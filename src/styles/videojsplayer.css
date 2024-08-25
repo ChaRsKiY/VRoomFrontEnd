@@ -1,0 +1,32 @@
+.video-js .vjs-control-bar {
+    height: 53px;
+    @apply pt-3 flex
+}
+
+.video-js .vjs-play-progress {
+    @apply bg-red-400
+}
+
+.video-js .vjs-progress-control {
+    @apply absolute top-0 right-0 left-0 w-full h-5
+}
+
+.video-js .vjs-fullscreen-control {
+    @apply absolute right-0
+}
+
+.video-js .vjs-picture-in-picture-control {
+    @apply absolute right-10
+}
+
+.video-js .vjs-icon-placeholder {
+    @apply text-[0.91rem]
+}
+
+.video-js .vjs-remaining-time {
+    @apply text-[0.92rem]
+}
+
+.video-js .vjs-playback-rate {
+    @apply text-[0.8rem] absolute right-20 mt-0.5
+}
