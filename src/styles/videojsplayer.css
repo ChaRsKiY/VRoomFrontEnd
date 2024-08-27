@@ -1,6 +1,18 @@
+.vjs-big-play-centered {
+    @apply rounded-xl
+}
+
+.video-js {
+    @apply rounded-2xl
+}
+
+.video-js .vjs-tech {
+    @apply rounded-2xl
+}
+
 .video-js .vjs-control-bar {
     height: 53px;
-    @apply pt-3 flex
+    @apply pt-3 flex rounded-b-2xl
 }
 
 .video-js .vjs-play-progress {

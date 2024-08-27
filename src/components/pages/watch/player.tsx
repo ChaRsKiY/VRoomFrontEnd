@@ -56,7 +56,7 @@ const VideoPlayer = ({ src }) => {
 
     return (
         <div data-vjs-player className="w-full">
-            <video ref={videoRef} className={"w-full h-auto aspect-video rounded-xl vjs-big-play-centered video-js"} />
+            <video ref={videoRef} className={"w-full h-auto aspect-video vjs-big-play-centered video-js rounded-xl"} />
         </div>
     );
 };
