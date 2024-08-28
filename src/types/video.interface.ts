@@ -6,5 +6,6 @@ export interface IPresentedVideo {
     views: number,
     posted: Date,
     cover: string,
-    channel: IPresentedChannel
+    channel: IPresentedChannel,
+    href: string
 }

@@ -3,7 +3,7 @@ import {FaMicrophone} from "react-icons/fa";
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {ITranslationFunction} from "@/types/translation.interface";
 
-const VoiceSearch: React.FC = ({ t }: ITranslationFunction) => {
+const VoiceSearch = ({ t }: ITranslationFunction) => {
     return (
         <TooltipProvider>
             <Tooltip>

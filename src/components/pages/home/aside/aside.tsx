@@ -18,7 +18,7 @@ import {ITranslationFunction} from "@/types/translation.interface";
 
 const AsideHome = async ({ t }: ITranslationFunction) => {
     const mainPageHomeCategories = [
-        { icon: <IoMdHome />, name: t("categories:home"), path: "/popular" },
+        { icon: <IoMdHome />, name: t("categories:home"), path: "/" },
         { icon: <SiYoutubeshorts />, name: t("categories:shorts"), path: "/shorts" },
         { icon: <MdSubscriptions />, name: t("categories:subscriptions"), path: "/subscriptions" },
     ]
@@ -54,8 +54,8 @@ const AsideHome = async ({ t }: ITranslationFunction) => {
     ]
 
     return (
-        <div>
-            <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden">
+        <>
+            <div className="fixed bottom-0 top-20 w-[18%] overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className="px-[7%]">
                     <CategoryBlock data={mainPageHomeCategories}/>
 
@@ -92,10 +92,10 @@ const AsideHome = async ({ t }: ITranslationFunction) => {
                 </div>
             </div>
 
-            <div className="bg-white hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
+            <div className="bg-white hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full no-scrollbar">
                 <SmallCategoryBlock data={mainPageHomeCategories} />
             </div>
-        </div>
+        </>
     )
 }
 

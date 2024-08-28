@@ -52,6 +52,13 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        green: {
+          DEFAULT: "#00FF8F",
+        }
+      },
+      screens: {
+        lgxl: "1400px",
+        lgxxl: "2200px"
       },
       borderRadius: {
         lg: "var(--radius)",

@@ -2,14 +2,17 @@
 
 import React from 'react'
 import {IoIosSettings, IoMdNotifications} from "react-icons/io";
-import {SignedIn, SignedOut, SignInButton, UserButton} from "@clerk/nextjs";
+import {SignedIn, SignedOut, UserButton} from "@clerk/nextjs";
 import { useSpring, animated } from '@react-spring/web'
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
+import {useRouter} from "next/navigation";
 
 const HeaderBlock: React.FC = () => {
     const { t }: ITranslationFunction = useTranslation()
+
+    const { push } = useRouter()
 
     const [springs, api] = useSpring(() => ({
         from: { transform: 'rotate(0deg)' },
@@ -85,10 +88,11 @@ const HeaderBlock: React.FC = () => {
             </TooltipProvider>
 
             <SignedOut>
-                <SignInButton/>
+                <button onClick={() => push("/auth/signin")} className="border-2 border-neutral-500 text-white bg-neutral-500 px-1.5 rounded">Sign in</button>
+                <button onClick={() => push("/auth/signup")} className="border-2 border-neutral-500 px-1.5 rounded">Sign up</button>
             </SignedOut>
             <SignedIn>
-                <UserButton/>
+            <UserButton/>
             </SignedIn>
         </div>
     )
