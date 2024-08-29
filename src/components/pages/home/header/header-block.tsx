@@ -10,7 +10,7 @@ import {useTranslation} from "next-i18next";
 import {useRouter} from "next/navigation";
 
 const HeaderBlock: React.FC = () => {
-    const { t }: ITranslationFunction = useTranslation()
+    const { t }: { t: ITranslationFunction } = useTranslation()
 
     const { push } = useRouter()
 

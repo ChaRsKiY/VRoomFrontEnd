@@ -7,7 +7,7 @@ import {useTranslation} from "next-i18next";
 import {ITranslationFunction} from "@/types/translation.interface";
 
 const Search: React.FC = () => {
-    const { t }: ITranslationFunction = useTranslation()
+    const { t }: { t: ITranslationFunction } = useTranslation()
 
     return (
         <div className="header-search flex-1 border border-neutral-300 rounded-full relative dark:border-neutral-700">

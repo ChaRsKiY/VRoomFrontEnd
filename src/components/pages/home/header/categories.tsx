@@ -7,9 +7,9 @@ const mukta = Mukta({ subsets: ['latin'], weight: ["400", "700"] })
 
 
 const CategoriesHeader: React.FC = () => {
-    const [selectedCategory, setSelectedCategory] = useState('Free');
+    const [selectedCategory, setSelectedCategory] = useState<string>('Free');
 
-    const categories = ['Free', 'Recommended', 'Subscriptions', 'Library', 'Live'];
+    const categories: string[] = ['Free', 'Recommended', 'Subscriptions', 'Library', 'Live'];
 
     return (
         <div className="flex space-x-2 items-center">

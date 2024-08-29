@@ -1,12 +1,13 @@
-import { NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import { clerkMiddleware } from '@clerk/nextjs/server';
 import { i18nRouter } from 'next-i18n-router';
 import i18nConfig from '../i18nConfig';
 
-export async function middleware(request) {
-    const clerkResponse = await clerkMiddleware()(request) as any;
+export async function middleware(request: NextRequest, res: NextResponse) {
+    // @ts-ignore
+    const clerkResponse = await clerkMiddleware()(request);
 
-    if (clerkResponse.status !== 200) {
+    if (clerkResponse?.status !== 200) {
         return clerkResponse;
     }
 

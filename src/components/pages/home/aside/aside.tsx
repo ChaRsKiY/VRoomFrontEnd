@@ -15,8 +15,13 @@ import {RiPlayList2Fill} from "react-icons/ri";
 import {FaFlag} from "react-icons/fa6";
 import SmallCategoryBlock from "@/components/pages/home/aside/small-category";
 import {ITranslationFunction} from "@/types/translation.interface";
+import MiniFooter from "@/components/pages/home/aside/mini-footer";
 
-const AsideHome = async ({ t }: ITranslationFunction) => {
+interface IAsideHomeProps {
+    t: ITranslationFunction
+}
+
+const AsideHome: React.FC<IAsideHomeProps> = async ({ t }: IAsideHomeProps) => {
     const mainPageHomeCategories = [
         { icon: <IoMdHome />, name: t("categories:home"), path: "/popular" },
         { icon: <SiYoutubeshorts />, name: t("categories:shorts"), path: "/shorts" },
@@ -55,7 +60,7 @@ const AsideHome = async ({ t }: ITranslationFunction) => {
 
     return (
         <div>
-            <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden">
+            <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className="px-[7%]">
                     <CategoryBlock data={mainPageHomeCategories}/>
 
@@ -89,10 +94,17 @@ const AsideHome = async ({ t }: ITranslationFunction) => {
                     </div>
 
                     <CategoryBlock data={mainPageOtherCategories} title="Other"/>
+
+                    <div className="px-3 my-3">
+                        <div className="h-[1px] bg-neutral-300 rounded-full"/>
+                    </div>
+
+                    <MiniFooter />
                 </div>
             </div>
 
-            <div className="bg-white hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
+            <div
+                className="bg-white hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
                 <SmallCategoryBlock data={mainPageHomeCategories} />
             </div>
         </div>

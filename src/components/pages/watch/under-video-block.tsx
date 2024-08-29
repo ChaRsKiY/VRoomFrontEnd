@@ -6,7 +6,11 @@ import {RiPlayListAddFill} from "react-icons/ri";
 import {BsShare} from "react-icons/bs";
 import {HiOutlineFlag} from "react-icons/hi2";
 
-const UnderVideoBlock: React.FC = ({ video }: { video: IPresentedVideo }) => {
+interface IUnderVideoBlockProps {
+    video: IPresentedVideo
+}
+
+const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideoBlockProps) => {
     return (
         <div>
             <div className="py-2 text-xl font-[500]">{video.title}</div>

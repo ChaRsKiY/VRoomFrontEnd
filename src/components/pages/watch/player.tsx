@@ -1,39 +1,41 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react";
-import "@/styles/videojsplayer.css"
-import {BsFullscreen, BsFullscreenExit} from "react-icons/bs";
-import {PiPictureInPicture, PiScreencast, PiScreencastThin} from "react-icons/pi";
-import {TfiLayers} from "react-icons/tfi";
-import {TbLayersSubtract} from "react-icons/tb";
-import {RxEnterFullScreen, RxExitFullScreen} from "react-icons/rx";
+import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
+import "@/styles/videojsplayer.css";
+import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
+import { TbLayersSubtract } from "react-icons/tb";
+import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 
-const VideoPlayer = ({ src }) => {
+interface IVideoPlayerProps {
+    src: string;
+}
+
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     // Refs
-    const videoRef = useRef(null);
-    const timelineContainerRef = useRef(null);
-    const volumeSliderRef = useRef(null);
-    const videoContainerRef = useRef(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const timelineContainerRef = useRef<HTMLDivElement | null>(null);
+    const volumeSliderRef = useRef<HTMLInputElement | null>(null);
+    const videoContainerRef = useRef<HTMLDivElement | null>(null);
 
     // State
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
-    const [volume, setVolume] = useState(1);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [isScrubbing, setIsScrubbing] = useState(false);
-    const [wasPaused, setWasPaused] = useState(false);
-    const [playbackRate, setPlaybackRate] = useState(1);
-    const [isFullScreen, setIsFullScreen] = useState(false);
-    const [isTheaterMode, setIsTheaterMode] = useState(false);
-    const [isMiniPlayer, setIsMiniPlayer] = useState(false);
-    const [captionsEnabled, setCaptionsEnabled] = useState(true);
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [isMuted, setIsMuted] = useState<boolean>(false);
+    const [volume, setVolume] = useState<number>(1);
+    const [currentTime, setCurrentTime] = useState<number>(0);
+    const [duration, setDuration] = useState<number>(0);
+    const [isScrubbing, setIsScrubbing] = useState<boolean>(false);
+    const [wasPaused, setWasPaused] = useState<boolean>(false);
+    const [playbackRate, setPlaybackRate] = useState<number>(1);
+    const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+    const [isTheaterMode, setIsTheaterMode] = useState<boolean>(false);
+    const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
+    const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
 
     // Effects
     useEffect(() => {
-        if (videoRef) {
-            const video = videoRef.current;
+        const video = videoRef.current;
 
+        if (video) {
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
@@ -45,20 +47,20 @@ const VideoPlayer = ({ src }) => {
                 setIsMuted(video.muted);
             };
 
+            video.addEventListener("loadedmetadata", handleLoadedMetadata);
             handleLoadedMetadata();
             video.addEventListener("timeupdate", handleTimeUpdate);
             video.addEventListener("volumechange", handleVolumeChange);
 
-            document.addEventListener("keydown", handleKeyDown);
-
             return () => {
-                video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-                video.removeEventListener("timeupdate", handleTimeUpdate);
-                video.removeEventListener("volumechange", handleVolumeChange);
-                document.removeEventListener("keydown", handleKeyDown);
+                if (video) {
+                    video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+                    video.removeEventListener("timeupdate", handleTimeUpdate);
+                    video.removeEventListener("volumechange", handleVolumeChange);
+                }
             };
         }
-    }, [videoRef]);
+    }, []);
 
     useEffect(() => {
         const handleFullScreenChange = () => {
@@ -78,26 +80,31 @@ const VideoPlayer = ({ src }) => {
         const handleEnterPictureInPicture = () => setIsMiniPlayer(true);
         const handleLeavePictureInPicture = () => setIsMiniPlayer(false);
 
-        video.addEventListener("enterpictureinpicture", handleEnterPictureInPicture);
-        video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+        if (video) {
+            video.addEventListener("enterpictureinpicture", handleEnterPictureInPicture);
+            video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+        }
+
+        document.addEventListener("keydown", handleKeyDown as EventListener);
 
         return () => {
-            video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
-            video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+            if (video) {
+                video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
+                video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+            }
+            document.removeEventListener("keydown", handleKeyDown as EventListener);
         };
     }, []);
 
     // Event Handlers
-    const handleKeyDown = (e) => {
-        const tagName = document.activeElement.tagName.toLowerCase();
+    const handleKeyDown: any = (e: KeyboardEvent) => {
+        const tagName = document.activeElement?.tagName.toLowerCase();
         if (tagName === "input" || tagName === "button") return;
 
-        e.preventDefault()
+        e.preventDefault();
 
         switch (e.key.toLowerCase()) {
             case " ":
-                togglePlayPause();
-                break;
             case "k":
                 togglePlayPause();
                 break;
@@ -131,22 +138,24 @@ const VideoPlayer = ({ src }) => {
 
     const togglePlayPause = () => {
         const video = videoRef.current;
-
-        if (isPlaying) {
-            video.pause();
-        } else {
-            video.play();
+        if (video) {
+            if (isPlaying) {
+                video.pause();
+            } else {
+                video.play();
+            }
+            setIsPlaying(!isPlaying);
         }
-
-        setIsPlaying(!isPlaying);
     };
 
     const toggleFullScreen = () => {
         const videoContainer = videoContainerRef.current;
-        if (!document.fullscreenElement) {
-            videoContainer.requestFullscreen();
-        } else {
-            document.exitFullscreen();
+        if (videoContainer) {
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
         }
     };
 
@@ -156,60 +165,74 @@ const VideoPlayer = ({ src }) => {
 
     const toggleMiniPlayerMode = () => {
         const video = videoRef.current;
-        if (isMiniPlayer) {
-            document.exitPictureInPicture();
-        } else {
-            video.requestPictureInPicture();
+        if (video) {
+            if (isMiniPlayer) {
+                document.exitPictureInPicture();
+            } else {
+                video.requestPictureInPicture();
+            }
         }
     };
 
     const toggleMute = () => {
         const video = videoRef.current;
-        video.muted = !isMuted;
-        setIsMuted(!isMuted);
+        if (video) {
+            video.muted = !isMuted;
+            setIsMuted(!isMuted);
+        }
     };
 
-    const handleVolumeChange = (e) => {
+    const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const video = videoRef.current;
-        const newVolume = parseFloat(e.target.value);
-        video.volume = newVolume;
-        setVolume(newVolume);
-        setIsMuted(newVolume === 0);
+        if (video) {
+            const newVolume = parseFloat(e.target.value);
+            video.volume = newVolume;
+            setVolume(newVolume);
+            setIsMuted(newVolume === 0);
+        }
     };
 
-    const skip = (duration) => {
+    const skip = (duration: number) => {
         const video = videoRef.current;
-        video.currentTime += duration;
+        if (video) {
+            video.currentTime += duration;
+        }
     };
 
     const toggleCaptions = () => {
         const video = videoRef.current;
-        const tracks = video.textTracks[0];
-        tracks.mode = captionsEnabled ? "hidden" : "showing";
-        setCaptionsEnabled(!captionsEnabled);
+        if (video) {
+            const tracks = video.textTracks[0];
+            tracks.mode = captionsEnabled ? "hidden" : "showing";
+            setCaptionsEnabled(!captionsEnabled);
+        }
     };
 
     const handlePlaybackRateChange = () => {
         const video = videoRef.current;
-        let newRate = playbackRate + 0.25;
-        if (newRate > 2) newRate = 0.25;
-        video.playbackRate = newRate;
-        setPlaybackRate(newRate);
-    };
-
-    const handleTimelineUpdate = (e) => {
-        const timelineContainer = timelineContainerRef.current;
-        const video = videoRef.current;
-        const rect = timelineContainer.getBoundingClientRect();
-        const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width;
-
-        if (isScrubbing) {
-            e.preventDefault();
-            timelineContainer.style.setProperty("--progress-position", percent);
+        if (video) {
+            let newRate = playbackRate + 0.25;
+            if (newRate > 2) newRate = 0.25;
+            video.playbackRate = newRate;
+            setPlaybackRate(newRate);
         }
     };
 
-    const formatDuration = (time) => {
+    const handleTimelineUpdate = (e: MouseEvent) => {
+        const timelineContainer = timelineContainerRef.current;
+        const video = videoRef.current;
+        if (timelineContainer && video) {
+            const rect = timelineContainer.getBoundingClientRect();
+            const percent = Math.min(Math.max(0, e.clientX - rect.x), rect.width) / rect.width;
+
+            if (isScrubbing) {
+                e.preventDefault();
+                timelineContainer.style.setProperty("--progress-position", `${percent * 100}%`);
+            }
+        }
+    };
+
+    const formatDuration = (time: number): string => {
         const leadingZeroFormatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
         const seconds = Math.floor(time % 60);
         const minutes = Math.floor(time / 60) % 60;
@@ -237,9 +260,9 @@ const VideoPlayer = ({ src }) => {
                         max="100"
                         step="1"
                         value={(currentTime / duration) * 100}
-                        onMouseDown={() => { videoRef.current.pause() }}
-                        onMouseUp={() => { isPlaying && videoRef.current.play() }}
-                        onChange={(e) => { videoRef.current.currentTime = (e.target.value / 100) * duration }}
+                        onMouseDown={() => { videoRef.current?.pause() }}
+                        onMouseUp={() => { isPlaying && videoRef.current?.play() }}
+                        onChange={(e) => { videoRef.current && (videoRef.current.currentTime = (parseFloat(e.target.value) / 100) * duration) }}
                     />
                 </div>
                 <div className="controls">
@@ -328,11 +351,10 @@ const VideoPlayer = ({ src }) => {
                 controls={false}
                 preload="metadata"
             >
-                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default/>
+                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default />
             </video>
         </div>
     );
 };
 
 export default VideoPlayer;
-

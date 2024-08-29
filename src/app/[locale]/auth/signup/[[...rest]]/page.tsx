@@ -1,12 +1,12 @@
 import React from 'react'
-import {SignIn} from "@clerk/nextjs";
+import {SignUp} from "@clerk/nextjs";
 
-const SignInPage: React.FC = () => {
+const SignUpPage: React.FC = () => {
     return (
         <div className="fixed top-0 flex w-full h-screen justify-center items-center">
-            <SignIn  />
+            <SignUp />
         </div>
     )
 }
 
-export default SignInPage
+export default SignUpPage

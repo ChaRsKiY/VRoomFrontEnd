@@ -1,3 +1,1 @@
-export interface ITranslationFunction {
-    t: (text: string) => string
-}
+export type ITranslationFunction = (key: string) => string;

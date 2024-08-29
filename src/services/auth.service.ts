@@ -18,7 +18,7 @@ class AuthService {
             const result = await this.signIn?.create({
                 identifier: email,
                 password,
-            }) as object;
+            }) as any;
 
             if (result?.status === 'complete') {
                 window.location.href = '/';
