@@ -44,7 +44,16 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
             <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className="px-[7%]">
 
-                    <div className="flex flex-col space-y-1 pl-[23%] py-[10%]">
+                    <div className="p-4 text-center">
+                        <Image className="w-120 h-120 mx-auto rounded-full" width={120} height={120}
+                               src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo"
+                               alt="Avatar"/>
+
+                        <p className="mt-2 text-gray-700 font-semibold">Your channel</p>
+                        <p className="text-sm text-gray-500">Mr.Beast</p>
+                    </div>
+
+                    {/*<div className="flex flex-col space-y-1 pl-[23%] py-[10%]">
                         <div>
                             <Image style={{borderRadius: '50%'}} width={120} height={120}
                                    src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo"
@@ -52,7 +61,7 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                             <h4 style={{textAlign: 'left'}}><strong>Your channel</strong></h4>
                             <h3>Mr.Beast</h3>
                         </div>
-                    </div>
+                    </div>*/}
 
                     <CategoryBlock data={mainPageAccountCategories} title=""/>
 
