@@ -7,5 +7,6 @@ export interface IPresentedVideo {
     posted: Date,
     cover: string,
     channel: IPresentedChannel,
-    href: string
+    href: string,
+    
 }

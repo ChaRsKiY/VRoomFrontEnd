@@ -8,6 +8,7 @@ import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/compon
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import {useRouter} from "next/navigation";
+import Notifications from '../notifications/notifications';
 
 const HeaderBlock: React.FC = () => {
     const { t }: { t: ITranslationFunction } = useTranslation()
@@ -56,7 +57,7 @@ const HeaderBlock: React.FC = () => {
     return (
         <div className="flex space-x-5 items-center">
             <TooltipProvider>
-                <Tooltip>
+                {/* <Tooltip>
                     <TooltipTrigger>
                         <animated.div
                             onMouseEnter={handleNotificationsMouseEnter}
@@ -69,7 +70,9 @@ const HeaderBlock: React.FC = () => {
                     <TooltipContent>
                         <p>{t("notifications")}</p>
                     </TooltipContent>
-                </Tooltip>
+                </Tooltip> */}
+
+               <Notifications/>
 
                 <Tooltip>
                     <TooltipTrigger>
