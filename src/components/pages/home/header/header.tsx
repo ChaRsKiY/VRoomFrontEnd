@@ -6,7 +6,7 @@ import BurgerMenu from "@/components/pages/home/header/burger-menu";
 import {ITranslationFunction} from "@/types/translation.interface";
 import Image from "next/image";
 import Link from "next/link";
-import  SearchComponent  from '@/app/algsearch/page';
+import  SearchComponent  from '@/components/pages/algsearch/algoliasearch';
 
 interface IHeaderHomeProps {
     t: ITranslationFunction

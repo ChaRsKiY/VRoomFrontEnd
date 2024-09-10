@@ -8,5 +8,5 @@ export interface IPresentedVideo {
     cover: string,
     channel: IPresentedChannel,
     href: string,
-    
+    description:string
 }

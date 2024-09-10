@@ -4,13 +4,19 @@ import UnderVideoBlock from "@/components/pages/watch/under-video-block";
 import {IPresentedVideo} from "@/types/video.interface";
 import UnderLine from "@/components/pages/watch/underline";
 import DescriptionBlock from "@/components/pages/watch/description-block";
-import {str} from "video.js";
+import str from "video.js";
 import CommentsBlock from "@/components/pages/watch/comments-block";
 
-const WatchPage: React.FC = ({ params }) => {
+interface WatchPageParams {
+    params: {
+      id: string;
+    };
+  }
+
+const WatchPage: React.FC<WatchPageParams> = ({ params }) => {
     const { id } = params;
 
-    const testVideo = {
+    const testVideo: IPresentedVideo = {
         id: 1,
         title: "Cyberpunk 2077 - Official Trailer 2022",
         views: 223000,
@@ -18,8 +24,12 @@ const WatchPage: React.FC = ({ params }) => {
         channel: {
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
-        }
-    } as IPresentedVideo
+        },
+        href:"",
+        posted: new Date(),
+        cover: ""
+
+    }
 
     return (
         <div className="flex w-full">
