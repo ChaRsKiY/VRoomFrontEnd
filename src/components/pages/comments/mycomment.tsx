@@ -45,21 +45,25 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
         setDisabled(false);
     };
 
-    // const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    //   setInputValue(event.target.value);
+    //const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      // setInputValue(event.target.value);
+      // if(inputValue==''||event.target.value=='')
+      //   setDisabled(true);
+      // else
+      //   setDisabled(false);
     // };
   
     const handleSubmit = async () => {
-     
+
       const comment: ICommentVideo = {
-        UserId: userId,  
-        VideoId: videoid,   
-        Comment: inputValue,
-        Date: new Date(),  
-        LikeCount: 0,
-        DislikeCount: 0,
-        IsPinned: false,
-        IsEdited: false,
+        userId: userId,  
+        videoId: videoid,   
+        comment: inputValue,
+        date: new Date(),  
+        likeCount: 0,
+        dislikeCount: 0,
+        isPinned: false,
+        isEdited: false,
       };
       try {
         const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
@@ -71,12 +75,20 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
         });
   
         if (response.ok) {
+          setWrite('comment sent successfully, write new here');
+          setInputValue('');
+          setDisplay('none');
+          setDisplay2('block'); 
           const data = await response.json();
           console.log('Комментарий успешно отправлен:', data);
+         
+
         } else {
+          setWrite('error sending');
           console.error('Ошибка при отправке комментария:', response.statusText);
         }
       } catch (error) {
+        setWrite('error sending');
         console.error('Ошибка при подключении к серверу:', error);
       }
     };
@@ -86,6 +98,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
       setInputValue('');
       setDisplay('none');
       setDisplay2('block');  
+      setWrite('write your comments here');
     };
   
   const toWrite=()=>{
@@ -143,22 +156,22 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
     </div>
     <div style={{display }}>
       <div>
-    <input
-        type="text"
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        ref={inputRef}
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`, 
-          outline: 'none', 
-          width: '100%',
-          display:'flex',
-          flexWrap:'wrap'
-        }}
-      />
+      <input
+      type="text"
+      value={inputValue}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      ref={inputRef}
+      style={{
+        border: 'none',
+        borderBottom: `2px solid ${lineColor}`, 
+        outline: 'none', 
+        width: '100%',
+        display:'flex',
+        flexWrap:'wrap'
+      }}
+    />
   
       </div>
       <div style={{display:'flex', width:'100%',justifyContent:'space-between'}}>
@@ -262,3 +275,6 @@ export default MyComment;
           padding: '5px' // Немного пространства для ввода
         }}
       />*/}
+
+
+    

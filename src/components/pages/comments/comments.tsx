@@ -1,41 +1,55 @@
+'use client'
+import React from 'react';
+import { ICommentVideo } from '@/types/commentvideo.interface';
+import { useEffect, useState } from 'react';
 
+interface CommentsProps {
+  comments: ICommentVideo[];
+}
 
-import React from 'react'
-import {GoSortDesc} from "react-icons/go";
-import {SlDislike, SlLike} from "react-icons/sl";
+const getTimeAgo = (date: string | Date) => {
+    const commentDate = new Date(date + "Z");
+    const now = new Date();
+    
+    const diffMs = now.getTime() - commentDate.getTime(); // Разница в миллисекундах
+    const diffMinutes = Math.floor(diffMs / 60000); // Преобразуем миллисекунды в минуты
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+  
+    if (diffMinutes < 1) return 'Только что';
+    if (diffMinutes < 60) return `${diffMinutes} мин назад`;
+    if (diffHours < 24) return `${diffHours} ч назад`;
+    return `${diffDays} д назад`;
+  }
 
-export default function Comments ()  {
-    return (
-       
-            
-            <div>
-                <div>
-                <p >
-                    Text of the comments somebody wroutes
-                </p>
-                <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-2.5">
-                        <SlLike size={14}/>
-                        <div className="font-[8]">20</div>
-                    </div>
-                    <div className="flex items-center space-x-2.5">
-                        <SlDislike size={14}/>
-                        <div className="font-[8]">5</div>
-                    </div>
-                </div>
-                <hr></hr>
-                </div>
-                <div>
-                <p>
-                    old comments somebody wroutes
-                </p>
-                <hr></hr>
-                <br></br>
-                </div>
-            </div>
-        
-    )
-};
+const Comments: React.FC<CommentsProps> = ({ comments }) => {
+    console.log(comments);
+
+    // const [com,setComments]=useState<ICommentVideo[]>([]);
+
+    // useEffect(() => {
+    //     setComments(comments);
+    //   }, [comments]);
+  return (
+   
+    <div>
+      {comments.length > 0 ? (
+        comments.map((comment) => (
+          <div key={comment.videoId}>
+            <p>{comment.comment}</p>
+            <small>{getTimeAgo(comment.date)}</small>
+            <hr></hr>
+          </div>
+        ))
+      ) : (
+        <p>Нет комментариев.</p>
+      )}
+    </div>
+  );
+}
+
+export default Comments;
+
 
 // 'use client';
 // import { useEffect, useState } from 'react';

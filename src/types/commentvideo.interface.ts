@@ -1,12 +1,12 @@
 
 export interface ICommentVideo {
-    UserId: string,
-    VideoId:number,
-    Comment: string,
-    Date: Date,
-    LikeCount:number,
-    DislikeCount:number,
-    AnswerVideoId?:number,
-    IsPinned:boolean,
-    IsEdited:boolean
+    userId: string,
+    videoId:number,
+    comment: string,
+    date: Date,
+    likeCount:number,
+    dislikeCount:number,
+    answerVideoId?:number,
+    isPinned:boolean,
+    isEdited:boolean
 }
