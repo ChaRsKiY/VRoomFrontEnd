@@ -31,15 +31,20 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
         {icon: <MdOutlineSubtitles/>, name: t("channel:Subtitles"), path: "/channel/editing/subtitles"},
         {icon: <TbCircleLetterC/>, name: t("channel:Copyright"), path: "/channel/editing/copyright"},
         {icon: <MdOutlineMonetizationOn/>, name: t("channel:Monetization"), path: "/channel/editing/monetization"},
-        {icon: <FaMagic/>, name: t("channel:Channel_setup"), path: "/channel/editing/channel_setup"},
+        {icon: <FaMagic/>, name: t("channel:Channel_setup"), path: "/channel/editing/channel_setup/profile"},
         {icon: <MdOutlineLibraryMusic/>, name: t("channel:Music_library"), path: "/channel/editing/music_library"},
+    ]
+
+    const mainPageOtherCategorie = [
+        {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
+        {icon: <MdOutlineFeedback/>, name: t("categories:feedback"), path: "/feedback"},
     ]
 
     const mainPageOtherCategories = [
         {icon: <MdOutlineFeedback/>, name: t("categories:feedback"), path: "/feedback"},
     ]
     const mainPageOtherCategories1 = [
-         {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
+        {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
     ]
 
     return (
@@ -48,7 +53,7 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                 <div className="px-[7%]">
 
                     <div className="p-4 text-center">
-                        <Image className="w-120 h-120 mx-auto rounded-full" width={120} height={120}
+                        <Image className="w-100 h-100 mx-auto rounded-full" width={100} height={100}
                                src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo"
                                alt="Avatar"/>
 
@@ -63,10 +68,17 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
+
+
                     <div className="py-[10%]"></div>
-                    <SettingsBlock data={[{icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},]} title=""/>
+                    <CategoryBlock data={mainPageOtherCategorie} title=""/>
 
-
+                    <div className="px-3 my-3">
+                        <div className="h-[1px] bg-neutral-300 rounded-full"/>
+                    </div>
+                    {/*<SettingsBlock
+                        data={[{icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},]}
+                        title=""/>
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
@@ -77,10 +89,8 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                     ]} title=""/>
                     <div className="px-3 my-3">
 
-                        {/*<div className="h-[1px] bg-neutral-300 rounded-full"/>*/}
-                    </div>
+                    </div>*/}
 
-                    {/*<MiniFooter/>*/}
                 </div>
             </div>
 

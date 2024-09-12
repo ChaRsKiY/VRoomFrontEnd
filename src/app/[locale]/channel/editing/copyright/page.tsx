@@ -17,16 +17,16 @@ const channelPage = async ({params: {locale}}) => {
                         <h1 className="text-2xl font-semibold mb-6">Channel copyright</h1>
 
                         <div className="flex items-center space-x-4 text-sm">
-                            <button className="text-gray-700 border-b-2 border-gray-900">Комментарии</button>
+                            <button className="text-gray-700 border-b-2 border-gray-900">Removal requests</button>
 
                         </div>
-                        <button className="text-gray-700 float-right">Комментарии</button>
+                        <button className="text-gray-700 float-right">Request removal</button>
                         <hr className="my-4 border-gray-300"/>
 
 
                         <div className="flex flex-col items-center justify-center h-96">
                             <img src="https://placehold.co/120x120" alt="No comments illustration" className="mb-4"/>
-                            <p className="text-gray-500">Проверять нечего, можно и отдохнуть.</p>
+                            <p className="text-gray-500">There is nothing yet.</p>
                         </div>
                     </div>
 
