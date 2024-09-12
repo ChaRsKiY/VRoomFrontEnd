@@ -7,19 +7,45 @@ const channelPage = async ({params: {locale}}) => {
     return (
 
         <>
-            <div className="flex pt-20 overflow-hidden">
+            <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
+            <div className="flex-auto overflow-hidden">
 
-                <div>
+                {/*<div>pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0
                     <br/><h1 style={{'float': 'left'}} className="text-[1.4rem]"><strong>Subtitles for videos on the channel</strong>
                 </h1><br/><br/><br/>
                     <div className="grid pr-[-3%] grid-cols-2 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
 
                     </div>
-                </div>
+                </div>*/}
+                <div className="flex-1 p-6">
+                    <h1 className="text-2xl font-semibold mb-6">Контент на канале</h1>
 
+                    <div className="flex items-center space-x-9 text-sm">
+                        <button className="text-gray-700 border-b-2 border-gray-900">Видео</button>
+                        <button className="text-gray-700">Shorts</button>
+                        <button className="text-gray-700">Трансляции</button>
+                    </div>
+
+                    <hr className="my-4 border-gray-300"/>
+
+                    {/*<div className="flex items-center space-x-4 mb-6">
+                        <button className="flex items-center text-gray-700 border border-gray-300 px-3 py-1 rounded-md">
+                            <i className="fas fa-filter mr-2"></i> Фильтр
+                        </button>
+                        <button className="flex items-center text-gray-700 px-3 py-1">
+                            Видео
+                        </button>
+                    </div>
+
+
+                    <div className="flex flex-col items-center justify-center h-96">
+                        <img src="https://placehold.co/120x120" alt="No content illustration" className="mb-4"/>
+                        <p className="text-gray-500">Здесь пока ничего нет.</p>
+                        <button className="bg-black text-white px-6 py-2 rounded-md mt-4">Добавить видео</button>
+                    </div>*/}
+                </div>
             </div>
         </>
     );

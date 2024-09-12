@@ -4,13 +4,14 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
 import {RxAvatar} from "react-icons/rx";
 import Image from "next/image";
+import Link from "next/link";
 
 const channelPage = async ({params: {locale}}) => {
     const {t} = await initTranslations(locale, ['common', 'categories'])
     return (
 
         <>
-            <div className="flex pt-20 overflow-hidden">
+            <div className="flex">{/* pt-20 overflow-hidden*/}
                 <AsideHome t={t}/>
             </div>
             <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
@@ -21,7 +22,8 @@ const channelPage = async ({params: {locale}}) => {
                            alt="Avatar"/>
                     <div className="pl-[12.5%]">
                         <h1><strong>Mr.Beast</strong></h1>
-                        <ClientHome/>
+                        <Link target={'_blank'} href={"/channel/editing"} className="space-y-2.5">Customize channel view</Link>
+                        {/*<ClientHome/>*/}
                     </div>
                 </div>
                 <div>

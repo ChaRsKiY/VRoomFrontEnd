@@ -9,13 +9,14 @@ import {
 } from "react-icons/md";
 import {FaMagic} from "react-icons/fa";
 import {ITranslationFunction} from "@/types/translation.interface";
-import MiniFooter from "@/components/pages/channel/aside/mini-footer";
 import {PiMonitorPlayLight} from "react-icons/pi";
 import {LuLayoutDashboard} from "react-icons/lu";
 import {TbCircleLetterC} from "react-icons/tb";
 import {LiaCommentSolid} from "react-icons/lia";
 import {CiSettings} from "react-icons/ci";
 import Image from "next/image";
+import ClientHome from "@/components/pages/channel/ClientHome";
+import SettingsBlock from "@/components/pages/channel/channelsettingsp";
 
 interface IAsideHomeProps {
     t: ITranslationFunction
@@ -35,8 +36,10 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
     ]
 
     const mainPageOtherCategories = [
-        {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
         {icon: <MdOutlineFeedback/>, name: t("categories:feedback"), path: "/feedback"},
+    ]
+    const mainPageOtherCategories1 = [
+         {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
     ]
 
     return (
@@ -53,15 +56,6 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                         <p className="text-sm text-gray-500">Mr.Beast</p>
                     </div>
 
-                    {/*<div className="flex flex-col space-y-1 pl-[23%] py-[10%]">
-                        <div>
-                            <Image style={{borderRadius: '50%'}} width={120} height={120}
-                                   src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo"
-                                   alt="Avatar"/>
-                            <h4 style={{textAlign: 'left'}}><strong>Your channel</strong></h4>
-                            <h3>Mr.Beast</h3>
-                        </div>
-                    </div>*/}
 
                     <CategoryBlock data={mainPageAccountCategories} title=""/>
 
@@ -70,9 +64,19 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                     </div>
 
                     <div className="py-[10%]"></div>
-                    <CategoryBlock data={mainPageOtherCategories} title=""/>
+                    <SettingsBlock data={[{icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},]} title=""/>
+
 
                     <div className="px-3 my-3">
+                        <div className="h-[1px] bg-neutral-300 rounded-full"/>
+                    </div>
+
+                    <div className="py-[10%]"></div>
+                    <CategoryBlock data={[
+                        {icon: <MdOutlineFeedback/>, name: t("categories:feedback"), path: "/feedback"},
+                    ]} title=""/>
+                    <div className="px-3 my-3">
+
                         {/*<div className="h-[1px] bg-neutral-300 rounded-full"/>*/}
                     </div>
 

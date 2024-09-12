@@ -14,7 +14,7 @@ const Home = async ({ params: { locale } }: IHomeProps) => {
 
   return (
       <>
-          <div className="flex pt-20 overflow-hidden">
+          <div className="flex pt-20 overflow-hidden">{/**/}
               <AsideHome t={t}/>
           </div>
           <main className="pl-[20%] max-lg:pl-[12%] max-sm:pl-0">

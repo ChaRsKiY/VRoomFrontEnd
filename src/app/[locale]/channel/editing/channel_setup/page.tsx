@@ -8,12 +8,12 @@ const channelPage = async ({params: {locale}}) => {
     return (
 
         <>
-            <div className="flex pt-20 overflow-hidden">
+            <div className="w-60 bg-white border-r border-gray-200 h-screen">{/*flex pt-20 overflow-hidden*/}
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
-
-                <div>
+            <div className="flex-auto overflow-hidden pl-[3.5%] max-sm:pl-0">
+                {/*pl-[22.5%] max-lg:pl-[12%]*/}
+                <div className="flex-1 pt-0 pb-6 pl-6 pr-6">
 
                     <div className="mb-6"><br/>
                         <h1 className="text-2xl font-bold">Channel settings</h1>
