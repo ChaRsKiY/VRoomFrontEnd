@@ -6,21 +6,22 @@ import Link from "next/link";
 import { FaSmile } from 'react-icons/fa';
 import React, { useRef } from 'react';
 import {ICommentVideo} from '@/types/commentvideo.interface'
+import { IUser } from '@/types/user.interface';
 
 interface MyCommentProps {
-  videoId: number; // Типизация для пропса clerkId
+  videoId: number; 
+  amuser:IUser;
 }
 
-const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
+const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
 
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [fullName, setName] = useState('');
   const [userId, setUserId] = useState('');
   const [display, setDisplay] = useState('');
   const [display2, setDisplay2] = useState('');
   const [displayMain, setDisplayMain] = useState('block');
   const [write, setWrite] = useState('');
-  const {user} = useUser(); 
   const [inputValue, setInputValue] = useState('');
   const [lineColor, setLineColor] = useState('lightgray');
   const [isHovered, setIsHovered] = useState(false);
@@ -56,14 +57,17 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
     const handleSubmit = async () => {
 
       const comment: ICommentVideo = {
+        id:0,
         userId: userId,  
-        videoId: videoid,   
+        videoId: videoid,  
+        channelBanner:avatarUrl, 
         comment: inputValue,
         date: new Date(),  
         likeCount: 0,
         dislikeCount: 0,
         isPinned: false,
         isEdited: false,
+        userName:fullName
       };
       try {
         const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
@@ -111,15 +115,14 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
 
   useEffect(() => {    
       try {
-        if(user) { 
+        if(amuser) { 
             setVideoId(videoId);
             setDisplay('none');
             setDisplay2('block');
             setWrite('write your comments here');
-            setUserId(user?.id);
-             setAvatarUrl(user?.imageUrl) ; 
-             if(user?.firstName )
-             setFullName(user?.firstName + user?.lastName);
+            setUserId(amuser.clerk_Id);
+            setAvatarUrl(amuser.channelBanner) ; 
+             setName(amuser.channelName);
             }  
           else{ 
             setDisplayMain('none');}
@@ -128,7 +131,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId}) => {
         console.error('Ошибка при получении профиля пользователя:', error);
       }
    
-  },[videoId]);
+  },[videoId, amuser]);
 
 
   

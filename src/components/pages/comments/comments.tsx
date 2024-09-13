@@ -2,6 +2,10 @@
 import React from 'react';
 import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useEffect, useState } from 'react';
+import Link from "next/link";
+import {SlDislike, SlLike} from "react-icons/sl";
+
+ 
 
 interface CommentsProps {
   comments: ICommentVideo[];
@@ -22,27 +26,63 @@ const getTimeAgo = (date: string | Date) => {
     return `${diffDays} д назад`;
   }
 
+
 const Comments: React.FC<CommentsProps> = ({ comments }) => {
-    console.log(comments);
+    const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
+  const [likecount,setLikeCount] =useState(0);
+  const [dislikecount,setDisLikeCount] =useState(0);
 
-    // const [com,setComments]=useState<ICommentVideo[]>([]);
+  const  like=(id: number,count: number)=>{
+      
+  }
 
-    // useEffect(() => {
-    //     setComments(comments);
-    //   }, [comments]);
+  const  dislike=(id: number,count: number)=>{
+    
+        
+  }
+    
+
   return (
    
-    <div>
+    <div style={{width:'100%'}}>
       {comments.length > 0 ? (
         comments.map((comment) => (
-          <div key={comment.videoId}>
-            <p>{comment.comment}</p>
-            <small>{getTimeAgo(comment.date)}</small>
-            <hr></hr>
+            <div style={{width:'100%'}}>
+          <div key={comment.videoId} style={{display:'flex'}}>
+            <div>
+             <img
+              src={avatars[comment.userId]  || comment.channelBanner}
+              alt=""
+              width="40px"
+              height="40px"
+              style={{ borderRadius: '50%', marginRight: '10px' }}
+            /></div>
+            <div style={{width:'100%'}}>
+            <div style={{paddingLeft:'20px' }}>
+              <Link  href='#' style={{paddingRight:'20px',fontWeight:'bold',fontSize:'14px' }}>@{comment.userName}</Link>
+             <small>{getTimeAgo(comment.date)}</small>
+             </div>
+             <hr style={{width:'100%'}}></hr>
+            <p style={{fontSize:'16px', padding:'5px' }}>{comment.comment}</p>
+            </div>
+            </div>
+            <div className="flex items-center space-x-8" style={{paddingLeft:"50px"}}>
+                    <div className="flex items-center space-x-2.5">
+                        <SlLike onClick={() => like(comment.id,comment.likeCount )} size={15}/>
+                        <div style={{fontSize:"14px"}}>{comment.likeCount !== 0 && comment.likeCount}</div>
+                    </div>
+                    <div className="flex items-center space-x-2.5">
+                        <SlDislike onClick={() => dislike(comment.id,comment.likeCount )} size={15}/>
+                        <div style={{fontSize:"14px"}}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
+                    </div>
+                    <button style={{paddingLeft:"20px", fontWeight:"bold",fontSize:'14px'}}>answer</button>
+             </div>
+            <hr style={{padding:'5px',visibility:'hidden' }}></hr>
+       
           </div>
         ))
       ) : (
-        <p>Нет комментариев.</p>
+        <p>no comments</p>
       )}
     </div>
   );
@@ -51,169 +91,3 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
 export default Comments;
 
 
-// 'use client';
-// import { useEffect, useState } from 'react';
-// import { clerkClient } from '@clerk/clerk-sdk-node';
-// import axios from 'axios'
-
-// interface MyCommentProps {
-//   clerkId: string; // Типизация для пропса clerkId
-// }
-
-// const MyComment: React.FC<MyCommentProps> = ({ clerkId }) => {
-//   const [avatarUrl, setAvatarUrl] = useState<string>('');
-
-//   useEffect(() => {
-//     const fetchUserProfile = async () => {
-//       try {
-//         console.log("ответ=************************");
-//         // const response = await fetch(`/getUser?clerkId=${clerkId}`, {
-//         //     method: 'GET', // Явно указываем метод GET
-//         //   });
-//       const response = await axios.get(`../users/?clerkId=${clerkId}`);
-
-//          console.log("ответ="+response.data);
-// // var url="";
-//     //       const user = await clerkClient.users.getUser(clerkId as string);
-//     // console.log(user);
-//     // console.log(user.id);
-//     // console.log("avatarUrl:"+user.imageUrl);
-//     // url=user.imageUrl;
-//        //  const data = await response.json();
-//          setAvatarUrl(response.data.avatarUrl); // Устанавливаем URL аватарки
-//         // setAvatarUrl("https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18ya2t1NFMyYVpmY1pZV3Z1cE1WVEJJbGJLbEEiLCJyaWQiOiJ1c2VyXzJsV1ZjSFE0SGNYQTlKZnJNTzFsMzBqRHhBaSIsImluaXRpYWxzIjoiT0EifQ"
-//         // ); // Устанавливаем URL аватарки
-//       } catch (error) {
-//         console.error('Ошибка при получении профиля пользователя:', error);
-//       }
-//     };
-
-//     fetchUserProfile();
-//   }, [clerkId]);
-//    return (
-//     <div style={{ display: 'flex', alignItems: 'center' }}>
-//       {avatarUrl ? (
-//         <img 
-//           src={avatarUrl} 
-//           alt="User Avatar" 
-//           style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }}
-//         />
-//       ) : (
-//         <p>Аватарка не найдена</p>
-//       )}
-//       <input type="text" placeholder="Введите текст"  />
-//       <hr></hr>
-//     </div>
-//   );
-// };
-
-// export default MyComment;
-
-
-// import { clerkClient } from '@clerk/nextjs/server';
-// import{IUser} from '@/types/user.interface'
-
-// export async function getServerSideProps() {
-//   const clerkIds = ['user_1', 'user_2', 'user_3']; // Список clerk_Id пользователей
-  
-//   // Запрашиваем данные пользователей по их Clerk ID
-//   const users = await Promise.all(
-//     clerkIds.map(async (clerkId) => {
-//       const user = await clerkClient.users.getUser(clerkId);
-//       return {
-//         id: user.id,
-//         avatar: user.imageUrl,
-//         fullName: `${user.firstName} ${user.lastName}`,
-//       };
-//     })
-//   );
-
-//   return {
-//     props: {
-//       users,
-//     },
-//   };
-// }
-
-// const AvatarsPage = ({ users }) => {
-//   return (
-//     <div>
-//       <h1>Список аватарок пользователей</h1>
-//       <ul>
-//         {users.map((user: IUser) => (
-//           <li key={user.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-//             <img
-//               src={user.avatar}
-//               alt={`Avatar of ${user.fullName}`}
-//               style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }}
-//             />
-//             <span>{user.fullName}</span>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
-
-// export default AvatarsPage;
-
-
-// 'use client';
-// import { useEffect, useState } from 'react';
-// import { clerkClient } from '@clerk/clerk-sdk-node';
-// import {useRouter} from "next/navigation";
-// import axios from 'axios'
-
-// interface MyCommentProps {
-//   clerkId: string; // Типизация для пропса clerkId
-// }
-
-// const MyComment: React.FC<MyCommentProps> = ({ clerkId }) => {
-//   const [avatarUrl, setAvatarUrl] = useState<string>('');
-//   const { push } = useRouter()
-
-//   useEffect(() => {
-//     const fetchUserProfile = async () => {
-//       try {
-//         console.log("ответ=************************");
-//         // const response = await fetch(`/api/users?clerkId=${clerkId}`, {
-//         //     method: 'GET', // Явно указываем метод GET
-//         //   });
-//       const response = await axios.get(`/api/users?clerkId=${clerkId}`);
-
-//          console.log("ответ="+response.data);
-// // var url="";
-//     //       const user = await clerkClient.users.getUser(clerkId as string);
-//     // console.log(user);
-//     // console.log(user.id);
-//     // console.log("avatarUrl:"+user.imageUrl);
-//     // url=user.imageUrl;
-//        //  const data = await response.json();
-//          setAvatarUrl(response.data.avatarUrl); // Устанавливаем URL аватарки
-//         // setAvatarUrl("https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18ya2t1NFMyYVpmY1pZV3Z1cE1WVEJJbGJLbEEiLCJyaWQiOiJ1c2VyXzJsV1ZjSFE0SGNYQTlKZnJNTzFsMzBqRHhBaSIsImluaXRpYWxzIjoiT0EifQ"
-//         // ); // Устанавливаем URL аватарки
-//       } catch (error) {
-//         console.error('Ошибка при получении профиля пользователя:', error);
-//       }
-//     };
-
-//     fetchUserProfile();
-//   }, [clerkId]);
-//    return (
-//     <div style={{ display: 'flex', alignItems: 'center' }}>
-//       {avatarUrl ? (
-//         <img 
-//           src={avatarUrl} 
-//           alt="User Avatar" 
-//           style={{ width: '50px', height: '50px', borderRadius: '50%', marginRight: '10px' }}
-//         />
-//       ) : (
-//         <p>Аватарка не найдена</p>
-//       )}
-//       <input type="text" placeholder="Введите текст"  />
-//       <hr></hr>
-//     </div>
-//   );
-// };
-
-// export default MyComment;
