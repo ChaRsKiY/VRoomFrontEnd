@@ -32,7 +32,7 @@ const WatchPage: React.FC<WatchPageParams> = ({ params }) => {
     }
 
     return (
-        <div className="flex w-full">
+        <div className="flex w-full  ml-[80px]">
             <div className="w-3/4 px-8">
                 <VideoPlayer src={'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4'} />
                 <UnderVideoBlock video={testVideo} />

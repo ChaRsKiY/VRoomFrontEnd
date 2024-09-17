@@ -11,9 +11,10 @@ import MyAnswerComment from '@/components/pages/comments/myanswercomment'
 import { comment } from 'postcss';
 import  { useRef } from 'react';
 import { IUser } from '@/types/user.interface';
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 
 interface CommentsProps {
-  comments: ICommentVideo[];
+  commentId: number;
 }
 
 const getTimeAgo = (date: string | Date) => {
@@ -30,7 +31,7 @@ const getTimeAgo = (date: string | Date) => {
   }
 
 
-const Comments: React.FC<CommentsProps> = ({ comments }) => {
+const AnswersComments: React.FC<CommentsProps> = ({ commentId }) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
     const {user}=useUser();
@@ -38,10 +39,12 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
     const [lineColor, setLineColor] = useState('lightgray');
     const [isExpanded, setIsExpanded] = useState(false); // Состояние для управления раскрытием поля
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(comments.length).fill(false));
+    // const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(comments.length).fill(false));
     const [rows,setRows] =useState(1);
     const [iAmUser, setUser] = useState<IUser | null>(null);
     const [visibleInput, setVisibleInput] = useState<number | null>(null); 
+    const [answers, setAnswers] = useState<IAnswerCommentVideo[]>([]);
+  
   
 
     const getUser = async () => {
@@ -63,7 +66,26 @@ const Comments: React.FC<CommentsProps> = ({ comments }) => {
       }
     };
 
-// const videoId=1;
+    const getAnswerss = async () => {
+      try {
+        const response = await fetch('https://localhost:7154/api/AnswerVideo/getbycommentid/' + commentId, {
+          method: 'GET',
+        });
+  
+        if (response.ok) {
+          const data: IAnswerCommentVideo[] = await response.json();
+          setAnswers(data);
+  
+  
+          console.log('Комментарии успешно получены:', data);
+        } else {
+          console.error('Ошибка при отправке комментария:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Ошибка при подключении к серверу:', error);
+      }
+    };
+  
 const handleFocus = () => {
   setLineColor('black');  
 };
@@ -88,7 +110,7 @@ const handleInputChange = (index: number, value: string) => {
     if(user){ 
     try {
       
-      const response = await fetch('https://localhost:7154/api/CommentVideo/dislike/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/AnswerVideo/dislike/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -106,7 +128,7 @@ const handleInputChange = (index: number, value: string) => {
   const like = async (id: number, userid:string ) => {
     if(user){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/CommentVideo/like/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/AnswerVideo/like/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -122,19 +144,14 @@ const handleInputChange = (index: number, value: string) => {
   }; 
 
   
-  const toggleExpand = (index: number) => {
-    setExpandedStates((prevState) =>     
-      prevState.map((state, i) => (i === index ? !state : state)) // Переключаем состояние только для конкретного комментария
-    );
-  };
 
   return (
    
     <div style={{width:'100%'}}>
-      {comments.length > 0 ? (
-        comments.map((comment, index) => (
+      {answers.length > 0 ? (
+        answers.map((comment, index) => (
             <div style={{width:'100%'}}>
-          <div key={comment.videoId} style={{display:'flex'}}>
+          <div key={comment.commentVideo_Id} style={{display:'flex'}}>
             <div>
              <img
               src={avatars[comment.userId]  || comment.channelBanner}
@@ -146,7 +163,7 @@ const handleInputChange = (index: number, value: string) => {
             <div style={{width:'100%'}}>
             <div style={{paddingLeft:'0px' }}>
               <Link  href='#' style={{paddingRight:'20px',fontWeight:'bolder' }}>@{comment.userName}</Link>
-             <small>{getTimeAgo(comment.date)}</small>
+             <small>{getTimeAgo(comment.answerDate)}</small>
              </div>
             
              <textarea
@@ -156,14 +173,12 @@ const handleInputChange = (index: number, value: string) => {
                     padding: '5px',
                     height: 'auto',
                     resize: 'none',
-                    overflow: expandedStates[index] ? 'auto' : 'hidden', // Скроллинг при раскрытии
-                    maxHeight: expandedStates[index] ? 'none' : '100px', // Ограничение по высоте (100px ≈ 4 строки)
                     wordWrap: 'break-word',
                      width: '100%',
                      backgroundColor:'white'
                   }}
                   disabled
-                  value={comment.comment}
+                  value={comment.text}
                   readOnly
                   rows={1} // Минимальное количество строк
                 />
@@ -223,6 +238,4 @@ const handleInputChange = (index: number, value: string) => {
   );
 }
 
-export default Comments;
-
-
+export default AnswersComments;

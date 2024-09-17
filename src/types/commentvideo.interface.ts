@@ -11,5 +11,6 @@ export interface ICommentVideo {
     dislikeCount:number,
     answerVideoId?:number,
     isPinned:boolean,
-    isEdited:boolean
+    isEdited:boolean,
+    users?:[]
 }
