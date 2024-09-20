@@ -166,6 +166,7 @@ import Comments from '@/components/pages/comments/comments';
 import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 
 const CommentsBlock: React.FC = () => {
   const videoId = 4;
@@ -175,6 +176,7 @@ const CommentsBlock: React.FC = () => {
   const [iAmUser, setUser] = useState<IUser | null>(null);
   const [isSortMenuOpen, setSortMenuOpen] = useState(false); // Состояние для управления видимостью меню сортировки
   const [sortMethod, setSortMethod] = useState<'date' | 'likes'>('date'); // Состояние для метода сортировки
+  const [answersByComment, setAnswersByComment] = useState<{ [key: number]: IAnswerCommentVideo[] }>({});
   const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
 
   // Получение текущего пользователя
@@ -197,6 +199,39 @@ const CommentsBlock: React.FC = () => {
     }
   };
 
+  const getAnswers = async  (commentId: number) => {
+    try {
+      const response = await fetch('https://localhost:7154/api/AnswerVideo/getbycommentid/' + commentId, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        const data: IAnswerCommentVideo[] = await response.json();
+        setAnswersByComment((prevAnswers) => ({
+          ...prevAnswers,
+          [commentId]: data,
+        }));
+
+
+        console.log('answers успешно получены:', data);
+        console.log('*****'+ answersByComment);
+      }
+      else if (response.status === 404) {
+      // Если ответов нет (404), устанавливаем пустой массив для этого комментария
+      setAnswersByComment((prevAnswers) => ({
+        ...prevAnswers,
+        [commentId]: [],
+      }));
+      console.log(`Ответов для комментария ${commentId} не найдено (404).`);
+      console.log('*****'+ answersByComment);
+    } else {
+        console.error('Ошибка при получении списка ответов:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Ошибка при подключении к серверу:', error);
+    }
+  };
+
   // Получение комментариев с сервера через обычный HTTP запрос
   const getComments = async () => {
     try {
@@ -207,15 +242,21 @@ const CommentsBlock: React.FC = () => {
       if (response.ok) {
         const data: ICommentVideo[] = await response.json();
         setAllComments(data.length);
-
+        
         // Сортируем комментарии после их получения в зависимости от текущего метода сортировки
         if (sortMethod === 'date') {
           setComments(sortByDate(data));
         } else if (sortMethod === 'likes') {
           setComments(sortByLikes(data));
         }
-
         console.log('Комментарии успешно получены:', data);
+
+        //  comments.forEach((comment) => {
+        //  getAnswers(comment.id); 
+        //  console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически        
+        // });
+        // console.log('Комментарии успешно получены:', data);
+        // console.log('ответы------:', answersByComment);
       } else {
         console.error('Ошибка при получении комментариев:', response.statusText);
       }
@@ -260,26 +301,24 @@ const CommentsBlock: React.FC = () => {
       console.log('Сообщение от WebSocket сервера:', messageData);
 
       if (messageData.type === 'new_comment') {
-        // Обновляем комментарии, если пришло новое сообщение
-        // setComments((prevComments) => [...prevComments,messageData.comment]);
-        // console.log(comments);
-        // setAllComments((prev) => prev + 1);
+        
         getComments();
+
+        comments.forEach((comment) => {
+          getAnswers(comment.id); 
+          console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически        
+         })
 
       }
     };
-
     ws.onclose = () => {
       console.log('WebSocket соединение закрыто');
     };
-
     ws.onerror = (error) => {
       console.error('Ошибка WebSocket:', error);
     };
-
     // Сохраняем WebSocket в состоянии
     setSocket(ws);
-
     // Закрываем WebSocket при размонтировании компонента
     return () => {
       ws.close();
@@ -290,13 +329,23 @@ const CommentsBlock: React.FC = () => {
   useEffect(() => {
     getUser();
     getComments();
-
+   
     return () => {
       if (socket) {
         socket.close();
       }
     };
   }, [videoId, user, sortMethod]);
+
+  useEffect(() => {
+    comments.forEach((comment) => {
+      getAnswers(comment.id); 
+           
+     });
+   
+     console.log('ответы------:', answersByComment);
+  
+  }, [comments]);
 
   return (
     <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }}>
@@ -342,7 +391,7 @@ const CommentsBlock: React.FC = () => {
       <div style={{ marginTop: '30' }}>
         {iAmUser ? <MyComment videoId={videoId} amuser={iAmUser} /> : <p></p>}
         <br />
-               <Comments comments={comments} />
+               <Comments comments={comments}  answers={answersByComment || []}/>
       </div>
     </div>
   );

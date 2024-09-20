@@ -253,7 +253,7 @@ const buttonCancelStyles: { [key: string]: React.CSSProperties } = {
 };
 const buttonSubmitStyles: { [key: string]: React.CSSProperties } = {
   base: {
-    backgroundColor: 'blue',  
+    backgroundColor: 'RoyalBlue',  
     border: 'none',             
     color: 'white',           
     padding: '2px 20px',

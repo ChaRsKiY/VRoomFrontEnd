@@ -1,10 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
 import  { useUser }  from '@clerk/nextjs';
-import Link from "next/link";
-import { FaSmile } from 'react-icons/fa';
 import React, { useRef } from 'react';
-import {ICommentVideo} from '@/types/commentvideo.interface'
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { IUser } from '@/types/user.interface';
 
 interface AnsCommentProps {
@@ -20,13 +18,12 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
   const [display, setDisplay] = useState('');
   const [display2, setDisplay2] = useState('');
   const [displayMain, setDisplayMain] = useState('block');
-  const [write, setWrite] = useState('Write a comment...');
   const [inputValue, setInputValue] = useState('');
   const [lineColor, setLineColor] = useState('lightgray');
   const [isHovered, setIsHovered] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const [comid, setCommentId] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef2 = useRef<HTMLInputElement>(null);
   const [iAmUser, setUser] = useState<IUser | null>(null);
   const { user } = useUser();
 
@@ -70,90 +67,72 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
         setDisabled(false);
     };
   
-    const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setInputValue(event.target.value);
-      if(inputValue==''||event.target.value=='')
-        setDisabled(true);
-      else
-        setDisabled(false);
-    };
+    // const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    //   setInputValue(event.target.value);
+    //   if(inputValue==''||event.target.value=='')
+    //     setDisabled(true);
+    //   else
+    //     setDisabled(false);
+    // };
   
     const handleSubmit = async () => {
 
-      // const comment: ICommentVideo = {
-      //   id:0,
-      //   userId: userId,  
-      //   videoId: comid,  
-      //   channelBanner:avatarUrl, 
-      //   comment: inputValue,
-      //   date: new Date(),  
-      //   likeCount: 0,
-      //   dislikeCount: 0,
-      //   isPinned: false,
-      //   isEdited: false,
-      //   userName:fullName
-      // };
-      // try {
-      //   const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify(comment), 
-      //   });
+      const answer: IAnswerCommentVideo = {
+        id:0,
+        userId: userId,  
+        commentVideo_Id: comid,  
+        channelBanner:avatarUrl, 
+        text: inputValue,
+        answerDate: new Date(),  
+        likeCount: 0,
+        dislikeCount: 0,
+        isEdited: false,
+        userName:fullName
+      };
+      try {
+        const response = await fetch('https://localhost:7154/api/AnswerVideo/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(answer), 
+        });
   
-      //   if (response.ok) {
-      //     setWrite('comment sent successfully, write new here');
-      //     setInputValue('');
-      //     setDisplay('none');
-      //     setDisplay2('block'); 
-      //     const data = await response.json();
-      //     console.log('Комментарий успешно отправлен:', data);
+        if (response.ok) {
          
+          setInputValue('');
+          setDisplay('none');
+          const data = await response.json();
 
-      //   } else {
-      //     setWrite('error sending');
-      //     console.error('Ошибка при отправке комментария:', response.statusText);
-      //   }
-      // } catch (error) {
-      //   setWrite('error sending');
-      //   console.error('Ошибка при подключении к серверу:', error);
-      // }
-
-      alert('Комментарий успешно отправлен:'+ inputValue);
+        } else {
+          console.error('Ошибка при отправке комментария:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Ошибка при подключении к серверу:', error);
+      }
+   
     };
-
 
     const handleCancel = () => {
       setInputValue('');
       onCancel();
     };
   
-  const toWrite=()=>{
-     setDisplay('block');
-     setDisplay2('none'); 
-     setTimeout(() => {
-      inputRef.current?.focus(); // Переводим фокус на input
-    }, 0);
-    };
-  
 
   useEffect(() => {   
     setCommentId(commentId);
     getUser();
+    setTimeout(() => {
+      inputRef2.current?.focus(); // Переводим фокус на input
+    }, 0);
   },[commentId]);
 
 
   
   return (
  
-     <div  >
-  
-      {/* <div style={{display }}>
-        You are writing a comment in account:
-       </div>  */}
-    <div style={{ display: 'flex', alignItems: 'center',width:'100%' , marginLeft:'160px'}}>    
-     
+     <div  style={{ display }} > 
+    <div style={{ display: 'flex', alignItems: 'center',width:'100%' , marginLeft:'100px'}}>         
       {avatarUrl ? (
         <img 
           src={avatarUrl} 
@@ -164,14 +143,10 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
         <p>Аватарка не найдена</p>
       )}
        <span style={{fontWeight:'bolder', fontSize:'12pxs'}}>{fullName}&nbsp;&nbsp;</span> 
-       {/* <div onClick={toWrite} style={{display: display2, width:'100%', border: 'none', background:'lightgray',
-         padding:'5px', borderBottom: `2px solid ${lineColor}`, borderRadius:'10px'}}>
-        <span > {write}</span>
-        </div>           */}
+     
     </div>
     <div >
-
-       <div style={{paddingLeft:'150px' }}>
+       <div style={{paddingLeft:'50px' }}>
       <div >
       <input
       type="text"
@@ -179,7 +154,7 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
       onChange={handleChange}
        onFocus={handleFocus}
       onBlur={handleBlur}
-   
+      ref={inputRef2}
       style={{
         border: 'none',
         borderBottom: `2px solid ${lineColor}`, 
@@ -188,30 +163,18 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
         display:'flex',
         flexWrap:'wrap',
         marginLeft:'50px',
+
         
       }}
     />  
       </div></div>
  
-      <div style={{display:'flex', width:'100%', fontSize:'12px',marginLeft:'200px'}}>
-        {/* <div style={{display:'flex'}}>
-        <div style={{margin:'5px' ,marginLeft:'50px'}}>
-           <FaSmile size={25} color="lightgray" />
-       </div>
-       <div style={{ marginLeft:'20px'}}>
-          <div style={{ fontSize:'11px', paddingTop:'5px', marginBottom:'-5px'}}>By sending a comment, you agree to</div>
-         <Link href="http://localhost:3000/ru/termsofservice" passHref target="_blank" rel="noopener noreferrer"
-          style={{color:'blue', fontSize:'11px'}} >     
-            VRoom's Terms of Service.</Link>
-        </div>
-        </div>
-      <div > */}
-      
+      <div style={{display:'flex', width:'100%', fontSize:'12px',marginLeft:'100px'}}>     
       <button onClick={handleSubmit} disabled={disabled} style={ !disabled ? {...buttonSubmitStyles.base} :buttonSubmitStyles.disab}>Answer</button>
       <button onClick={handleCancel}   style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>Cancel</button>
-      {/* </div> */}
+
       </div>
       </div>
  
@@ -238,7 +201,7 @@ const buttonCancelStyles: { [key: string]: React.CSSProperties } = {
 };
 const buttonSubmitStyles: { [key: string]: React.CSSProperties } = {
   base: {
-    backgroundColor: 'blue',  
+    backgroundColor: 'RoyalBlue',  
     border: 'none',             
     color: 'white',           
     padding: '2px 20px',
