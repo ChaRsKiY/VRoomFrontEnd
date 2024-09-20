@@ -7,19 +7,24 @@ const channelPage = async ({params: {locale}}) => {
     return (
 
         <>
-            <div className="flex pt-20 overflow-hidden">
+            <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
+            <div className="flex-auto overflow-hidden">
 
-                <div>
-                    <br/><h1 style={{'float': 'left'}} className="text-[1.4rem]"><strong>Subtitles for videos on the channel</strong>
-                </h1><br/><br/><br/>
-                    <div className="grid pr-[-3%] grid-cols-2 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+                <div className="flex-1 p-6">
+                    <h1 className="text-2xl font-semibold mb-6">КSubtitles for videos on the channel</h1>
 
+                    <div className="flex items-center space-x-9 text-sm">
+                        <button className="text-gray-700 border-b-2 border-gray-900">All</button>
+                        <button className="text-gray-700">Foul copy</button>
+                        <button className="text-gray-700">Published</button>
                     </div>
-                </div>
 
+                    <hr className="my-4 border-gray-300"/>
+
+
+                </div>
             </div>
         </>
     );

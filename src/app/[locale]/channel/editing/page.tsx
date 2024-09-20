@@ -7,7 +7,7 @@ const channelPage = async ({params: {locale}}) => {
     return (
 
         <>
-            <div className="flex pt-20 overflow-hidden">
+            <div className="flex">
                 <AsideHome t={t}/>
             </div>
             <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
