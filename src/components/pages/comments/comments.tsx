@@ -14,7 +14,6 @@ import { IUser } from '@/types/user.interface';
 import AnswersComments from './answerscomment';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { MdMoreVert } from 'react-icons/md'; 
-import { RxRadiobutton } from 'react-icons/rx';
 import RadioButtonList from '@/components/pages/comments/report';
 
 interface CommentsProps {
@@ -52,8 +51,7 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers }) => {
     const textAreasRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
     const [display2, setDisplay2] = useState('none'); 
     const [display1, setDisplay1] = useState('block'); 
-      const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); // Индекс активного меню
-    //   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+    const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); // Индекс активного меню
 
     const getUser = async () => {
       try {
@@ -300,8 +298,7 @@ const handleInputChange = (index: number, value: string) => {
                 paddingBottom: '4px',
                 position: 'absolute',
                display:display1,
-                // top: `${menuPosition.top}px`,
-                // left: `${menuPosition.left}px`,
+
               }}
             >
               <div onClick={() => openReport()} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" 
