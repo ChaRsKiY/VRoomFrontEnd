@@ -15,10 +15,14 @@ import AnswersComments from './answerscomment';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { MdMoreVert } from 'react-icons/md'; 
 import RadioButtonList from '@/components/pages/comments/report';
+import { FaThumbtack } from 'react-icons/fa';
+import { MdPushPin } from 'react-icons/md';
+import { ISimpleUser } from '@/types/simpleuser.interface';
 
 interface CommentsProps {
   comments: ICommentVideo[];
   answers: {[key: number]: IAnswerCommentVideo[]};
+  id:number;
 }
 
 const getTimeAgo = (date: string | Date) => {
@@ -35,7 +39,7 @@ const getTimeAgo = (date: string | Date) => {
   }
 
 
-const Comments: React.FC<CommentsProps> = ({ comments, answers }) => {
+const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
     const {user}=useUser();
@@ -46,6 +50,7 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers }) => {
     const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(comments.length).fill(false));
     const [rows,setRows] =useState(1);
     const [iAmUser, setUser] = useState<IUser | null>(null);
+    const [videoOwner, setVideoOwner] = useState<ISimpleUser | null>(null);
     const [visibleInput, setVisibleInput] = useState<number | null>(null); 
     const [isTextOverflowing, setIsTextOverflowing] = useState<boolean[]>([]);
     const textAreasRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
@@ -129,6 +134,61 @@ const handleInputChange = (index: number, value: string) => {
       console.error('Ошибка при подключении к серверу:', error);
     }}
   }; 
+  const toPin = async (id: number) => {
+    if(user){ 
+    try {     
+      const response = await fetch('https://localhost:7154/api/CommentVideo/topin/'+id , {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+       console.log('успешный pin');
+      } else {
+        console.error('Ошибка при pin:', response.statusText);
+      }
+    
+    } catch (error) {
+      console.error('Ошибка при подключении к серверу:', error);
+    }}
+  }; 
+  const unPin = async (id: number) => {
+    if(user){ 
+    try {     
+      const response = await fetch('https://localhost:7154/api/CommentVideo/unpin/'+id , {
+        method: 'PUT',
+      });
+
+      if (response.ok) {
+       console.log('успешный unpin');
+      } else {
+        console.error('Ошибка при unpin:', response.statusText);
+      }
+    
+    } catch (error) {
+      console.error('Ошибка при подключении к серверу:', error);
+    }}
+  };
+  const findOwner = async (id: number) => {
+    if(user){ 
+    try {     
+      const response = await fetch('https://localhost:7154/api/User/getbyvideoid/'+id , {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+      
+       const data: ISimpleUser = await response.json();
+       console.log('успешный ownerVideo',data);
+       setVideoOwner(data);
+
+      } else {
+        console.error('ownerVideo:', response.statusText);
+      }
+    
+    } catch (error) {
+      console.error('Ошибка при подключении к серверу:', error);
+    }}
+  }; 
   
   const toggleExpand = (index: number) => {
     setDisplay2('none');
@@ -153,8 +213,14 @@ const handleInputChange = (index: number, value: string) => {
 
   useEffect(() => {    
     setExpandedStates(Array(comments.length).fill(false)); 
-    },[comments]);
+    findOwner(id); 
+    },[comments,id]);
 
+   
+
+   
+      
+      
     useEffect(() => {
       // Проверяем, все ли текстовые области помещают текст
       const overflowStatuses = textAreasRefs.current.map((textarea) => {
@@ -168,8 +234,7 @@ const handleInputChange = (index: number, value: string) => {
 
 
     const toggleReportMenu = (index: number, event: React.MouseEvent) => {
-      // const { clientX, clientY } = event; // Получаем координаты клика
-      // setMenuPosition({ top: clientY, left: clientX }); // Устанавливаем позицию меню
+
       setDisplay2('none');
       setDisplay1('block');
       if (reportMenuOpenIndex === index) {
@@ -195,10 +260,19 @@ const handleInputChange = (index: number, value: string) => {
               height="40px"
               style={{ borderRadius: '50%', marginRight: '10px' }}
             /></div>
-            <div style={{width:'100%'}}>
+            <div style={{width:'100%'}}>                           
             <div style={{paddingLeft:'0px' }}>
+              <div style={{ display: 'flex' , justifyContent:'space-between', borderBottom:comment.isPinned? '2px solid lightgray':'none'}}>
+                <div>
               <Link  href='#' style={{paddingRight:'20px',fontWeight:'bolder' }}>@{comment.userName}</Link>
              <small>{getTimeAgo(comment.date)}</small>
+             </div>
+             <div style={{ display: 'flex', alignItems: 'center',marginLeft:'50px' }}>
+                  {comment.isPinned && <FaThumbtack size={14} color="brown" 
+                  onClick={() => unPin(comment.id)} 
+                  title="Unpin comment" />} {/* Иконка булавки */}
+               </div>     
+            </div>
              </div>
              <div key={index} style={{ marginBottom: '20px' }}>
              <textarea
@@ -263,9 +337,12 @@ const handleInputChange = (index: number, value: string) => {
                   <FiFlag size={16} />
                    <span style={{fontSize:"14px"}}>Report</span>
                   </div> */}
-                   {comment.userId === user?.id && (
+                   {videoOwner?.clerk_Id === user?.id && !comment.isPinned  &&(
                    <>
-                  <button style={{fontSize:'11px'}} >
+                   <button  onClick={() => toPin(comment.id)}>
+                   <MdPushPin size={18} color="gray" title="Pin comment" />
+                   </button>
+                  <button style={{fontSize:'11px'}}   >
                     Edit</button>
                   </>
                 )}
