@@ -105,7 +105,7 @@ useEffect(() => {
   ws.onopen = () => {
     console.log('WebSocket соединение установлено');
     // Например, можно отправить начальный запрос или уведомление
-    ws.send(JSON.stringify({ type: 'subscribe', ans }));
+    ws.send(JSON.stringify({ type: 'subscribe', ans,commentId }));
   };
   ws.onmessage = (event) => {
     const messageData = JSON.parse(event.data);
@@ -120,9 +120,30 @@ useEffect(() => {
       });
   
     setAllAnswers((prev) => prev + 1);
-    }}
-    if (messageData.type === 'new_Like_answer') {
+    }
+  }
 
+    if (messageData.type === 'like_answer') {
+      const likedAnswer = messageData.payload;
+      console.log('*/*/*/*=',likedAnswer);
+      setAnswers((prevAnswers) =>
+        prevAnswers.map((answer) =>
+          answer.id === likedAnswer.id
+            ? { ...answer, likeCount: likedAnswer.likeCount } // Обновляем количество лайков
+            : answer
+        )
+      );
+    }
+    if (messageData.type === 'dislike_answer') {
+      const likedAnswer = messageData.payload;
+      console.log('*/*/*/*=',likedAnswer);
+      setAnswers((prevAnswers) =>
+        prevAnswers.map((answer) =>
+          answer.id === likedAnswer.id
+            ? { ...answer, dislikeCount: likedAnswer.dislikeCount } // Обновляем количество лайков
+            : answer
+        )
+      );
     }
   };
   ws.onclose = () => {
@@ -328,52 +349,5 @@ borderRadius:'20px'
 
 export default AnswersComments;
 
-{/* <div> 
-<button onClick={(event) => toggleReportMenu(index, event)} className="flex pl-10 pt-2 space-x-2">
-  <MdMoreVert size={24} color="black" />
-</button>
-
-   {reportMenuOpenIndex === index && (
-<div>
-<div
-className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[180px]"
-style={{
-paddingTop: '4px',
-paddingBottom: '4px',
-position: 'absolute',
-display:display1,
-// top: `${menuPosition.top}px`,
-// left: `${menuPosition.left}px`,
-}}
->
-<div onClick={() => openReport()} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" 
-style={{display:'flex', justifyContent:'center'}}>
-<div>
-<FiFlag size={16} /></div>
-<div>
-<span style={{fontSize:'20px'}}>Report</span></div>
-</div>
-</div>
-
-<div
-className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
-style={{
-paddingTop: '10px',
-paddingBottom: '10px',
-position: 'absolute',
-marginTop:'-150px',
-marginLeft:'-300px',
-display:display3,
-maxWidth: '400px',
-minWidth:'300px',
-borderRadius:'20px'
-}}
->            
-<RadioButtonList userName={comment.userName} onClose={closeReport}/>
-
-</div>
-</div>
 
 
-)}
-</div> */}
