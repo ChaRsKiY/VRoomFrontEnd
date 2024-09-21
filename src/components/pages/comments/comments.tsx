@@ -152,7 +152,7 @@ const handleInputChange = (index: number, value: string) => {
     }}
   }; 
   const unPin = async (id: number) => {
-    if(user){ 
+    if(user && videoOwner?.clerk_Id==user?.id){ 
     try {     
       const response = await fetch('https://localhost:7154/api/CommentVideo/unpin/'+id , {
         method: 'PUT',
@@ -348,7 +348,7 @@ const handleInputChange = (index: number, value: string) => {
                 )}
              </div>
              
-             {visibleInput === index && (
+             {visibleInput === index && user &&(
              <>
               <br />
                <MyAnswerComment commentId={comment.id}   onCancel={handleCancel} /> 
