@@ -1,0 +1,23 @@
+.cl-socialButtonsIconButton {
+    @apply h-9 rounded-[0.5rem]
+}
+.cl-socialButtonsIconButton:hover {
+    @apply bg-neutral-200
+}
+
+
+.cl-socialButtonsIconButton img {
+    @apply w-5
+}
+
+.cl-formFieldInput {
+    @apply text-[1rem] rounded-[0.5rem];
+}
+
+.cl-formFieldLabel {
+    @apply font-[300] text-[0.9rem]
+}
+
+.cl-formButtonPrimary {
+    @apply rounded-[0.5rem];
+}
