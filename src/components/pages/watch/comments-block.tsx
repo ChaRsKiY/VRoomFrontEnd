@@ -112,11 +112,22 @@ const CommentsBlock: React.FC = () => {
     // Выполняем сортировку на основе выбранного метода
     const handleSortMethodChange = (method: 'date' | 'likes') => {
         setSortMethod(method);
-        if (method === 'date') {
-            setComments(sortByDate(comments));
-        } else if (method === 'likes') {
-            setComments(sortByLikes(comments));
-        }
+        const sortedData = comments.sort((a, b) => {
+            // Сначала сортируем по полю isPinned
+            if (a.isPinned && !b.isPinned) {
+                return -1;
+            }
+            if (!a.isPinned && b.isPinned) {
+                return 1;
+            }
+            if (sortMethod === 'date') {
+                return sortByDate([a, b])[0] === a ? -1 : 1; 
+            } else if (sortMethod === 'likes') {
+                return sortByLikes([a, b])[0] === a ? -1 : 1; 
+            }
+            return 0; // Если нет метода сортировки, ничего не меняем
+        });
+        setComments(sortedData);
     };
 
     // Инициализация WebSocket и обновление комментариев через WebSocket
