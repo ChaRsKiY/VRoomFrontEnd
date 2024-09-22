@@ -18,7 +18,7 @@ import RadioButtonList from '@/components/pages/comments/report';
 import { FaThumbtack } from 'react-icons/fa';
 import { MdPushPin } from 'react-icons/md';
 import { ISimpleUser } from '@/types/simpleuser.interface';
-import {getUser} from "@/services/user.service";
+//import {getUser} from "@/services/user.service";
 
 interface CommentsProps {
   comments: ICommentVideo[];
@@ -59,9 +59,29 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
     const [display1, setDisplay1] = useState('block'); 
     const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); // Индекс активного меню
 
-    getUser(user, setUser)
+  //  getUser(user, setUser)
 
 // const videoId=1;
+
+// const getUser = async (user: any, setUser: (prev: IUser) => void) => {
+//   try {
+//       if(user){
+//           const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
+//               method: 'GET',
+//           });
+
+//           if (response.ok) {
+//               const data: IUser = await response.json();
+//               setUser(data);
+//           } else {
+//               console.error('Ошибка при получении пользователя:', response.statusText);
+//           }
+//       }
+//   } catch (error) {
+//       console.error('Ошибка при подключении к серверу:', error);
+//   }
+// };
+
 const handleFocus = () => {
   setLineColor('black');  
 };

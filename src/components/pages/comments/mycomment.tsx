@@ -141,7 +141,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
             setDisplayMain('none');}
 
       } catch (error) {
-        console.error('Ошибка при получении профиля пользователя:', error);
+        console.error('???Ошибка при получении профиля пользователя:', error);
       }
    
   },[videoId, amuser]);

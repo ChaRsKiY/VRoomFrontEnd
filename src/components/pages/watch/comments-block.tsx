@@ -8,7 +8,7 @@ import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
-import {getUser} from "@/services/user.service";
+
 
 
 const CommentsBlock: React.FC = () => {
@@ -23,7 +23,24 @@ const CommentsBlock: React.FC = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
 
     // Получение текущего пользователя
-    getUser(user, setUser);
+    const getUser = async (user: any, setUser: (prev: IUser) => void) => {
+        try {
+            if(user){
+                const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
+                    method: 'GET',
+                });
+    
+                if (response.ok) {
+                    const data: IUser = await response.json();
+                    setUser(data);
+                } else {
+                    console.error('Ошибка при получении пользователя:', response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getAnswers = async  (commentId: number) => {
         try {
@@ -172,7 +189,7 @@ const CommentsBlock: React.FC = () => {
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
-        getUser(user, setUser);
+        getUser(user,setUser);
         getComments();
 
         return () => {
