@@ -3,7 +3,8 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 
 const channelPage = async ({params: {locale}}) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+    const {t} = await initTranslations(locale, ['common', 'categories']);
+
     return (
 
         <>

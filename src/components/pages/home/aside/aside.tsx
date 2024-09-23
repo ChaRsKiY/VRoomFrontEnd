@@ -23,13 +23,13 @@ interface IAsideHomeProps {
 
 const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
     const mainPageHomeCategories = [
-        { icon: <IoMdHome />, name: t("categories:home"), path: "/popular" },
+        { icon: <IoMdHome />, name: t("categories:home"), path: "/" },
         { icon: <SiYoutubeshorts />, name: t("categories:shorts"), path: "/shorts" },
         { icon: <MdSubscriptions />, name: t("categories:subscriptions"), path: "/subscriptions" },
     ]
 
     const mainPageAccountCategories = [
-        { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/" },
+        { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/channel" },
         { icon: <RiPlayList2Fill />, name: t("categories:playlists"), path: "/playlists" },
         { icon: <MdWatchLater />, name: t("categories:watch_later"), path: "/playlist?list=WL" },
         { icon: <BiSolidLike />, name: t("categories:liked_videos"), path: "/playlist?list=LL" },

@@ -45,7 +45,7 @@ export function LanguagePicker({ handleLanguageChange, currentLanguage }: any) {
                 <button
                     className="hover:bg-neutral-200 rounded-[0.5rem] flex items-center p-2 text-[1.075rem] space-x-3">
                     <HiMiniLanguage size={23}/>
-                    <div>{`Language: ${languages.filter(el => el.value === currentLanguage)[0].label}`}</div>
+                    <div>{`Language: ${languages.filter(el => el.value === currentLanguage)[0]?.label}`}</div>
                 </button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0">
