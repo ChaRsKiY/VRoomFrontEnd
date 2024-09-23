@@ -17,6 +17,10 @@ export async function middleware(request: NextRequest, res: NextResponse) {
         return i18nResponse;
     }
 
+    if (request.nextUrl.pathname.startsWith('/api')) {
+        return NextResponse.next(); // Пропускаем API запросы дальше без изменений
+      }
+
     return NextResponse.next();
 }
 

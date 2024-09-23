@@ -11,7 +11,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 2,
@@ -23,7 +24,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 3,
@@ -35,7 +37,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 4,
@@ -47,7 +50,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 5,
@@ -59,7 +63,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 6,
@@ -71,7 +76,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 7,
@@ -83,7 +89,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 8,
@@ -95,7 +102,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 9,
@@ -107,7 +115,8 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
     {
         id: 10,
@@ -119,6 +128,7 @@ export const data: IPresentedVideo[] = [
             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
             name: "Mr Beast"
         },
-        href: "273887dfh23"
+        href: "273887dfh23",
+        description:"my new video"
     },
 ]

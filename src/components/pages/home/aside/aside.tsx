@@ -29,7 +29,7 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({ t }: IAsideHomeProps) => {
     ]
 
     const mainPageAccountCategories = [
-        { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/" },
+        { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/channel" },
         { icon: <RiPlayList2Fill />, name: t("categories:playlists"), path: "/playlists" },
         { icon: <MdWatchLater />, name: t("categories:watch_later"), path: "/playlist?list=WL" },
         { icon: <BiSolidLike />, name: t("categories:liked_videos"), path: "/playlist?list=LL" },
