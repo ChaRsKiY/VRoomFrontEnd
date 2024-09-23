@@ -8,7 +8,7 @@ import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
-import {getUser} from "@/services/user.service";
+
 
 
 const CommentsBlock: React.FC = () => {
@@ -23,7 +23,24 @@ const CommentsBlock: React.FC = () => {
     const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
 
     // Получение текущего пользователя
-    getUser(user, setUser);
+    const getUser = async (user: any, setUser: (prev: IUser) => void) => {
+        try {
+            if(user){
+                const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
+                    method: 'GET',
+                });
+    
+                if (response.ok) {
+                    const data: IUser = await response.json();
+                    setUser(data);
+                } else {
+                    console.error('Ошибка при получении пользователя:', response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getAnswers = async  (commentId: number) => {
         try {
@@ -112,11 +129,22 @@ const CommentsBlock: React.FC = () => {
     // Выполняем сортировку на основе выбранного метода
     const handleSortMethodChange = (method: 'date' | 'likes') => {
         setSortMethod(method);
-        if (method === 'date') {
-            setComments(sortByDate(comments));
-        } else if (method === 'likes') {
-            setComments(sortByLikes(comments));
-        }
+        const sortedData = comments.sort((a, b) => {
+            // Сначала сортируем по полю isPinned
+            if (a.isPinned && !b.isPinned) {
+                return -1;
+            }
+            if (!a.isPinned && b.isPinned) {
+                return 1;
+            }
+            if (sortMethod === 'date') {
+                return sortByDate([a, b])[0] === a ? -1 : 1; 
+            } else if (sortMethod === 'likes') {
+                return sortByLikes([a, b])[0] === a ? -1 : 1; 
+            }
+            return 0; // Если нет метода сортировки, ничего не меняем
+        });
+        setComments(sortedData);
     };
 
     // Инициализация WebSocket и обновление комментариев через WebSocket
@@ -161,7 +189,7 @@ const CommentsBlock: React.FC = () => {
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
-        getUser(user, setUser);
+        getUser(user,setUser);
         getComments();
 
         return () => {
