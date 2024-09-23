@@ -1,4 +1,4 @@
-import React from 'react'
+
 import CategoryBlock from "@/components/pages/channel/aside/category";
 import {
     MdOutlineAnalytics,
@@ -16,13 +16,37 @@ import {LiaCommentSolid} from "react-icons/lia";
 import {CiSettings} from "react-icons/ci";
 import Image from "next/image";
 import ClientHome from "@/components/pages/channel/ClientHome";
-import SettingsBlock from "@/components/pages/channel/channelsettingsp";
+import SettingsBlock from "@/components/pages/channel/youChannelP";
+import { useUser } from '@clerk/clerk-react'
+import axios from "axios";
+import {IPresentedChannel} from "@/types/channel.interface";
+import React from "react";
+import UserCategoryBlock from "@/components/pages/channel/aside/user-category";
 
 interface IAsideHomeProps {
     t: ITranslationFunction
 }
 
+
 const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
+/*    const { isSignedIn, user } = useUser();
+
+    if (!isSignedIn) {
+        // Handle loading state however you like
+        return null
+    }
+
+    axios({
+        url: "https://localhost:7154/api//User/getbyclerkid/" + user.id,
+        method: "GET",
+        headers: {"Content-Type": "application/json"},
+    }).then((response) => {
+
+    }).catch(function (error) {
+        alert(error);
+    });*/
+
+
     const mainPageAccountCategories = [
         {icon: <LuLayoutDashboard/>, name: t("channel:Home"), path: "/channel/editing"},
         {icon: <PiMonitorPlayLight/>, name: t("channel:Content"), path: "/channel/editing/content"},
@@ -51,15 +75,14 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
         <div>
             <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className="px-[7%]">
-
-                    <div className="p-4 text-center">
-                        <Image className="w-100 h-100 mx-auto rounded-full" width={100} height={100}
-                               src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo"
-                               alt="Avatar"/>
+                    <UserCategoryBlock/>
+                    {/*<div className="p-4 text-center">
+                       <Image className="w-100 h-100 mx-auto rounded-full" width={100} height={100}
+                               src="https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo" alt="Avatar"/>
 
                         <p className="mt-2 text-gray-700 font-semibold">Your channel</p>
                         <p className="text-sm text-gray-500">Mr.Beast</p>
-                    </div>
+                    </div>*/}
 
 
                     <CategoryBlock data={mainPageAccountCategories} title=""/>
@@ -76,7 +99,7 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
-                    {/*<SettingsBlock
+                    {/*<SettingsBlockhttps://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo
                         data={[{icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},]}
                         title=""/>
                     <div className="px-3 my-3">

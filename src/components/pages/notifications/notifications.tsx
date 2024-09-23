@@ -9,6 +9,7 @@ import { useSpring, animated } from '@react-spring/web'
 import {Tooltip,  TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import { useUser } from '@clerk/nextjs';
 import { INotification } from '@/types/inotification.interface';
+import AsideHome from "@/components/pages/channel/aside/aside";
 
 
 
@@ -87,7 +88,7 @@ const Notifications = () => {
             <Tooltip>
                 <TooltipTrigger>
                     <animated.div onClick={handleOpenModal}>
-                        <IoMdNotifications className="text-2xl text-neutral-500 cursor-pointer" />
+                        <IoMdNotifications className="text-2xl text-neutral-500 cursor-pointer"/>
                     </animated.div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -100,9 +101,10 @@ const Notifications = () => {
                     <ul>
                         {notifications.map((notification: INotification) => (
                             <li key={notification.id}>{notification.message}
-                            <div style={modalStyles.date}>
-                                {notification.date.toLocaleDateString()}
-                                </div></li>
+                                <div style={modalStyles.date}>
+                                    {notification.date.toLocaleDateString()}
+                                </div>
+                            </li>
                         ))}
                     </ul>
                 ) : (
