@@ -10,11 +10,13 @@ import { CiLogin } from "react-icons/ci";
 import HeaderMenuButton from "@/components/pages/home/header/menu-button";
 import {usePathname, useRouter} from "next/navigation";
 import { VscAccount } from "react-icons/vsc";
-import { HiOutlineSwitchHorizontal } from "react-icons/hi";
-import { MdOutlineWbSunny } from "react-icons/md";
+import {MdOutlineFeedback, MdOutlineWbSunny} from "react-icons/md";
 import {useTranslation} from "next-i18next";
 import i18nConfig from "@/../i18nConfig";
 import {LanguagePicker} from "@/components/pages/home/header/language-picker";
+import {TbSettings} from "react-icons/tb";
+import {AccountSwitch} from "@/components/pages/home/header/account-switch";
+import {RxQuestionMarkCircled} from "react-icons/rx";
 
 const BurgerMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(true);
@@ -88,16 +90,14 @@ const BurgerMenu: React.FC = () => {
 
             {isOpen && (
                 <div
-                    className="absolute top-10 min-w-64 right-0 bg-white dark:bg-neutral-950 shadow-2xl rounded-lg p-4 flex flex-col">
+                    className="absolute top-10 min-w-64 right-0 bg-white dark:bg-neutral-950 shadow-custom-big rounded-lg p-4 flex flex-col">
                     {isLoaded && user ? (
                         <>
                             <UserDataInBurgerMenu user={user}/>
                             <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
                             <HeaderMenuButton icon={<VscAccount size={22}/>} text="Account"
                                               action={() => push("/account")}/>
-                            <HeaderMenuButton icon={<HiOutlineSwitchHorizontal size={23}/>} text="Switch account"
-                                              action={() => {
-                                              }}/>
+                            <AccountSwitch />
                             <HeaderMenuButton icon={<IoLogOutOutline size={23}/>} text="Logout" action={signOut}/>
                             <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
                         </>
@@ -115,7 +115,17 @@ const BurgerMenu: React.FC = () => {
                         action={() => themeChange(appearance === 'system' ? 'light' : appearance === 'light' ? 'dark' : 'system')}
                     />
 
-                    <LanguagePicker handleLanguageChange={handleChange} currentLanguage={currentLocale} />
+                    <LanguagePicker handleLanguageChange={handleChange} currentLanguage={currentLocale}/>
+
+                    <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
+
+                    <HeaderMenuButton icon={<TbSettings size={23}/>} text="Settings" action={() => {
+                    }}/>
+
+                    <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
+
+                    <HeaderMenuButton icon={<RxQuestionMarkCircled size={23} />} text="Help" action={() => {}} />
+                    <HeaderMenuButton icon={<MdOutlineFeedback size={23} />} text="Feedback" action={() => {}} />
 
                     <NotificationButtonMenu/>
                 </div>
