@@ -19,7 +19,7 @@ import {AccountSwitch} from "@/components/pages/home/header/account-switch";
 import {RxQuestionMarkCircled} from "react-icons/rx";
 
 const BurgerMenu: React.FC = () => {
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [theme, setTheme] = useState<string>();
     const [appearance, setAppearance] = useState<string>('system');
     const { user, isLoaded } = useUser();
@@ -95,6 +95,7 @@ const BurgerMenu: React.FC = () => {
                         <>
                             <UserDataInBurgerMenu user={user}/>
                             <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
+                            <NotificationButtonMenu/>
                             <HeaderMenuButton icon={<VscAccount size={22}/>} text="Account"
                                               action={() => push("/account")}/>
                             <AccountSwitch />
@@ -119,15 +120,12 @@ const BurgerMenu: React.FC = () => {
 
                     <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
 
-                    <HeaderMenuButton icon={<TbSettings size={23}/>} text="Settings" action={() => {
-                    }}/>
+                    <HeaderMenuButton icon={<TbSettings size={23}/>} text="Settings" action={() => push("/account")}/>
 
                     <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
 
                     <HeaderMenuButton icon={<RxQuestionMarkCircled size={23} />} text="Help" action={() => {}} />
                     <HeaderMenuButton icon={<MdOutlineFeedback size={23} />} text="Feedback" action={() => {}} />
-
-                    <NotificationButtonMenu/>
                 </div>
             )}
         </div>

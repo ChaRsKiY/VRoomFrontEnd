@@ -11,6 +11,7 @@ import initTranslations from "@/app/i18n";
 import "@/styles/clerk-edit.css"
 import {ReactNode} from "react";
 import {clerkLocalization} from "@/utils/clerk-localization-tool";
+import {Toaster} from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "VRoom",
@@ -41,6 +42,7 @@ async function RootLayout({ children, params: { locale } }: Readonly<IRootLayout
                     <div className="overflow-hidden">
                         {children}
                     </div>
+                    <Toaster />
                 </TranslationsProvider>
                 </body>
         </html>

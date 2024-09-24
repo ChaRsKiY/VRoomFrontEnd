@@ -25,20 +25,24 @@ export function AccountSwitch() {
 
     const endSession = async (session: SessionResource) => {
         await session.end()
-        const newAvailableSessions: SessionResource[] = client.sessions
-        await setActive({ session: newAvailableSessions[0].id })
+
+        if (session.id === currentSession.session?.id) {
+            const newAvailableSessions: SessionResource[] = client.sessions
+            await setActive({ session: newAvailableSessions[0].id })
+        }
     }
 
     const switchAccount = async (session: SessionResource) => {
         if (session.id === currentSession.session?.id) return;
         await setActive({ session: session.id })
+        window.location.reload()
     }
 
     return (
         <Sheet>
             <SheetTrigger asChild>
                 <button
-                    className="hover:bg-neutral-200 rounded-[0.5rem] flex items-center p-2 text-[1.075rem] space-x-3">
+                    className="hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-[0.5rem] flex items-center p-2 text-[1.075rem] space-x-3">
                     <HiOutlineSwitchHorizontal size={23}/>
                     <div>Switch account</div>
                 </button>
