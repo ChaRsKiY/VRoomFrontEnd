@@ -21,15 +21,23 @@ const YouChannelP = () => {
     }
 
     return (
-        <div className="pl-[22.5%] ml-2 max-lg:pl-[12%] max-sm:pl-0">
+        <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0">
             <ShortChannelBlock/>
-            <div>
-                <br/><h1 style={{'float': 'left'}}><strong>History</strong></h1><br/><br/><br/>
-                <div className="grid pr-[2%] grid-cols-3 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0"></div>
+            <div className="mt-8">
+                <h2 className="text-xl font-bold">История</h2>
+                <div className="flex justify-between items-center mt-4">
+                    <div className="bg-gray-200 w-72 h-40"></div>
+                    <button className="text-blue-600">Посмотреть все</button>
+                </div>
             </div>
-            <div>
-                <br/><h1 style={{'float': 'left'}}><strong>Play Lists</strong></h1><br/><br/><br/>
-                <div className="grid pr-[2%] grid-cols-3 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0"> </div>
+            <div className="mt-8">
+                <h2 className="text-xl font-bold">Плейлисты</h2>
+                <div className="flex justify-between items-center mt-4">
+                    <div className="bg-gray-200 w-72 h-40 flex items-center justify-center">
+                        <i className="fas fa-video text-4xl text-gray-400"></i>
+                    </div>
+                    <button className="text-blue-600">Посмотреть все</button>
+                </div>
             </div>
         </div>
     )
