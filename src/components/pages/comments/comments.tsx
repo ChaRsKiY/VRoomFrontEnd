@@ -15,10 +15,11 @@ import AnswersComments from './answerscomment';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { MdMoreVert } from 'react-icons/md'; 
 import RadioButtonList from '@/components/pages/comments/report';
+import EditComment from '@/components/pages/comments/editcomment';
 import { FaThumbtack } from 'react-icons/fa';
 import { MdPushPin } from 'react-icons/md';
 import { ISimpleUser } from '@/types/simpleuser.interface';
-//import {getUser} from "@/services/user.service";
+import { FaPen } from 'react-icons/fa';
 
 interface CommentsProps {
   comments: ICommentVideo[];
@@ -53,12 +54,17 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
     const [iAmUser, setUser] = useState<IUser | null>(null);
     const [videoOwner, setVideoOwner] = useState<ISimpleUser | null>(null);
     const [visibleInput, setVisibleInput] = useState<number | null>(null); 
+    const [visibleInput2, setVisibleInput2] = useState<number | null>(null); 
     const [isTextOverflowing, setIsTextOverflowing] = useState<boolean[]>([]);
     const textAreasRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
     const [display2, setDisplay2] = useState('none'); 
-    const [display1, setDisplay1] = useState('block'); 
+    const [display1, setDisplay1] = useState('block');  
+    const [display4, setDisplay4] = useState('none');  
     const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); // Индекс активного меню
 
+    const editComment = (index: number) => {
+      setVisibleInput2(visibleInput2 === index ? null : index);  
+    };
 
 const handleFocus = () => {
   setLineColor('black');  
@@ -175,6 +181,7 @@ const handleInputChange = (index: number, value: string) => {
   const toggleExpand = (index: number) => {
     setDisplay2('none');
     setDisplay1('block');
+    setDisplay4('none');
     setExpandedStates((prevState) =>     
       prevState.map((state, i) => (i === index ? !state : state)) // Переключаем состояние только для конкретного комментария
     );
@@ -193,16 +200,22 @@ const handleInputChange = (index: number, value: string) => {
     setReportMenuOpenIndex(null);
    };
 
+   const openEdit = () => {
+    setDisplay4('block');
+    setDisplay1('none');
+   };
+ 
+   const closeEdit = () => {
+     setDisplay1('block');
+     setDisplay4('none');
+     setReportMenuOpenIndex(null);
+    };
+
   useEffect(() => {    
     setExpandedStates(Array(comments.length).fill(false)); 
     findOwner(id); 
     },[comments,id]);
-
-   
-
-   
-      
-      
+ 
     useEffect(() => {
       // Проверяем, все ли текстовые области помещают текст
       const overflowStatuses = textAreasRefs.current.map((textarea) => {
@@ -214,10 +227,10 @@ const handleInputChange = (index: number, value: string) => {
       setIsTextOverflowing(overflowStatuses); // Обновляем состояние
     }, [comments]);
 
-
     const toggleReportMenu = (index: number, event: React.MouseEvent) => {
 
       setDisplay2('none');
+      setDisplay4('none');
       setDisplay1('block');
       if (reportMenuOpenIndex === index) {
         setReportMenuOpenIndex(null); // Закрываем, если уже открыто
@@ -299,7 +312,9 @@ const handleInputChange = (index: number, value: string) => {
                 )}
                  </div>
             </div>
+
             </div>
+
             <div className="flex items-center space-x-8" style={{paddingLeft:"55px"}}>
                     <div className="flex items-center space-x-2.5">
                         <SlLike onClick={() => like(comment.id, comment.userId )} size={15}/>
@@ -315,19 +330,17 @@ const handleInputChange = (index: number, value: string) => {
                     <span style={{fontSize:"14px"}}>Replay</span>               
                  </div>
               
-                 {/* <div className="flex items-center space-x-2">
-                  <FiFlag size={16} />
-                   <span style={{fontSize:"14px"}}>Report</span>
-                  </div> */}
-                   {videoOwner?.clerk_Id === user?.id && !comment.isPinned  &&(
+                 {videoOwner?.clerk_Id === user?.id && !comment.isPinned  &&(
                    <>
                    <button  onClick={() => toPin(comment.id)}>
                    <MdPushPin size={18} color="gray" title="Pin comment" />
-                   </button>
-                  <button style={{fontSize:'11px'}}   >
-                    Edit</button>
-                  </>
-                )}
+                   </button>   </>)}
+                   {comment.isEdited    &&(
+                   <>
+
+                  <div style={{fontSize:'11px', color:'brown'}} > Edited </div>
+                    </>)}
+              
              </div>
              
              {visibleInput === index && user &&(
@@ -363,11 +376,24 @@ const handleInputChange = (index: number, value: string) => {
               <div onClick={() => openReport()} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" 
                 style={{display:'flex', justifyContent:'center'}}>
                 <div>
-                <FiFlag size={16} /></div>
+                <FiFlag size={15} /></div>
                 <div>
-                <span style={{fontSize:'20px'}}>Report</span></div>
+                <span style={{fontSize:'18px'}}>Report</span></div>
               </div>
+
+              {comment.userId === user?.id   &&(
+                   <>
+              <div onClick={() => openEdit()} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" 
+                style={{display:'flex', justifyContent:'center'}}>
+                <div>
+                <FaPen size={15} color="blue" /></div>
+                <div>
+                <span style={{fontSize:'18px'}}>Edit comment</span></div>
+              </div>
+              </>)}
+
             </div>
+              
           
             <div
               className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
@@ -386,6 +412,26 @@ const handleInputChange = (index: number, value: string) => {
                 <RadioButtonList userName={comment.userName} onClose={closeReport}/>
          
             </div>
+            <div
+              className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
+              style={{
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                position: 'absolute',
+               marginTop:'-50px',
+               marginLeft:'-550px',
+               display:display4,
+               width: '100%',
+               minWidth:'550px',
+               borderRadius:'16px',
+               border:'2px solid gray',
+               
+              }}
+            >            
+                <EditComment comment={comment} onClose={closeEdit} />
+         
+            </div>
+            
             </div>
           )}
           

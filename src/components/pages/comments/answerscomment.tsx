@@ -145,6 +145,16 @@ useEffect(() => {
         )
       );
     }
+    if (messageData.type === 'update_answer') {
+      const upAnswer = messageData.payload;
+      setAnswers((prevAnswers) =>
+        prevAnswers.map((answer) =>
+          answer.id === upAnswer.id
+            ? { ...answer, text: upAnswer.text, isEdited: upAnswer.isEdited  } // Обновляем количество лайков
+            : answer
+        )
+      );
+    }
   };
   ws.onclose = () => {
     console.log('WebSocket соединение закрыто');

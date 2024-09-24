@@ -170,8 +170,17 @@ const CommentsBlock: React.FC = () => {
                     getAnswers(comment.id);
                     console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически
                 })
-
             }
+            if (messageData.type === 'update_comment') {
+                const upComment = messageData.payload;
+                setComments((prevComments) =>
+                  prevComments.map((com) =>
+                    com.id === upComment.id
+                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.text } // Обновляем количество лайков
+                      : com
+                  )
+                );
+              }
         };
         ws.onclose = () => {
             console.log('WebSocket соединение закрыто');
