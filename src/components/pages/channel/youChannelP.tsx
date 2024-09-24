@@ -8,8 +8,7 @@ import ShortChannelBlock from "@/components/pages/channel/aside/shortChannelBloc
 import Link from "next/link";
 
 const YouChannelP = () => {
-    const { isSignedIn, user, isLoaded } = useUser();
-    const { t }: { t: ITranslationFunction } = useTranslation();
+    const { isSignedIn } = useUser();
 
     if (!isSignedIn){
         return (<div className="flex-grow flex flex-col justify-center items-center text-center p-10 pt-30">

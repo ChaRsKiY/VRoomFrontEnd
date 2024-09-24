@@ -3,7 +3,6 @@ import "../../styles/globals.css";
 import {
     ClerkProvider,
 } from '@clerk/nextjs'
-import HeaderHome from "@/components/pages/home/header/header";
 import i18nConfig from '@/../i18nConfig';
 import { dir } from 'i18next';
 import TranslationsProvider from "@/components/providers/translations.provider";
@@ -30,7 +29,7 @@ interface IRootLayoutProps {
 }
 
 async function RootLayout({ children, params: { locale } }: Readonly<IRootLayoutProps>) {
-    const { t, resources } = await initTranslations(locale, i18nNamespaces);
+    const { resources } = await initTranslations(locale, i18nNamespaces);
 
   return (
       <ClerkProvider localization={clerkLocalization(locale)}>
