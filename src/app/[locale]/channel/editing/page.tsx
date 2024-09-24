@@ -1,13 +1,21 @@
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
+import HeaderHome from "@/components/pages/home/header/header";
 
-const channelPage = async ({params: {locale}}) => {
+interface IChannelEditProps {
+    params: { locale: string; }
+}
+
+const channelPage = async ({params: {locale}}: IChannelEditProps) => {
     const {t} = await initTranslations(locale, ['common', 'categories']);
 
     return (
 
         <>
+            <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">
+                <HeaderHome t={t}/>
+            </div>
             <div className="flex">
                 <AsideHome t={t}/>
             </div>
@@ -21,7 +29,8 @@ const channelPage = async ({params: {locale}}) => {
                             <p style={{textAlign: 'center', textWrap: 'balance', width: '340px'}}>Here you will see the
                                 metrics of the video that you upload last.
                                 To add a video, click the button below.</p><br/>
-                            <button style={{ display:'block',
+                            <button style={{
+                                display: 'block',
                                 borderRadius: '20px',
                                 background: 'black',
                                 color: 'white',
@@ -35,7 +44,7 @@ const channelPage = async ({params: {locale}}) => {
                             <h5 className="text-[1.0rem]">Subscriptions</h5>
                             <h2 className="text-[1.3rem]"><strong>0</strong></h2>
                             <br/><br/><h5 className="text-[1.0rem]"><strong>Summary data</strong></h5>
-                            <h5 className="text-[1.0rem]">Last 28 days</h5><br />
+                            <h5 className="text-[1.0rem]">Last 28 days</h5><br/>
                             <div>
                                 <h5 className="text-[1.0rem]" style={{width: 'max-content', float: 'left'}}>Views</h5>
                                 <h5 className="text-[1.0rem]" style={{width: 'max-content', float: 'right'}}>0 - </h5>

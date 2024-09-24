@@ -3,12 +3,20 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import Image from "next/image";
 import Link from "next/link";
+import HeaderHome from "@/components/pages/home/header/header";
 
-const channelPage = async ({params: {locale}}) => {
+interface IHomeTabProps {
+    params: { locale: string; }
+}
+
+const channelPage = async ({params: {locale}}:IHomeTabProps) => {
     const {t} = await initTranslations(locale, ['common', 'categories'])
     return (
 
         <>
+            <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">
+                <HeaderHome t={t}/>
+            </div>
             <div className="w-60 bg-white border-r border-gray-200 h-screen">{/*flex pt-20 overflow-hidden*/}
                 <AsideHome t={t}/>
             </div>
@@ -20,8 +28,10 @@ const channelPage = async ({params: {locale}}) => {
                         <h1 className="text-2xl font-bold">Channel settings</h1>
                         <br/>
                         <div className="flex mt-2">
-                            <Link target={'_self'} href={"/channel/editing/channel_setup/profile"} className="mr-4 text-gray-800 pb-2">Profile</Link>
-                            <a href="#" className="text-gray-500 border-b-2 border-gray-800 hover:text-gray-800 pb-2">Tab "main"</a>
+                            <Link target={'_self'} href={"/channel/editing/channel_setup/profile"}
+                                  className="mr-4 text-gray-800 pb-2">Profile</Link>
+                            <a href="#" className="text-gray-500 border-b-2 border-gray-800 hover:text-gray-800 pb-2">Tab
+                                "main"</a>
                         </div>
                     </div>
 
@@ -39,7 +49,8 @@ const channelPage = async ({params: {locale}}) => {
                                 <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
                                     <div>
                                         <h4 className="font-semibold">For you</h4>
-                                        <p className="text-sm text-gray-600">In this section, viewers will see recommendations
+                                        <p className="text-sm text-gray-600">In this section, viewers will see
+                                            recommendations
                                             based on their
                                             interests.</p>
                                         <a href="#" className="text-sm text-blue-600 hover:underline">More Settings</a>
@@ -88,7 +99,6 @@ const channelPage = async ({params: {locale}}) => {
                             </div>
                         </section>
                     </div>
-
 
 
                 </div>

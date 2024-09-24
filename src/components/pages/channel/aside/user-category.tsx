@@ -30,8 +30,8 @@ const UserCategoryBlock = () => {
      const {t}: { t: ITranslationFunction } = useTranslation();//
 
     return (
-        <div className="p-4 text-center">
-            <Image className="w-100 h-100 mx-auto rounded-full" width={100} height={100}
+        <div className="pt-2 pb-2 pr-2 ml-[-6%] text-center">
+            <Image className="w-95 h-95 mx-auto rounded-full" width={100} height={100}
                    src={avatar} alt="Avatar"/>
 
             <p className="mt-2 text-gray-700 font-semibold">Your channel</p>
