@@ -4,6 +4,7 @@ import React, {useEffect, useState} from 'react'
 import {IoMdNotifications} from "react-icons/io";
 import {useUser} from "@clerk/nextjs";
 import {INotification} from "@/types/inotification.interface";
+import {IoNotificationsOutline} from "react-icons/io5";
 
 const NotificationButtonMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -73,15 +74,15 @@ const NotificationButtonMenu: React.FC = () => {
             onClick={handleCloseOpen}
             className="hidden max-sm:flex relative items-center space-x-2 rounded-[0.5rem] hover:bg-neutral-200 cursor-pointer p-2 pr-3">
 
-            <div className="relative self-center flex">
-                <IoMdNotifications
-                                   className="text-2xl text-neutral-500 cursor-pointer self-center"/>
+            <div className="min-sm:relative self-center flex">
+                <IoNotificationsOutline
+                                   className="text-2xl cursor-pointer self-center"/>
                 {unreadNotifications >= 1 && <div
                     className="absolute text-[0.74rem] bg-green rounded-full p-0.5 top-[-1px] right-[-3px] h-3.5 w-3.5 flex items-center justify-center">
                     <div>{unreadNotifications}</div>
                 </div>}
                 {isOpen && <div
-                    className="absolute top-10 right-0 w-80 bg-white shadow-2xl rounded-xl z-50 notify-dropdown overflow-hidden">
+                    className="absolute top-12 right-0 w-80 bg-white dark:bg-neutral-800 shadow-2xl rounded-xl z-50 notify-dropdown overflow-hidden">
                     {notifications.length === 0 ? (
                         <div className="p-5">
                             <div className="text-[1.05rem] font-[500] mb-2">Notifications</div>
