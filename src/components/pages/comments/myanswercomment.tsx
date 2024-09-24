@@ -4,6 +4,8 @@ import  { useUser }  from '@clerk/nextjs';
 import React, { useRef } from 'react';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { IUser } from '@/types/user.interface';
+import { buttonSubmitStyles } from '@/components/styled/buttonstyles/buttonSubmitStyles';
+import {buttonCancelStyles} from'@/components/styled/buttonstyles/buttonCancelStyles';
 
 interface AnsCommentProps {
   commentId: number; 
@@ -182,45 +184,6 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
   );
 };
 
-const buttonCancelStyles: { [key: string]: React.CSSProperties } = {
-  base: {
-    backgroundColor: 'white',   
-    border: 'none',           
-    color: 'black',            
-    padding: '2px 20px',
-    margin: '5px',         
-    borderRadius: '50px',      
-    cursor: 'pointer',          
-    fontSize: '16px', 
-    fontWeight:'bold' ,         
-    transition: 'background-color 0.3s ease',  
-  },
-  hover: {
-    backgroundColor: 'lightgray',  
-  },
-};
-const buttonSubmitStyles: { [key: string]: React.CSSProperties } = {
-  base: {
-    backgroundColor: 'RoyalBlue',  
-    border: 'none',             
-    color: 'white',           
-    padding: '2px 20px',
-    margin: '5px',        
-    borderRadius: '50px',                
-    fontSize: '16px', 
-    fontWeight:'bold'         
-      
-  },
-  disab:{
-    backgroundColor: 'lightgray',
-    border: 'none',            
-    color: 'white',            
-    padding: '2px 20px',  
-    margin: '5px',    
-    borderRadius: '50px',              
-    fontSize: '16px', 
-    fontWeight:'bold' 
-  }
-};
+
 
 export default MyAnswerComment;

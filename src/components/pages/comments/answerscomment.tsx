@@ -9,6 +9,8 @@ import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { HiOutlineChevronUp, HiOutlineChevronDown } from 'react-icons/hi';
 import { MdMoreVert } from 'react-icons/md'; 
 import RadioButtonList from '@/components/pages/comments/report';
+import EditAnswer from '@/components/pages/comments/editanswer';
+import { FaPen } from 'react-icons/fa';
 
 interface CommentsProps {
   commentId: number;
@@ -43,6 +45,7 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
     const [display1, setDisplay1] = useState('block'); 
       const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); 
       const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(answers.length).fill(false));
+      const [display4, setDisplay4] = useState('none');  
 
     const handleReplayClick = (index: number) => {
       setVisibleInput(visibleInput === index ? null : index); // Переключаем видимость конкретного поля
@@ -145,6 +148,16 @@ useEffect(() => {
         )
       );
     }
+    if (messageData.type === 'update_answer') {
+      const upAnswer = messageData.payload;
+      setAnswers((prevAnswers) =>
+        prevAnswers.map((answer) =>
+          answer.id === upAnswer.id
+            ? { ...answer, text: upAnswer.text, isEdited: upAnswer.isEdited  } // Обновляем количество лайков
+            : answer
+        )
+      );
+    }
   };
   ws.onclose = () => {
     console.log('WebSocket соединение закрыто');
@@ -171,13 +184,24 @@ const openReport = () => {
    setReportMenuOpenIndex(null);
   };
 
+  const openEdit = () => {
+    setDisplay4('block');
+    setDisplay1('none');
+   };
+ 
+   const closeEdit = () => {
+     setDisplay1('block');
+     setDisplay4('none');
+     setReportMenuOpenIndex(null);
+    };
+
  useEffect(() => {    
    setExpandedStates(Array(answers.length).fill(false)); 
    },[answers]);
 
    const toggleReportMenu = (index: number, event: React.MouseEvent) => {
-    alert(index);
     setDisplay3('none');
+    setDisplay4('none');
     setDisplay1('block');
     if (reportMenuOpenIndex === index) {
       setReportMenuOpenIndex(null); // Закрываем, если уже открыто
@@ -189,6 +213,7 @@ const openReport = () => {
   const toggleExpand = (index: number) => {
     setDisplay3('none');
     setDisplay1('block');
+    setDisplay4('none');
     setExpandedStates((prevState) =>     
       prevState.map((state, i) => (i === index ? !state : state)) // Переключаем состояние только для конкретного комментария
     );
@@ -241,10 +266,11 @@ const openReport = () => {
              <small>{getTimeAgo(comment.answerDate)}</small>
 </div>
              <div   key={comment.id} className="relative"  style={{marginRight:'-65px'}}> 
-<button onClick={(event) => toggleReportMenu(index, event)}  
+
+     <button onClick={(event) => toggleReportMenu(index, event)}  
       className="flex pl-10 pt-2 space-x-2" style={{ position: 'relative', zIndex: 10 }}> 
-  <MdMoreVert size={24} color="black"  />
-</button>
+            <MdMoreVert size={24} color="black"  />
+     </button>
 
    {reportMenuOpenIndex === index && (
 <div>
@@ -264,7 +290,39 @@ style={{display:'flex', justifyContent:'center'}}>
 <div>
 <span style={{fontSize:'20px'}}>Report</span></div>
 </div>
+{comment.userId === user?.id   &&(
+                   <>
+              <div onClick={() => openEdit()} className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" 
+                style={{display:'flex', justifyContent:'center'}}>
+                <div>
+                <FaPen size={15} color="blue" /></div>
+                <div>
+                <span style={{fontSize:'18px'}}>Edit answer</span></div>
+              </div>
+              </>)}
 </div>
+
+           
+
+              <div
+              className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
+              style={{
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                position: 'absolute',
+               marginTop:'-50px',
+               marginLeft:'-550px',
+               display:display4,
+               width: '100%',
+               minWidth:'550px',
+               borderRadius:'16px',
+               border:'2px solid gray',
+               
+              }}
+            >            
+                <EditAnswer answer={comment} onClose={closeEdit} />
+         
+            </div>
 
 <div
 className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
@@ -283,6 +341,7 @@ borderRadius:'20px'
 <RadioButtonList userName={comment.userName} onClose={closeReport}/>
 
 </div>
+
 </div>
 
 
@@ -323,12 +382,11 @@ borderRadius:'20px'
                         <div style={{fontSize:"14px"}}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
                     </div>
               
-                   {comment.userId === user?.id && (
+                    {comment.isEdited    &&(
                    <>
-                  <button style={{fontSize:'11px'}}>
-                    Edit</button>
-                  </>
-                )}
+
+                  <div style={{fontSize:'11px', color:'brown'}} > Edited </div>
+                    </>)}
              </div>
              <br />
 
