@@ -12,7 +12,7 @@ const YouChannelP = () => {
     const { t }: { t: ITranslationFunction } = useTranslation();
 
     if (!isSignedIn){
-        return (<div className="flex-grow flex flex-col justify-center items-center text-center p-10">
+        return (<div className="flex-grow flex flex-col justify-center items-center text-center p-10 pt-30">
             <i className="fas fa-play-circle text-7xl text-gray-400 mb-6"></i>
             <h1 className="text-2xl font-semibold">Войдите в аккаунт</h1>
             <p className="text-gray-500 mt-2">Здесь вы увидите сохраненные видео и те, которые вам понравились.</p>
@@ -21,7 +21,7 @@ const YouChannelP = () => {
     }
 
     return (
-        <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0">
+        <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0 pt-20">
             <ShortChannelBlock/>
             <div className="mt-8">
                 <h2 className="text-xl font-bold">История</h2>

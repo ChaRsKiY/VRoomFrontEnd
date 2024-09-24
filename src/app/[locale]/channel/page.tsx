@@ -21,7 +21,7 @@ const channelPage = async ({params: {locale}}: IChannelProps) => {
                 <div className="flex pt-20 overflow-hidden">
                     <AsideHome t={t}/>
                 </div>
-                    <YouChannelP/>
+            <YouChannelP/>
         </>
     );
 }

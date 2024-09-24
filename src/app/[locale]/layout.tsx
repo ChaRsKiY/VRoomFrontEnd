@@ -39,7 +39,7 @@ async function RootLayout({ children, params: { locale } }: Readonly<IRootLayout
                 <TranslationsProvider namespaces={i18nNamespaces}
                                       locale={locale}
                                       resources={resources}>
-                    <div className="flex pt-20 overflow-hidden">
+                    <div className="flex overflow-hidden">
                         {children}
                     </div>
                     <Toaster />
