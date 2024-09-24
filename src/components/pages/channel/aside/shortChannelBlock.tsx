@@ -25,18 +25,21 @@ const ShortChannelBlock = () => {
             setAvatar(data.channelBanner);
             setName(data.channelName);
         } catch (error) {
-            console.error('Ошибка при загрузке уведомлений:', error);
+            console.error('Ошибка при загрузке данных:', error);
         }
     };
     const {t}: { t: ITranslationFunction } = useTranslation();//
 
     return (
-        <div className=" grid-cols-3 flex max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-            <Image className="flex-1" style={{borderRadius: '50%'}} width={110} height={110} alt="Avatar"
+        <div className="flex items-center space-x-4">
+
+            <Image className="bg-purple-500 text-white rounded-full w-24 h-24 flex items-center justify-center text-4xl"
+                   width={70} height={70} alt="Avatar"
                    src={avatar}/>
-            <div className="pl-5">
-                <h1><strong>{name}</strong></h1>
-                <Link target={'_blank'} href={"/channel/editing"} className="space-y-2.5">Customize channel
+            <div>
+                <h1 className="text-3xl font-bold">{name}</h1>
+                <Link target={'_blank'} href={"/channel/editing"} className="block pl-0 pr-4 py-2 rounded-full">Customize
+                    channel
                     view</Link>
             </div>
         </div>

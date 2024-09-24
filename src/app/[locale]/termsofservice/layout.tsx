@@ -1,5 +1,5 @@
 // import {ReactNode} from "react";
-
+//
 // export default function termsOfServicePageLayout({ children }: { children: ReactNode }) {
 //     return (
 //       <html>
