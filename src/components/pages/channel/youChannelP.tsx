@@ -2,8 +2,6 @@
 
 import React from 'react'
 import {useUser} from "@clerk/clerk-react";
-import {ITranslationFunction} from "@/types/translation.interface";
-import {useTranslation} from "next-i18next";
 import ShortChannelBlock from "@/components/pages/channel/aside/shortChannelBlock";
 import Link from "next/link";
 
