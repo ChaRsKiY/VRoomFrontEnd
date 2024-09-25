@@ -7,8 +7,8 @@ import { FaSmile } from 'react-icons/fa';
 import React, { useRef } from 'react';
 import {ICommentVideo} from '@/types/commentvideo.interface'
 import { IUser } from '@/types/user.interface';
-import { buttonSubmitStyles } from '@/components/styled/buttonstyles/buttonSubmitStyles';
-import {buttonCancelStyles} from'@/components/styled/buttonstyles/buttonCancelStyles';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface MyCommentProps {
   videoId: number; 

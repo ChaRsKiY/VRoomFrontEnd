@@ -4,7 +4,11 @@ import React  from 'react'
 import Image from "next/image";
 import { FaImage, FaVideo } from 'react-icons/fa';
 import { useEffect, useState, useRef } from 'react';
-import {buttonCancelStyles} from'@/components/styled/buttonstyles/buttonCancelStyles';
+import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
+import {IPost} from "@/types/post.interface"
 
 
 interface ICreatePostProps {
@@ -12,6 +16,8 @@ interface ICreatePostProps {
 }
 
 const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
+    const idTest=1;
+    const { t }: { t: ITranslationFunction } = useTranslation()
     
     const [lineColor, setLineColor] = useState('lightgray');
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -52,7 +58,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const handleSubmit = async () => {
       const formData = new FormData();
       formData.append('text', text);
-      if (image) formData.append('image', image);
+      formData.append('id', idTest+'');
+      if (image) formData.append('img', image);
       if (video) formData.append('video', video);
   
       const res = await fetch('https://localhost:7154/api/Post/add', {
@@ -62,8 +69,12 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
   
       if (res.ok) {
         alert('Данные успешно сохранены');
+        handleCancelImg ();
+        handleCancelVideo ();
+        setText('');
       } else {
         alert('Ошибка при сохранении данных');
+        alert(res.statusText);
       }
     };
 
@@ -119,16 +130,17 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     setDisplay1('none'); 
     setDisplay3('block'); 
       };
+    
 
     return (
      
         <div className="flex w-full  mt-20" style={{justifyItems:'center'}}>
             <div className=" w-3/4 px-8"  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px'}}>
             <div style={{display:'flex', justifyContent:'space-around'}}>
-            <h1 style={{textAlign:'center'}}>Enter text and/or add media</h1>
+            <small style={{textAlign:'center'}}>Enter text or/and add media</small>
             <button onClick={handleSubmit} onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
-                 style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}>
+                 style={isHovered ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}>
                       Publish </button>
             </div>
        <textarea
@@ -151,12 +163,22 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       />
           <div className='flex' style={{justifyContent:'space-around'}}>
           <div onClick={addImage} style={{display: display2} } >
-          <FaImage size={40} color="blue" /> </div>
+          <TooltipProvider>
+                <Tooltip >
+                <TooltipTrigger className="max-sm:hidden">
+                <FaImage size={40} color="#00b4ff"  style={{ opacity: 0.9 }}/>
+                </TooltipTrigger>
+                    <TooltipContent>
+                        <p>add image</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+           </div>
             <div style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',margin:'10px', display}}>
             <label>Add image:</label>
           
                         <Image src={imagePreview} alt="Banner Image" width={200} height={150}
-                              className="w-35 h-25 bg-gray-200 mr-6 mt-2"/>
+                              className="w-35 h-25 bg-gray-200 mr-6 mt-2" />
                         <div>
                             <input type="file"  ref={fileImageRef}
                                 className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
@@ -170,7 +192,18 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                         </div>
                     </div>
                     <div onClick={addVideo} style={{display: display3} } >
-                    <FaVideo size={40} color="green" /></div>
+                   
+                    <TooltipProvider>
+                <Tooltip >
+                <TooltipTrigger className="max-sm:hidden">
+                     <FaVideo size={40} color="green" style={{ opacity: 0.5 }} />
+                </TooltipTrigger>
+                    <TooltipContent>
+                        <p>add video</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+                    </div>
       <div  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',display: display1}}>
         <label>Add video:</label>
             
@@ -180,9 +213,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
             <source src={videoPreview} type="video/mp4" />
             Ваш браузер не поддерживает просмотр видео.
           </video>
-          <button onClick={handleCancelVideo}   style={isHovered3 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
-      onMouseEnter={() => setIsHovered3(true)}
-      onMouseLeave={() => setIsHovered3(false)}>Cancel</button>
+        
         </div>
       )}
 
@@ -192,6 +223,10 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" 
                                    onChange={handleVideoChange}
                             />
+
+           <button onClick={handleCancelVideo}   style={isHovered3 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+      onMouseEnter={() => setIsHovered3(true)}
+      onMouseLeave={() => setIsHovered3(false)}>Cancel</button>
       </div>
             </div>
 

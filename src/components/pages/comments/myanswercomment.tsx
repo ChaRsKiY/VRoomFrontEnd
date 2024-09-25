@@ -4,8 +4,8 @@ import  { useUser }  from '@clerk/nextjs';
 import React, { useRef } from 'react';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 import { IUser } from '@/types/user.interface';
-import { buttonSubmitStyles } from '@/components/styled/buttonstyles/buttonSubmitStyles';
-import {buttonCancelStyles} from'@/components/styled/buttonstyles/buttonCancelStyles';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface AnsCommentProps {
   commentId: number; 
