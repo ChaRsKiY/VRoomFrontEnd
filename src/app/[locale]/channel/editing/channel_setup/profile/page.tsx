@@ -22,7 +22,7 @@ const channelPage = async ({params: {locale}}:IProfileTabProps) => {
             <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="flex-auto overflow-hidden pl-[6.75%] max-sm:pl-0">
+            <div className="flex-auto overflow-hidden pl-[2.75%] max-sm:pl-0">
                 <h1 className="text-2xl font-bold pl-3">Channel settings<br/></h1>
 
                 <div className="flex-1 pt-0 pb-6 pl-6 pr-6">

@@ -26,7 +26,7 @@ const channelPage = async ({params: {locale}}: IChannelEditProps) => {
                 </h1><br/><br/><br/>
                     <div className="grid pr-[-3%] grid-cols-2 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
                         <div>
-                            <p style={{textAlign: 'center', textWrap: 'balance', width: '340px'}}>Here you will see the
+                            <p style={{textAlign: 'center', wordWrap: 'normal', width: '340px'}}>Here you will see the
                                 metrics of the video that you upload last.
                                 To add a video, click the button below.</p><br/>
                             <button style={{
@@ -39,7 +39,7 @@ const channelPage = async ({params: {locale}}: IChannelEditProps) => {
                             }}>Add video
                             </button>
                         </div>
-                        <div>
+                        <div className="ml-16">
                             <h1 className="text-[1.3rem]"><strong>Channel analytics</strong></h1>
                             <h5 className="text-[1.0rem]">Subscriptions</h5>
                             <h2 className="text-[1.3rem]"><strong>0</strong></h2>

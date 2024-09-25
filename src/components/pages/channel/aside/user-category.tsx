@@ -27,15 +27,17 @@ const UserCategoryBlock = () => {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
     };
-     const {t}: { t: ITranslationFunction } = useTranslation();//
+    const {t}: { t: ITranslationFunction } = useTranslation();//
 
     return (
-        <div className="pt-2 pb-2 pr-2 ml-[-6%] text-center">
-            <Image className="w-95 h-95 mx-auto rounded-full" width={100} height={100}
+        <div className="flex p-[0.625rem] items-center gap-[0.625rem] self-stretch rounded-[0.625rem]">
+            <Image className="w-[2.5rem] h-[2.5rem] rounded-[2.5rem] " width={100} height={100}
                    src={avatar} alt="Avatar"/>
 
-            <p className="mt-2 text-gray-700 font-semibold">Your channel</p>
-            <p className="text-sm text-gray-500">{name}</p>
+            <div className="flex flex-col justify-center items-start gap-[0.3125rem] flex-[1_0_0]">
+                <p className="-webkit-box   self-stretch overflow-hidden text-[#000] text-ellipsis font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">Your channel</p>
+                <p className="-webkit-box   self-stretch overflow-hidden text-[#000] text-ellipsis font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">{name}</p>
+            </div>
         </div>
     )
 }
