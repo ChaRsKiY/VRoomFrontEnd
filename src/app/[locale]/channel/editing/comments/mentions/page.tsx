@@ -18,7 +18,7 @@ const channelPage = async ({params: {locale}}:IMentionsTabProps) => {
             <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="flex-auto overflow-hidden">
+            <div className="flex-auto overflow-hidden pt-20">
                 <div className="mb-6"><br/>
                     <h1 className="text-2xl font-bold">Comments and mentions</h1>
                     <br/>

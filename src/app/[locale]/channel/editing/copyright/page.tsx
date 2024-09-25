@@ -19,7 +19,7 @@ const channelPage = async ({params: {locale}}:ICopyrightProps) => {
                 <AsideHome t={t}/>
             </div>
 
-            <div className="flex-auto overflow-hidden">
+            <div className="flex-auto overflow-hidden pt-20">
 
                 <div className="flex-1 p-6">
                     <h1 className="text-2xl font-semibold mb-6">Channel copyright</h1>

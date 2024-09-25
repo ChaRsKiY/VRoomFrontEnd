@@ -19,7 +19,7 @@ const Home = async ({ params: { locale } }: IHomeProps) => {
           <div className="flex pt-20 overflow-hidden">
               <AsideHome t={t}/>
           </div>
-          <main className="pl-[20%] max-lg:pl-[12%] max-sm:pl-0">
+          <main className="pl-[20%] max-lg:pl-[12%] max-sm:pl-0 pt-20">
               <UnlimitedScrollBlock data={data}/>
           </main>
       </>

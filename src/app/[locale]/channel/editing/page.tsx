@@ -19,7 +19,7 @@ const channelPage = async ({params: {locale}}: IChannelEditProps) => {
             <div className="flex">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0">
+            <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0 pt-20">
 
                 <div>
                     <br/><h1 style={{'float': 'left'}} className="text-[1.4rem]"><strong>Channel control panel</strong>
