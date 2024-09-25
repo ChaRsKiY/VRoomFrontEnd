@@ -8,7 +8,8 @@ import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
-import {IPost} from "@/types/post.interface"
+import {IPost} from "@/types/post.interface";
+import PostList from "@/components/pages/posts/posts";
 
 
 interface ICreatePostProps {
@@ -27,7 +28,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isHovered2, setIsHovered2] = useState(false);
     const [isHovered3, setIsHovered3] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string>('https://placehold.co/150x100.svg');
+    const [imagePreview, setImagePreview] = useState<string>('');
     const fileImageRef = useRef<HTMLInputElement | null>(null);
     const [videoPreview, setVideoPreview] = useState<string | null>(null); // Состояние для ссылки на видео
     const fileVideoRef = useRef<HTMLInputElement | null>(null);
@@ -114,7 +115,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
       const handleCancelImg = () => {
         setImage(null);
-        setImagePreview('https://placehold.co/250x150.svg');
+        setImagePreview('');
         if (fileImageRef.current) {
           fileImageRef.current.value = ''; // Очищаем выбранный файл
         }
@@ -134,7 +135,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
     return (
      
-        <div className="flex w-full  mt-20" style={{justifyItems:'center'}}>
+        <div className=" w-full  mt-20" style={{justifyItems:'center',marginBottom:'20px'}}>
+          <div>
             <div className=" w-3/4 px-8"  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px'}}>
             <div style={{display:'flex', justifyContent:'space-around'}}>
             <small style={{textAlign:'center'}}>Enter text or/and add media</small>
@@ -176,9 +178,9 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
            </div>
             <div style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',margin:'10px', display}}>
             <label>Add image:</label>
-          
+            {imagePreview!=''&&( 
                         <Image src={imagePreview} alt="Banner Image" width={200} height={150}
-                              className="w-35 h-25 bg-gray-200 mr-6 mt-2" />
+                              className="w-35 h-25 bg-gray-200 mr-6 mt-2" /> )}
                         <div>
                             <input type="file"  ref={fileImageRef}
                                 className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
@@ -232,7 +234,10 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
         </div>
         </div>
-        
+
+           <PostList channelId={1}/>
+
+        </div>
     )
 }
 
