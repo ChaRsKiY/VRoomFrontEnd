@@ -18,7 +18,7 @@ const channelPage = async ({params: {locale}}:IContentProps) => {
             <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="flex-auto overflow-hidden">
+            <div className="pl-[0%] max-lg:pl-[12%] max-sm:pl-0 pt-20">
 
                 <div className="flex-1 p-6">
                     <h1 className="text-2xl font-semibold mb-6">Content on the channel</h1>

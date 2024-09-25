@@ -18,7 +18,7 @@ const channelPage = async ({params: {locale}}:IMusicLibraryProps) => {
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[20.5%] max-lg:pl-[11%] max-sm:pl-0">
+            <div className="pl-[20.5%] max-lg:pl-[11%] max-sm:pl-0 pt-20">
 
                 <div>
                     <br/><h1 style={{'float': 'left'}} className="text-[1.4rem]"><strong>Music</strong>

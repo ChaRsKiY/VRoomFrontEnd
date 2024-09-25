@@ -17,16 +17,15 @@ const channelPage = async ({params: {locale}}:IHomeTabProps) => {
             <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">
                 <HeaderHome t={t}/>
             </div>
-            <div className="w-60 bg-white border-r border-gray-200 h-screen">{/*flex pt-20 overflow-hidden*/}
+            <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="flex-auto overflow-hidden pl-[2.5%] max-sm:pl-0">
-                {/*pl-[22.5%] max-lg:pl-[12%]*/}
-                <div className="flex-1 pt-0 pb-6 pr-6">
+            <div className="flex-auto overflow-hidden pl-[2.75%] max-sm:pl-0 pt-20">
+                <h1 className="text-2xl font-bold pl-3">Channel settings</h1>
+                <div className="flex-1  pt-0 pb-6 pl-6 pr-6">
 
                     <div className="mb-6"><br/>
-                        <h1 className="text-2xl font-bold">Channel settings</h1>
-                        <br/>
+
                         <div className="flex mt-2">
                             <Link target={'_self'} href={"/channel/editing/channel_setup/profile"}
                                   className="mr-4 text-gray-800 pb-2">Profile</Link>
