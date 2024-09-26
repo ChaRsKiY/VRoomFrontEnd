@@ -144,7 +144,7 @@ const handleInputChange = (index: number, value: string) => {
     }}
   };
   const findOwner = async (id: number) => {
-    if(user){ 
+    
     try {     
       const response = await fetch('https://localhost:7154/api/User/getbypostid/'+id , {
         method: 'GET',
@@ -162,7 +162,7 @@ const handleInputChange = (index: number, value: string) => {
     
     } catch (error) {
       console.error('Ошибка при подключении к серверу:', error);
-    }}
+    }
   }; 
   
   const toggleExpand = (index: number) => {

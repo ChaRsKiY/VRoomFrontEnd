@@ -1,4 +1,4 @@
-
+'use client'
 import { useEffect, useState, useRef } from 'react';
 import {SlDislike, SlLike} from "react-icons/sl";
 import  { useUser }  from '@clerk/nextjs';
@@ -67,7 +67,7 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
 
   const getUser = async () => {
     try {
-        if(user){
+        
             const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfobychannelid/' + channelId, {
                 method: 'GET',
             });
@@ -78,7 +78,7 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
             } else {
                 console.error('Ошибка при получении пользователя:', response.statusText);
             }
-        }
+        
     } catch (error) {
         console.error('Ошибка при подключении к серверу:', error);
     }

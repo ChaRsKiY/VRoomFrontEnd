@@ -10,6 +10,8 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import {IPost} from "@/types/post.interface";
 import PostList from "@/components/pages/posts/posts";
+import {IUser} from "@/types/user.interface"
+import { useUser } from '@clerk/nextjs';
 
 
 interface ICreatePostProps {
@@ -17,7 +19,7 @@ interface ICreatePostProps {
 }
 
 const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
-    const idTest=1;
+    // const idTest=1;
     const { t }: { t: ITranslationFunction } = useTranslation()
     
     const [lineColor, setLineColor] = useState('lightgray');
@@ -36,7 +38,27 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const [display2, setDisplay2] = useState('block');
     const [display1, setDisplay1] = useState('none');
     const [display3, setDisplay3] = useState('block');
+    const [postOwner, setPostOwner] = useState<IUser | null>(null);
+    const {user}=useUser();
+
+    const findOwner = async (id: number) => {
+      try {
+          
+              const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfobychannelid/' + id, {
+                  method: 'GET',
+              });
   
+              if (response.ok) {
+                  const data: IUser = await response.json();
+                  setPostOwner(data);
+              } else {
+                  console.error('Ошибка при получении пользователя:', response.statusText);
+              }
+          
+      } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+      }
+  };
   
   
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,7 +81,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const handleSubmit = async () => {
       const formData = new FormData();
       formData.append('text', text);
-      formData.append('id', idTest+'');
+      formData.append('id', id+'');
       if (image) formData.append('img', image);
       if (video) formData.append('video', video);
   
@@ -104,6 +126,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
       useEffect(() => {    
           setLineColor('lightgray');
+          findOwner(id);
       },[id]);
 
       useEffect(() => {
@@ -136,8 +159,9 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     return (
      
         <div className=" w-full  mt-20" style={{justifyItems:'center',marginBottom:'20px'}}>
-          <div>
-            
+
+          {user && user?.id === postOwner?.clerk_Id && (  
+          <div>           
             <div className=" w-3/4 px-8"  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px'}}>
             <div style={{display:'flex', justifyContent:'space-around'}}>
             <small style={{textAlign:'center'}}>Enter text or/and add media</small>
@@ -234,7 +258,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
             </div>
 
         </div>
-        </div>
+        </div> )}
 
            <PostList channelId={1}/>
 
