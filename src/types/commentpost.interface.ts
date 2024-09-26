@@ -8,7 +8,7 @@ export interface ICommentPost {
     date: Date,
     likeCount:number,
     dislikeCount:number,
-    answerVideoId?:number,
+    answerPostId?:number,
     isPinned:boolean,
     isEdited:boolean,
     users?:[]

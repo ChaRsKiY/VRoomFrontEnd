@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import {SlDislike, SlLike} from "react-icons/sl";
 import  { useUser }  from '@clerk/nextjs';
@@ -6,11 +7,16 @@ import {formatTimeAgo} from"@/utils/format";
 import { BiCommentDetail } from 'react-icons/bi';
 import { ICommentPost } from '@/types/commentpost.interface';
 import {IPost} from "@/types/post.interface";
-import { FaTrash } from 'react-icons/fa';
+import Link from "next/link";
 import { BiTrash } from 'react-icons/bi';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
+interface IPropsPost {
+ channelId:  number,
+ 
+ }
 
-const PostList = ({ channelId }: { channelId: number }) => {
+const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const [posts, setPosts] = useState<IPost[]>([]); // Храним список постов
   const [loading, setLoading] = useState<boolean>(true); // Для отображения состояния загрузки
   const [error, setError] = useState<string | null>(null); // Для обработки ошибок
@@ -304,17 +310,10 @@ useEffect(() => {
         />    
        <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelName}&nbsp;&nbsp;</a> 
        </div>
-       {/* <small style={{fontWeight:'bold'}}>{new Date(post.date).toLocaleDateString()}</small> */}
+
        <small style={{fontWeight:'bold',color:'gray'}}>{formatTimeAgo(new Date(post.date)) }</small>
                 
                 </div>
-              {/* <p>{post.text.split('\n').map((line, ind) => (
-      <span key={ind}>
-        {line}
-        <br />
-      </span>
-    ))}</p> */}
-
 
 <div key={index} style={{ marginBottom: '20px' }}>
              <textarea
@@ -394,14 +393,27 @@ useEffect(() => {
                         <div style={{fontSize:"14px"}}>{post.dislikeCount !== 0 && post.dislikeCount}</div>
                     </div>
                     </div>
+
+                    <TooltipProvider>
+                    <Tooltip >
+                     <TooltipTrigger className="max-sm:hidden">
+                    <Link href={"/post/comments/" +post.id} className="block pl-0 pr-4 py-2 rounded-full">                  
                     <div className='flex ' >
-                    {allComments[post.id]!=0? (<span style={{paddingRight:'10px'}}>
+                    {allComments[post.id]!=0? (
+                      <span style={{paddingRight:'10px'}}>
                       {allComments[post.id]}</span>) :
                       (<span style={{paddingRight:'10px'}}>No comments</span>)}
                     <BiCommentDetail size={24} color="gray" />
                     </div>
-                    {iAmUser?.clerk_Id === user?.id ? (
+                    </Link>
+                </TooltipTrigger>
+                    <TooltipContent>
+                        <p>add comment</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
 
+                    {iAmUser?.clerk_Id === user?.id ? (
                     <div>
                     <div onClick={(event) => toggleDeleteMenu(index, event)} >
                     <BiTrash size={24} color="brown" />

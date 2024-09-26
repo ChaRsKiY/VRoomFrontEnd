@@ -1,19 +1,18 @@
 'use client'
-
 import { useEffect, useState } from 'react';
 import React, { useRef } from 'react';
-import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
+import {ICommentPost} from '@/types/commentpost.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface MyCommentProps {
-    answer: IAnswerCommentVideo; 
+    comment: ICommentPost; 
      onClose: () => void;
 }
 
-const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
+const EditCommentPost : React.FC<MyCommentProps> = ( {comment, onClose}) => {
 
-  const [inputValue, setInputValue] = useState(answer.text);
+  const [inputValue, setInputValue] = useState(comment.comment);
   const [lineColor, setLineColor] = useState('lightgray');
   const [isHovered, setIsHovered] = useState(false);
   const [disabled, setDisabled] = useState(true);
@@ -38,25 +37,26 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
 
     const handleSubmit = async () => {
 
-      const answer2: IAnswerCommentVideo = {
-        id:answer.id,
-        userId: answer.userId,  
-        commentVideo_Id: answer.commentVideo_Id,  
-        channelBanner: answer.channelBanner, 
-        text: inputValue,
-        answerDate: answer.answerDate,  
-        likeCount: answer.likeCount,
-        dislikeCount: answer.dislikeCount,
+      const comment2: ICommentPost = {
+        id:comment.id,
+        userId: comment.userId,  
+        postId: comment.postId,  
+        channelBanner:comment.channelBanner, 
+        comment: inputValue,
+        date: comment.date,  
+        likeCount: comment.likeCount,
+        dislikeCount: comment.dislikeCount,
+        isPinned: comment.isPinned,
         isEdited: true,
-        userName: answer.userName
+        userName:comment.userName
       };
       try {
-        const response = await fetch('https://localhost:7154/api/AnswerVideo/update', {
+        const response = await fetch('https://localhost:7154/api/CommentPost/update', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(answer2), 
+          body: JSON.stringify(comment2), 
         });
   
         if (response.ok) {
@@ -75,7 +75,7 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
     setTimeout(() => {
         inputRef.current?.focus(); // Переводим фокус на input
       }, 0);     
-  },[answer]);
+  },[comment]);
 
 
   
@@ -117,11 +117,10 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
       </div>
       </div>
  
-
     </div>
   );
 };
 
 
 
-export default EditAnswer;
+export default EditCommentPost;

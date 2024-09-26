@@ -137,6 +137,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
      
         <div className=" w-full  mt-20" style={{justifyItems:'center',marginBottom:'20px'}}>
           <div>
+            
             <div className=" w-3/4 px-8"  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px'}}>
             <div style={{display:'flex', justifyContent:'space-around'}}>
             <small style={{textAlign:'center'}}>Enter text or/and add media</small>

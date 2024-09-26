@@ -1,34 +1,35 @@
 'use client'
 import React from 'react';
-import { ICommentVideo } from '@/types/commentvideo.interface';
+import { ICommentPost } from '@/types/commentpost.interface';
 import { useEffect, useState } from 'react';
 import Link from "next/link";
 import {SlDislike, SlLike} from "react-icons/sl";
 import { useUser } from '@clerk/nextjs';
 import { FiCornerDownRight } from 'react-icons/fi';
 import { FiFlag } from 'react-icons/fi';
-import MyAnswerComment from '@/components/pages/comments/myanswercomment'
-import {formatTimeAgo} from"@/utils/format";
+import MyAnswerCommentPost from './myanswercommentpost'
 import  { useRef } from 'react';
 import { IUser } from '@/types/user.interface';
-import AnswersComments from './answerscomment';
-import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import AnswersCommentsPost from './answercommentpost';
+import { IAnswerCommentPost } from '@/types/answercommentpost.interface';
 import { MdMoreVert } from 'react-icons/md'; 
 import RadioButtonList from '@/components/pages/comments/report';
-import EditComment from '@/components/pages/comments/editcomment';
+import EditCommentPost from './editcommentpost';
 import { FaThumbtack } from 'react-icons/fa';
 import { MdPushPin } from 'react-icons/md';
 import { ISimpleUser } from '@/types/simpleuser.interface';
 import { FaPen } from 'react-icons/fa';
+import {formatTimeAgo} from"@/utils/format";
 
 interface CommentsProps {
-  comments: ICommentVideo[];
-  answers: {[key: number]: IAnswerCommentVideo[]};
   id:number;
+  comments: ICommentPost[];
+  answers: {[key: number]: IAnswerCommentPost[]};
 }
 
 
-const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
+
+const CommentsPost: React.FC<CommentsProps> = ({comments, answers ,id}) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
     const {user}=useUser();
@@ -37,8 +38,6 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
     const [isExpanded, setIsExpanded] = useState(false); // Состояние для управления раскрытием поля
     const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
     const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(comments.length).fill(false));
-    const [rows,setRows] =useState(1);
-    const [iAmUser, setUser] = useState<IUser | null>(null);
     const [videoOwner, setVideoOwner] = useState<ISimpleUser | null>(null);
     const [visibleInput, setVisibleInput] = useState<number | null>(null); 
     const [visibleInput2, setVisibleInput2] = useState<number | null>(null); 
@@ -47,7 +46,8 @@ const Comments: React.FC<CommentsProps> = ({ comments, answers ,id}) => {
     const [display2, setDisplay2] = useState('none'); 
     const [display1, setDisplay1] = useState('block');  
     const [display4, setDisplay4] = useState('none');  
-    const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); // Индекс активного меню
+    const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null); 
+
 
     const editComment = (index: number) => {
       setVisibleInput2(visibleInput2 === index ? null : index);  
@@ -77,7 +77,7 @@ const handleInputChange = (index: number, value: string) => {
     if(user){ 
     try {
       
-      const response = await fetch('https://localhost:7154/api/CommentVideo/dislike/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/CommentPost/dislike/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -95,7 +95,7 @@ const handleInputChange = (index: number, value: string) => {
   const like = async (id: number, userid:string ) => {
     if(user){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/CommentVideo/like/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/CommentPost/like/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -112,7 +112,7 @@ const handleInputChange = (index: number, value: string) => {
   const toPin = async (id: number) => {
     if(user){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/CommentVideo/topin/'+id , {
+      const response = await fetch('https://localhost:7154/api/CommentPost/topin/'+id , {
         method: 'PUT',
       });
 
@@ -129,7 +129,7 @@ const handleInputChange = (index: number, value: string) => {
   const unPin = async (id: number) => {
     if(user && videoOwner?.clerk_Id==user?.id){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/CommentVideo/unpin/'+id , {
+      const response = await fetch('https://localhost:7154/api/CommentPost/unpin/'+id , {
         method: 'PUT',
       });
 
@@ -146,18 +146,18 @@ const handleInputChange = (index: number, value: string) => {
   const findOwner = async (id: number) => {
     if(user){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/User/getbyvideoid/'+id , {
+      const response = await fetch('https://localhost:7154/api/User/getbypostid/'+id , {
         method: 'GET',
       });
 
       if (response.ok) {
       
        const data: ISimpleUser = await response.json();
-       console.log('успешный ownerVideo',data);
+       console.log('успешный ownerPost',data);
        setVideoOwner(data);
 
       } else {
-        console.error('ownerVideo:', response.statusText);
+        console.error('ownerPost:', response.statusText);
       }
     
     } catch (error) {
@@ -233,7 +233,7 @@ const handleInputChange = (index: number, value: string) => {
         comments.map((comment, index) => (
           <div style={{display:'flex'}}>
             <div style={{width:'100%'}}>
-          <div key={comment.videoId} style={{display:'flex'}}>
+          <div key={comment.postId} style={{display:'flex'}}>
             <div>
              <img
               src={avatars[comment.userId]  || comment.channelBanner}
@@ -333,11 +333,11 @@ const handleInputChange = (index: number, value: string) => {
              {visibleInput === index && user &&(
              <>
               <br />
-               <MyAnswerComment commentId={comment.id}   onCancel={handleCancel} /> 
+               <MyAnswerCommentPost commentId={comment.id}   onCancel={handleCancel} /> 
              </>
             )}
         
-                  <AnswersComments  commentId={comment.id}  ans={answers[comment.id] || []}/>
+                  <AnswersCommentsPost  commentId={comment.id}  ans={answers[comment.id] || []}/>
            <br />
        
           </div>
@@ -415,7 +415,7 @@ const handleInputChange = (index: number, value: string) => {
                
               }}
             >            
-                <EditComment comment={comment} onClose={closeEdit} />
+                <EditCommentPost comment={comment} onClose={closeEdit} />
          
             </div>
             
@@ -437,6 +437,4 @@ const handleInputChange = (index: number, value: string) => {
   );
 }
 
-export default Comments;
-
-
+export default CommentsPost;
