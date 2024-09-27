@@ -19,7 +19,7 @@ const AccountPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
             <HeaderHome t={t} />
 
                 <Tabs defaultValue="general" className="flex mt-20">
-                    <TabsList className="flex flex-col h-fit w-3/12 max-w-80 bg-white px-4 space-y-1">
+                    <TabsList className="flex flex-col h-fit w-80 bg-white px-4 space-y-1">
                         <div className="text-[500] text-xl self-start pl-8 mb-2.5">Settings</div>
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100" value="general">General</TabsTrigger>
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100" value="account">Account</TabsTrigger>
@@ -28,7 +28,7 @@ const AccountPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100" value="extended">Extended settings</TabsTrigger>
                     </TabsList>
                     <TabsContent className="flex-1 px-7" value="general">
-                         <GeneralTab />
+                        <GeneralTab />
                     </TabsContent>
                     <TabsContent className="flex-1 px-7" value="account">
                         <AccountTab />
