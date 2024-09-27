@@ -30,6 +30,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const [isHovered, setIsHovered] = useState(false);
     const [isHovered2, setIsHovered2] = useState(false);
     const [isHovered3, setIsHovered3] = useState(false);
+    const [isHovered4, setIsHovered4] = useState(false);
+    const [isHovered5, setIsHovered5] = useState(false);
     const [imagePreview, setImagePreview] = useState<string>('');
     const fileImageRef = useRef<HTMLInputElement | null>(null);
     const [videoPreview, setVideoPreview] = useState<string | null>(null); // Состояние для ссылки на видео
@@ -38,6 +40,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const [display2, setDisplay2] = useState('block');
     const [display1, setDisplay1] = useState('none');
     const [display3, setDisplay3] = useState('block');
+    const [displayVideoMenu, setDisplayVideoMenu] = useState('none');
     const [postOwner, setPostOwner] = useState<IUser | null>(null);
     const {user}=useUser();
 
@@ -118,10 +121,21 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       const addImage = () => {
         setDisplay2('none'); 
         setDisplay('block'); 
+        setDisplayVideoMenu('none'); 
       };
       const addVideo = () => {
         setDisplay3('none'); 
         setDisplay1('block'); 
+        setDisplayVideoMenu('none'); 
+      };
+
+      const openVideoMenu = () => {
+        setDisplayVideoMenu('block'); 
+        setDisplay3('none');
+      };
+      const closeMenuVideo = () => {
+        setDisplayVideoMenu('none'); 
+        setDisplay3('block');
       };
 
       useEffect(() => {    
@@ -144,8 +158,10 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         }
         setDisplay('none'); 
         setDisplay2('block'); 
+        setDisplay3('block'); 
       };
       const handleCancelVideo = () => {
+        setDisplay2('block'); 
         setVideo(null);
         setVideoPreview(null);
     if (fileVideoRef.current) {
@@ -162,7 +178,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
           {user && user?.id === postOwner?.clerk_Id && (  
           <div>           
-            <div className=" w-3/4 px-8"  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px'}}>
+            <div className=" w-3/4 px-8"  style={{border:'1px solid lightgray', padding:'10px',borderRadius:'10px'}}>
             <div style={{display:'flex', justifyContent:'space-around'}}>
             <small style={{textAlign:'center'}}>Enter text or/and add media</small>
             <button onClick={handleSubmit} onMouseEnter={() => setIsHovered(true)}
@@ -218,7 +234,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       onMouseLeave={() => setIsHovered2(false)}>Cancel</button>
                         </div>
                     </div>
-                    <div onClick={addVideo} style={{display: display3} } >
+                    <div onClick={openVideoMenu} style={{display: display3} } >
                    
                     <TooltipProvider>
                 <Tooltip >
@@ -231,6 +247,21 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                 </Tooltip>
             </TooltipProvider>
                     </div>
+                    <div style={{display:displayVideoMenu,border:'1px solid lightgray',borderRadius:'20px'}}>
+                      <div style={{display:'flex'}}> <div>
+                      <div   style={isHovered5 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
+      onMouseEnter={() => setIsHovered5(true)}
+      onMouseLeave={() => setIsHovered5(false)} >
+                      <p>Choose from list</p></div>
+                      <div onClick={addVideo}  style={isHovered4 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
+      onMouseEnter={() => setIsHovered4(true)}
+      onMouseLeave={() => setIsHovered4(false)}>
+                      <p>Add new video</p></div>
+                    </div>
+                   <div> <button  style={{paddingRight:'10px',  color:'gray'}} onClick={closeMenuVideo}>
+                      X</button></div>
+                  </div></div>
+
       <div  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',display: display1}}>
         <label>Add video:</label>
             
@@ -260,7 +291,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         </div>
         </div> )}
 
-           <PostList channelId={1}/>
+           <PostList channelId={id}/>
 
         </div>
     )

@@ -103,35 +103,37 @@ useEffect(() => {
 
   // Отображение постa
   return (
-    <div >
-      <div style={{width:'100%',display:'flex',justifyContent:'end'}}>
-        <Link href={"/post/createpost/"} style={{padding:'10px'}}>
+    <div  >
+      <div style={{width:'100%',display:'flex',justifyContent:'end',marginTop:'-50px',marginBottom:'20px'}}>
+        <Link href={"/post/createpost/"+post?.channelSettingsId} style={{padding:'10px'}}>
              <BiArrowBack size={24} color="black" />
          </Link>
       </div>
           
-                <div className='flex ' style={{width:'100%',justifyContent:'space-between'}}>
+                <div className='flex ' style={{width:'100%',justifyContent:'space-between',}}>
                   <div className='flex '>
                   <img 
           src={iAmUser?.channelBanner} 
           alt="User Avatar" 
-          style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px' }}
+          style={{ width: '35px', height: '35px', borderRadius: '50%', marginRight: '15px' }}
         />    
        <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelName}&nbsp;&nbsp;</a> 
        </div>
 
-      { post?(  <small style={{fontWeight:'bold',color:'gray'}}>{formatTimeAgo(new Date(post.date)) }</small>):(<></>)}
+      { post?(  <small style={{fontWeight:'bold',color:'gray',paddingRight:'50px'}}>{formatTimeAgo(new Date(post.date)) }</small>):(<></>)}
                 
+
                 </div>
-              <p style={{textAlign:'center'}}>{post?.text.split('\n').map((line, index) => (
+              <p style={{textAlign:'center',paddingTop:'20px'}}>{post?.text.split('\n').map((line, index) => (
       <span key={index}>
         {line}
         <br />
       </span>
     ))}</p>
              <br />
+            
               {post?.photo && 
-              <img src={post.photo} alt="Post image" width="100%" />}
+              <img src={post.photo} alt="Post image" width="100%" style={{paddingLeft:'50px',paddingRight:'50px'}}/>}
               {post?.video && (
                 <>
                 {/* <div className='flex'> */}
@@ -148,7 +150,7 @@ useEffect(() => {
                 </>
               )}
            
-                  <div className="flex space-x-2.5" style={{width:'100%',justifyContent:'end',marginTop:'20px'}}>
+                  <div className="flex space-x-2.5" style={{width:'100%',justifyContent:'end',marginTop:'20px',paddingRight:'50px'}}>
 
                     <div className="flex items-center space-x-2.5 pr-10">                       
                     <SlLike size={20}  onClick={iAmUser ? post? () => like(post?.id, iAmUser?.clerk_Id) : undefined:undefined} />

@@ -299,14 +299,14 @@ useEffect(() => {
       ) : (
         <ul>
           {posts.map((post,index) => (
-            <li key={post.id} style={{borderRadius:'10px',border:'2px solid gray',padding:'10px',marginTop:'10px',
+            <li key={post.id} style={{borderRadius:'10px',border:'1px solid lightgray',padding:'20px',marginTop:'20px',
               paddingRight:'30px',paddingLeft:'30px',textAlign:'center'}}>
                 <div className='flex ' style={{width:'100%',justifyContent:'space-between'}}>
                   <div className='flex '>
                   <img 
           src={iAmUser?.channelBanner} 
           alt="User Avatar" 
-          style={{ width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px' }}
+          style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
         />    
        <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelName}&nbsp;&nbsp;</a> 
        </div>
@@ -315,7 +315,7 @@ useEffect(() => {
                 
                 </div>
 
-<div key={index} style={{ marginBottom: '20px' }}>
+<div key={index} style={{ marginBottom: '20px',paddingLeft:'50px' }}>
              <textarea
                  ref={(el) => {
                   textAreasRefs.current[index] = el; // Присваиваем реф каждому textarea
@@ -364,11 +364,11 @@ useEffect(() => {
             
              <br />
               {post.photo && 
-              <img src={post.photo} alt="Post image" width="100%" />}
+              <img src={post.photo} alt="Post image" width="100%" style={{paddingLeft:'50px'}}/>}
               {post.video && (
                 <>
                 <div className='flex'>
-                  <video src={post.video} controls width="300px">
+                  <video src={post.video} controls width="350px" style={{paddingLeft:'50px'}}>
                     Ваш браузер не поддерживает видео.
                   </video>
                   <div  style={{paddingRight:'10px'}}>

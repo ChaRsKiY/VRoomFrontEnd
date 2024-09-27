@@ -18,7 +18,9 @@ const CreatePostPage: React.FC = async ({ params }: any) => {
                 <AsideHome t={t}/>
             </div>
             <div className="pl-[20%] w-full max-w-[1300px] flex justify-center max-lg:pl-[12%] max-sm:pl-0">
+                <div>
                 <CreatePost  id={id}/>
+                </div>
             </div>
             <div>
 
