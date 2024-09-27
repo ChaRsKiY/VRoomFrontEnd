@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useRef, useState} from 'react'
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {useUser} from "@clerk/nextjs";
@@ -111,7 +111,7 @@ const BaseUserDataChangeForm: React.FC = () => {
                                     <div className="flex space-x-2.5">
                                         <Button variant="outline" onClick={handleUploadAvatarButtonClicked}>Upload</Button>
                                         <Input accept=".jpg, .jpeg, .png" onChange={handleUploadAvatar} ref={avatarInputRef} type="file" className="hidden" />
-                                        {user?.hasImage && <Button onClick={handleImageDelete} variant="ghost" className="text-red-500 hover:bg-red-100 hover:text-red-500">Remove</Button>}
+                                        {user?.hasImage && <Button onClick={handleImageDelete} variant="ghost" className="text-red-500 hover:bg-red-100 hover:text-red-500 dark:hover:bg-red-300 dark:hover:text-white">Remove</Button>}
                                     </div>
                                     <div className="mt-1 text-[0.9rem] italic text-neutral-500">Recommended size
                                         1:1, up to 10MB.

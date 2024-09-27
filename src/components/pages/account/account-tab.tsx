@@ -5,8 +5,6 @@ import EmailsManagementForm from "@/components/pages/account/emails-management-f
 import AccountsManagement from "@/components/pages/account/accounts-management";
 
 const AccountTab: React.FC = async () => {
-    //const user = await currentUser()
-
     return (
         <div>
             <div className="font-[600]">Account</div>
@@ -15,7 +13,7 @@ const AccountTab: React.FC = async () => {
             <div className="mt-1.5 text-[0.9rem]">Add information about yourself and set up access to VRoom features
             </div>
 
-            <BaseUserDataChangeForm/>
+            <BaseUserDataChangeForm />
 
             <div className="h-[1px] bg-neutral-300 my-8"/>
 
@@ -24,14 +22,14 @@ const AccountTab: React.FC = async () => {
                 and to identify you in the community.
             </div>
 
-            <UsernameChangeForm/>
+            <UsernameChangeForm />
 
             <div className="h-[1px] bg-neutral-300 my-8"/>
 
             <div className="text-2xl mt-4">Emails</div>
             <div className="mt-1.5 text-[0.9rem]">Add and manage your email addresses</div>
 
-            <EmailsManagementForm/>
+            <EmailsManagementForm />
 
             <div className="h-[1px] bg-neutral-300 my-8"/>
 

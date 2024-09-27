@@ -58,7 +58,6 @@ const BurgerMenu: React.FC = () => {
         const initialTheme = localTheme || (localAppearance === 'system' ? browserTheme : localAppearance);
         setTheme(initialTheme);
         setAppearance(localAppearance);
-        document.body.classList.toggle('dark', initialTheme === 'dark');
         localStorage.setItem('theme', initialTheme);
         localStorage.setItem('appearance', localAppearance);
     }, []);

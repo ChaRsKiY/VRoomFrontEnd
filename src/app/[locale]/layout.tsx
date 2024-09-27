@@ -11,6 +11,7 @@ import "@/styles/clerk-edit.css"
 import {ReactNode} from "react";
 import {clerkLocalization} from "@/utils/clerk-localization-tool";
 import {Toaster} from "@/components/ui/toaster";
+import {ThemeProvider} from "@/components/providers/theme.provider";
 
 export const metadata: Metadata = {
   title: "VRoom",
@@ -32,20 +33,22 @@ async function RootLayout({ children, params: { locale } }: Readonly<IRootLayout
     const { resources } = await initTranslations(locale, i18nNamespaces);
 
   return (
-      <ClerkProvider localization={clerkLocalization(locale)}>
-        <html lang={locale} dir={dir(locale)} className="light">
-                <body>
-                <TranslationsProvider namespaces={i18nNamespaces}
-                                      locale={locale}
-                                      resources={resources}>
-                    <div className="flex overflow-hidden">
-                        {children}
-                    </div>
-                    <Toaster />
-                </TranslationsProvider>
-                </body>
-        </html>
-      </ClerkProvider>
+      <ThemeProvider>
+          <ClerkProvider localization={clerkLocalization(locale)}>
+            <html lang={locale} dir={dir(locale)} className="light">
+                    <body>
+                    <TranslationsProvider namespaces={i18nNamespaces}
+                                          locale={locale}
+                                          resources={resources}>
+                        <div className="flex overflow-hidden">
+                            {children}
+                        </div>
+                        <Toaster />
+                    </TranslationsProvider>
+                    </body>
+            </html>
+          </ClerkProvider>
+      </ThemeProvider>
   );
 }
 

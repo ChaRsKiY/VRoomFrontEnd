@@ -47,7 +47,7 @@ const AccountsManagement: React.FC = () => {
                         <div>{account.provider.charAt(0).toUpperCase() + account.provider.slice(1)}</div>
                     </div>
                     <div>
-                        <Button variant="ghost" onClick={() => removeAccount(account)} className="text-red-500 hover:text-red-500 hover:bg-red-100">
+                        <Button variant="ghost" onClick={() => removeAccount(account)} className="text-red-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-300 dark:hover:text-white">
                             Remove
                         </Button>
                     </div>
