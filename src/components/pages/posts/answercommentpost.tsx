@@ -5,17 +5,17 @@ import Link from "next/link";
 import {SlDislike, SlLike} from "react-icons/sl";
 import { useUser } from '@clerk/nextjs';
 import { FiFlag } from 'react-icons/fi';
-import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import { IAnswerCommentPost } from '@/types/answercommentpost.interface';
 import { HiOutlineChevronUp, HiOutlineChevronDown } from 'react-icons/hi';
 import { MdMoreVert } from 'react-icons/md'; 
 import RadioButtonList from '@/components/pages/comments/report';
-import EditAnswer from '@/components/pages/comments/editanswer';
+import EditAnswerPost from './editanswerpost';
 import { FaPen } from 'react-icons/fa';
 import {formatTimeAgo} from"@/utils/format";
 
 interface CommentsProps {
   commentId: number;
-  ans:IAnswerCommentVideo[]
+  ans:IAnswerCommentPost[]
 }
 
 const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
@@ -25,7 +25,7 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
     const [display, setDisplay] = useState('none');
     const [display2, setDisplay2] = useState('block');
     const [visibleInput, setVisibleInput] = useState<number | null>(null); 
-    const [answers, setAnswers] = useState<IAnswerCommentVideo[]>([]);
+    const [answers, setAnswers] = useState<IAnswerCommentPost[]>([]);
     const [socket, setSocket] = useState<WebSocket | null>(null); 
     const [allAnswers, setAllAnswers] = useState(0);
     const [display3, setDisplay3] = useState('none'); 
@@ -43,7 +43,7 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
     if(user){ 
     try {
       
-      const response = await fetch('https://localhost:7154/api/AnswerVideo/dislike/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/AnswerPost/dislike/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -61,7 +61,7 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
   const like = async (id: number, userid:string ) => {
     if(user){ 
     try {     
-      const response = await fetch('https://localhost:7154/api/AnswerVideo/like/'+id +'/'+ user.id +'/'+ userid, {
+      const response = await fetch('https://localhost:7154/api/AnswerPost/like/'+id +'/'+ user.id +'/'+ userid, {
         method: 'PUT',
       });
 
@@ -101,9 +101,9 @@ useEffect(() => {
     const messageData = JSON.parse(event.data);
     console.log('Сообщение от WebSocket сервера:', messageData);
  
-    if (messageData.type === 'new_answer') {    
-      const a:IAnswerCommentVideo=messageData.payload;
-      if(a.commentVideo_Id===commentId)
+    if (messageData.type === 'new_answerpost') {    
+      const a:IAnswerCommentPost=messageData.payload;
+      if(a.commentPost_Id===commentId)
    { 
     setAnswers((prevAnswers) => {        
         return [...prevAnswers, a];
@@ -113,7 +113,7 @@ useEffect(() => {
     }
   }
 
-    if (messageData.type === 'like_answer') {
+    if (messageData.type === 'like_answerpost') {
       const likedAnswer = messageData.payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
@@ -124,7 +124,7 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'dislike_answer') {
+    if (messageData.type === 'dislike_answerpost') {
       const likedAnswer = messageData.payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
@@ -135,7 +135,7 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'update_answer') {
+    if (messageData.type === 'update_answerpost') {
       const upAnswer = messageData.payload;
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
@@ -234,7 +234,7 @@ const openReport = () => {
          
             <div style={{width:'100%', display:'flex'}}>
           
-          <div key={comment.commentVideo_Id} style={{display:'flex',width:'100%'}}>
+          <div key={comment.commentPost_Id} style={{display:'flex',width:'100%'}}>
             <div>
           
              <img
@@ -307,7 +307,7 @@ style={{display:'flex', justifyContent:'center'}}>
                
               }}
             >            
-                <EditAnswer answer={comment} onClose={closeEdit} />
+                <EditAnswerPost answer={comment} onClose={closeEdit} />
          
             </div>
 
@@ -393,6 +393,3 @@ borderRadius:'20px'
 }
 
 export default AnswersComments;
-
-
-

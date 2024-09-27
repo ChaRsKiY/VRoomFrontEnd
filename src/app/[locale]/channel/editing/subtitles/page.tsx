@@ -18,10 +18,10 @@ const channelPage = async ({params: {locale}}:ISubtitlesProps) => {
             <div className="w-60 bg-white border-r border-gray-200 h-screen">
                 <AsideHome t={t}/>
             </div>
-            <div className="flex-auto overflow-hidden">
+            <div className="flex-auto overflow-hidden pt-20">
 
                 <div className="flex-1 p-6">
-                    <h1 className="text-2xl font-semibold mb-6">КSubtitles for videos on the channel</h1>
+                    <h1 className="text-2xl font-semibold mb-6">Subtitles for videos on the channel</h1>
 
                     <div className="flex items-center space-x-9 text-sm">
                         <button className="text-gray-700 border-b-2 border-gray-900">All</button>

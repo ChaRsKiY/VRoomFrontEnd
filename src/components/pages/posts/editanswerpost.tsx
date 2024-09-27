@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import React, { useRef } from 'react';
-import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
+import {IAnswerCommentPost} from '@/types/answercommentpost.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface MyCommentProps {
-    answer: IAnswerCommentVideo; 
+    answer: IAnswerCommentPost; 
      onClose: () => void;
 }
 
-const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
+const EditAnswerPost : React.FC<MyCommentProps> = ( {answer, onClose}) => {
 
   const [inputValue, setInputValue] = useState(answer.text);
   const [lineColor, setLineColor] = useState('lightgray');
@@ -38,10 +38,10 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
 
     const handleSubmit = async () => {
 
-      const answer2: IAnswerCommentVideo = {
+      const answer2: IAnswerCommentPost = {
         id:answer.id,
         userId: answer.userId,  
-        commentVideo_Id: answer.commentVideo_Id,  
+        commentPost_Id: answer.commentPost_Id,  
         channelBanner: answer.channelBanner, 
         text: inputValue,
         answerDate: answer.answerDate,  
@@ -51,7 +51,7 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
         userName: answer.userName
       };
       try {
-        const response = await fetch('https://localhost:7154/api/AnswerVideo/update', {
+        const response = await fetch('https://localhost:7154/api/AnswerPost/update', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -121,7 +121,4 @@ const EditAnswer : React.FC<MyCommentProps> = ( {answer, onClose}) => {
     </div>
   );
 };
-
-
-
-export default EditAnswer;
+export default EditAnswerPost;

@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import  { useUser }  from '@clerk/nextjs';
 import React, { useRef } from 'react';
-import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import { IAnswerCommentPost } from '@/types//answercommentpost.interface';
 import { IUser } from '@/types/user.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
@@ -12,7 +12,7 @@ interface AnsCommentProps {
   onCancel: () => void;
 }
 
-const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) => {
+const MyAnswerCommentPost : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) => {
 
   const [avatarUrl, setAvatarUrl] = useState('');
   const [fullName, setName] = useState('');
@@ -79,10 +79,10 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
   
     const handleSubmit = async () => {
 
-      const answer: IAnswerCommentVideo = {
+      const answer: IAnswerCommentPost = {
         id:0,
         userId: userId,  
-        commentVideo_Id: comid,  
+        commentPost_Id: comid,  
         channelBanner:avatarUrl, 
         text: inputValue,
         answerDate: new Date(),  
@@ -92,7 +92,7 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
         userName:fullName
       };
       try {
-        const response = await fetch('https://localhost:7154/api/AnswerVideo/add', {
+        const response = await fetch('https://localhost:7154/api/AnswerPost/add', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -186,4 +186,4 @@ const MyAnswerComment : React.FC<AnsCommentProps> = ( {commentId,  onCancel}) =>
 
 
 
-export default MyAnswerComment;
+export default MyAnswerCommentPost;

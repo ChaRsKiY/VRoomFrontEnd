@@ -1,21 +1,20 @@
-
 'use client'
 import { useEffect, useState } from 'react';
 import  { useUser }  from '@clerk/nextjs';
 import Link from "next/link";
 import { FaSmile } from 'react-icons/fa';
 import React, { useRef } from 'react';
-import {ICommentVideo} from '@/types/commentvideo.interface'
+import {ICommentPost} from '@/types/commentpost.interface'
 import { IUser } from '@/types/user.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface MyCommentProps {
-  videoId: number; 
+  postId: number; 
   amuser:IUser;
 }
 
-const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
+const MyCommentPost : React.FC<MyCommentProps> = ( {postId,amuser}) => {
 
   const [avatarUrl, setAvatarUrl] = useState('');
   const [fullName, setName] = useState('');
@@ -28,7 +27,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
   const [lineColor, setLineColor] = useState('lightgray');
   const [isHovered, setIsHovered] = useState(false);
   const [disabled, setDisabled] = useState(true);
-  const [videoid, setVideoId] = useState(0);
+  const [postid, setPostId] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const textAreaRef2 = useRef<HTMLTextAreaElement | null>(null);
 
@@ -71,10 +70,10 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
   
     const handleSubmit = async () => {
 
-      const comment: ICommentVideo = {
+      const comment: ICommentPost = {
         id:0,
         userId: userId,  
-        videoId: videoid,  
+        postId: postid,  
         channelBanner:avatarUrl, 
         comment: inputValue,
         date: new Date(),  
@@ -85,7 +84,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
         userName:fullName
       };
       try {
-        const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
+        const response = await fetch('https://localhost:7154/api/CommentPost/add', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -131,7 +130,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
   useEffect(() => {    
       try {
         if(amuser) { 
-            setVideoId(videoId);
+            setPostId(postId);
             setDisplay('none');
             setDisplay2('block');
             setWrite('Write a comment...');
@@ -146,7 +145,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
         console.error('???Ошибка при получении профиля пользователя:', error);
       }
    
-  },[videoId, amuser]);
+  },[postId, amuser]);
 
 
   
@@ -238,25 +237,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
 
 
 
-export default MyComment;
-
-
-     {/* <textarea
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        rows={1} 
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`,
-          outline: 'none',
-          width: '100%',
-          resize: 'none',   
-          overflow: 'hidden', 
-          padding: '5px' 
-        }}
-      />*/}
+export default MyCommentPost;
 
 
     
