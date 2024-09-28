@@ -12,7 +12,7 @@ const SmallCategoryBlock: React.FC<ICategoryBlock> = ({ data }: ICategoryBlock) 
             <div className="flex space-y-4 sm:flex-col max-sm:space-y-0 max-sm:justify-around">
                 {data.map((el, key) => (
                     <Link href={el.path} key={key}
-                          className={"flex flex-col space-y-1 items-center p-2.5 rounded-xl hover:bg-neutral-200 text-neutral-600"}>
+                          className={"flex flex-col space-y-1 items-center p-2.5 rounded-xl hover:bg-neutral-200 text-neutral-600 dark:text-white dark:hover:bg-neutral-700"}>
                         {el.icon ? (
                             <div className="text-3xl">{el.icon}</div>
                         ) : (
