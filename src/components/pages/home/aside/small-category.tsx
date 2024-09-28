@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react'
+import React from 'react'
 import {validateCategoryBlock} from "@/lib/category.utils";
 import {ICategoryBlock} from "@/components/pages/home/aside/category.interface";
 import Link from "next/link";

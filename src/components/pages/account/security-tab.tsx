@@ -1,5 +1,4 @@
 import React from 'react'
-import {UserButton} from "@clerk/nextjs";
 import ChangePasswordForm from "@/components/pages/account/change-password-form";
 import {DeleteAccount} from "@/components/pages/account/delete-account";
 import ActiveDevices from "@/components/pages/account/active-devices";
