@@ -72,16 +72,16 @@ const MyCommentPost : React.FC<MyCommentProps> = ( {postId,amuser}) => {
 
       const comment: ICommentPost = {
         id:0,
-        userId: userId,  
+        userId: amuser.clerk_Id,  
         postId: postid,  
-        channelBanner:avatarUrl, 
+        channelBanner:amuser.channelBanner, 
         comment: inputValue,
         date: new Date(),  
         likeCount: 0,
         dislikeCount: 0,
         isPinned: false,
         isEdited: false,
-        userName:fullName
+        userName:amuser.channelName
       };
       try {
         const response = await fetch('https://localhost:7154/api/CommentPost/add', {

@@ -36,6 +36,7 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 if (response.ok) {
                     const data: IUser = await response.json();
                     setUser(data);
+                    console.log('user ch:',data);
                 } else {
                     console.error('Ошибка при получении пользователя:', response.statusText);
                 }
@@ -179,7 +180,17 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
-                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.text } // Обновляем количество лайков
+                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.comment } // Обновляем количество лайков
+                      : com
+                  )
+                );
+              }
+              if (messageData.type === 'pin_commentpost') {
+                const upComment = messageData.payload;
+                setComments((prevComments) =>
+                  prevComments.map((com) =>
+                    com.id === upComment.id
+                      ? { ...com, isPinned: upComment.isPinned } // Обновляем количество лайков
                       : com
                   )
                 );

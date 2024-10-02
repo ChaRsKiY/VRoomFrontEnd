@@ -170,13 +170,11 @@ useEffect(() => {
  
     if (messageData.type === 'new_post') {    
       const a:IPost=messageData.payload;
-      if(a.channelSettingsId===channelId)
-      { 
-    setPosts((prevPosts) => {        
-        return [ a,  ...prevPosts,];
+     
+           setPosts((prevPosts) => {        
+        return [ a,  ...prevPosts];
       });
-  
-     }
+     
     }
     if (messageData.type === 'new_likepost') {
       const likedAnswer = messageData.payload;
@@ -223,9 +221,7 @@ useEffect(() => {
   };
 }, [posts , channelId]);
 
-  // Получаем посты по channelId
-  useEffect(() => {
-    const fetchPosts = async () => {
+ const fetchPosts = async () => {
       try {
         const response = await fetch(`https://localhost:7154/api/Post/getbychannelid/`+ channelId);
         if (!response.ok) {
@@ -239,6 +235,9 @@ useEffect(() => {
         setLoading(false);
       }
     };
+
+  // Получаем посты по channelId
+  useEffect(() => {
 
     fetchPosts();
     getUser();

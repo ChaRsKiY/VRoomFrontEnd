@@ -240,7 +240,7 @@ const handleInputChange = (index: number, value: string) => {
               alt=""
               width="40px"
               height="40px"
-              style={{ borderRadius: '50%', marginRight: '10px' }}
+              style={{ borderRadius: '50%', marginRight: '10px', minHeight:'40px' }}
             /></div>
             <div style={{width:'100%'}}>                           
             <div style={{paddingLeft:'0px' }}>

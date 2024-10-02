@@ -234,13 +234,13 @@ const handleInputChange = (index: number, value: string) => {
           <div style={{display:'flex'}}>
             <div style={{width:'100%'}}>
           <div key={comment.videoId} style={{display:'flex'}}>
-            <div>
+            <div  >
              <img
               src={avatars[comment.userId]  || comment.channelBanner}
               alt=""
               width="40px"
               height="40px"
-              style={{ borderRadius: '50%', marginRight: '10px' }}
+              style={{ borderRadius: '50%', marginRight: '10px',minHeight:'40px' }}
             /></div>
             <div style={{width:'100%'}}>                           
             <div style={{paddingLeft:'0px' }}>

@@ -242,7 +242,7 @@ const openReport = () => {
               alt=""
               width="25px"
               height="25px"
-              style={{ borderRadius: '50%', marginRight: '10px' }}
+              style={{ borderRadius: '50%', marginRight: '10px' ,minHeight:'25px'}}
             /></div>
             <div style={{width:'100%'}}>
             

@@ -9,10 +9,14 @@ import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
 
+interface MyProps {
+    videoid:number;
+
+  }
 
 
-const CommentsBlock: React.FC = () => {
-    const videoId = 4;
+const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
+   
     const { user } = useUser();
     const [comments, setComments] = useState<ICommentVideo[]>([]);
     const [allComments, setAllComments] = useState(0);
@@ -78,7 +82,7 @@ const CommentsBlock: React.FC = () => {
     // Получение комментариев с сервера через обычный HTTP запрос
     const getComments = async () => {
         try {
-            const response = await fetch('https://localhost:7154/api/CommentVideo/getbyvideoid/' + videoId, {
+            const response = await fetch('https://localhost:7154/api/CommentVideo/getbyvideoid/' + videoid, {
                 method: 'GET',
             });
 
@@ -155,7 +159,7 @@ const CommentsBlock: React.FC = () => {
         ws.onopen = () => {
             console.log('WebSocket соединение установлено');
             // Например, можно отправить начальный запрос или уведомление
-            ws.send(JSON.stringify({ type: 'subscribe', videoId }));
+            ws.send(JSON.stringify({ type: 'subscribe', videoid }));
         };
 
         ws.onmessage = (event) => {
@@ -194,7 +198,7 @@ const CommentsBlock: React.FC = () => {
         return () => {
             ws.close();
         };
-    }, [videoId]);
+    }, [videoid]);
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
@@ -206,7 +210,7 @@ const CommentsBlock: React.FC = () => {
                 socket.close();
             }
         };
-    }, [videoId, user, sortMethod]);
+    }, [videoid, user, sortMethod]);
 
     useEffect(() => {
         comments.forEach((comment) => {
@@ -219,7 +223,7 @@ const CommentsBlock: React.FC = () => {
     }, [comments]);
 
     return (
-        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }}>
+        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }} style={{marginBottom:"100px"}}>
             <div className="flex items-center space-x-8">
                 <div className="font-[500]">{allComments} Comments</div>
                 <div
@@ -260,9 +264,9 @@ const CommentsBlock: React.FC = () => {
             </div>
             <br />
             <div style={{ marginTop: '30' }}>
-                {iAmUser ? <MyComment videoId={videoId} amuser={iAmUser} /> : <p></p>}
+                {iAmUser ? <MyComment videoId={videoid} amuser={iAmUser} /> : <p></p>}
                 <br />
-                <Comments id={videoId} comments={comments}  answers={answersByComment || []}/>
+                <Comments id={videoid} comments={comments}  answers={answersByComment || []}/>
             </div>
         </div>
     );
