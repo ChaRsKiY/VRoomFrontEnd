@@ -1,5 +1,6 @@
 import React from 'react'
 import Search from "@/components/pages/home/header/search";
+import AlgoliaSearch from "@/components/pages/algsearch/algoliasearch"
 import HeaderBlock from "@/components/pages/home/header/header-block";
 import VoiceSearch from "@/components/pages/home/header/voice-search";
 import {ITranslationFunction} from "@/types/translation.interface";

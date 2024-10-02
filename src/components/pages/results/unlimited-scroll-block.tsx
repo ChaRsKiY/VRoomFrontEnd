@@ -30,14 +30,14 @@ interface IUnlimitedScrollBlockProps {
 
 const UnlimitedScrollBlock: React.FC<IUnlimitedScrollBlockProps> = ({ data }: IUnlimitedScrollBlockProps) => {
     return (
-        <div className="pr-[2%] max-sm:pr-0 flex-1">
+        <div className="pr-[2%] max-sm:pr-0 flex-1" style={{marginTop:'100px'}}>
             {data.map((el, key) => (
                 <div key={key} className="px-3 mb-8 space-y-2.5">
                     <VideoCard el={el} />
                 </div>
             ))}
 
-            <ClientScrollBlock />
+            {/* <ClientScrollBlock /> */}
         </div>
     )
 }

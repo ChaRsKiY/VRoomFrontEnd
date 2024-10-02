@@ -61,7 +61,7 @@ interface IUnderVideoBlockProps {
 const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideoBlockProps) => {
     return (
         <div>
-            <div className="py-2 text-xl font-[500]">{video.title}</div>
+            <div className="py-2 text-xl font-[500]">{video.tittle}</div>
             <div className="flex justify-between">
                 <div className="flex items-center">
                     <Image src={video.channelBanner} alt={video.channelName} width={40} height={40} 

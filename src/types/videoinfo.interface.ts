@@ -1,7 +1,7 @@
 export interface IVideo {
     id: number,
     objectId:string,
-    title: string,
+    tittle: string,
     uploadDate: Date,
     duration:number,
     channelSettingsId: number,
