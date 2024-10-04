@@ -1,7 +1,6 @@
 import React from 'react'
 import Search from "@/components/pages/home/header/search";
 import HeaderBlock from "@/components/pages/home/header/header-block";
-import VoiceSearch from "@/components/pages/home/header/voice-search";
 import {ITranslationFunction} from "@/types/translation.interface";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,7 +18,6 @@ const HeaderHome: React.FC<IHeaderHomeProps> = ({ t }: IHeaderHomeProps) => {
 
             <div className="flex space-x-4 w-[50%] max-lg:w-[30%] max-lg:space-x-3 max-lg:flex-1 max-lg:px-[10%] max-[520px]:hidden">
                 <Search />
-                <VoiceSearch t={t} />
             </div>
 
             <HeaderBlock />
