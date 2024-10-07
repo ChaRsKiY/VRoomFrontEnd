@@ -62,7 +62,7 @@ const Search: React.FC = () => {
                 <form onSubmit={(e) => {
                     e.preventDefault();
                     if (ref.current) {
-                        window.location.href = `/results?search_query=${ref.current.value}`;
+                        window.location.href = `/results?search=${ref.current.value}`;
                     }
                 }}>
                     <input
