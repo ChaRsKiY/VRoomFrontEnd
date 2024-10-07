@@ -81,8 +81,7 @@ const EditComment : React.FC<MyCommentProps> = ( {comment, onClose}) => {
   
   return (
     <div  >
-     
-    
+      
     <div >
       <div >
       <input

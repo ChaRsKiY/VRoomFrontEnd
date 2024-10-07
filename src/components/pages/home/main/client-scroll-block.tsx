@@ -80,10 +80,10 @@ const ClientScrollBlock: React.FC<IProps> = ({videolist}) => {
 
     useEffect(() => {
         if (isInView) {
-            // getVideos();
+           
             setVideos([...videos, ...videolist])
         }
-    }, [isInView])
+    }, [isInView, videolist])
 
     useEffect(() => {
         scrollTo(0, 0)

@@ -8,6 +8,8 @@ import { ICommentPost } from '@/types/commentpost.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentPost } from '@/types/answercommentpost.interface';
+// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
+import { signalRService } from '@/services/signalr.service';
 
 interface CommentsProps {
     postid:number;
@@ -152,19 +154,70 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
     };
 
     // Инициализация WebSocket и обновление комментариев через WebSocket
+    // useEffect(() => {
+    //     // const ws = new WebSocket('ws://localhost:5000'); // URL WebSocket сервера
+    //     const ws = new WebSocket('wss://localhost:7154');
+
+    //     ws.onopen = () => {
+    //         console.log('WebSocket соединение установлено');
+    //         // Например, можно отправить начальный запрос или уведомление
+    //         ws.send(JSON.stringify({ type: 'subscribe', postid }));
+    //     };
+
+    //     ws.onmessage = (event) => {
+    //         const messageData = JSON.parse(event.data);
+    //         console.log('Сообщение от WebSocket сервера:', messageData);
+
+    //         if (messageData.type === 'new_commentpost') {
+
+    //             getComments();
+
+    //             comments.forEach((comment) => {
+    //                 getAnswers(comment.id);
+    //                 console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически
+    //             })
+    //         }
+    //         if (messageData.type === 'update_commentpost') {
+    //             const upComment = messageData.payload;
+    //             setComments((prevComments) =>
+    //               prevComments.map((com) =>
+    //                 com.id === upComment.id
+    //                   ? { ...com, isEdited: upComment.isEdited, comment:upComment.comment } // Обновляем количество лайков
+    //                   : com
+    //               )
+    //             );
+    //           }
+    //           if (messageData.type === 'pin_commentpost') {
+    //             const upComment = messageData.payload;
+    //             setComments((prevComments) =>
+    //               prevComments.map((com) =>
+    //                 com.id === upComment.id
+    //                   ? { ...com, isPinned: upComment.isPinned } // Обновляем количество лайков
+    //                   : com
+    //               )
+    //             );
+    //           }
+    //     };
+    //     ws.onclose = () => {
+    //         console.log('WebSocket соединение закрыто');
+    //     };
+    //     ws.onerror = (error) => {
+    //         console.error('Ошибка WebSocket:', error);
+    //     };
+    //     // Сохраняем WebSocket в состоянии
+    //     setSocket(ws);
+    //     // Закрываем WebSocket при размонтировании компонента
+    //     return () => {
+    //         ws.close();
+    //     };
+    // }, [postid]);
+
     useEffect(() => {
-        // const ws = new WebSocket('ws://localhost:5000'); // URL WebSocket сервера
-        const ws = new WebSocket('wss://localhost:7154');
+    //    const connection = initializeConnection();
 
-        ws.onopen = () => {
-            console.log('WebSocket соединение установлено');
-            // Например, можно отправить начальный запрос или уведомление
-            ws.send(JSON.stringify({ type: 'subscribe', postid }));
-        };
+  const handleMessage = (messageData: any) => {
 
-        ws.onmessage = (event) => {
-            const messageData = JSON.parse(event.data);
-            console.log('Сообщение от WebSocket сервера:', messageData);
+    console.log('Сообщение от SignalR сервера:', messageData);
 
             if (messageData.type === 'new_commentpost') {
 
@@ -180,7 +233,7 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
-                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.comment } // Обновляем количество лайков
+                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.text } // Обновляем количество лайков
                       : com
                   )
                 );
@@ -196,30 +249,19 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 );
               }
         };
-        ws.onclose = () => {
-            console.log('WebSocket соединение закрыто');
-        };
-        ws.onerror = (error) => {
-            console.error('Ошибка WebSocket:', error);
-        };
-        // Сохраняем WebSocket в состоянии
-        setSocket(ws);
-        // Закрываем WebSocket при размонтировании компонента
+        signalRService.on('postcommentMessage', handleMessage);
+
         return () => {
-            ws.close();
-        };
+             signalRService.off('postcommentMessage', handleMessage);
+       };
     }, [postid]);
+
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
         getUser(user,setUser);
         getComments();
 
-        // return () => {
-        //     if (socket) {
-        //         socket.close();
-        //     }
-        // };
     }, [postid, user, sortMethod]);
 
     useEffect(() => {
@@ -234,19 +276,6 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
 
     return (
         <div>
-
-{/* <div className="flex items-center space-x-2.5">
-
-<div className="flex items-center space-x-2.5 pr-10">                       
-<SlLike size={20}  onClick={iAmUser ? post? () => like(post?.id, iAmUser?.clerk_Id) : undefined:undefined} />
-    <div style={{fontSize:"14px"}}>{post?.likeCount !== 0 && post?.likeCount}</div>
-</div>
-<div className="flex items-center space-x-2.5">
-    <SlDislike size={20} onClick={iAmUser ? post? () => dislike(post?.id, iAmUser?.clerk_Id) : undefined: undefined}/>
-    <div style={{fontSize:"14px"}}>{post?.dislikeCount !== 0 && post?.dislikeCount}</div>
-</div>
-
-</div> */}
 
         <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }}>
             <div className="flex items-center space-x-8">

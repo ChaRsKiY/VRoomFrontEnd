@@ -201,6 +201,7 @@ const handleInputChange = (index: number, value: string) => {
   useEffect(() => {    
     setExpandedStates(Array(comments.length).fill(false)); 
     findOwner(id); 
+    
     },[comments,id]);
  
     useEffect(() => {

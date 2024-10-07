@@ -12,6 +12,8 @@ import RadioButtonList from '@/components/pages/comments/report';
 import EditAnswer from '@/components/pages/comments/editanswer';
 import { FaPen } from 'react-icons/fa';
 import {formatTimeAgo} from"@/utils/format";
+// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
+import { signalRService } from '@/services/signalr.service';
 
 interface CommentsProps {
   commentId: number;
@@ -82,34 +84,35 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
        setAllAnswers(ans.length);
        setDisplay('none');
        setDisplay2('blok');
-         
+      
     } catch (error) {
       console.error('Ошибка при получении профиля пользователя:', error);
     }
  
 },[commentId, ans]);
 
+
+
 useEffect(() => {
 
-  const ws = new WebSocket('wss://localhost:7154');
-  ws.onopen = () => {
-    console.log('WebSocket соединение установлено');
-    // Например, можно отправить начальный запрос или уведомление
-    ws.send(JSON.stringify({ type: 'subscribe', ans,commentId }));
-  };
-  ws.onmessage = (event) => {
-    const messageData = JSON.parse(event.data);
-    console.log('Сообщение от WebSocket сервера:', messageData);
- 
-    if (messageData.type === 'new_answer') {    
-      const a:IAnswerCommentVideo=messageData.payload;
-      if(a.commentVideo_Id===commentId)
-   { 
-    setAnswers((prevAnswers) => {        
-        return [...prevAnswers, a];
+  const handleMessage = (messageData: any) => {
+    console.log('Сообщение от SignalR сервера:', messageData); 
+
+  if (messageData.type === "new_answer") {
+    const a: IAnswerCommentVideo = messageData.payload;
+    if (a.commentVideo_Id === commentId) {
+      setAnswers((prevAnswers) => {
+        // Проверка, если ответ уже существует
+        const isAnswerExists = prevAnswers.some(
+          (answer) => answer.id === a.id
+        );
+        if (!isAnswerExists) {
+          setAllAnswers((prev) => prev + 1);
+          return [...prevAnswers, a];
+        }
+        return prevAnswers;
       });
-  
-    setAllAnswers((prev) => prev + 1);
+     
     }
   }
 
@@ -146,18 +149,12 @@ useEffect(() => {
       );
     }
   };
-  ws.onclose = () => {
-    console.log('WebSocket соединение закрыто');
-  };
-  ws.onerror = (error) => {
-    console.error('Ошибка WebSocket:', error);
-  };
-  // Сохраняем WebSocket в состоянии
-  setSocket(ws);
-  // Закрываем WebSocket при размонтировании компонента
-  return () => {
-    ws.close();
-  };
+ 
+    signalRService.on('answerMessage', handleMessage);
+
+    return () => {
+         signalRService.off('answerMessage', handleMessage);
+    };
 }, [ans , commentId]);
 
 const openReport = () => {
@@ -184,6 +181,7 @@ const openReport = () => {
 
  useEffect(() => {    
    setExpandedStates(Array(answers.length).fill(false)); 
+   
    },[answers]);
 
    const toggleReportMenu = (index: number, event: React.MouseEvent) => {
@@ -206,10 +204,6 @@ const openReport = () => {
     );
     setReportMenuOpenIndex(null);
   };
-
-  useEffect(() => {    
-    setExpandedStates(Array(answers.length).fill(false)); 
-    },[answers]);
 
   return (
     

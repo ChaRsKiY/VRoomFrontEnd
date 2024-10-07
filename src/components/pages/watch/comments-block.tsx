@@ -8,6 +8,8 @@ import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
+import { signalRService } from '@/services/signalr.service';
 
 interface MyProps {
     videoid:number;
@@ -24,7 +26,7 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
     const [isSortMenuOpen, setSortMenuOpen] = useState(false); // Состояние для управления видимостью меню сортировки
     const [sortMethod, setSortMethod] = useState<'date' | 'likes'>('date'); // Состояние для метода сортировки
     const [answersByComment, setAnswersByComment] = useState<{ [key: number]: IAnswerCommentVideo[] }>({});
-    const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
+   // const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
 
     // Получение текущего пользователя
     const getUser = async (user: any, setUser: (prev: IUser) => void) => {
@@ -151,20 +153,11 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
         setComments(sortedData);
     };
 
-    // Инициализация WebSocket и обновление комментариев через WebSocket
+   
     useEffect(() => {
-        // const ws = new WebSocket('ws://localhost:5000'); // URL WebSocket сервера
-        const ws = new WebSocket('wss://localhost:7154');
-
-        ws.onopen = () => {
-            console.log('WebSocket соединение установлено');
-            // Например, можно отправить начальный запрос или уведомление
-            ws.send(JSON.stringify({ type: 'subscribe', videoid }));
-        };
-
-        ws.onmessage = (event) => {
-            const messageData = JSON.parse(event.data);
-            console.log('Сообщение от WebSocket сервера:', messageData);
+  // Обработчик сообщений
+  const handleMessage = (messageData: any) => {
+    console.log('Сообщение от SignalR сервера:', messageData);
 
             if (messageData.type === 'new_comment') {
 
@@ -186,38 +179,26 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
                 );
               }
         };
-        ws.onclose = () => {
-            console.log('WebSocket соединение закрыто');
-        };
-        ws.onerror = (error) => {
-            console.error('Ошибка WebSocket:', error);
-        };
-        // Сохраняем WebSocket в состоянии
-        setSocket(ws);
-        // Закрываем WebSocket при размонтировании компонента
-        return () => {
-            ws.close();
-        };
+ 
+     signalRService.on('commentMessage', handleMessage);
+
+     return () => {
+          signalRService.off('commentMessage', handleMessage);
+    };
     }, [videoid]);
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
         getUser(user,setUser);
         getComments();
-
-        return () => {
-            if (socket) {
-                socket.close();
-            }
-        };
+       
     }, [videoid, user, sortMethod]);
 
     useEffect(() => {
         comments.forEach((comment) => {
             getAnswers(comment.id);
-
         });
-
+       
         console.log('ответы------:', answersByComment);
 
     }, [comments]);
