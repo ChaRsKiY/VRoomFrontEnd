@@ -87,7 +87,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       formData.append('id', id+'');
       if (image) formData.append('img', image);
       if (video) formData.append('video', video);
-  
+         const r=video?.size
       const res = await fetch('https://localhost:7154/api/Post/add', {
         method: 'POST',
         body: formData,

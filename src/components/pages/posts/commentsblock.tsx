@@ -248,6 +248,26 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                   )
                 );
               }
+              if (messageData.type === 'like_commentpost') {
+                const upComment = messageData.payload;
+                setComments((prevComments) =>
+                  prevComments.map((com) =>
+                    com.id === upComment.id
+                      ? { ...com, likeCount: upComment.likeCount } // Обновляем количество лайков
+                      : com
+                  )
+                );
+              }
+              if (messageData.type === 'dislike_commentpost') {
+                const upComment = messageData.payload;
+                setComments((prevComments) =>
+                  prevComments.map((com) =>
+                    com.id === upComment.id
+                      ? { ...com, dislikeCount: upComment.dislikeCount } // Обновляем количество лайков
+                      : com
+                  )
+                );
+              }
         };
         signalRService.on('postcommentMessage', handleMessage);
 
