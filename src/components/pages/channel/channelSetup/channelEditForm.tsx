@@ -72,7 +72,7 @@ const ChannelEditBlock = () => {
             if (profilePhoto) {
                 formData.append('profilePhoto', profilePhoto);// Добавляем изображение
             }
-
+          
             formData.append('id', id + '');
             formData.append('ChannelName', channelName);
             formData.append('Description', channelDescription);

@@ -104,7 +104,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
             </div>
 
             <div
-                className="bg-white hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
+                className="bg-white dark:bg-neutral-950 hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
                 <SmallCategoryBlock data={mainPageHomeCategories} />
             </div>
         </div>

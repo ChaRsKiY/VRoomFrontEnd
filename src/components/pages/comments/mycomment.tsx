@@ -7,6 +7,8 @@ import { FaSmile } from 'react-icons/fa';
 import React, { useRef } from 'react';
 import {ICommentVideo} from '@/types/commentvideo.interface'
 import { IUser } from '@/types/user.interface';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import {buttonCancelStyles} from'@/styles/buttonstyles/buttonCancelStyles';
 
 interface MyCommentProps {
   videoId: number; 
@@ -234,46 +236,7 @@ const MyComment : React.FC<MyCommentProps> = ( {videoId,amuser}) => {
   );
 };
 
-const buttonCancelStyles: { [key: string]: React.CSSProperties } = {
-  base: {
-    backgroundColor: 'white',   
-    border: 'none',           
-    color: 'black',            
-    padding: '2px 20px',
-    margin: '5px',         
-    borderRadius: '50px',      
-    cursor: 'pointer',          
-    fontSize: '16px', 
-    fontWeight:'bold' ,         
-    transition: 'background-color 0.3s ease',  
-  },
-  hover: {
-    backgroundColor: 'lightgray',  
-  },
-};
-const buttonSubmitStyles: { [key: string]: React.CSSProperties } = {
-  base: {
-    backgroundColor: 'RoyalBlue',  
-    border: 'none',             
-    color: 'white',           
-    padding: '2px 20px',
-    margin: '5px',        
-    borderRadius: '50px',                
-    fontSize: '16px', 
-    fontWeight:'bold'         
-      
-  },
-  disab:{
-    backgroundColor: 'lightgray',
-    border: 'none',            
-    color: 'white',            
-    padding: '2px 20px',  
-    margin: '5px',    
-    borderRadius: '50px',              
-    fontSize: '16px', 
-    fontWeight:'bold' 
-  }
-};
+
 
 export default MyComment;
 
