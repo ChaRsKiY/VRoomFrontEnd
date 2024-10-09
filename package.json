@@ -23,7 +23,7 @@
     "@types/videojs": "^5.16.2",
     "@videojs/themes": "^1.0.1",
     "algoliasearch": "^5.5.3",
-    "axios": "^1.7.2",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

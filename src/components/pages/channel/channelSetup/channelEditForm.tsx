@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useRef, useState} from 'react'
 import Image from "next/image";
 import {useUser} from "@clerk/nextjs";
 import {ITranslationFunction} from "@/types/translation.interface";
@@ -29,6 +29,7 @@ const ChannelEditBlock = () => {
 
     const [channelDescription, setChannelDescription] = useState<string>("");
 
+
     useEffect(() => {
         if (user) {
             fetchChannel(user.id);
@@ -36,8 +37,12 @@ const ChannelEditBlock = () => {
     }, [user]);
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/ChannelSettings/getbyownerid/${userId}`);
+            const response = await fetch(`https://localhost:7154/api/ChannelSettings/getbyownerid/` + userId, {
+                method: 'GET'
+            });
+
             const data: any = await response.json();
+            console.log(data.channelName);
 
             if (data.channelBanner == null) {
                 setChannelBannerPreview('https://placehold.co/150x100.svg');
@@ -77,18 +82,17 @@ const ChannelEditBlock = () => {
                 headers: {"Content-Type": false},
                 data: formData,
             }).then(function () {
-                location. reload();
+                location.reload();
             }).catch(function (error) {
-                alert(error);
+                alert(error.message);
             });
-
 
         }
     };
 
     const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inpId = event.target.id;
-        console.log('id=' + inpId);
+
         const file = event.target.files?.[0];
         if (file) {
             if (inpId == "file1") {
@@ -124,60 +128,63 @@ const ChannelEditBlock = () => {
                                value="Опубликовать"/>
                     </div>
                 </div>
-
-
                 <div className="w-[62.5rem] h-[12.25rem] shrink-0">
                     <h2 className="text-[#000] font-bold text-[1rem] font-not-italic font-500 leading-normal">Banner</h2>
-                    <p className="text-[#000] mt-2 font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">This image is shown at the top channel pages. </p>
+                    <p className="text-[#000] mt-2 font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">This
+                        image is shown at the top channel pages. </p>
                     <div className="flex items-center">
                         <Image src={channelBannerPreview} alt="Banner Image" width={150} height={100}
                                className="w-[6.25rem] h-[6.25rem] shrink-0 rounded-[6.25rem]"/>
-                        <div className="w-[56.5rem] h-[8.75rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-solid border-[#E6E6E6]">
-                            <p className="w-[46.5rem] mt-6 ml-6 text-[#000] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">To make the channel look attractive on
+                        <div
+                            className="w-[56.5rem] h-[8.75rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-solid border-[#E6E6E6]">
+                            <p className="w-[46.5rem] mt-6 ml-6 text-[#000] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">To
+                                make the channel look attractive on
                                 all devices We recommend uploading an image of at least 2048 x 1152 pixels. Size
                                 file - no more than 6 MB.</p>
-                            <input type="file" className="mt-3 ml-6 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                            <input type="file" className="block mt-3 ml-6  w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file1"
-                                   onChange={handleAvatarChange}
-                            />{/*Download*/}
+                                   onChange={handleAvatarChange}/>
                         </div>
                     </div>
                 </div>
 
                 <div className="w-[62.5rem] h-[12.25rem] shrink-0">
-                    <h2 className="text-[#000]  font-bold text-[1rem] font-not-italic font-500 leading-normal">Profile photo</h2>
-                    <p className="text-[#000] mt-2 font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">The profile photo is shown, for example, next to
+                    <h2 className="text-[#000]  font-bold text-[1rem] font-not-italic font-500 leading-normal">Profile
+                        photo</h2>
+                    <p className="text-[#000] mt-2 font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">The
+                        profile photo is shown, for example, next to
                         your video or comments on YouTube.</p>
-                    {/*<div className="flex items-center">*/}
-                        <div className="flex items-center">
-                            <Image className="w-[6.25rem] h-[6.25rem] shrink-0 rounded-[6.25rem] " width={180} height={120}
-                                   src={profilePhotoPreview} alt="Banner Image"/>
-                            <div className="w-[56.5rem] h-[8.75rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-solid border-[#E6E6E6]">
-                                <p className="w-[46.5rem] mt-6 ml-6 text-[#000] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">We recommend using an image
-                                    At least 98 x 98 pixels in size in PNG or GIF format. Animated pictures
-                                    upload it is forbidden. File size: no more than 4 MB. Remember that the image
-                                    must comply with the rules YouTube community. </p>
-                                {/*<div className="mt-4 space-x-2">*/}
-                                    <input type="file" className="mt-3 ml-6 block w-full text-sm text-gray-500
+                    <div className="flex items-center">
+                        <Image className="w-[6.25rem] h-[6.25rem] shrink-0 rounded-[6.25rem] " width={180} height={120}
+                               src={profilePhotoPreview} alt="Banner Image"/>
+                        <div
+                            className="w-[56.5rem] h-[8.75rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-solid border-[#E6E6E6]">
+                            <p className="w-[46.5rem] mt-6 ml-6 text-[#000] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">We
+                                recommend using an image
+                                At least 98 x 98 pixels in size in PNG or GIF format. Animated pictures
+                                upload it is forbidden. File size: no more than 4 MB. Remember that the image
+                                must comply with the rules YouTube community. </p>
+                            <input type="file" className="block mt-3 ml-6 w-full text-sm text-gray-500
         file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white
         hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file2"
-                                           onChange={handleAvatarChange}/>{/*Change</button>*/}
-                                </div>
-                            {/*</div>
-                        </div>*/}
+                                   onChange={handleAvatarChange}/>
+                        </div>
                     </div>
                 </div>
 
                 <div className="w-[62.5rem] h-[7rem] shrink-0">
-                    <h2 className="text-[#000] font-bold text-[1rem] font-not-italic font-500 leading-normal">Channel name</h2>
-                    <p className="text-[#000] max-w-[51.5rem] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">Come up with a channel name that will represent
+                    <h2 className="text-[#000] font-bold text-[1rem] font-not-italic font-500 leading-normal">Channel
+                        name</h2>
+                    <p className="text-[#000] max-w-[51.5rem] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">Come
+                        up with a channel name that will represent
                         you and your content. If you provide a different name or change your profile photo,
                         these changes will will visible only on YouTube and not across all Google services. You can
                         change your name twice within 14 days.</p>
-                    <input type="text" className="mt-4 pl-1 w-[51.5rem] h-[3.0625rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-gray-400 "
+                    <input type="text"
+                           className="mt-4 pl-1 w-[51.5rem] h-[3.0625rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-gray-400 "
                            value={channelName}
                            onChange={(e) => {
                                setChannelName(e.target.value);
@@ -188,10 +195,12 @@ const ChannelEditBlock = () => {
 
                 <div className="mt-8 w-[62.5rem] h-[7rem] shrink-0">
                     <h2 className="text-[#000] font-bold text-[1rem] font-not-italic font-500 leading-normal">Nickname</h2>
-                    <p className="text-[#000] max-w-[51.5rem] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">Create a unique username using letters and numbers.
+                    <p className="text-[#000] max-w-[51.5rem] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">Create
+                        a unique username using letters and numbers.
                         You can return your previous nickname within 14 days. Nicknames can be changed twice
                         every 14 days.</p>
-                    <input type="text" className="mt-4 pl-1 w-[51.5rem] h-[3.0625rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-gray-400"
+                    <input type="text"
+                           className="mt-4 pl-1 w-[51.5rem] h-[3.0625rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-gray-400"
                            value={channelNickName} onChange={(e) => {
                         setChannelNickName(e.target.value);
                         setChannelNickNameValid(validateChannelNickName(e.target.value));
@@ -199,43 +208,29 @@ const ChannelEditBlock = () => {
                     {!channelNameValid && <span className="span_error">Некорректное название</span>}
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0 mt-8">
-                        <h2 className="block font-semibold">Channel description</h2>
-                        <textarea className=" w-[51.5rem] mt-2 p-2 border rounded h-24 border-gray-400"
-                                  value={channelDescription} onChange={(e) => setChannelDescription(e.target.value)}
-                                  placeholder="Tell your audience about your channel. The description will appear in different sections of YouTube, including the About tab and search results."></textarea>
+                    <h2 className="block font-semibold">Channel description</h2>
+                    <textarea className=" w-[51.5rem] mt-2 p-2 border rounded h-24 border-gray-400"
+                              value={channelDescription} onChange={(e) => setChannelDescription(e.target.value)}
+                              placeholder="Tell your audience about your channel. The description will appear in different sections of YouTube, including the About tab and search results."></textarea>
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0  mt-8">
-                        <h2 className="block font-semibold">Channel URL</h2>
-                        <input type="text" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
-                               value=""/>
-                        <br/>
-                        <button className="mt-2 text-blue-600 hover:underline">copy</button>
+                    <h2 className="block font-semibold">Channel URL</h2>
+                    <input type="text" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
+                           value=""/>
+                    <br/>
+                    <button className="mt-2 text-blue-600 hover:underline">copy</button>
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0">
-                        <h2 className="block font-semibold">Link</h2>
-                        <button className="text-blue-600 hover:underline">Add link</button>
+                    <h2 className="block font-semibold">Link</h2>
+                    <button className="text-blue-600 hover:underline">Add link</button>
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0">
-                        <h2 className="block font-semibold">Contact information</h2>
-                        <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
-                            cooperation. Viewers can see the email address in the 'About' tab.</p>
-                        <input type="email" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
-                               placeholder="Email address"/>
+                    <h2 className="block font-semibold">Contact information</h2>
+                    <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
+                        cooperation. Viewers can see the email address in the 'About' tab.</p>
+                    <input type="email" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
+                           placeholder="Email address"/>
 
-
-
-                    {/*<div className="mt-3">
-                    <label className="block font-semibold">Channel logo</label>
-                    <div className="border p-4 rounded mt-2">
-                        <div className="flex items-center justify-center bg-gray-100 h-24 rounded mb-2">
-                            <img src="https://placehold.co/150x150" alt="Channel logo placeholder"/>
-                        </div>
-                        <p className="text-sm text-gray-500">It is recommended to upload an image size of
-                            150 x 150 pixels in PNG, GIF, BMP or JPEG format. Animated pictures to download
-                            it is forbidden. File size - no more than 1 MB.</p>
-                        <button className="mt-2 bg-gray-200 text-black px-4 py-2 rounded">Download</button>
-                    </div>
-                </div>*/}
                 </div>
             </form>
         </>

@@ -28,6 +28,11 @@ const nextConfig = {
                 hostname: '127.0.0.1',
                 port: '10000',
                 pathname: '**',
+            }, {
+                protocol: 'https',
+                hostname: 'myblobcont.blob.core.windows.net',
+                port: '',
+                pathname: '**',
             }
         ],
     },
