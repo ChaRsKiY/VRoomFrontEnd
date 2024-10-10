@@ -138,6 +138,10 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
          
         };
 
+  useEffect(() => {
+          closeReport();
+      }, []);
+
         useEffect(() => {
           console.log('Текущее значение displayR:', displayR);
       }, [displayR]);
@@ -169,17 +173,21 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
                         <RiPlayListAddFill size={22} />
                         <div className="font-[300]">Add to playlist</div>
                     </div>
-                    {/* <div className="flex items-center space-x-2.5">
-                        <BsShare size={22} />
-                        <div className="font-[300]">Share</div>
-                    </div> */}
+                    <button className="absolute bg-white border border-gray-300 rounded-md shadow-lg p-4 mt-2"
+                    style={{padding:'10px',zIndex:'105px',display:displayR}} onClick={() => closeReport()}>
+                        X
+                    </button>
                      <div className="flex items-center space-x-2.5">
                         <ShareComponent URL={newVideo.videoUrl} />
+                       
                     </div>
                     <div className="flex items-center space-x-2.5"  onClick={() => openReport()}>
                         <HiOutlineFlag size={22} />
+                        
                         <div className="font-[300]">Report</div>
                         {user? (
+                          <>
+                          
                         <div
               className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
               style={{
@@ -195,10 +203,14 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
                backgroundColor:'white',
                zIndex: 100,
               }}
-            >            
+            >    
+            <button className="absolute bg-white border border-gray-300 rounded-md shadow-lg p-4 mt-2"
+                    style={{padding:'10px',zIndex:'150px',display:displayR}} onClick={() => closeReport()}>
+                        X
+                    </button>        
                 <RadioButtonList userName={newVideo.tittle} onClose={closeReport}/>
          
-            </div>):<></>}
+            </div></>):<></>}
                     </div>
                 </div>
             </div></>):<></>}
