@@ -12,6 +12,7 @@ import{formatNumber} from "@/utils/format";
 import { useUser } from '@clerk/nextjs';
 import { signalRService } from '@/services/signalr.service';
 import RadioButtonList from '@/components/pages/comments/report';
+import ShareComponent  from './share'; 
 
 // interface IUnderVideoBlockProps {
 //     video: IPresentedVideo
@@ -168,9 +169,12 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
                         <RiPlayListAddFill size={22} />
                         <div className="font-[300]">Add to playlist</div>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    {/* <div className="flex items-center space-x-2.5">
                         <BsShare size={22} />
                         <div className="font-[300]">Share</div>
+                    </div> */}
+                     <div className="flex items-center space-x-2.5">
+                        <ShareComponent URL={newVideo.videoUrl} />
                     </div>
                     <div className="flex items-center space-x-2.5"  onClick={() => openReport()}>
                         <HiOutlineFlag size={22} />
