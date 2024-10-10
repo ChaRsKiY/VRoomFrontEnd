@@ -215,11 +215,11 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
     useEffect(() => {
     //    const connection = initializeConnection();
 
-  const handleMessage = (messageData: any) => {
+  const handleMessage = (messageType: string, payload: any) => {
 
-    console.log('Сообщение от SignalR сервера:', messageData);
+    console.log('Сообщение от SignalR сервера:', messageType);
 
-            if (messageData.type === 'new_commentpost') {
+            if (messageType === 'new_commentpost') {
 
                 getComments();
 
@@ -228,8 +228,8 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                     console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически
                 })
             }
-            if (messageData.type === 'update_commentpost') {
-                const upComment = messageData.payload;
+            if (messageType === 'update_commentpost') {
+                const upComment = payload;
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
@@ -238,8 +238,8 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                   )
                 );
               }
-              if (messageData.type === 'pin_commentpost') {
-                const upComment = messageData.payload;
+              if (messageType === 'pin_commentpost') {
+                const upComment = payload;
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
@@ -248,8 +248,8 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                   )
                 );
               }
-              if (messageData.type === 'like_commentpost') {
-                const upComment = messageData.payload;
+              if (messageType === 'like_commentpost') {
+                const upComment = payload;
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
@@ -258,8 +258,8 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                   )
                 );
               }
-              if (messageData.type === 'dislike_commentpost') {
-                const upComment = messageData.payload;
+              if (messageType === 'dislike_commentpost') {
+                const upComment = payload;
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
@@ -269,11 +269,17 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 );
               }
         };
-        signalRService.on('postcommentMessage', handleMessage);
+    //     signalRService.on('postcommentMessage', handleMessage);
 
-        return () => {
-             signalRService.off('postcommentMessage', handleMessage);
-       };
+    //     return () => {
+    //          signalRService.off('postcommentMessage', handleMessage);
+    //    };
+    signalRService.onMessageReceived(handleMessage);
+
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
+    };
     }, [postid]);
 
 

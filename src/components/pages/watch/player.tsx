@@ -33,11 +33,14 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
 
+    
+
     // Effects
     useEffect(() => {
         const video = videoRef.current;
 
         if (video) {
+              
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
@@ -63,6 +66,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
             };
         }
     }, []);
+
 
     useEffect(() => {
         const handleFullScreenChange = () => {

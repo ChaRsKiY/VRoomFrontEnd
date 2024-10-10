@@ -95,11 +95,11 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
 
 useEffect(() => {
 
-  const handleMessage = (messageData: any) => {
-    console.log('Сообщение от SignalR сервера:', messageData); 
+  const handleMessage = (messageType: string, payload: any) => {
+    console.log('Сообщение от SignalR сервера:', messageType); 
 
-  if (messageData.type === "new_answer") {
-    const a: IAnswerCommentVideo = messageData.payload;
+  if (messageType === "new_answer") {
+    const a: IAnswerCommentVideo = payload;
     if (a.commentVideo_Id === commentId) {
       setAnswers((prevAnswers) => {
         // Проверка, если ответ уже существует
@@ -116,8 +116,8 @@ useEffect(() => {
     }
   }
 
-    if (messageData.type === 'like_answer') {
-      const likedAnswer = messageData.payload;
+    if (messageType === 'like_answer') {
+      const likedAnswer =  payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
@@ -127,8 +127,8 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'dislike_answer') {
-      const likedAnswer = messageData.payload;
+    if (messageType === 'dislike_answer') {
+      const likedAnswer = payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
@@ -138,8 +138,8 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'update_answer') {
-      const upAnswer = messageData.payload;
+    if (messageType === 'update_answer') {
+      const upAnswer = payload;
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
           answer.id === upAnswer.id
@@ -150,10 +150,16 @@ useEffect(() => {
     }
   };
  
-    signalRService.on('answerMessage', handleMessage);
+    // signalRService.on('answerMessage', handleMessage);
 
+    // return () => {
+    //      signalRService.off('answerMessage', handleMessage);
+    // };
+    signalRService.onMessageReceived(handleMessage);
+
+    // Очистка подписки при размонтировании компонента
     return () => {
-         signalRService.off('answerMessage', handleMessage);
+        signalRService.offMessageReceived(handleMessage);
     };
 }, [ans , commentId]);
 

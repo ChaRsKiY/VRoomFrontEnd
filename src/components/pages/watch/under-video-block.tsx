@@ -1,3 +1,5 @@
+'use client';
+
 import React, {useEffect, useState} from 'react'
 import {IPresentedVideo} from "@/types/video.interface";
 import Image from "next/image";
@@ -9,6 +11,7 @@ import {IVideo} from "@/types/videoinfo.interface";
 import{formatNumber} from "@/utils/format";
 import { useUser } from '@clerk/nextjs';
 import { signalRService } from '@/services/signalr.service';
+import RadioButtonList from '@/components/pages/comments/report';
 
 // interface IUnderVideoBlockProps {
 //     video: IPresentedVideo
@@ -63,6 +66,7 @@ interface IUnderVideoBlockProps {
 const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideoBlockProps) => {
     const {user}=useUser();
     const[newVideo,setVideo]=useState<IVideo>();
+    const [displayR, setDisplayR] = useState('none');  
 
     const  dislike= async (id: number )=>{
         if(user){ 
@@ -73,9 +77,9 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
           });
     
           if (response.ok) {
-           console.log('успешный лайк');
+           console.log('дизлайк');
           } else {
-            console.error('Ошибка при like:', response.statusText);
+            console.error('Ошибка при dislike:', response.statusText);
           }
         
         } catch (error) {
@@ -91,7 +95,7 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
           });
     
           if (response.ok) {
-           console.log('успешный лайк');
+           console.log('лайк');
           } else {
             console.error('Ошибка при like:', response.statusText);
           }
@@ -102,29 +106,43 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
       }; 
 
       useEffect(() => {
+        const handleMessage = (messageType: string, payload: any) => {
+          console.log('Сообщение от SignalR сервера:', messageType,payload);
+    
+          if (messageType === 'up_video') {
+            const i= payload;
+            setVideo(i);
+          }
+        };
+    
+        signalRService.onMessageReceived(handleMessage);
 
-        const handleMessage = (messageData: any) => {
-          console.log('Сообщение от SignalR сервера:', messageData); 
-      
-          if (messageData.type === 'new_video') {
-            setVideo(messageData.payload);            
-          };
-      
-          
-          signalRService.on('videoMessage', handleMessage);
-      
-          return () => {
-               signalRService.off('videoMessage', handleMessage);
-          };
-        }
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
+    };
       }, [video]);
 
       useEffect(() => {
-          setVideo(video);                     
+          setVideo(video);                    
       }, [video]);
 
+      const openReport = () => {
+        setDisplayR('block');
+       };
+     
+       const closeReport = () => {
+        setDisplayR('none');
+        console.log('closing report');
+         
+        };
+
+        useEffect(() => {
+          console.log('Текущее значение displayR:', displayR);
+      }, [displayR]);
+
     return (
-        <div>
+        <div >
             {newVideo? (<>  
             <div className="py-2 text-xl font-[500]">{newVideo.tittle}</div>
             <div className="flex justify-between">
@@ -135,16 +153,16 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
                         <div className="font-[500]">{newVideo.channelName}</div>
                     </div>
                     <button className="px-2 py-0.5 rounded bg-neutral-400 text-white ml-5">Follow</button>
-                    <div className="ml-5 text-neutral-600">{formatNumber(newVideo.viewCount)} views</div>
+                    <div className="ml-5 text-neutral-600" title={newVideo.viewCount.toString()}>{formatNumber(newVideo.viewCount)} views</div>
                 </div>
                 <div className="flex items-center space-x-8">
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center space-x-2.5" onClick={() => closeReport()}>
                         <SlLike size={22} onClick={() => like(newVideo.id )}/>
-                        <div className="font-[300]">{formatNumber(newVideo.likeCount)}</div>
+                        <div className="font-[300]" title={newVideo.likeCount.toString()}>{formatNumber(newVideo.likeCount)}</div>
                     </div>
                     <div className="flex items-center space-x-2.5">
                         <SlDislike size={22} onClick={() => dislike(newVideo.id )}/>
-                        <div className="font-[300]">{formatNumber(newVideo.dislikeCount)}</div>
+                        <div className="font-[300]" title={newVideo.dislikeCount.toString()}>{formatNumber(newVideo.dislikeCount)}</div>
                     </div>
                     <div className="flex items-center space-x-2.5">
                         <RiPlayListAddFill size={22} />
@@ -154,9 +172,29 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
                         <BsShare size={22} />
                         <div className="font-[300]">Share</div>
                     </div>
-                    <div className="flex items-center space-x-2.5">
+                    <div className="flex items-center space-x-2.5"  onClick={() => openReport()}>
                         <HiOutlineFlag size={22} />
                         <div className="font-[300]">Report</div>
+                        {user? (
+                        <div
+              className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
+              style={{
+                paddingTop: '10px',
+                paddingBottom: '10px',
+                position: 'absolute',
+               marginTop:'-150px',
+               marginLeft:'-300px',
+               display: displayR,
+               maxWidth: '400px',
+               minWidth:'300px',
+               borderRadius:'20px',
+               backgroundColor:'white',
+               zIndex: 100,
+              }}
+            >            
+                <RadioButtonList userName={newVideo.tittle} onClose={closeReport}/>
+         
+            </div>):<></>}
                     </div>
                 </div>
             </div></>):<></>}
