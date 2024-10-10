@@ -15,9 +15,13 @@ const ChannelEditBlock = () => {
 
     const [channelBanner, setChannelBanner] = useState<File | null>();
     const [channelBannerPreview, setChannelBannerPreview] = useState<string>('https://placehold.co/150x100.svg');
+    const [chBannerPrevOld, setChBannerPrevOld] = useState<string>("");
+    const chBInputRef = useRef<HTMLInputElement | null>(null);
 
     const [profilePhoto, setProfilePhoto] = useState<File | null>();
     const [profilePhotoPreview, setProfilePhotoPreview] = useState<string>('https://placehold.co/120x80.svg');
+    const [profPhotoPrevOld, setProfPhotoPrevOld] = useState<string>("");
+    const profPhInputRef = useRef<HTMLInputElement | null>(null);
 
     const [channelNickName, setChannelNickName] = useState<string>("");
     const [channelNickNameValid, setChannelNickNameValid] = useState(true);
@@ -50,7 +54,9 @@ const ChannelEditBlock = () => {
 
             setId(data.id);
             setChannelBannerPreview(data.channelBanner);
+            setChBannerPrevOld(data.channelBanner);
             setProfilePhotoPreview(data.channelPlofilePhoto);
+            setProfPhotoPrevOld(data.channelPlofilePhoto);
             setChannelName(data.channelName);
             setChannelNameValid(true);
             setChannelDescription(data.description);
@@ -61,7 +67,7 @@ const ChannelEditBlock = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
+alert('error');
         if (channelNameValid) {
 
             const formData = new FormData();
@@ -72,7 +78,7 @@ const ChannelEditBlock = () => {
             if (profilePhoto) {
                 formData.append('profilePhoto', profilePhoto);// Добавляем изображение
             }
-          
+
             formData.append('id', id + '');
             formData.append('ChannelName', channelName);
             formData.append('Description', channelDescription);
@@ -89,25 +95,39 @@ const ChannelEditBlock = () => {
 
         }
     };
+// Функция для открытия окна выбора файла для первого поля
+    const handleButtonClick1 = () => {
+        if (chBInputRef.current) {
+            chBInputRef.current.click();
+        }
+    };
+
+    const handleButtonClick2 = () => {
+        if (profPhInputRef.current) {
+            profPhInputRef.current.click();
+        }
+    };
+
 
     const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const inpId = event.target.id;
 
         const file = event.target.files?.[0];
-        if (file) {
-            if (inpId == "file1") {
+
+        if (inpId == "file1") {
+            if (file) {
                 setChannelBanner(file);
                 setChannelBannerPreview(URL.createObjectURL(file));
-            }
-            if (inpId == "file2") {
+            } else setChannelBannerPreview(chBannerPrevOld);
+        }
+
+        if (inpId == "file2") {
+            if (file) {
                 setProfilePhoto(file);
                 setProfilePhotoPreview(URL.createObjectURL(file));
-            }
-        } else {
-            if (user) {
-                fetchChannel(user.id);
-            }
+            } else setProfilePhotoPreview(profPhotoPrevOld);
         }
+
     };
 
     const {t}: { t: ITranslationFunction } = useTranslation();
@@ -141,10 +161,14 @@ const ChannelEditBlock = () => {
                                 make the channel look attractive on
                                 all devices We recommend uploading an image of at least 2048 x 1152 pixels. Size
                                 file - no more than 6 MB.</p>
-                            <input type="file" className="block mt-3 ml-6  w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                            <input type="file" className="hidden mt-3 ml-6  w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file1"
-                                   onChange={handleAvatarChange}/>
+                                   onChange={handleAvatarChange} ref={chBInputRef}/>
+                            <button type="button"
+                                className=" mt-3 ml-6 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
+                                onClick={handleButtonClick1}>Update channel banner
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -165,12 +189,17 @@ const ChannelEditBlock = () => {
                                 At least 98 x 98 pixels in size in PNG or GIF format. Animated pictures
                                 upload it is forbidden. File size: no more than 4 MB. Remember that the image
                                 must comply with the rules YouTube community. </p>
-                            <input type="file" className="block mt-3 ml-6 w-full text-sm text-gray-500
+                            <input type="file" className="hidden mt-3 ml-6 w-full text-sm text-gray-500
         file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white
         hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file2"
-                                   onChange={handleAvatarChange}/>
+                                   onChange={handleAvatarChange} ref={profPhInputRef}/>
+                            <button type="button"
+                                    className=" mt-3 ml-6 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
+                                    onClick={handleButtonClick2}>Update profile picture
+                            </button>
+
                         </div>
                     </div>
                 </div>
