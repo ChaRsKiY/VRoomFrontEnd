@@ -167,12 +167,15 @@ useEffect(() => {
 
     if (messageType === 'new_post') {
       const newPost = payload;
-      console.log('1234567',newPost);
-      console.log('12',channelId);
       const i= newPost.channelSettingsId;
       if (i == channelId) {
-        console.log('1234567!!!',newPost);
-        setPosts((prevPosts) => [newPost, ...prevPosts]);
+        setPosts((prevPosts) => {
+          const postExists = prevPosts.some((post) => post.id === newPost.id);
+          if (!postExists) {
+            return [newPost, ...prevPosts];
+          }
+          return prevPosts;
+        });
       }
     }
 
@@ -206,11 +209,6 @@ useEffect(() => {
     }
   };
 
-  // signalRService.on('postMessage', handleMessage);
-
-  //    return () => {
-  //         signalRService.off('postMessage', handleMessage);
-  //   };
   signalRService.onMessageReceived(handleMessage);
 
     // Очистка подписки при размонтировании компонента
