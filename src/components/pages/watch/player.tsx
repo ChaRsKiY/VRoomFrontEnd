@@ -10,9 +10,10 @@ import {useUser} from "@clerk/nextjs";
 
 interface IVideoPlayerProps {
     src: string;
+    id:number;
 }
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -32,8 +33,53 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     const [isTheaterMode, setIsTheaterMode] = useState<boolean>(false);
     const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
+    const [viewed, setViewed] = useState(false);
 
+    const handleTimeUpdate = () => {
+        if (videoRef.current) {
+          setCurrentTime(videoRef.current.currentTime);
+          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
     
+          // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+          if (percentagePlayed > 40 && !viewed) {
+            setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+            increaseViewCount(); // Увеличиваем счётчик просмотров
+          }
+        }
+      };
+
+      const increaseViewCount = () => { 
+       alert("Просмотр засчитан!"); 
+       Viewed(id);
+      };
+
+      const Viewed = async (id: number ) => {   
+        try {     
+          const response = await fetch('https://localhost:7154/api/Video/view/'+id , {
+            method: 'PUT',
+          });
+    
+          if (response.ok) {
+           console.log('просмотр добавлен к счетчику');
+          } else {
+            console.error('Ошибка при view:', response.statusText);
+          }
+        
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+        }
+      }; 
+
+      useEffect(() => {
+        if (videoRef.current) {
+          videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+          
+          // Убираем обработчик при размонтировании компонента
+          return () => {
+            videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
+          };
+        }
+      }, [viewed,id]);
 
     // Effects
     useEffect(() => {
