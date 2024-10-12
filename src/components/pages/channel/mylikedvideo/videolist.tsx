@@ -5,7 +5,7 @@ import VideoCard from "@/components/pages/results/video-card";
 import {IVideo} from "@/types/videoinfo.interface";
 
 interface IBlockProps {
-    data: IVideo[]
+    data: IVideo[];
 }
 
 const VideoList: React.FC<IBlockProps> = ({ data }: IBlockProps) => {
