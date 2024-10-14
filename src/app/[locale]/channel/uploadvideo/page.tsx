@@ -71,38 +71,38 @@ const VideoUpload: FC<IHomeProps> = ({ params: { locale } }) => {
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t} />
                 <main className="pl-[25%] ml-[-5%] max-lg:pl-[70%] max-sm:pl-10">
-                    <div className="upload-section">
-                        <h1 className="text-4xl font-bold ">{t('Upload media')}</h1>
+    <div className="upload-section">
+        <h1 className="text-4xl font-bold">{t('Upload media')}</h1>
+        
+        <div className="upload-box" onClick={openFilePicker}>
+            <MdCloudUpload />
+            <p>{t('Click "Upload" to select a video file from your computer')}</p>
 
-                        <div className="upload-box" onClick={openFilePicker}>
-                            <MdCloudUpload />
-                            <p>Click "Upload" to select a video file from your computer</p>
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept="video/*"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+            />
+            <button type="button">
+                {t('select_file')}
+            </button>
+        </div>
 
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="video/*"
-                                onChange={handleFileChange}
-                                style={{ display: 'none' }}
-                            />
-                            <button type="button">
-                                {t('select_file')}
-                            </button>
-                        </div>
+        {fileURL && (
+            <div className="mt-5">
+                <ReactPlayer url={fileURL} controls={true} width="100%" height="auto" />
+            </div>
+        )}
 
-                        {fileURL && (
-                            <div className="mt-5">
-                                <ReactPlayer url={fileURL} controls={true} />
-                            </div>
-                        )}
+        {error && <p className="text-red-500">{error}</p>}
 
-                        {error && <p className="text-red-500">{error}</p>}
-
-                        <button type="button" className="submit-btn mt-5" onClick={handleNextPage}>
-                            {t('Next')}
-                        </button>
-                    </div>
-                </main>
+        <button type="button" className="submit-btn mt-5" onClick={handleNextPage}>
+            {t('Next')}
+        </button>
+    </div>
+</main>
             </div>
         </>
     );

@@ -1,5 +1,5 @@
 .upload-section {
-    text-align: center; /* Центрує вміст всередині секції */
+    text-align: center;
     padding: 50px;
     border: 1px solid #ccc;
     border-radius: 10px;
@@ -19,7 +19,7 @@
     cursor: pointer;
     position: relative;
     width: 100%;
-    max-width: 300px;
+    max-width: 300px; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -27,7 +27,7 @@
 }
 
 .upload-box svg {
-    width: 100px; /* Збільшуємо іконку */
+    width: 100px; 
     height: 100px;
     margin-bottom: 20px;
     color: #000000; /* Колір іконки */
@@ -60,4 +60,14 @@
 
 .submit-btn:hover {
     background-color: #3f444c;
+}
+@media (max-width: 768px) {
+    .upload-box {
+        max-width: 100%;
+        width: 90%;
+    }
+
+    .submit-btn {
+        width: 100%;
+    }
 }
