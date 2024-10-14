@@ -1,6 +1,6 @@
 // 'use client'
 
-import React ,{useState, useEffect }from 'react'
+import React from 'react'
 import initTranslations from "@/app/i18n";
 import UnlimitedScrollBlock from "@/components/pages/home/main/unlimited-scroll-block";
 import AsideHome from "@/components/pages/home/aside/aside";
