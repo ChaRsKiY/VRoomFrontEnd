@@ -42,7 +42,7 @@ const Watch: React.FC<IProps> = ({id}) => {
         <div className="flex w-full " style={{marginLeft:'80px'}}>
         {video ? (
           <div className="w-3/4 px-8">
-            <VideoPlayer src={video.videoUrl} />
+            <VideoPlayer src={video.videoUrl} id={video.id}/>
             <UnderVideoBlock video={video} />
             <UnderLine />
             <DescriptionBlock description={video.description} />

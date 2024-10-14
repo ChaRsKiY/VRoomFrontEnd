@@ -156,10 +156,10 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
    
     useEffect(() => {
   // Обработчик сообщений
-  const handleMessage = (messageData: any) => {
-    console.log('Сообщение от SignalR сервера:', messageData);
+  const handleMessage = (messageType: string, payload: any) => {
+    console.log('Сообщение от SignalR сервера:', messageType);
 
-            if (messageData.type === 'new_comment') {
+            if (messageType === 'new_comment') {
 
                 getComments();
 
@@ -168,8 +168,8 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
                     console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически
                 })
             }
-            if (messageData.type === 'update_comment') {
-                const upComment = messageData.payload;
+            if (messageType === 'update_comment') {
+                const upComment = payload;
                 setComments((prevComments) =>
                   prevComments.map((com) =>
                     com.id === upComment.id
@@ -180,12 +180,18 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
               }
         };
  
-     signalRService.on('commentMessage', handleMessage);
+    //  signalRService.on('commentMessage', handleMessage);
 
-     return () => {
-          signalRService.off('commentMessage', handleMessage);
+    //  return () => {
+    //       signalRService.off('commentMessage', handleMessage);
+    // };
+    signalRService.onMessageReceived(handleMessage);
+
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
     };
-    }, [videoid]);
+    }, [videoid, comments]);
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {

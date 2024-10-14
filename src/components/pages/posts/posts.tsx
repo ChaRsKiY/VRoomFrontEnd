@@ -162,22 +162,25 @@ const deletePost = async (id: number ) => {
 
 useEffect(() => {
   // Обработчик сообщений
-  const handleMessage = (messageData: any) => {
-    console.log('Сообщение от SignalR сервера:', messageData);
+  const handleMessage = (messageType: string, payload: any) => {
+    console.log('Сообщение от SignalR сервера:', messageType);
 
-    if (messageData.type === 'new_post') {
-      const newPost = messageData.payload;
-      console.log('1234567',newPost);
-      console.log('12',channelId);
+    if (messageType === 'new_post') {
+      const newPost = payload;
       const i= newPost.channelSettingsId;
       if (i == channelId) {
-        console.log('1234567!!!',newPost);
-        setPosts((prevPosts) => [newPost, ...prevPosts]);
+        setPosts((prevPosts) => {
+          const postExists = prevPosts.some((post) => post.id === newPost.id);
+          if (!postExists) {
+            return [newPost, ...prevPosts];
+          }
+          return prevPosts;
+        });
       }
     }
 
-    if (messageData.type === 'new_likepost') {
-      const likedAnswer = messageData.payload;
+    if (messageType === 'new_likepost') {
+      const likedAnswer = payload;
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === likedAnswer.id
@@ -187,8 +190,8 @@ useEffect(() => {
       );
     }
 
-    if (messageData.type === 'new_dislikepost') {
-      const dislikedAnswer = messageData.payload;
+    if (messageType === 'new_dislikepost') {
+      const dislikedAnswer = payload;
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === dislikedAnswer.id
@@ -198,18 +201,19 @@ useEffect(() => {
       );
     }
 
-    if (messageData.type === 'post_deleted') {
-      const deletedPost = messageData.payload;
+    if (messageType === 'post_deleted') {
+      const deletedPost = payload;
       setPosts((prevPosts) =>
         prevPosts.filter((post) => post.id !== deletedPost.id)
       );
     }
   };
 
-  signalRService.on('postMessage', handleMessage);
+  signalRService.onMessageReceived(handleMessage);
 
-     return () => {
-          signalRService.off('postMessage', handleMessage);
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
     };
 }, [posts, channelId]);
 

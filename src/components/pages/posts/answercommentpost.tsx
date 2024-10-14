@@ -164,11 +164,11 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
 
 useEffect(() => {
 
-  const handleMessage = (messageData: any) => {
-    console.log('Сообщение от SignalR сервера:', messageData);
+  const handleMessage = (messageType: string, payload: any) => {
+    console.log('Сообщение от SignalR сервера:', messageType);
  
-    if (messageData.type === 'new_answerpost') {    
-      const a:IAnswerCommentPost=messageData.payload;
+    if (messageType === 'new_answerpost') {    
+      const a:IAnswerCommentPost= payload;
       if(a.commentPost_Id===commentId)
    { 
     setAnswers((prevAnswers) => {        
@@ -187,8 +187,8 @@ useEffect(() => {
     }
   }
 
-    if (messageData.type === 'like_answerpost') {
-      const likedAnswer = messageData.payload;
+    if (messageType === 'like_answerpost') {
+      const likedAnswer = payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
@@ -198,8 +198,8 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'dislike_answerpost') {
-      const likedAnswer = messageData.payload;
+    if (messageType === 'dislike_answerpost') {
+      const likedAnswer = payload;
       console.log('*/*/*/*=',likedAnswer);
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
@@ -209,8 +209,8 @@ useEffect(() => {
         )
       );
     }
-    if (messageData.type === 'update_answerpost') {
-      const upAnswer = messageData.payload;
+    if (messageType === 'update_answerpost') {
+      const upAnswer = payload;
       setAnswers((prevAnswers) =>
         prevAnswers.map((answer) =>
           answer.id === upAnswer.id
@@ -220,11 +220,17 @@ useEffect(() => {
       );
     }
   };
-  signalRService.on('postanswerMessage', handleMessage);
+//   signalRService.on('postanswerMessage', handleMessage);
 
-  return () => {
-       signalRService.off('postanswerMessage', handleMessage);
- };
+//   return () => {
+//        signalRService.off('postanswerMessage', handleMessage);
+//  };
+signalRService.onMessageReceived(handleMessage);
+
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
+    };
 }, [ans , commentId]);
 
 const openReport = () => {
