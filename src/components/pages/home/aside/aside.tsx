@@ -1,9 +1,9 @@
-import React from 'react'
+
+import React, {useState, ReactNode} from 'react'
 import CategoryBlock from "@/components/pages/home/aside/category";
 import {IoMdHome} from "react-icons/io";
 import {SiYoutubeshorts} from "react-icons/si";
 import {
-    MdExpandMore,
     MdFeedback,
     MdSubscriptions,
     MdWatchLater
@@ -16,12 +16,15 @@ import {FaFlag} from "react-icons/fa6";
 import SmallCategoryBlock from "@/components/pages/home/aside/small-category";
 import {ITranslationFunction} from "@/types/translation.interface";
 import MiniFooter from "@/components/pages/home/aside/mini-footer";
+import CategorySubscription from './category-subscription';
+
 
 interface IAsideHomeProps {
     t: ITranslationFunction
 }
 
 const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
+
     const mainPageHomeCategories = [
         { icon: <IoMdHome />, name: t("categories:home"), path: "/" },
         { icon: <SiYoutubeshorts />, name: t("categories:shorts"), path: "/shorts" },
@@ -36,13 +39,6 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
         { icon: <FaHistory />, name: t("categories:history"), path: "/history" },
     ]
 
-    const mainPageFollowedCategories = [
-        { iconPath: "https://yt3.ggpht.com/5oUY3tashyxfqsjO5SGhjT4dus8FkN9CsAHwXWISFrdPYii1FudD4ICtLfuCw6-THJsJbgoY=s176-c-k-c0x00ffffff-no-rj-mo", name: "PewDiePie", path: "/", iconClassNames: "rounded-full" },
-        { iconPath: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo", name: "MrBeast", path: "/playlists", iconClassNames: "rounded-full" },
-        { iconPath: "https://yt3.googleusercontent.com/P4iKxY5nqAgfAOkwHGxxPPDEc14uoOCQveOPG5nyEE8evz_KCwQfrKRCcqXpEnDMcORmFGdoww=s160-c-k-c0x00ffffff-no-rj", name: "Yoj", path: "/playlist?list=WL", iconClassNames: "rounded-full" },
-        { iconPath: "https://yt3.googleusercontent.com/ytc/AIdro_n8xc4U_fWTlscOwQZgzW1IvQmncTqYpTZpwg1IiFRyOE8=s176-c-k-c0x00ffffff-no-rj-mo", name: "EZ 25", path: "/mylikedvideo", iconClassNames: "rounded-full" },
-        { iconPath: "https://yt3.googleusercontent.com/ytc/AIdro_kkYKpC-P8upOa1u4_2QTVT_lyKdur2vwZKMdZ3lKfNVko=s176-c-k-c0x00ffffff-no-rj-mo", name: "OneTwo", path: "/history", iconClassNames: "rounded-full" },
-    ]
 
     const mainPageCategories = [
         { iconPath: "/", name: t("categories:trending"), path: "/popular" },
@@ -57,6 +53,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
         { icon: <MdFeedback />, name: t("categories:feedback"), path: "/feedback" },
         { icon: <FaFlag />, name: t("categories:report_history"), path: "/reporthistory" },
     ]
+
 
     return (
         <div>
@@ -74,14 +71,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
-                    <CategoryBlock data={mainPageFollowedCategories} title="Followed"/>
-                    <div className="flex flex-col space-y-1 mt-1 hover:cursor-pointer">
-                        <div
-                            className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
-                            <div className="text-2xl"><MdExpandMore/></div>
-                            <div>More</div>
-                        </div>
-                    </div>
+                     <CategorySubscription />
 
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>

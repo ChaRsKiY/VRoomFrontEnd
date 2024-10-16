@@ -47,7 +47,7 @@ const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
                     </button></div>
                     <div>
                     
-                    <button onClick={onDelete}>Delete subscription</button>
+                    <button onClick={onDelete}>Cancel subscription</button>
 
                     </div>
                 </div>
