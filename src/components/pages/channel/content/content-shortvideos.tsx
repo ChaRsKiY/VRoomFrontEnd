@@ -6,11 +6,21 @@ import Image from "next/image";
 import {IContentVideo} from "@/types/videoDTO.interface";
 import axios from "axios";
 import {formatDate} from "@/utils/dateformat";
+import {MdOutlineAnalytics, MdOutlineInsertComment, MdOutlineModeEditOutline} from "react-icons/md";
+import {RiYoutubeLine} from "react-icons/ri";
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {IoMdArrowDropdown} from "react-icons/io";
+import {FaFilter} from "react-icons/fa";
 
 const ContentShortVideos = () => {
     const {user} = useUser(); // Получаем текущего пользователя
     const [data, setData] = useState<IContentVideo[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [activeId, setActiveId] = useState<number | null>(null);
+    const handleClick = (id: number) => {
+        setActiveId(activeId === id ? null : id);
+    };
 
     useEffect(() => {
         if (user && isLoading) {// Если пользователь существует и данные еще не загружены
@@ -47,8 +57,8 @@ const ContentShortVideos = () => {
     } else
         return (<>
                 <div className="flex items-center space-x-4 mb-6 mt-3">
-                    <button className="flex items-center text-gray-700 border border-gray-300 px-3 py-1 rounded-md">
-                        <i className="fas fa-filter mr-2"></i> Filter
+                    <button className="flex items-center text-gray-700 border border-gray-300 px-3 py-1 rounded-mdp-1">
+                        <FaFilter className="pr-0.5" /> Filter
                     </button>
                 </div>
                 <table className="table-auto w-full  bg-white shadow-md rounded-lg">
@@ -68,9 +78,35 @@ const ContentShortVideos = () => {
                     {data.map((el, key) => (
                         <tr key={key} className="border-b text-left border-gray-200 hover:bg-gray-100">
                             <td className="py-3 px-3 text-left"><input type="checkbox" className="w-5 h-5"/></td>
-                            <td className="py-3 px-3  flex items-center">
-                                <Image src={el.cover} width={115} height={100} alt="Video Thumbnail" className="mr-4"/>
-                                <span>{el.tittle}</span>
+                            <td className="py-3 px-3 flex">
+                                <Image src={el.cover} width={115} height={100} alt="Video Thumbnail" className="mr-1.5 rounded-lg"/>
+                                <div key={el.id} className="relative w-full" onMouseEnter={() => setActiveId(el.id)}
+                                     onMouseLeave={() => setActiveId(null)}>
+                                    <div className="w-full h-full p-1 flex flex-col">
+                                        <span>{el.tittle}</span>
+                                        <span className="w-max">{el.description}</span>
+                                    </div>
+                                    {activeId === el.id && (
+                                        <div className="absolute top-0 left-0 bg-white w-full h-full p-1">
+                                            <span>{el.tittle}</span>
+                                            <div className="flex flex-row items-center justify-center mt-2">
+                                                <MdOutlineModeEditOutline
+                                                    onClick={() => alert(el.tittle + " / " + el.id)} title="Edit"
+                                                    className="w-1/4 h-7 cursor-pointer"/>
+                                                <MdOutlineAnalytics title="Analitics"
+                                                                    className="w-1/4 h-7 cursor-pointer"/>
+                                                <MdOutlineInsertComment title="Comments"
+                                                                        className="w-1/4 h-7 cursor-pointer"/>
+                                                <RiYoutubeLine title="Short" className="w-1/4 h-7 cursor-pointer"/>
+                                                <BsThreeDotsVertical title="All" className="w-1/4 h-7 cursor-pointer"/>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="flex">
+                                    <IoMdArrowDropdown className="w-[1.8rem] h-[1.8rem] cursor-pointer" key={el.id}
+                                                       onClick={() => handleClick(el.id)}/>
+                                </div>
                             </td>
                             {el?.visibility === true && (<td className="py-3 px-3 ">Public</td>)}
                             {el?.visibility === false && (<td className="py-3 px-3 ">Private</td>)}
