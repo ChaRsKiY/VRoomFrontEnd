@@ -2,6 +2,8 @@ import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
+import Link from "next/link";
+import ContentVideos from "@/components/pages/channel/content/content-videos";
 
 interface IContentProps {
     params: { locale: string; }
@@ -15,41 +17,32 @@ const channelPage = async ({params: {locale}}:IContentProps) => {
             <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">
                 <HeaderHome t={t}/>
             </div>
-            <div className="w-60 bg-white border-r border-gray-200 h-screen">
+            <div className="w-52 bg-white border-r border-gray-200 h-screen overflow-hidden">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[0%] max-lg:pl-[12%] max-sm:pl-0 pt-20">
-
+            <div className="pl-[0%] max-lg:pl-[12%] w-full max-sm:pl-0 pt-20">
                 <div className="flex-1 p-6">
                     <h1 className="text-2xl font-semibold mb-6">Content on the channel</h1>
-
                     <div className="flex items-center space-x-4 text-sm">
-                        <button className="text-gray-700 border-b-2 border-gray-900">Video</button>
-                        <button className="text-gray-700">Shorts</button>
-                        <button className="text-gray-700">Broadcasts</button>
-                        <button className="text-gray-700">Recording</button>
-                        <button className="text-gray-700">Playlists</button>
-                        <button className="text-gray-700">Podcasts</button>
-                        <button className="text-gray-700">Advertising campaigns</button>
+                        <p className="text-gray-500 border-b-2 border-gray-800 hover:text-gray-800 pb-2">Video</p>
+
+                        <Link target={'_self'} href={"/channel/editing/content/shorts"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Shorts</Link>
+                        <Link target={'_self'} href={"/channel/editing/content/broadcasts"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Broadcasts</Link>
+                        <Link target={'_self'} href={"/channel/editing/content/recording"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Recording</Link>
+                        <Link target={'_self'} href={"/channel/editing/content/playlists"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Playlists</Link>
+
+                        <Link target={'_self'} href={"/channel/editing/content/podcasts"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Podcasts</Link>
+                        <Link target={'_self'} href={"/channel/editing/content/advertising_campaigns"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Advertising campaigns</Link>
                     </div>
 
-                    <hr className="my-4 border-gray-300"/>
+                    <ContentVideos/>
 
-                    <div className="flex items-center space-x-4 mb-6">
-                        <button className="flex items-center text-gray-700 border border-gray-300 px-3 py-1 rounded-md">
-                            <i className="fas fa-filter mr-2"></i> Filter
-                        </button>
-                        <button className="flex items-center text-gray-700 px-3 py-1">
-                            Video
-                        </button>
-                    </div>
-
-
-                    <div className="flex flex-col items-center justify-center h-96">
-                        <img src="https://placehold.co/120x120" alt="No content illustration" className="mb-4"/>
-                        <p className="text-gray-500">There's nothing here yet.</p>
-                        <button className="bg-black text-white px-6 py-2 rounded-md mt-4">Add video</button>
-                    </div>
                 </div>
             </div>
         </>

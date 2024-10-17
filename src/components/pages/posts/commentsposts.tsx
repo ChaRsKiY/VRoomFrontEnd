@@ -240,7 +240,7 @@ const handleInputChange = (index: number, value: string) => {
               alt=""
               width="40px"
               height="40px"
-              style={{ borderRadius: '50%', marginRight: '10px' }}
+              style={{ borderRadius: '50%', marginRight: '10px', minHeight:'40px' }}
             /></div>
             <div style={{width:'100%'}}>                           
             <div style={{paddingLeft:'0px' }}>
@@ -252,7 +252,7 @@ const handleInputChange = (index: number, value: string) => {
              <div style={{ display: 'flex', alignItems: 'center',marginLeft:'50px' }}>
                   {comment.isPinned && <FaThumbtack size={14} color="brown" 
                   onClick={() => unPin(comment.id)} 
-                  title="Unpin comment" />} {/* Иконка булавки */}
+                  title="Unpin comment" />} 
                </div>     
             </div>
              </div>
@@ -321,7 +321,8 @@ const handleInputChange = (index: number, value: string) => {
                    <>
                    <button  onClick={() => toPin(comment.id)}>
                    <MdPushPin size={18} color="gray" title="Pin comment" />
-                   </button>   </>)}
+                   </button>  
+                    </>)}
                    {comment.isEdited    &&(
                    <>
 

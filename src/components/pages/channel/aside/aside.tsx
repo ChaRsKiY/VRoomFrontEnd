@@ -49,8 +49,8 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
 
     return (
         <div>
-            <div className="fixed bottom-0 top-20 w-[20%] overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
-                <div className="pr-[4%] ml-[-3%]">
+            <div className="fixed bottom-0 top-20  overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
+                <div className=" ml-[-3%]">
                     <UserCategoryBlock/>
 
 

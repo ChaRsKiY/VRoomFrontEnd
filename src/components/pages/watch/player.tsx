@@ -8,11 +8,16 @@ import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import {auth} from "@clerk/nextjs/server";
 import {useUser} from "@clerk/nextjs";
 
+class WatchHistory {
+    constructor(public videoId: number, public lastViewedPosition: number) {}
+  }
+
 interface IVideoPlayerProps {
     src: string;
+    id:number;
 }
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -32,12 +37,123 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
     const [isTheaterMode, setIsTheaterMode] = useState<boolean>(false);
     const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
+    const [viewed, setViewed] = useState(false);
+    const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
+
+    const handleTimeUpdate = () => {
+        if (videoRef.current) {
+          setCurrentTime(videoRef.current.currentTime);
+          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+    
+          // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+          if (percentagePlayed > 40 && !viewed) {
+            setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+            increaseViewCount(); // Увеличиваем счётчик просмотров
+          }
+        }
+      };
+
+      const saveWatchHistory = () => {
+        if (videoRef.current) {
+          const lastViewedPosition = videoRef.current.currentTime;
+    
+          // Добавляем или обновляем историю просмотра
+          setWatchHistory(prevHistory => {
+            const existingVideo = prevHistory.find(history => history.videoId === id);
+    
+            if (existingVideo) {
+              // Обновляем время последнего просмотра
+              return prevHistory.map(history =>
+                history.videoId === id
+                  ? { ...history, lastViewedPosition }
+                  : history
+              );
+            } else {
+              // Добавляем новое видео в историю
+              return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+            }
+          });
+    
+          console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
+        }
+      };
+
+      const handleVideoPauseOrEnd = () => {
+        saveWatchHistory();
+      };
+    
+      // Обработка закрытия вкладки или перезагрузки страницы
+      useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+          saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
+          event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)
+        };
+    
+        if (videoRef.current) {
+          const video = videoRef.current;
+          
+          // Подписка на события видео
+          video.addEventListener('timeupdate', handleTimeUpdate);
+          video.addEventListener('pause', handleVideoPauseOrEnd);
+          video.addEventListener('ended', handleVideoPauseOrEnd);
+        }
+    
+        // Подписка на событие закрытия вкладки
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    
+        // Очистка событий при размонтировании
+        return () => {
+          if (videoRef.current) {
+            const video = videoRef.current;
+            video.removeEventListener('timeupdate', handleTimeUpdate);
+            video.removeEventListener('pause', handleVideoPauseOrEnd);
+            video.removeEventListener('ended', handleVideoPauseOrEnd);
+          }
+    
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+      }, [id]);
+    
+
+      const increaseViewCount = () => { 
+       alert("Просмотр засчитан!"); 
+       Viewed(id);
+      };
+
+      const Viewed = async (id: number ) => {   
+        try {     
+          const response = await fetch('https://localhost:7154/api/Video/view/'+id , {
+            method: 'PUT',
+          });
+    
+          if (response.ok) {
+           console.log('просмотр добавлен к счетчику');
+          } else {
+            console.error('Ошибка при view:', response.statusText);
+          }
+        
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+        }
+      }; 
+
+      useEffect(() => {
+        if (videoRef.current) {
+          videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+          
+          // Убираем обработчик при размонтировании компонента
+          return () => {
+            videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
+          };
+        }
+      }, [viewed,id]);
 
     // Effects
     useEffect(() => {
         const video = videoRef.current;
 
         if (video) {
+              
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
@@ -63,6 +179,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src }) => {
             };
         }
     }, []);
+
 
     useEffect(() => {
         const handleFullScreenChange = () => {

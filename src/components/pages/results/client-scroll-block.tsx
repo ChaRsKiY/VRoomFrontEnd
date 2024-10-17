@@ -2,13 +2,16 @@
 
 import React, {useEffect, useRef, useState} from 'react'
 import {useInView} from "framer-motion";
-import {IPresentedVideo} from "@/types/video.interface";
-import {data} from "@/testdata/videos";
+import {IVideo} from "@/types/videoinfo.interface";
 import ResultsVideoSkeleton from "@/components/styled/results-video-skeleton";
 import VideoCard from "@/components/pages/results/video-card";
 
-const ClientScrollBlock: React.FC = () => {
-    const [videos, setVideos] = useState<IPresentedVideo[]>([])
+
+interface IProps {
+    v: IVideo[]
+}
+const ClientScrollBlock: React.FC<IProps> = ({v}) => {
+    const [videos, setVideos] = useState<IVideo[]>([])
 
     const ref = useRef<HTMLDivElement | null>(null)
     const isInView: boolean = useInView(ref)
@@ -16,7 +19,7 @@ const ClientScrollBlock: React.FC = () => {
 
     useEffect(() => {
         if (isInView) {
-            setVideos([...videos, ...data])
+            setVideos([...videos, ...v])
         }
     }, [isInView])
 
@@ -44,3 +47,4 @@ const ClientScrollBlock: React.FC = () => {
 }
 
 export default ClientScrollBlock
+

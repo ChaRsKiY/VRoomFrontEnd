@@ -17,6 +17,7 @@ const EditCommentPost : React.FC<MyCommentProps> = ( {comment, onClose}) => {
   const [isHovered, setIsHovered] = useState(false);
   const [disabled, setDisabled] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [com, setComment] = useState<ICommentPost>();
   
 
     const handleFocus = () => {
@@ -36,19 +37,20 @@ const EditCommentPost : React.FC<MyCommentProps> = ( {comment, onClose}) => {
     };
 
     const handleSubmit = async () => {
-
+      if(com!=null){ 
       const comment2: ICommentPost = {
-        id:comment.id,
-        userId: comment.userId,  
-        postId: comment.postId,  
-        channelBanner:comment.channelBanner, 
+       
+        id:com?.id,
+        userId: com?.userId,  
+        postId: com?.postId,  
+        channelBanner:com?.channelBanner, 
         comment: inputValue,
-        date: comment.date,  
-        likeCount: comment.likeCount,
-        dislikeCount: comment.dislikeCount,
-        isPinned: comment.isPinned,
+        date: com?.date,  
+        likeCount: com?.likeCount,
+        dislikeCount: com?.dislikeCount,
+        isPinned: com?.isPinned,
         isEdited: true,
-        userName:comment.userName
+        userName:com?.userName
       };
       try {
         const response = await fetch('https://localhost:7154/api/CommentPost/update', {
@@ -69,12 +71,14 @@ const EditCommentPost : React.FC<MyCommentProps> = ( {comment, onClose}) => {
       } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
       }
+    }
     };
 
   useEffect(() => {    
     setTimeout(() => {
         inputRef.current?.focus(); // Переводим фокус на input
-      }, 0);     
+      }, 0);  
+      setComment(comment);   
   },[comment]);
 
 

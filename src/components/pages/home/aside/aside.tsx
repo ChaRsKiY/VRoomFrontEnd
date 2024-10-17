@@ -32,7 +32,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
         { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/channel" },
         { icon: <RiPlayList2Fill />, name: t("categories:playlists"), path: "/playlists" },
         { icon: <MdWatchLater />, name: t("categories:watch_later"), path: "/playlist?list=WL" },
-        { icon: <BiSolidLike />, name: t("categories:liked_videos"), path: "/playlist?list=LL" },
+        { icon: <BiSolidLike />, name: t("categories:liked_videos"), path: "/mylikedvideo" },
         { icon: <FaHistory />, name: t("categories:history"), path: "/history" },
     ]
 
@@ -40,7 +40,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
         { iconPath: "https://yt3.ggpht.com/5oUY3tashyxfqsjO5SGhjT4dus8FkN9CsAHwXWISFrdPYii1FudD4ICtLfuCw6-THJsJbgoY=s176-c-k-c0x00ffffff-no-rj-mo", name: "PewDiePie", path: "/", iconClassNames: "rounded-full" },
         { iconPath: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo", name: "MrBeast", path: "/playlists", iconClassNames: "rounded-full" },
         { iconPath: "https://yt3.googleusercontent.com/P4iKxY5nqAgfAOkwHGxxPPDEc14uoOCQveOPG5nyEE8evz_KCwQfrKRCcqXpEnDMcORmFGdoww=s160-c-k-c0x00ffffff-no-rj", name: "Yoj", path: "/playlist?list=WL", iconClassNames: "rounded-full" },
-        { iconPath: "https://yt3.googleusercontent.com/ytc/AIdro_n8xc4U_fWTlscOwQZgzW1IvQmncTqYpTZpwg1IiFRyOE8=s176-c-k-c0x00ffffff-no-rj-mo", name: "EZ 25", path: "/playlist?list=LL", iconClassNames: "rounded-full" },
+        { iconPath: "https://yt3.googleusercontent.com/ytc/AIdro_n8xc4U_fWTlscOwQZgzW1IvQmncTqYpTZpwg1IiFRyOE8=s176-c-k-c0x00ffffff-no-rj-mo", name: "EZ 25", path: "/mylikedvideo", iconClassNames: "rounded-full" },
         { iconPath: "https://yt3.googleusercontent.com/ytc/AIdro_kkYKpC-P8upOa1u4_2QTVT_lyKdur2vwZKMdZ3lKfNVko=s176-c-k-c0x00ffffff-no-rj-mo", name: "OneTwo", path: "/history", iconClassNames: "rounded-full" },
     ]
 

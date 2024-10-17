@@ -15,6 +15,7 @@ import {SessionResource} from "@clerk/types";
 import {useRouter} from "next/navigation";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {RiLogoutCircleRLine} from "react-icons/ri";
+import Link from "next/link";
 
 export function AccountSwitch() {
     const { client, setActive } = useClerk()
@@ -78,6 +79,7 @@ export function AccountSwitch() {
                 </div>
                 <div className="flex justify-center">
                     <button onClick={() => push("/auth/signin")} className="text-blue-400">Add new user</button>
+   
                 </div>
             </SheetContent>
         </Sheet>

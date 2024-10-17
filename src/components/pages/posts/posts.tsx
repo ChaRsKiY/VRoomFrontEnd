@@ -10,6 +10,8 @@ import {IPost} from "@/types/post.interface";
 import Link from "next/link";
 import { BiTrash } from 'react-icons/bi';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
+import { signalRService } from '@/services/signalr.service';
 
 interface IPropsPost {
  channelId:  number,
@@ -29,7 +31,7 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const textAreasRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(posts.length).fill(false));
   const [isTextOverflowing, setIsTextOverflowing] = useState<boolean[]>([]);
-  const [socket, setSocket] = useState<WebSocket | null>(null); 
+ // const [socket, setSocket] = useState<WebSocket | null>(null); 
   const [deleteMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null);
 
 
@@ -156,76 +158,66 @@ const deletePost = async (id: number ) => {
     }
   };
 
+
+
 useEffect(() => {
+  // Обработчик сообщений
+  const handleMessage = (messageType: string, payload: any) => {
+    console.log('Сообщение от SignalR сервера:', messageType);
 
-  const ws = new WebSocket('wss://localhost:7154');
-  ws.onopen = () => {
-    console.log('WebSocket соединение установлено');
-    // Например, можно отправить начальный запрос или уведомление
-    ws.send(JSON.stringify({ type: 'subscribe', posts,channelId }));
-  };
-  ws.onmessage = (event) => {
-    const messageData = JSON.parse(event.data);
-    console.log('Сообщение от WebSocket сервера:', messageData);
- 
-    if (messageData.type === 'new_post') {    
-      const a:IPost=messageData.payload;
-      if(a.channelSettingsId===channelId)
-      { 
-    setPosts((prevPosts) => {        
-        return [ a,  ...prevPosts,];
-      });
-  
-     }
+    if (messageType === 'new_post') {
+      const newPost = payload;
+      const i= newPost.channelSettingsId;
+      if (i == channelId) {
+        setPosts((prevPosts) => {
+          const postExists = prevPosts.some((post) => post.id === newPost.id);
+          if (!postExists) {
+            return [newPost, ...prevPosts];
+          }
+          return prevPosts;
+        });
+      }
     }
-    if (messageData.type === 'new_likepost') {
-      const likedAnswer = messageData.payload;
-      console.log('*/*/*/*=',likedAnswer);
+
+    if (messageType === 'new_likepost') {
+      const likedAnswer = payload;
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === likedAnswer.id
-            ? { ...post, likeCount: likedAnswer.likeCount } // Обновляем количество лайков
-            : post
-        )
-      );
-    }
-    if (messageData.type === 'new_dislikepost') {
-      const likedAnswer = messageData.payload;
-      console.log('*/*/*/*=',likedAnswer);
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.id === likedAnswer.id
-            ? { ...post, dislikeCount: likedAnswer.dislikeCount } // Обновляем количество лайков
+            ? { ...post, likeCount: likedAnswer.likeCount }
             : post
         )
       );
     }
 
-    if (messageData.type === 'post_deleted') {
-      const likedAnswer = messageData.payload;
-      console.log('*/*/*/*=',likedAnswer);
+    if (messageType === 'new_dislikepost') {
+      const dislikedAnswer = payload;
       setPosts((prevPosts) =>
-        prevPosts.filter((post) => post.id !== likedAnswer.id) // Удаляем пост с нужным id
+        prevPosts.map((post) =>
+          post.id === dislikedAnswer.id
+            ? { ...post, dislikeCount: dislikedAnswer.dislikeCount }
+            : post
+        )
+      );
+    }
+
+    if (messageType === 'post_deleted') {
+      const deletedPost = payload;
+      setPosts((prevPosts) =>
+        prevPosts.filter((post) => post.id !== deletedPost.id)
       );
     }
   };
-  ws.onclose = () => {
-    console.log('WebSocket соединение закрыто');
-  };
-  ws.onerror = (error) => {
-    console.error('Ошибка WebSocket:', error);
-  };
-  // Сохраняем WebSocket в состоянии
-  setSocket(ws);
-  // Закрываем WebSocket при размонтировании компонента
-  return () => {
-    ws.close();
-  };
-}, [posts , channelId]);
 
-  // Получаем посты по channelId
-  useEffect(() => {
-    const fetchPosts = async () => {
+  signalRService.onMessageReceived(handleMessage);
+
+    // Очистка подписки при размонтировании компонента
+    return () => {
+        signalRService.offMessageReceived(handleMessage);
+    };
+}, [posts, channelId]);
+
+ const fetchPosts = async () => {
       try {
         const response = await fetch(`https://localhost:7154/api/Post/getbychannelid/`+ channelId);
         if (!response.ok) {
@@ -239,6 +231,9 @@ useEffect(() => {
         setLoading(false);
       }
     };
+
+  // Получаем посты по channelId
+  useEffect(() => {
 
     fetchPosts();
     getUser();
@@ -263,6 +258,7 @@ useEffect(() => {
       })); // Вызываем getComments для каждого поста
     });
     console.log(allComments);
+   
   }, [commentsByPost]);
       
   const toggleExpand = (index: number) => {
@@ -282,6 +278,7 @@ useEffect(() => {
     });
     setIsTextOverflowing(overflowStatuses); // Обновляем состояние
     setExpandedStates(Array(posts.length).fill(false)); 
+  
   }, [posts]);
 
   // Отображаем состояние загрузки или ошибки

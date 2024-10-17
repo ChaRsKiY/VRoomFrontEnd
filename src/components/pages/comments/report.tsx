@@ -29,6 +29,7 @@ const RadioButtonList  : React.FC<MyProps>=( {userName, onClose} ) => {
       
       alert("In a complaint about "+name+" you have chosen: "+ selectedOption);
       onClose();
+      console.log("close)");
     } else {
       alert(`Please select an option `);
     }
