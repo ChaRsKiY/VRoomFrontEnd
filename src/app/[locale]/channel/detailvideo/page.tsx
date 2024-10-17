@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
 import { FC } from 'react';
-import { useRouter } from 'next/navigation';
 import initTranslations from "@/app/i18n";
 //import "@/app/[locale]/channel/uploadvideo/style.css";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
