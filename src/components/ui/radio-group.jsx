@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 
 export const RadioGroup = ({ value, onValueChange, children, className }) => {
   return (
     <div className={`flex flex-col space-y-2 ${className}`}>
       {React.Children.map(children, (child) => {
-        return React.cloneElement(child, { selectedValue: value, onValueChange });
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { selectedValue: value, onValueChange });
+        }
+        return child;
       })}
     </div>
   );
@@ -19,11 +22,9 @@ export const RadioGroupItem = ({ value, id, selectedValue, onValueChange, childr
         value={value}
         checked={selectedValue === value}
         onChange={() => onValueChange(value)}
-        className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+        className="form-radio"
       />
-      <label htmlFor={id} className="text-sm font-medium text-gray-700">
-        {children}
-      </label>
+      <label htmlFor={id} className="text-sm">{children}</label>
     </div>
   );
-}
+};

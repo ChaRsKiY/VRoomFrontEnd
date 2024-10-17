@@ -22,9 +22,21 @@ interface IHomeProps {
     };
 }
 const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
-    const [t, setT] = useState<any>(null); 
-    const [loading, setLoading] = useState(true); 
-    const [visibility, setVisibility] = useState("private");
+  const [t, setT] = useState<any>(null); 
+  const [loading, setLoading] = useState(true); 
+  const [visibility, setVisibility] = useState("private");
+  const [category, setCategory] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
+  const [titleLanguage, setTitleLanguage] = useState<string | null>(null);
+  const [recordingDate, setRecordingDate] = useState<string | null>(null);
+  const [videoLocation, setVideoLocation] = useState<string | null>(null);
+  
+  // Стан для відкриття/закриття меню Select
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isTitleLanguageOpen, setIsTitleLanguageOpen] = useState(false);
+  const [isRecordingDateOpen, setIsRecordingDateOpen] = useState(false);
+  const [isVideoLocationOpen, setIsVideoLocationOpen] = useState(false);
 
     // Ініціалізація перекладів
     useEffect(() => {
@@ -79,22 +91,16 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                         <div className="space-y-2">
                             <Label className="text-lg">Visibility</Label>
                             <RadioGroup value={visibility} onValueChange={setVisibility} className="flex space-x-4">
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="private" id="private" checked={visibility === "private"} onChange={() => setVisibility("private")}>
-                                                        Private
-                                                    </RadioGroupItem>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="unlisted" id="unlisted" checked={visibility === "unlisted"} onChange={() => setVisibility("unlisted")}>
-                                                        Unlisted
-                                                    </RadioGroupItem>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <RadioGroupItem value="public" id="public" checked={visibility === "public"} onChange={() => setVisibility("public")}>
-                                                        Public
-                                                    </RadioGroupItem>
-                                                </div>
-                                            </RadioGroup>
+  <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
+    Private
+  </RadioGroupItem>
+  <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
+    Unlisted
+  </RadioGroupItem>
+  <RadioGroupItem value="public" id="public" selectedValue={visibility} onValueChange={setVisibility}>
+    Public
+  </RadioGroupItem>
+</RadioGroup>
                         </div>
                         {visibility === "private" && (
                             <Button variant="outline">Grant access</Button>
@@ -116,112 +122,138 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                             </div>
                         </div>
                         <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Video details</h3>
-                            <div className="space-y-2">
-                            <Label>Video category</Label>
-                            <Select>
-                                <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                <SelectItem value="people-blogs">People and blogs</SelectItem>
-                                <SelectItem value="gaming">Gaming</SelectItem>
-                                <SelectItem value="education">Education</SelectItem>
-                                </SelectContent>
-                            </Select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Video language</Label>
-                                <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Not selected" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="es">Spanish</SelectItem>
-                                    <SelectItem value="fr">French</SelectItem>
-                                </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Title and description language</Label>
-                                <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Not selected" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="en">English</SelectItem>
-                                    <SelectItem value="es">Spanish</SelectItem>
-                                    <SelectItem value="fr">French</SelectItem>
-                                </SelectContent>
-                                </Select>
-                            </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Recording date</Label>
-                                <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Not set" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="today">Today</SelectItem>
-                                    <SelectItem value="yesterday">Yesterday</SelectItem>
-                                    <SelectItem value="custom">Custom</SelectItem>
-                                </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Video location</Label>
-                                <Select>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Not specified" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="usa">United States</SelectItem>
-                                    <SelectItem value="uk">United Kingdom</SelectItem>
-                                    <SelectItem value="canada">Canada</SelectItem>
-                                </SelectContent>
-                                </Select>
-                            </div>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">Audience</h3>
-                            <div className="space-y-2">
-                            <Label className="text-base">Made for Kids</Label>
-                            <p className="text-sm text-gray-500">
-                                Regardless of your location, you're legally required to comply with the Children's Online Privacy Protection Act (COPPA) and/or other laws. You're required to tell us whether your videos are Made for Kids. What is 'Made for Kids' content?
-                            </p>
-                            <RadioGroup value={madeForKids ? "yes" : "no"} onValueChange={(value) => setMadeForKids(value === "yes")}>
-                                <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="yes" id="made-for-kids-yes" />
-                                <Label htmlFor="made-for-kids-yes">Yes, it is 'Made for Kids'</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="no" id="made-for-kids-no" />
-                                <Label htmlFor="made-for-kids-no">No, it is not 'Made for Kids'</Label>
-                                </div>
-                            </RadioGroup>
-                            </div>
-                            <div className="space-y-2">
-                            <Label className="text-base">Age restriction</Label>
-                            <p className="text-sm text-gray-500">
-                                Do you want to restrict your video to an adult audience?
-                            </p>
-                            <RadioGroup value={ageRestricted ? "yes" : "no"} onValueChange={(value) => setAgeRestricted(value === "yes")}>
-                                <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="yes" id="age-restricted-yes" />
-                                <Label htmlFor="age-restricted-yes">Yes, restrict my video to viewers over 18</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="no" id="age-restricted-no" />
-                                <Label htmlFor="age-restricted-no">No, don't restrict my video to viewers over 18 only</Label>
-                                </div>
-                            </RadioGroup>
-                            </div>
-                        </div>
+        <h3 className="text-lg font-semibold">Video details</h3>
+
+        {/* Video Category */}
+        <div className="space-y-2">
+          <Label>Video category</Label>
+          <Select>
+            <SelectTrigger onClick={() => setIsCategoryOpen(!isCategoryOpen)}>
+              <SelectValue value={category} placeholder="Select a category" />
+            </SelectTrigger>
+            <SelectContent isOpen={isCategoryOpen}>
+              <SelectItem value="people-blogs" onClick={() => { setCategory('people-blogs'); setIsCategoryOpen(false); }}>
+                People and blogs
+              </SelectItem>
+              <SelectItem value="gaming" onClick={() => { setCategory('gaming'); setIsCategoryOpen(false); }}>
+                Gaming
+              </SelectItem>
+              <SelectItem value="education" onClick={() => { setCategory('education'); setIsCategoryOpen(false); }}>
+                Education
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Video Language */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Video language</Label>
+            <Select>
+              <SelectTrigger onClick={() => setIsLanguageOpen(!isLanguageOpen)}>
+                <SelectValue value={language} placeholder="Not selected" />
+              </SelectTrigger>
+              <SelectContent isOpen={isLanguageOpen}>
+                <SelectItem value="en" onClick={() => { setLanguage('en'); setIsLanguageOpen(false); }}>
+                  English
+                </SelectItem>
+                <SelectItem value="es" onClick={() => { setLanguage('es'); setIsLanguageOpen(false); }}>
+                  Spanish
+                </SelectItem>
+                <SelectItem value="fr" onClick={() => { setLanguage('fr'); setIsLanguageOpen(false); }}>
+                  French
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Title and Description Language */}
+          <div className="space-y-2">
+            <Label>Title and description language</Label>
+            <Select>
+              <SelectTrigger onClick={() => setIsTitleLanguageOpen(!isTitleLanguageOpen)}>
+                <SelectValue value={titleLanguage} placeholder="Not selected" />
+              </SelectTrigger>
+              <SelectContent isOpen={isTitleLanguageOpen}>
+                <SelectItem value="en" onClick={() => { setTitleLanguage('en'); setIsTitleLanguageOpen(false); }}>
+                  English
+                </SelectItem>
+                <SelectItem value="es" onClick={() => { setTitleLanguage('es'); setIsTitleLanguageOpen(false); }}>
+                  Spanish
+                </SelectItem>
+                <SelectItem value="fr" onClick={() => { setTitleLanguage('fr'); setIsTitleLanguageOpen(false); }}>
+                  French
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Recording Date */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>Recording date</Label>
+            <Select>
+              <SelectTrigger onClick={() => setIsRecordingDateOpen(!isRecordingDateOpen)}>
+                <SelectValue value={recordingDate} placeholder="Not set" />
+              </SelectTrigger>
+              <SelectContent isOpen={isRecordingDateOpen}>
+                <SelectItem value="today" onClick={() => { setRecordingDate('today'); setIsRecordingDateOpen(false); }}>
+                  Today
+                </SelectItem>
+                <SelectItem value="yesterday" onClick={() => { setRecordingDate('yesterday'); setIsRecordingDateOpen(false); }}>
+                  Yesterday
+                </SelectItem>
+                <SelectItem value="custom" onClick={() => { setRecordingDate('custom'); setIsRecordingDateOpen(false); }}>
+                  Custom
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Video Location */}
+          <div className="space-y-2">
+            <Label>Video location</Label>
+            <Select>
+              <SelectTrigger onClick={() => setIsVideoLocationOpen(!isVideoLocationOpen)}>
+                <SelectValue value={videoLocation} placeholder="Not specified" />
+              </SelectTrigger>
+              <SelectContent isOpen={isVideoLocationOpen}>
+                <SelectItem value="usa" onClick={() => { setVideoLocation('usa'); setIsVideoLocationOpen(false); }}>
+                  United States
+                </SelectItem>
+                <SelectItem value="uk" onClick={() => { setVideoLocation('uk'); setIsVideoLocationOpen(false); }}>
+                  United Kingdom
+                </SelectItem>
+                <SelectItem value="canada" onClick={() => { setVideoLocation('canada'); setIsVideoLocationOpen(false); }}>
+                  Canada
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Audience Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Audience</h3>
+
+        {/* Made for Kids */}
+        <div className="space-y-2">
+          <Label>Made for Kids</Label>
+          <p className="text-sm text-gray-500">
+            Regardless of your location, you're legally required to comply with the Children's Online Privacy Protection Act (COPPA) and/or other laws. You're required to tell us whether your videos are Made for Kids. What is 'Made for Kids' content?
+          </p>
+          {/* RadioGroup logic можна винести окремо для вибору так/ні */}
+        </div>
+
+        {/* Age restriction */}
+        <div className="space-y-2">
+          <Label>Age restriction</Label>
+          <p className="text-sm text-gray-500">Do you want to restrict your video to an adult audience?</p>
+          {/* RadioGroup logic */}
+        </div>
+      </div>
                         <Button>Show more</Button>
                         </div>
                         <div className="space-y-8">
@@ -242,7 +274,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                         </div>
                         <div className="space-y-2">
                             <div className="text-sm font-medium">Upload status</div>
-                            <Progress value={66} className="w-full" />
+                            <Progress value={66} />
                             <div className="grid grid-cols-3 text-sm">
                             <div>
                                 <div className="font-medium">HD</div>
