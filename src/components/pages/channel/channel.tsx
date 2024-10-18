@@ -63,8 +63,8 @@ const CreateChannelModal: React.FC<{ open: boolean;onClose: () => void; }> = ({ 
     if (!open) return null;
 
     return (
-        <div style={modalStyles.overlay}>
-            <div style={modalStyles.modal}>
+        <div style={modalStyles.overlay} className="pointer-events-none">
+            <dialog className="pointer-events-none" aria-modal={true}>
                 <h1><strong>Basic information</strong></h1>
                 <br/>
                 <form onSubmit={handleSubmit}>
@@ -97,7 +97,7 @@ const CreateChannelModal: React.FC<{ open: boolean;onClose: () => void; }> = ({ 
                         <button type="submit" style={modalStyles.buttonPrimary}>Create</button>
                     </div>
                 </form>
-            </div>
+            </dialog>
         </div>
     );
 };
