@@ -74,7 +74,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                 <AsideHome t={t} />
                 <main className="pl-[25%] ml-[-5%] max-lg:pl-[10%] max-sm:pl-0">
                 <div className="container mx-auto p-4">
-                <Tabs defaultValue="details" className="w-full">
+                <Tabs defaultValue="details" className="right">
                     <TabsList className="grid w-full grid-cols-6 mb-4">
                     <TabsTrigger value="details">Details</TabsTrigger>
                     <TabsTrigger value="monetisation">Monetisation</TabsTrigger>
@@ -90,16 +90,16 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                         <div className="space-y-2">
                             <Label className="text-lg">Visibility</Label>
                             <RadioGroup value={visibility} onValueChange={setVisibility} className="flex space-x-4">
-  <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
-    Private
-  </RadioGroupItem>
-  <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
-    Unlisted
-  </RadioGroupItem>
-  <RadioGroupItem value="public" id="public" selectedValue={visibility} onValueChange={setVisibility}>
-    Public
-  </RadioGroupItem>
-</RadioGroup>
+                            <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
+                                Private
+                            </RadioGroupItem>
+                            <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
+                                Unlisted
+                            </RadioGroupItem>
+                            <RadioGroupItem value="public" id="public" selectedValue={visibility} onValueChange={setVisibility}>
+                                Public
+                            </RadioGroupItem>
+                            </RadioGroup>
                         </div>
                         {visibility === "private" && (
                             <Button variant="outline">Grant access</Button>
@@ -209,8 +209,6 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
               </SelectContent>
             </Select>
           </div>
-
-          {/* Video Location */}
           <div className="space-y-2">
             <Label>Video location</Label>
             <Select>
