@@ -5,7 +5,7 @@ const PermissionEmailPreference: React.FC = () => {
     return (
         <div className="flex-1">
             <div className="flex items-center space-x-4">
-                <Switch/>
+                <Switch />
                 <div>
                     <h3>
                         Send me emails about my VRoom activity and updates I requested</h3>

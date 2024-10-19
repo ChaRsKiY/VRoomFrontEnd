@@ -34,6 +34,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "framer-motion": "^11.3.30",
+    "hls.js": "^1.5.17",
     "i18next": "^23.14.0",
     "i18next-resources-to-backend": "^1.2.1",
     "input-otp": "^1.2.4",
