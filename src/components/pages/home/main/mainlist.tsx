@@ -28,7 +28,6 @@ const MainInfo: React.FC = () => {
     };
        
     useEffect(() => {
-     
         getVideos();
       }, []);
   
@@ -37,7 +36,7 @@ const MainInfo: React.FC = () => {
     return (
         <div className="pr-[2%] max-sm:pr-0 flex-1 " style={{marginTop:'100px'}}>
              <UnlimitedScrollBlock data={moreVideos} />
-             </div>
+        </div>
     )
 }
 
