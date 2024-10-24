@@ -91,11 +91,11 @@ const ClientScrollBlock: React.FC<IProps> = ({videolist}) => {
 
     return (
         <>
-            {videos.map((el, key) => (
+            {/* {videos.map((el, key) => (
                 <div key={key} className="px-3 mb-8">
                     <VideoCard el={el} />
                 </div>
-            ))}
+            ))} */}
 
             <div ref={ref} className="w-5 h-5" />
 

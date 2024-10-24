@@ -14,5 +14,6 @@ export interface IVideo {
     dislikeCount:number,
     isShort:boolean,
     cover: string,
+    visibility: boolean,
 }
 
