@@ -35,3 +35,28 @@
     font-size: 12px;
     color: #888;
 }
+.container {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  /* Бокове меню */
+  .sidebar {
+    width: 250px; /* Встановіть ширину меню */
+    background-color: #f4f4f4; /* Фоновий колір меню */
+    padding: 20px;
+    box-sizing: border-box;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto; /* Якщо меню велике, дозволить прокручувати */
+  }
+  
+  /* Основний контент */
+  .content {
+    flex-grow: 1; /* Контент займатиме весь вільний простір */
+    margin-left: 250px; /* Відступ щоб не налазити на бокове меню */
+    padding: 20px;
+    box-sizing: border-box;
+  }
