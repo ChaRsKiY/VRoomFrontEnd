@@ -5,8 +5,7 @@ import "@/styles/videojsplayer.css";
 import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
 import { TbLayersSubtract } from "react-icons/tb";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
-import {auth} from "@clerk/nextjs/server";
-import {useUser} from "@clerk/nextjs";
+import Hls from 'hls.js';
 
 class WatchHistory {
     constructor(public videoId: number, public lastViewedPosition: number) {}
@@ -201,6 +200,10 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         const handleLeavePictureInPicture = () => setIsMiniPlayer(false);
 
         if (video) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+
             video.addEventListener("enterpictureinpicture", handleEnterPictureInPicture);
             video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
         }
@@ -466,7 +469,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             <video
                 ref={videoRef}
                 className="video"
-                src={src}
                 onClick={togglePlayPause}
                 muted={isMuted}
                 controls={false}

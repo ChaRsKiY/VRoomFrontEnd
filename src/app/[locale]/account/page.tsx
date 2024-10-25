@@ -7,6 +7,8 @@ import AccountTab from "@/components/pages/account/account-tab";
 import SecurityTab from "@/components/pages/account/security-tab";
 import {auth} from "@clerk/nextjs/server";
 import {redirect} from "next/navigation";
+import AdvancedSettingsTab from "@/components/pages/account/advanced-setting-tab";
+import NotificationsTab from "@/components/pages/account/notification-tab";
 
 interface Props {
     params: {
@@ -35,7 +37,7 @@ const AccountPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800" value="security">Security</TabsTrigger>
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800" value="notitifications">Notifications</TabsTrigger>
                         <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800" value="payments">Payments</TabsTrigger>
-                        <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800" value="extended">Extended settings</TabsTrigger>
+                        <TabsTrigger className="w-full py-2.5 hover:bg-neutral-100 dark:hover:bg-neutral-800" value="extended">Advanced settings</TabsTrigger>
                     </TabsList>
                     <TabsContent className="flex-1 px-7" value="general">
                         <GeneralTab />
@@ -46,14 +48,14 @@ const AccountPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
                     <TabsContent className="flex-1 px-7" value="security">
                         <SecurityTab />
                     </TabsContent>
-                    <TabsContent className="flex-1" value="notitifications">
-                        Notitifications
+                    <TabsContent className="flex-1 px-7" value="notitifications">
+                        <NotificationsTab />
                     </TabsContent>
-                    <TabsContent className="flex-1" value="payments">
+                    <TabsContent className="flex-1 px-7" value="payments">
                         Payments
                     </TabsContent>
-                    <TabsContent className="flex-1" value="extended">
-                        Extended
+                    <TabsContent className="flex-1 px-7" value="extended">
+                        <AdvancedSettingsTab />
                     </TabsContent>
                 </Tabs>
         </>
