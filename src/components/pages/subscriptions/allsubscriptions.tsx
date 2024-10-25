@@ -8,19 +8,15 @@ import {IChannel} from '@/types/channelinfo.interface';
 import FolowComponent from '@/components/pages/watch/folowblock';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
-// interface IChannel{
-//   name: string,
-//   icon?: ReactNode,
-//   iconPath?: string,
-//   path: string,
-//   iconClassNames?: string 
-// }
+interface SubscribersData {
+  [key: number]: number; // Ключи - channelId, значения - количество подписчиков
+}
 const AllSubscriptionsComponent: React.FC = () => {
 
     const [ mainPageFollowed,setMainPageFollowed] = useState<IChannel[]>([]); 
     const [ allFollowed,setAllFollowed] = useState<IChannel[]>([]); 
     const { user } = useUser();
-    const [subscribers,setSubscribers]=useState<number[]>([]);
+    const [subscribers, setSubscribers] = useState<SubscribersData>({});
     const [isFollowed, setIsFollowed] = useState<boolean[]>([]); 
    
     const getFollowed = async () => {
@@ -36,21 +32,9 @@ const AllSubscriptionsComponent: React.FC = () => {
           // Преобразуем данные в JSON
           const subscriptions = await response.json();
           console.log(subscriptions);
-          // Преобразуем данные в нужный формат для вашего массива и берем только первые 5 элементов
-          // setMainPageFollowed(  subscriptions.slice(0, 15).map((subscription: any) => ({
-          //   iconPath: subscription.channelProfilePhoto ,  // URL иконки, можно задать значение по умолчанию
-          //   name: subscription.channelNikName,  // Имя категории или пользователя
-          //   path: `/gotochannel/${subscription.id}`,  // Путь на страницу подписки
-          //   iconClassNames: "rounded-full"  // Класс иконки
-          // })) );
+  
           setMainPageFollowed(  subscriptions.slice(0, 15) );
 
-          // setAllFollowed(  subscriptions.map((subscription: any) => ({
-          //   iconPath: subscription.channelProfilePhoto ,  // URL иконки, можно задать значение по умолчанию
-          //   name: subscription.channelName,  // Имя категории или пользователя
-          //   path: `/gotochannel/${subscription.id}`,  // Путь на страницу подписки
-          //   iconClassNames: "rounded-full"  // Класс иконки
-          // })) );
           setAllFollowed(  subscriptions);
          
         } catch (error) {
@@ -60,22 +44,46 @@ const AllSubscriptionsComponent: React.FC = () => {
     
       }; 
      
-      const getSubscribers = async () => {
-        if (!user) return; 
+      // const getSubscribers = async (channelSettingsId:number): Promise<number> => {
+      //   if (!user) return 0; 
+    
+      //   try {
+      //     const promises = allFollowed.map(async (followed) => {
+      //       const response = await fetch(`https://localhost:7154/api/Subscription/countbychannelid/${channelSettingsId}`);
+      //       const data = await response.json();
+      //       return data; 
+      //     });
+      //     const results = await Promise.all(promises);
+
+      //     // setSubscribers(results);
+      //   } catch (error) {
+      //     console.error('Ошибка при получении подписчиков:', error);
+      //     return 0;
+      //   }
+      
+      //   return 0;
+      // };
+
+      const getSubscribers = async (channelId: number): Promise<number> => {
+        if (!user) return 0;
     
         try {
-          const promises = allFollowed.map(async (followed) => {
-            const response = await fetch(`https://localhost:7154/api/Subscription/countbyuserid/${user?.id}`);
-            const data = await response.json();
-            return data; 
+          const response = await fetch(`https://localhost:7154/api/Subscription/countbychannelid/${channelId}`, {
+            method: 'GET',
           });
-          const results = await Promise.all(promises);
-
-          setSubscribers(results);
+          if (response.ok) {
+            const data = await response.json();
+            return data;
+          } else {
+            console.error('Ошибка при получении подписчиков:', response.statusText);
+            return 0;
+          }
         } catch (error) {
-          console.error('Ошибка при получении подписчиков:', error);
+          console.error('Ошибка при подключении к серверу:', error);
+          return 0;
         }
       };
+
       const deleteSubscription = async ( channelSettingsId:number,index:number) => {
         if(user){ 
         try {     
@@ -107,12 +115,37 @@ const AllSubscriptionsComponent: React.FC = () => {
     }, [user]);
  
     useEffect(() => {
-      getSubscribers();
+      // getSubscribers();
       if (allFollowed.length > 0) {
         const followedArray = Array(allFollowed.length).fill(true);
         setIsFollowed(followedArray);
       }
+      
     }, [allFollowed, user]);
+
+    useEffect(() => {
+      const fetchAllSubscribers = async () => {
+        // Указываем тип для результатов
+        const results: { channelId: number; count: number }[] = await Promise.all(
+          allFollowed.map(async (item) => {
+            const count = await getSubscribers(item.id);
+            return { channelId: item.id, count };
+          })
+        );
+  
+        // Используем reduce с типом SubscribersData
+        const subscribersData: SubscribersData = results.reduce<SubscribersData>((acc, { channelId, count }) => {
+          acc[channelId] = count;
+          return acc;
+        }, {});
+  
+        setSubscribers(subscribersData);
+        console.log(subscribers);
+      };
+  
+      fetchAllSubscribers();
+    }, [allFollowed, user]);
+
     return (
         <div  style={{width:'100%',marginLeft:'100%'}}>
             <div style={{width:'100%'}}>
@@ -134,7 +167,7 @@ const AllSubscriptionsComponent: React.FC = () => {
                              &nbsp;&nbsp;&nbsp;
                             <CheckCircleIcon className="h-5 w-5 text-gray-500" /> 
                           </div>
-                        <div>{subscribers[index]} subscribers</div>
+                        <div>{subscribers[el.id]} subscribers</div>
                         </div>
                     </Link>
                     <div style={{display:'flex',flexDirection:'column',justifyContent:'space-around'}}>

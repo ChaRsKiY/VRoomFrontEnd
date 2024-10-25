@@ -4,7 +4,8 @@ import { IChannel } from '@/types/channelinfo.interface';
 import {IVideo} from '@/types/videoinfo.interface'
 import Image from 'next/image';
 import VideoCard from './video-card';
-import PostList from '@/components/pages/posts/posts'
+import PostList from '@/components/pages/posts/posts';
+import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles'
 
 interface IProps{
 
@@ -21,6 +22,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [videosShorts,setVideosShorts]=useState<IVideo[]>([]);
     const [videosLiked,setVideosLiked]=useState<IVideo[]>([]);
     const [videosAll,setVideosAll]=useState<IVideo[]>([]);
+    const [subscribers, setSubscribers] = useState<number>();
     const [display1,setDisplay1] =useState('block');
     const [display2,setDisplay2] =useState('block');
     const [display3,setDisplay3] =useState('block');
@@ -32,6 +34,9 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [display5,setDisplay5] =useState('none');
     const [display6,setDisplay6] =useState('block');
     const [display7,setDisplay7] =useState('none');
+    const [color1,setColor1] =useState('lightgray');
+    const [color2,setColor2] =useState('white');
+    const [color3,setColor3] =useState('white');
     
 
     const getChannel = async () => {
@@ -51,6 +56,27 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
             console.error('Ошибка при подключении к серверу:', error);
         }
       };
+      const getSubscribers = async (): Promise<number> => {
+       
+    
+        try {
+          const response = await fetch(`https://localhost:7154/api/Subscription/countbychannelid/${channelid}`, {
+            method: 'GET',
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setSubscribers(data);
+            return data;
+          } else {
+            console.error('Ошибка при получении подписчиков:', response.statusText);
+            return 0;
+          }
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+          return 0;
+        }
+      };
+
       const getChannelVideos = async () => {
         try {
           
@@ -111,23 +137,33 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
         const showPosts = ()=>{     
             setDisplay6('none'); 
             setDisplay7('none');
-            setDisplay5('block');    
+            setDisplay5('block');  
+            setColor3('lightgray') ;
+            setColor2('white');  
+            setColor1('white');   
         }  
         const showAll = ()=>{     
             setDisplay6('none'); 
             setDisplay7('block');
-            setDisplay5('none');    
+            setDisplay5('none'); 
+            setColor2('lightgray') ;
+            setColor1('white');  
+            setColor3('white');    
         }  
         const showMain = ()=>{     
             setDisplay5('none'); 
             setDisplay6('block');
-            setDisplay7('none');    
+            setDisplay7('none'); 
+            setColor1('lightgray') ;
+            setColor2('white');  
+            setColor3('white'); 
         } 
 
       useEffect(() => {
 
         getChannel();
         getChannelVideos();
+        getSubscribers();
        
       }, [channelid]);
 
@@ -155,13 +191,18 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
             className='rounded-full' style={{minHeight:'160px'}}/>
               <div style={{display:'flex', flexDirection:'column',padding:'20px',justifyContent:'space-around'}}>
               <div style={{fontSize:"20px", fontWeight:'bold'}}>{channel?.channelNikName}</div>
+              <div>{subscribers} subscribers</div>
+              <div>{videos.length} videos</div>
               <div>{channel.description}</div>
               </div>
             </div>
             </div>
-            <button onClick={showMain}>Main</button>
-            <button onClick={showAll}>Video</button>
-            <button onClick={showPosts}>Communities</button>
+            <button onClick={showMain} style={{padding:'5px',backgroundColor:color1,borderRadius:'5px',
+                margin:'2px',fontSize:"20px"}}>Main</button>
+            <button onClick={showAll} style={{padding:'5px',backgroundColor:color2,
+                borderRadius:'5px',margin:'2px',fontSize:"20px"}}>Video</button>
+            <button onClick={showPosts} style={{padding:'5px',backgroundColor:color3,
+                borderRadius:'5px',margin:'2px',fontSize:"20px"}}>Communities</button>
             <hr />
             <div style={{display:display6}}>
             <div>              
