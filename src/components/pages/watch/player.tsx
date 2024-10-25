@@ -5,8 +5,11 @@ import "@/styles/videojsplayer.css";
 import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
 import { TbLayersSubtract } from "react-icons/tb";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
-import {auth} from "@clerk/nextjs/server";
-import {useUser} from "@clerk/nextjs";
+import Hls from 'hls.js';
+
+class WatchHistory {
+    constructor(public videoId: number, public lastViewedPosition: number) {}
+  }
 
 interface IVideoPlayerProps {
     src: string;
@@ -34,6 +37,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
     const [viewed, setViewed] = useState(false);
+    const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -47,6 +51,68 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
           }
         }
       };
+
+      const saveWatchHistory = () => {
+        if (videoRef.current) {
+          const lastViewedPosition = videoRef.current.currentTime;
+    
+          // Добавляем или обновляем историю просмотра
+          setWatchHistory(prevHistory => {
+            const existingVideo = prevHistory.find(history => history.videoId === id);
+    
+            if (existingVideo) {
+              // Обновляем время последнего просмотра
+              return prevHistory.map(history =>
+                history.videoId === id
+                  ? { ...history, lastViewedPosition }
+                  : history
+              );
+            } else {
+              // Добавляем новое видео в историю
+              return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+            }
+          });
+    
+          console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
+        }
+      };
+
+      const handleVideoPauseOrEnd = () => {
+        saveWatchHistory();
+      };
+    
+      // Обработка закрытия вкладки или перезагрузки страницы
+      useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+          saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
+          event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)
+        };
+    
+        if (videoRef.current) {
+          const video = videoRef.current;
+          
+          // Подписка на события видео
+          video.addEventListener('timeupdate', handleTimeUpdate);
+          video.addEventListener('pause', handleVideoPauseOrEnd);
+          video.addEventListener('ended', handleVideoPauseOrEnd);
+        }
+    
+        // Подписка на событие закрытия вкладки
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    
+        // Очистка событий при размонтировании
+        return () => {
+          if (videoRef.current) {
+            const video = videoRef.current;
+            video.removeEventListener('timeupdate', handleTimeUpdate);
+            video.removeEventListener('pause', handleVideoPauseOrEnd);
+            video.removeEventListener('ended', handleVideoPauseOrEnd);
+          }
+    
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+      }, [id]);
+    
 
       const increaseViewCount = () => { 
        alert("Просмотр засчитан!"); 
@@ -133,6 +199,10 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         const handleLeavePictureInPicture = () => setIsMiniPlayer(false);
 
         if (video) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+
             video.addEventListener("enterpictureinpicture", handleEnterPictureInPicture);
             video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
         }
@@ -398,7 +468,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             <video
                 ref={videoRef}
                 className="video"
-                src={src}
                 onClick={togglePlayPause}
                 muted={isMuted}
                 controls={false}

@@ -180,11 +180,6 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
               }
         };
  
-    //  signalRService.on('commentMessage', handleMessage);
-
-    //  return () => {
-    //       signalRService.off('commentMessage', handleMessage);
-    // };
     signalRService.onMessageReceived(handleMessage);
 
     // Очистка подписки при размонтировании компонента

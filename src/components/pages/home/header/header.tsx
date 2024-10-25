@@ -8,7 +8,7 @@ import Link from "next/link";
 
 interface IHeaderHomeProps {
     t: ITranslationFunction
-}
+};
 
 const HeaderHome: React.FC<IHeaderHomeProps> = ({ t }: IHeaderHomeProps) => {
     return (
@@ -24,6 +24,6 @@ const HeaderHome: React.FC<IHeaderHomeProps> = ({ t }: IHeaderHomeProps) => {
             <HeaderBlock />
         </div>
     )
-}
+};
 
-export default HeaderHome
+export default HeaderHome;
