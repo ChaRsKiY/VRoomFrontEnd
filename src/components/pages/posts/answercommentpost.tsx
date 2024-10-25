@@ -12,7 +12,6 @@ import RadioButtonList from '@/components/pages/comments/report';
 import EditAnswerPost from './editanswerpost';
 import { FaPen } from 'react-icons/fa';
 import {formatTimeAgo} from"@/utils/format";
-// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
 import { signalRService } from '@/services/signalr.service';
 
 interface CommentsProps {
@@ -91,76 +90,6 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
  
 },[commentId, ans]);
 
-// useEffect(() => {
-
-//   const ws = new WebSocket('wss://localhost:7154');
-//   ws.onopen = () => {
-//     console.log('WebSocket соединение установлено');
-//     // Например, можно отправить начальный запрос или уведомление
-//     ws.send(JSON.stringify({ type: 'subscribe', ans,commentId }));
-//   };
-//   ws.onmessage = (event) => {
-//     const messageData = JSON.parse(event.data);
-//     console.log('Сообщение от WebSocket сервера:', messageData);
- 
-//     if (messageData.type === 'new_answerpost') {    
-//       const a:IAnswerCommentPost=messageData.payload;
-//       if(a.commentPost_Id===commentId)
-//    { 
-//     setAnswers((prevAnswers) => {        
-//         return [...prevAnswers, a];
-//       });
-  
-//     setAllAnswers((prev) => prev + 1);
-//     }
-//   }
-
-//     if (messageData.type === 'like_answerpost') {
-//       const likedAnswer = messageData.payload;
-//       console.log('*/*/*/*=',likedAnswer);
-//       setAnswers((prevAnswers) =>
-//         prevAnswers.map((answer) =>
-//           answer.id === likedAnswer.id
-//             ? { ...answer, likeCount: likedAnswer.likeCount } // Обновляем количество лайков
-//             : answer
-//         )
-//       );
-//     }
-//     if (messageData.type === 'dislike_answerpost') {
-//       const likedAnswer = messageData.payload;
-//       console.log('*/*/*/*=',likedAnswer);
-//       setAnswers((prevAnswers) =>
-//         prevAnswers.map((answer) =>
-//           answer.id === likedAnswer.id
-//             ? { ...answer, dislikeCount: likedAnswer.dislikeCount } // Обновляем количество лайков
-//             : answer
-//         )
-//       );
-//     }
-//     if (messageData.type === 'update_answerpost') {
-//       const upAnswer = messageData.payload;
-//       setAnswers((prevAnswers) =>
-//         prevAnswers.map((answer) =>
-//           answer.id === upAnswer.id
-//             ? { ...answer, text: upAnswer.text, isEdited: upAnswer.isEdited  } // Обновляем количество лайков
-//             : answer
-//         )
-//       );
-//     }
-//   };
-//   ws.onclose = () => {
-//     console.log('WebSocket соединение закрыто');
-//   };
-//   ws.onerror = (error) => {
-//     console.error('Ошибка WebSocket:', error);
-//   };
-//   // Сохраняем WebSocket в состоянии
-//   setSocket(ws);
-//   // Закрываем WebSocket при размонтировании компонента
-//   return () => {
-//     ws.close();
-//   };
-// }, [ans , commentId]);
 
 useEffect(() => {
 
@@ -220,11 +149,7 @@ useEffect(() => {
       );
     }
   };
-//   signalRService.on('postanswerMessage', handleMessage);
 
-//   return () => {
-//        signalRService.off('postanswerMessage', handleMessage);
-//  };
 signalRService.onMessageReceived(handleMessage);
 
     // Очистка подписки при размонтировании компонента
@@ -323,7 +248,7 @@ const openReport = () => {
             <div style={{paddingLeft:'0px' ,width:'100%'}}>
             <div style={{display:'flex',justifyContent:'space-between',width:'100%'}} >
               <div>
-              <Link  href='#' style={{paddingRight:'20px',fontWeight:'bolder', fontSize:'14px' }}>@{comment.userName}</Link>
+              <Link  href={"/gotochannel/" + comment.channelId} style={{paddingRight:'20px',fontWeight:'bolder', fontSize:'14px' }}>@{comment.userName}</Link>
              <small>{formatTimeAgo(new Date(comment.answerDate)) }</small>
 </div>
              <div   key={comment.id} className="relative"  style={{marginRight:'-65px'}}> 

@@ -4,6 +4,7 @@ export interface ICommentVideo {
     userId: string,
     userName: string,
     channelBanner:string,
+    channelId:number,
     videoId:number,
     comment: string,
     date: Date,

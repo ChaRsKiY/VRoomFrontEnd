@@ -42,9 +42,9 @@ const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
                 <div className="absolute bg-white border border-gray-300 rounded-md shadow-lg p-4 mt-2 "
                 style={{maxWidth:'410px'}}>
                     <div style={{display:'flex',width:'100%',justifyContent:'end'}}>
-                    <button  style={{padding:'10px',paddingTop:'0', fontWeight:'bold',color:'gray'}} onClick={onCloseFolow}>
-                        X
-                    </button></div>
+                    {/* <button  style={{padding:'10px',paddingTop:'0', fontWeight:'bold',color:'gray'}} onClick={onCloseFolow}>
+                        X </button> */}
+                    </div>
                     <div>
                     
                     <button onClick={onDelete}>Cancel subscription</button>

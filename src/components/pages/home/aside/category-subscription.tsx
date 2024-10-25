@@ -19,7 +19,7 @@ const CategorySubscription: React.FC = () => {
     const [ mainPageFollowedCategories,setMainPageFollowedCategories] = useState<IBlock[]>([]); 
    const [ allFollowed,setAllFollowed] = useState<IBlock[]>([]); 
    const { user } = useUser();
-   const [visibleCount, setVisibleCount] = useState(5);
+   const [visibleCount, setVisibleCount] = useState(2);
 
 //    const handleClick = () => {
 //     window.location.href = '/subscriptions'; 
@@ -48,16 +48,16 @@ const handleClick = () => {
           console.log(subscriptions);
           // Преобразуем данные в нужный формат для вашего массива и берем только первые 5 элементов
           setMainPageFollowedCategories(  subscriptions.slice(0, 5).map((subscription: any) => ({
-            iconPath: subscription.channelPlofilePhoto || "defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
-            name: subscription.channelName,  // Имя категории или пользователя
-            path: `/subscription/${subscription.id}`,  // Путь на страницу подписки
+            iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
+            name: subscription.channelNikName,  // Имя категории или пользователя
+            path: "/gotochannel/" + subscription.id,  // Путь на страницу подписки
             iconClassNames: "rounded-full"  // Класс иконки
           })) );
 
           setAllFollowed(  subscriptions.map((subscription: any) => ({
-            iconPath: subscription.channelPlofilePhoto || "defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
-            name: subscription.channelName,  // Имя категории или пользователя
-            path: `/subscription/${subscription.id}`,  // Путь на страницу подписки
+            iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
+            name: subscription.channelNikName,  // Имя категории или пользователя
+            path: `/gotochannel/${subscription.id}`,  // Путь на страницу подписки
             iconClassNames: "rounded-full"  // Класс иконки
           })) );
       
@@ -80,6 +80,7 @@ const handleClick = () => {
         <div>
         <div>
              <div className="pl-5 font-bold mb-2">Followed</div>
+             {mainPageFollowedCategories.length>0 ?(
             <div className="flex flex-col space-y-1">
                 {mainPageFollowedCategories.map((el, key) => (
                     <Link href={el.path} key={key} className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 py-1 min-h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
@@ -93,15 +94,16 @@ const handleClick = () => {
                         <div>{el.name}</div>
                     </Link>
                 ))}
-            </div>
+            </div>):
+            <div style={{paddingLeft:'50px'}}>------------</div>}
         </div>
         <div className="flex flex-col space-y-1 mt-1 hover:cursor-pointer">
+        {visibleCount < mainPageFollowedCategories.length && (
         <div  onClick={handleClick} style={{ cursor: 'pointer' }}
             className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
             <div className="text-2xl"><MdExpandMore/></div>
-            {/* <div>All subscriptions</div> */}
             <div> More</div>
-        </div>
+        </div> )}
     </div>
     </div>
     )
