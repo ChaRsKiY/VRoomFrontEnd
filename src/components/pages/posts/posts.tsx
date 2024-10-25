@@ -301,11 +301,11 @@ useEffect(() => {
                 <div className='flex ' style={{width:'100%',justifyContent:'space-between'}}>
                   <div className='flex '>
                   <img 
-          src={iAmUser?.channelBanner} 
+          src={iAmUser?.channelProfilePhoto} 
           alt="User Avatar" 
           style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
         />    
-       <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelName}&nbsp;&nbsp;</a> 
+       <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelNikName}&nbsp;&nbsp;</a> 
        </div>
 
        <small style={{fontWeight:'bold',color:'gray'}}>{formatTimeAgo(new Date(post.date)) }</small>

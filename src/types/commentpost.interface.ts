@@ -3,7 +3,7 @@ export interface ICommentPost {
     userId: string,
     userName: string,
     channelBanner:string,
-    channelId:number,
+    channelId?:number,
     postId:number,
     comment: string,
     date: Date,

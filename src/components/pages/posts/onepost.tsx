@@ -113,11 +113,11 @@ useEffect(() => {
                 <div className='flex ' style={{width:'100%',justifyContent:'space-between',}}>
                   <div className='flex '>
                   <img 
-          src={iAmUser?.channelBanner} 
+          src={iAmUser?.channelProfilePhoto} 
           alt="User Avatar" 
           style={{ width: '35px', height: '35px', borderRadius: '50%', marginRight: '15px' }}
         />    
-       <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelName}&nbsp;&nbsp;</a> 
+       <a style={{fontSize:'14px',fontWeight:'bold', color:'gray'}} href='#'>{iAmUser?.channelNikName}&nbsp;&nbsp;</a> 
        </div>
 
       { post?(  <small style={{fontWeight:'bold',color:'gray',paddingRight:'50px'}}>{formatTimeAgo(new Date(post.date)) }</small>):(<></>)}

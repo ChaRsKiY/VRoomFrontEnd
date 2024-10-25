@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { IChannel } from '@/types/channelinfo.interface';
 import {IVideo} from '@/types/videoinfo.interface'
 import Image from 'next/image';
-import VideoCard from '../../home/main/video-card';
+import VideoCard from './video-card';
+import PostList from '@/components/pages/posts/posts'
 
 interface IProps{
 
@@ -19,6 +20,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [videosPopular,setVideosPopular]=useState<IVideo[]>([]);
     const [videosShorts,setVideosShorts]=useState<IVideo[]>([]);
     const [videosLiked,setVideosLiked]=useState<IVideo[]>([]);
+    const [videosAll,setVideosAll]=useState<IVideo[]>([]);
     const [display1,setDisplay1] =useState('block');
     const [display2,setDisplay2] =useState('block');
     const [display3,setDisplay3] =useState('block');
@@ -27,6 +29,9 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [display2a,setDisplay2a] =useState('none');
     const [display3a,setDisplay3a] =useState('none');
     const [display4a,setDisplay4a] =useState('none');
+    const [display5,setDisplay5] =useState('none');
+    const [display6,setDisplay6] =useState('block');
+    const [display7,setDisplay7] =useState('none');
     
 
     const getChannel = async () => {
@@ -49,13 +54,15 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
       const getChannelVideos = async () => {
         try {
           
-                const response = await fetch('https://localhost:7154/api/Videos/getchannelvideos/' + channelid, {
+                const response = await fetch('https://localhost:7154/api/Video/getchannelvideos/' + channelid, {
                     method: 'GET',
                 });
       
                 if (response.ok) {
                     const data: IVideo[] = await response.json();
                     setVideos(data);
+                    console.log(data);
+                    
                 } else {
                     console.error('Ошибка при получении videos:', response.statusText);
                  }
@@ -75,11 +82,14 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
         }  
         
         const chooseMoreViwed = ()=>{     
-            setVideosPopular(  videos.sort((a: any, b: any) => b.viewCount - a.viewCount)) ;       
+            setVideosPopular(  videos.sort((a: any, b: any) => b.viewCount - a.viewCount)) ;     
            }
         
        const chooseMoreLiked = ()=>{     
-            setVideosLiked(  videos.sort((a: any, b: any) => b.likeCount - a.likeCount)) ;       
+            setVideosLiked(  videos.sort((a: any, b: any) => b.likeCount - a.likeCount)) ;     
+           }
+           const chooseAll = ()=>{     
+            setVideosAll(  videos.filter((video: any) => video.isShort === false)) ;     
            }
 
         const showAllShorts = ()=>{     
@@ -98,20 +108,39 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
             setDisplay3('none');
             setDisplay3a('block');    
         }       
-      
+        const showPosts = ()=>{     
+            setDisplay6('none'); 
+            setDisplay7('none');
+            setDisplay5('block');    
+        }  
+        const showAll = ()=>{     
+            setDisplay6('none'); 
+            setDisplay7('block');
+            setDisplay5('none');    
+        }  
+        const showMain = ()=>{     
+            setDisplay5('none'); 
+            setDisplay6('block');
+            setDisplay7('none');    
+        } 
 
       useEffect(() => {
 
         getChannel();
         getChannelVideos();
+       
+      }, [channelid]);
+
+      useEffect(() => {
         chooseShorts();
         chooseNewOnce();
         chooseMoreViwed();
         chooseMoreLiked();
-    
-      }, [channelid]);
+        chooseAll();
+      }, [videos]);
 
     return (
+        <div>
         <div style={{marginBottom:'100px'}}>
           {channel? ( <>
             <div style={{ maxHeight: '120px', overflow: 'hidden' }}>
@@ -130,8 +159,14 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
               </div>
             </div>
             </div>
+            <button onClick={showMain}>Main</button>
+            <button onClick={showAll}>Video</button>
+            <button onClick={showPosts}>Communities</button>
+            <hr />
+            <div style={{display:display6}}>
             <div>              
-                <button style={{paddingTop:"20px",paddingLeft:'100px',fontSize:'20px',fontWeight:'bold', }}>Last videos</button>
+                <button style={{padding:"20px",fontSize:'20px',fontWeight:'bold', }}
+                onClick={showAllNewOnce}>Last videos</button>
             <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
             {videosNew.slice(0,4).map((el, key) => (
                 <div key={key} className="px-3 mb-8 space-y-2.5" style={{display:display1}}>
@@ -144,7 +179,9 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                 </div>
             ))}
         </div>
-        <button style={{ paddingTop:"20px", paddingLeft:'100px',fontSize:'20px',fontWeight:'bold'}}>Popular videos</button>
+        <hr />
+        <button style={{ padding:"20px", fontSize:'20px',fontWeight:'bold'}}
+        onClick={showAllViwed}>Popular videos</button>
             <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
             {videosPopular.slice(0,4).map((el, key) => (
                 <div key={key} className="px-3 mb-8 space-y-2.5" style={{display:display2}}>
@@ -157,7 +194,9 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                 </div>
             ))}
         </div>
-        <button style={{paddingTop:"20px",paddingLeft:'100px',fontSize:'20px',fontWeight:'bold'}}>High raiting videos</button>
+        <hr />
+        <button style={{padding:"20px",fontSize:'20px',fontWeight:'bold'}}
+        onClick={showAllLiked}>High raiting videos</button>
             <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
             {videosLiked.slice(0,4).map((el, key) => (
                 <div key={key} className="px-3 mb-8 space-y-2.5" style={{display:display3}}>
@@ -170,7 +209,9 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                 </div>
             ))}
         </div>
-        <button style={{paddingTop:"20px",paddingLeft:'100px',fontSize:'20px',fontWeight:'bold'}}>Shorts</button>
+        <hr />
+        <button style={{padding:"20px",fontSize:'20px',fontWeight:'bold'}}
+        onClick={showAllShorts}>Shorts</button>
             <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
             {videosShorts.slice(0,4).map((el, key) => (
                 <div key={key} className="px-3 mb-8 space-y-2.5" style={{display:display4}}>
@@ -182,14 +223,29 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                     <VideoCard el={el} />
                 </div>
             ))}
-       
+             <hr />
+            </div>
             </div>
             </div>
             </>
         ):<></>}
-          
+
         </div>
-    
+
+        <div onClick={showPosts} style={{display:display5,marginTop:'-70px'}}>
+          <PostList channelId={channelid} />
+        </div>
+        <div onClick={showAll} style={{display:display7 }}>
+        <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+        {videosAll.map((el, key) => (
+                <div key={key} className="px-3 mb-8 space-y-2.5" >
+                    <VideoCard el={el} />
+                </div>
+            ))}
+        </div>
+        </div>
+
+        </div>
       );
     };
     
