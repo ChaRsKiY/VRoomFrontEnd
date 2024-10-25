@@ -3,6 +3,7 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
 
+
 interface IChannelEditProps {
     params: { locale: string; }
 }

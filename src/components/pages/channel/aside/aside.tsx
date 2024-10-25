@@ -1,4 +1,3 @@
-
 import CategoryBlock from "@/components/pages/channel/aside/category";
 import {
     MdOutlineAnalytics,
@@ -14,14 +13,10 @@ import {LuLayoutDashboard} from "react-icons/lu";
 import {TbCircleLetterC} from "react-icons/tb";
 import {LiaCommentSolid} from "react-icons/lia";
 import {CiSettings} from "react-icons/ci";
-import Image from "next/image";
-import ClientHome from "@/components/pages/channel/ClientHome";
-import SettingsBlock from "@/components/pages/channel/youChannelP";
-import { useUser } from '@clerk/clerk-react'
-import axios from "axios";
-import {IPresentedChannel} from "@/types/channel.interface";
 import React from "react";
 import UserCategoryBlock from "@/components/pages/channel/aside/user-category";
+import OtherCategoryBlock from "@/components/pages/channel/aside/other-category";
+import ClientHome from "@/components/pages/channel/ClientHome";
 
 interface IAsideHomeProps {
     t: ITranslationFunction
@@ -42,34 +37,21 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
         {icon: <MdOutlineLibraryMusic/>, name: t("channel:Music_library"), path: "/channel/editing/music_library"},
     ]
 
-    const mainPageOtherCategorie = [
-        {icon: <CiSettings/>, name: t("channel:settings"), path: "/channel/editing/settings"},
-        {icon: <MdOutlineFeedback/>, name: t("categories:feedback"), path: "/feedback"},
-    ]
 
     return (
         <div>
             <div className="fixed bottom-0 top-20  overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className=" ml-[-3%]">
                     <UserCategoryBlock/>
-
-
                     <CategoryBlock data={mainPageAccountCategories} title=""/>
-
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
-
-
-
                     <div className="py-[10%]"></div>
-                    <CategoryBlock data={mainPageOtherCategorie} title=""/>
-
+                    <OtherCategoryBlock/>
                     <div className="px-3 mt-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
-
-
                 </div>
             </div>
 
