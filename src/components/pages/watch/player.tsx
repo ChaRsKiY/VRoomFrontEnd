@@ -1,22 +1,24 @@
 "use client"
 
-import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
+import React, {useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent} from "react";
 import "@/styles/videojsplayer.css";
-import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
-import { TbLayersSubtract } from "react-icons/tb";
-import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
+import {PiPictureInPicture, PiScreencast} from "react-icons/pi";
+import {TbLayersSubtract} from "react-icons/tb";
+import {RxEnterFullScreen, RxExitFullScreen} from "react-icons/rx";
 import Hls from 'hls.js';
 
+
 class WatchHistory {
-    constructor(public videoId: number, public lastViewedPosition: number) {}
-  }
+    constructor(public videoId: number, public lastViewedPosition: number) {
+    }
+}
 
 interface IVideoPlayerProps {
     src: string;
-    id:number;
+    id: number;
 }
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -41,118 +43,118 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-          setCurrentTime(videoRef.current.currentTime);
-          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-    
-          // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-          if (percentagePlayed > 40 && !viewed) {
-            setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
-            increaseViewCount(); // Увеличиваем счётчик просмотров
-          }
-        }
-      };
+            setCurrentTime(videoRef.current.currentTime);
+            const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
 
-      const saveWatchHistory = () => {
-        if (videoRef.current) {
-          const lastViewedPosition = videoRef.current.currentTime;
-    
-          // Добавляем или обновляем историю просмотра
-          setWatchHistory(prevHistory => {
-            const existingVideo = prevHistory.find(history => history.videoId === id);
-    
-            if (existingVideo) {
-              // Обновляем время последнего просмотра
-              return prevHistory.map(history =>
-                history.videoId === id
-                  ? { ...history, lastViewedPosition }
-                  : history
-              );
-            } else {
-              // Добавляем новое видео в историю
-              return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+            // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+            if (percentagePlayed > 40 && !viewed) {
+                setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+                increaseViewCount(); // Увеличиваем счётчик просмотров
             }
-          });
-    
-          console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
         }
-      };
+    };
 
-      const handleVideoPauseOrEnd = () => {
-        saveWatchHistory();
-      };
-    
-      // Обработка закрытия вкладки или перезагрузки страницы
-      useEffect(() => {
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-          saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
-          event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)
-        };
-    
+    const saveWatchHistory = () => {
         if (videoRef.current) {
-          const video = videoRef.current;
-          
-          // Подписка на события видео
-          video.addEventListener('timeupdate', handleTimeUpdate);
-          video.addEventListener('pause', handleVideoPauseOrEnd);
-          video.addEventListener('ended', handleVideoPauseOrEnd);
+            const lastViewedPosition = videoRef.current.currentTime;
+
+            // Добавляем или обновляем историю просмотра
+            setWatchHistory(prevHistory => {
+                const existingVideo = prevHistory.find(history => history.videoId === id);
+
+                if (existingVideo) {
+                    // Обновляем время последнего просмотра
+                    return prevHistory.map(history =>
+                        history.videoId === id
+                            ? {...history, lastViewedPosition}
+                            : history
+                    );
+                } else {
+                    // Добавляем новое видео в историю
+                    return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+                }
+            });
+
+            console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
         }
-    
+    };
+
+    const handleVideoPauseOrEnd = () => {
+        saveWatchHistory();
+    };
+
+    // Обработка закрытия вкладки или перезагрузки страницы
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
+            event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)
+        };
+
+        if (videoRef.current) {
+            const video = videoRef.current;
+
+            // Подписка на события видео
+            video.addEventListener('timeupdate', handleTimeUpdate);
+            video.addEventListener('pause', handleVideoPauseOrEnd);
+            video.addEventListener('ended', handleVideoPauseOrEnd);
+        }
+
         // Подписка на событие закрытия вкладки
         window.addEventListener('beforeunload', handleBeforeUnload);
-    
+
         // Очистка событий при размонтировании
         return () => {
-          if (videoRef.current) {
-            const video = videoRef.current;
-            video.removeEventListener('timeupdate', handleTimeUpdate);
-            video.removeEventListener('pause', handleVideoPauseOrEnd);
-            video.removeEventListener('ended', handleVideoPauseOrEnd);
-          }
-    
-          window.removeEventListener('beforeunload', handleBeforeUnload);
+            if (videoRef.current) {
+                const video = videoRef.current;
+                video.removeEventListener('timeupdate', handleTimeUpdate);
+                video.removeEventListener('pause', handleVideoPauseOrEnd);
+                video.removeEventListener('ended', handleVideoPauseOrEnd);
+            }
+
+            window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-      }, [id]);
-    
+    }, [id]);
 
-      const increaseViewCount = () => { 
-       alert("Просмотр засчитан!"); 
-       Viewed(id);
-      };
 
-      const Viewed = async (id: number ) => {   
-        try {     
-          const response = await fetch('https://localhost:7154/api/Video/view/'+id , {
-            method: 'PUT',
-          });
-    
-          if (response.ok) {
-           console.log('просмотр добавлен к счетчику');
-          } else {
-            console.error('Ошибка при view:', response.statusText);
-          }
-        
+    const increaseViewCount = () => {
+        alert("Просмотр засчитан!");
+        Viewed(id);
+    };
+
+    const Viewed = async (id: number) => {
+        try {
+            const response = await fetch('https://localhost:7154/api/Video/view/' + id, {
+                method: 'PUT',
+            });
+
+            if (response.ok) {
+                console.log('просмотр добавлен к счетчику');
+            } else {
+                console.error('Ошибка при view:', response.statusText);
+            }
+
         } catch (error) {
-          console.error('Ошибка при подключении к серверу:', error);
+            console.error('Ошибка при подключении к серверу:', error);
         }
-      }; 
+    };
 
-      useEffect(() => {
+    useEffect(() => {
         if (videoRef.current) {
-          videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-          
-          // Убираем обработчик при размонтировании компонента
-          return () => {
-            videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
-          };
+            videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+
+            // Убираем обработчик при размонтировании компонента
+            return () => {
+                videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
+            };
         }
-      }, [viewed,id]);
+    }, [viewed, id]);
 
     // Effects
     useEffect(() => {
         const video = videoRef.current;
 
         if (video) {
-              
+
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
@@ -356,7 +358,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     };
 
     const formatDuration = (time: number): string => {
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2});
         const seconds = Math.floor(time % 60);
         const minutes = Math.floor(time / 60) % 60;
         const hours = Math.floor(time / 3600);
@@ -383,9 +385,15 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                         max="100"
                         step="1"
                         value={(currentTime / duration) * 100}
-                        onMouseDown={() => { videoRef.current?.pause() }}
-                        onMouseUp={() => { isPlaying && videoRef.current?.play() }}
-                        onChange={(e) => { videoRef.current && (videoRef.current.currentTime = (parseFloat(e.target.value) / 100) * duration) }}
+                        onMouseDown={() => {
+                            videoRef.current?.pause()
+                        }}
+                        onMouseUp={() => {
+                            isPlaying && videoRef.current?.play()
+                        }}
+                        onChange={(e) => {
+                            videoRef.current && (videoRef.current.currentTime = (parseFloat(e.target.value) / 100) * duration)
+                        }}
                     />
                 </div>
                 <div className="controls">
@@ -447,20 +455,22 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                         </svg>
                     </div>
                     <button className="cursor-pointer mr-2" onClick={handlePlaybackRateChange}>{playbackRate}x</button>
-                    <div className="theater-btn flex justify-center items-center cursor-pointer" onClick={toggleTheaterMode}>
-                        <TbLayersSubtract size={24} />
+                    <div className="theater-btn flex justify-center items-center cursor-pointer"
+                         onClick={toggleTheaterMode}>
+                        <TbLayersSubtract size={24}/>
                     </div>
-                    <div className="mini-player-btn flex justify-center items-center cursor-pointer" onClick={toggleMiniPlayerMode}>
-                        <PiPictureInPicture size={26} />
+                    <div className="mini-player-btn flex justify-center items-center cursor-pointer"
+                         onClick={toggleMiniPlayerMode}>
+                        <PiPictureInPicture size={26}/>
                     </div>
                     <div className="mini-player-btn cursor-pointer">
-                        <PiScreencast size={25} />
+                        <PiScreencast size={25}/>
                     </div>
                     <div className="full-screen-btn mr-2 cursor-pointer" onClick={toggleFullScreen}>
                         {isFullScreen ? (
-                            <RxExitFullScreen size={23} />
+                            <RxExitFullScreen size={23}/>
                         ) : (
-                            <RxEnterFullScreen size={23} />
+                            <RxEnterFullScreen size={23}/>
                         )}
                     </div>
                 </div>
@@ -473,7 +483,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 controls={false}
                 preload="metadata"
             >
-                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default />
+                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default/>
             </video>
         </div>
     );

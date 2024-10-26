@@ -13,7 +13,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({isOpen, onClose, onApplyFilt
     const [filters, setFilters] = useState<Filters>({
         copyright: '', ageRestriction: '', audience: '',
         access: '', title: '', description: '',
-        minViews: undefined, maxViews: undefined,
+        minViews: 0, maxViews: 0,
     });
 
     const onFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -53,8 +53,8 @@ const FilterDialog: React.FC<FilterDialogProps> = ({isOpen, onClose, onApplyFilt
                         <select name="ageRestriction" value={filters.ageRestriction} onChange={onFilterChange}
                                 className="block w-full mt-1 border-gray-300 rounded shadow-sm">
                             <option value="">Все</option>
-                            <option value="ageRestricted">Есть</option>
-                            <option value="none">Нет</option>
+                            <option value="true">Есть</option>
+                            <option value="false">Нет</option>
                         </select>
                     </div>
 
@@ -62,7 +62,7 @@ const FilterDialog: React.FC<FilterDialogProps> = ({isOpen, onClose, onApplyFilt
                         <span className="text-gray-700">Аудитория</span>
                         <select name="audience" value={filters.audience} onChange={onFilterChange}
                                 className="block w-full mt-1 border-gray-300 rounded shadow-sm">
-                            <option value="">Все</option>
+                            <option value="all">Все</option>
                             <option value="children">Дети</option>
                             <option value="adults">Взрослые</option>
                         </select>
@@ -91,13 +91,15 @@ const FilterDialog: React.FC<FilterDialogProps> = ({isOpen, onClose, onApplyFilt
                     </div>
 
                     <div className="block">
-                        <span className="text-gray-700">Просмотры (Минимум)</span>
-                        <input type="number" name="minViews" value={filters.minViews || ''} onChange={onFilterChange}
+                        <span className="text-gray-700">Просмотры (Больше равно)</span>
+                        <input min={0} type="number" name="minViews" value={filters.minViews || 0}
+                               onChange={onFilterChange}
                                className="block w-full mt-1 border-gray-300 rounded shadow-sm"/>
                     </div>
                     <div className="block">
-                        <span className="text-gray-700">Просмотры (Максимум)</span>
-                        <input type="number" name="maxViews" value={filters.maxViews || ''} onChange={onFilterChange}
+                        <span className="text-gray-700">Просмотры (Мeньше равно)</span>
+                        <input min={0} type="number" name="maxViews" value={filters.maxViews || 0}
+                               onChange={onFilterChange}
                                className="block w-full mt-1 border-gray-300 rounded shadow-sm"/>
                     </div>
                     <button className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
