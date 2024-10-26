@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {IoMdNotifications} from "react-icons/io";
 import {  HiOutlineChevronDown } from 'react-icons/hi';
+import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
 
 interface IProps {
     isfolowed: boolean;
@@ -11,6 +12,7 @@ interface IProps {
 const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
     const [isFolowOpen, setIsFolowOpen] = useState(false);
     const [isfolow,setIsFolowed]=useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     const toggleFolowWindow = () => {
         setIsFolowOpen(!isFolowOpen); 
@@ -47,7 +49,9 @@ const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
                     </div>
                     <div>
                     
-                    <button onClick={onDelete}>Cancel subscription</button>
+                    <button onClick={onDelete} style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)} >Cancel subscription</button>
 
                     </div>
                 </div>

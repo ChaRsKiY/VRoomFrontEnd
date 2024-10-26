@@ -7,6 +7,8 @@ import Image from "next/image";
 import {IChannel} from '@/types/channelinfo.interface';
 import FolowComponent from '@/components/pages/watch/folowblock';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import FilterComponent from './filtersubscriptions';
+import { SortAsc } from 'lucide-react';
 
 interface SubscribersData {
   [key: number]: number; // Ключи - channelId, значения - количество подписчиков
@@ -43,26 +45,19 @@ const AllSubscriptionsComponent: React.FC = () => {
         }
     
       }; 
-     
-      // const getSubscribers = async (channelSettingsId:number): Promise<number> => {
-      //   if (!user) return 0; 
-    
-      //   try {
-      //     const promises = allFollowed.map(async (followed) => {
-      //       const response = await fetch(`https://localhost:7154/api/Subscription/countbychannelid/${channelSettingsId}`);
-      //       const data = await response.json();
-      //       return data; 
-      //     });
-      //     const results = await Promise.all(promises);
-
-      //     // setSubscribers(results);
-      //   } catch (error) {
-      //     console.error('Ошибка при получении подписчиков:', error);
-      //     return 0;
-      //   }
       
-      //   return 0;
-      // };
+      const applyFilters = (newFilters: any) => {
+        if(newFilters==='sortUp')
+        {
+          const sortedArray = [...allFollowed].sort((a, b) => a.channelNikName.localeCompare(b.channelNikName));
+               setAllFollowed(sortedArray);
+        }
+        if(newFilters==='sortDown')
+          {
+            const sortedArray = [...allFollowed].sort((a, b) => b.channelNikName.localeCompare(a.channelNikName));
+                 setAllFollowed(sortedArray);
+          }
+    };
 
       const getSubscribers = async (channelId: number): Promise<number> => {
         if (!user) return 0;
@@ -154,8 +149,8 @@ const AllSubscriptionsComponent: React.FC = () => {
                 </div>
               <div className='flex ' style={{width:'100%',display:'flex',justifyContent:'space-around'}}> 
                 <div>
-
-{allFollowed.map((el, index) => (
+               <FilterComponent applyFilters={applyFilters} />
+          {allFollowed.map((el, index) => (
                     <div className='flex'>
                     <Link href={"/gotochannel/" + el.id}  className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 py-1 min-h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
                         
