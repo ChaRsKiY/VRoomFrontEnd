@@ -3,6 +3,7 @@ export interface IAnswerCommentPost {
     userId: string,
     userName: string,
     channelBanner:string,
+    channelId?:number,
     commentPost_Id:number,
     text: string,
     answerDate: Date,

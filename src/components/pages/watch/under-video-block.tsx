@@ -11,7 +11,8 @@ import { useUser } from '@clerk/nextjs';
 import { signalRService } from '@/services/signalr.service';
 import RadioButtonList from '@/components/pages/watch/report';
 import ShareComponent  from './share'; 
-
+import FolowComponent from "./folowblock";
+import ChannelUrlComponent from '../channel/channelurlcomponent';
 
 interface IUnderVideoBlockProps {
     video: IVideo;
@@ -21,7 +22,8 @@ interface IUnderVideoBlockProps {
 const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideoBlockProps) => {
     const {user}=useUser();
     const[newVideo,setVideo]=useState<IVideo>();
-    const [displayR, setDisplayR] = useState('none');  
+    const [displayR, setDisplayR] = useState('none'); 
+    const [isFolowed, setIsFolowed] = useState(false);  
 
     const  dislike= async (id: number )=>{
         if(user){ 
@@ -42,6 +44,7 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
         }}
             
       }
+
       const like = async (id: number ) => {
         if(user){ 
         try {     
@@ -53,6 +56,59 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
            console.log('лайк');
           } else {
             console.error('Ошибка при like:', response.statusText);
+          }
+        
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+        }}
+      }; 
+
+      const checkIsFolowed = async ( ) => {
+        if(user){ 
+        try {     
+          const response = await fetch('https://localhost:7154/api/Subscription/isfolowed/'+video.channelSettingsId +'/'+ user.id , {
+            method: 'GET',
+          });
+    
+          if (response.ok) {
+                 setIsFolowed(true);
+          } else {
+            console.error('Ошибка при isfolowed:', response.statusText);
+          }
+        
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+        }}
+      }; 
+      const addSubscription = async ( ) => {
+        if(user){ 
+        try {     
+          const response = await fetch('https://localhost:7154/api/Subscription/add/'+video.channelSettingsId +'/'+ user.id , {
+            method: 'POST',
+          });
+    
+          if (response.ok) {
+                 setIsFolowed(true);
+          } else {
+            console.error('Ошибка при isfolowed:', response.statusText);
+          }
+        
+        } catch (error) {
+          console.error('Ошибка при подключении к серверу:', error);
+        }}
+      }; 
+
+      const deleteSubscription = async ( ) => {
+        if(user){ 
+        try {     
+          const response = await fetch('https://localhost:7154/api/Subscription/delete/'+video.channelSettingsId +'/'+ user.id , {
+            method: 'DELETE',
+          });
+    
+          if (response.ok) {
+                 setIsFolowed(false);
+          } else {
+            console.error('Ошибка при isfolowed:', response.statusText);
           }
         
         } catch (error) {
@@ -79,7 +135,8 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
       }, [video]);
 
       useEffect(() => {
-          setVideo(video);                    
+          setVideo(video); 
+          checkIsFolowed();                  
       }, [video]);
 
       const openReport = () => {
@@ -103,12 +160,17 @@ const UnderVideoBlock: React.FC<IUnderVideoBlockProps> = ({ video }: IUnderVideo
             <div className="py-2 text-xl font-[500]">{newVideo.tittle}</div>
             <div className="flex justify-between">
                 <div className="flex items-center">
-                    <Image src={newVideo.channelBanner} alt={newVideo.channelName} width={40} height={40} 
+                    <Image src={newVideo.channelProfilePhoto} alt={newVideo.channelName} width={40} height={40} 
                     style={{minHeight:'40px'}} className="rounded-full" />
                     <div className="flex flex-col pl-3.5">
-                        <div className="font-[500]">{newVideo.channelName}</div>
+                        {/* <div className="font-[500]">{newVideo.channelName}</div> */}
+                       
+                        <ChannelUrlComponent name={newVideo.channelName} id={newVideo.channelSettingsId} nik={newVideo.channelNikName} />
+
                     </div>
-                    <button className="px-2 py-0.5 rounded bg-neutral-400 text-white ml-5">Follow</button>
+
+                    <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription} onAdd={addSubscription}/>
+
                     <div className="ml-5 text-neutral-600" title={newVideo.viewCount.toString()}>{formatNumber(newVideo.viewCount)} views</div>
                 </div>
                 <div className="flex items-center space-x-8">
