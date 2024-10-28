@@ -16,7 +16,11 @@ interface IContentVideoProps {
 const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
     const {user} = useUser(); // Получаем текущего пользователя
     const [videos, setVideos] = useState<IContentVideo[]>([]);
-    const [filters, setFilters] = useState<Filters>({});
+    const [filters, setFilters] = useState<Filters>({
+        copyright: '', ageRestriction: '', audience: '',
+        access: '', title: '', description: '',
+        minViews: 0, maxViews: 0,
+    });
     const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -24,7 +28,7 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
         setIsLoading(true);
         if (user && isLoading) {
             const fetchData = async () => {
-                const result = await fetchVideos(user.id, isShort);
+                const result = await fetchVideos(user.id, isShort, filters);
                 setVideos(result);
             };
             fetchData();
