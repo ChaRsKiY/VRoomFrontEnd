@@ -11,6 +11,7 @@ export interface IChannel {
     language_Id: number;
     country_Id:number;
     notification:boolean;
+    subscriptionCount?:number,
     videos:[];
     posts:[];
     subscriptions:[];

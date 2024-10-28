@@ -17,7 +17,7 @@ const ChannelPage: React.FC = async ({ params }: any) => {
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[20%] w-full max-w-[1300px] flex justify-center max-lg:pl-[12%] max-sm:pl-0">
+            <div className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
                 
                 <ChannelInfoComponent channelid={id} />
             </div>

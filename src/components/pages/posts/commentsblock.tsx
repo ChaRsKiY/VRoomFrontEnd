@@ -8,7 +8,6 @@ import { ICommentPost } from '@/types/commentpost.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentPost } from '@/types/answercommentpost.interface';
-// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
 import { signalRService } from '@/services/signalr.service';
 
 interface CommentsProps {
@@ -136,7 +135,7 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
     const handleSortMethodChange = (method: 'date' | 'likes') => {
         setSortMethod(method);
         const sortedData = comments.sort((a, b) => {
-            // Сначала сортируем по полю isPinned
+           
             if (a.isPinned && !b.isPinned) {
                 return -1;
             }
@@ -148,72 +147,12 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
             } else if (sortMethod === 'likes') {
                 return sortByLikes([a, b])[0] === a ? -1 : 1; 
             }
-            return 0; // Если нет метода сортировки, ничего не меняем
+            return 0; 
         });
         setComments(sortedData);
     };
 
-    // Инициализация WebSocket и обновление комментариев через WebSocket
-    // useEffect(() => {
-    //     // const ws = new WebSocket('ws://localhost:5000'); // URL WebSocket сервера
-    //     const ws = new WebSocket('wss://localhost:7154');
-
-    //     ws.onopen = () => {
-    //         console.log('WebSocket соединение установлено');
-    //         // Например, можно отправить начальный запрос или уведомление
-    //         ws.send(JSON.stringify({ type: 'subscribe', postid }));
-    //     };
-
-    //     ws.onmessage = (event) => {
-    //         const messageData = JSON.parse(event.data);
-    //         console.log('Сообщение от WebSocket сервера:', messageData);
-
-    //         if (messageData.type === 'new_commentpost') {
-
-    //             getComments();
-
-    //             comments.forEach((comment) => {
-    //                 getAnswers(comment.id);
-    //                 console.log('получаю ответы****!!!', answersByComment);// Загружаем ответы для каждого комментария автоматически
-    //             })
-    //         }
-    //         if (messageData.type === 'update_commentpost') {
-    //             const upComment = messageData.payload;
-    //             setComments((prevComments) =>
-    //               prevComments.map((com) =>
-    //                 com.id === upComment.id
-    //                   ? { ...com, isEdited: upComment.isEdited, comment:upComment.comment } // Обновляем количество лайков
-    //                   : com
-    //               )
-    //             );
-    //           }
-    //           if (messageData.type === 'pin_commentpost') {
-    //             const upComment = messageData.payload;
-    //             setComments((prevComments) =>
-    //               prevComments.map((com) =>
-    //                 com.id === upComment.id
-    //                   ? { ...com, isPinned: upComment.isPinned } // Обновляем количество лайков
-    //                   : com
-    //               )
-    //             );
-    //           }
-    //     };
-    //     ws.onclose = () => {
-    //         console.log('WebSocket соединение закрыто');
-    //     };
-    //     ws.onerror = (error) => {
-    //         console.error('Ошибка WebSocket:', error);
-    //     };
-    //     // Сохраняем WebSocket в состоянии
-    //     setSocket(ws);
-    //     // Закрываем WebSocket при размонтировании компонента
-    //     return () => {
-    //         ws.close();
-    //     };
-    // }, [postid]);
-
     useEffect(() => {
-    //    const connection = initializeConnection();
 
   const handleMessage = (messageType: string, payload: any) => {
 
@@ -269,21 +208,14 @@ const CommentsPostBlock: React.FC<CommentsProps> = ({postid}) => {
                 );
               }
         };
-    //     signalRService.on('postcommentMessage', handleMessage);
-
-    //     return () => {
-    //          signalRService.off('postcommentMessage', handleMessage);
-    //    };
     signalRService.onMessageReceived(handleMessage);
 
-    // Очистка подписки при размонтировании компонента
     return () => {
         signalRService.offMessageReceived(handleMessage);
     };
     }, [postid]);
 
 
-    // Получаем комментарии при загрузке компонента
     useEffect(() => {
         getUser(user,setUser);
         getComments();

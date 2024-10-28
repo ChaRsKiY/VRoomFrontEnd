@@ -19,17 +19,17 @@ const CommentsPostPage: React.FC = async ({ params }: any) => {
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t}/>
             </div>
+            
             <div className="pl-[20%] w-3/4   max-lg:pl-[12%] max-sm:pl-0">
             <div  style={{border:'1px solid lightgray', padding:'15px',borderRadius:'20px',marginTop:'50px'}}>
                 <Post postid={id} />
                 <div style={{paddingLeft:'50px',paddingRight:'50px'}}>
                 <CommentsPostBlock  postid={id} />
                 </div>
-                </div>
             </div>
-            <div>
+            </div>
 
-            </div>
+           
         </div>
     )
 }

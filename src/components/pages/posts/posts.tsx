@@ -10,7 +10,6 @@ import {IPost} from "@/types/post.interface";
 import Link from "next/link";
 import { BiTrash } from 'react-icons/bi';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
 import { signalRService } from '@/services/signalr.service';
 
 interface IPropsPost {
@@ -31,7 +30,6 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const textAreasRefs = useRef<(HTMLTextAreaElement | null)[]>([]);
   const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(posts.length).fill(false));
   const [isTextOverflowing, setIsTextOverflowing] = useState<boolean[]>([]);
- // const [socket, setSocket] = useState<WebSocket | null>(null); 
   const [deleteMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null);
 
 
@@ -360,6 +358,7 @@ useEffect(() => {
                  </div>
             
              <br />
+             <Link href={"/post/comments/" +post.id} className="block pl-0 pr-4 py-2 rounded-full">  
               {post.photo && 
               <img src={post.photo} alt="Post image" width="100%" style={{paddingLeft:'50px'}}/>}
               {post.video && (
@@ -378,6 +377,7 @@ useEffect(() => {
                   </div>
                 </>
               )}
+              </Link>
               <div className="flex items-center space-x-8 pt-5" style={{paddingLeft:"55px", width:'100%',justifyContent:'space-between'}}>
                    <div className="flex items-center space-x-2.5">
                     <div className="flex items-center space-x-2.5 pr-10">

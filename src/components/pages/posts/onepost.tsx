@@ -5,8 +5,11 @@ import  { useUser }  from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import {formatTimeAgo} from"@/utils/format";
 import {IPost} from "@/types/post.interface";
+import {IChannel} from "@/types/channelinfo.interface";
 import Link from "next/link";
 import { BiArrowBack } from 'react-icons/bi';
+import '@/styles/channelmodul.css';
+import Image from 'next/image';
 
 interface IPropsPost {
  postid:  number,
@@ -17,7 +20,26 @@ const Post : React.FC<IPropsPost> =({ postid }) => {
 
   const [iAmUser, setUser] = useState<IUser | null>(null);
   const [post, setPost] = useState<IPost | null>(null);
+  const [channel, setChannel] = useState<IChannel | null>(null);
   const {user} = useUser();
+
+  const getChannel = async () => {
+    try {
+      
+            const response = await fetch('https://localhost:7154/api/ChannelSettings/' + post?.channelSettingsId, {
+                method: 'GET',
+            });
+  
+            if (response.ok) {
+                const data: IChannel = await response.json();
+                setChannel(data);
+            } else {
+                console.error('Ошибка при получении channel:', response.statusText);
+             }
+        } catch (error) {
+        console.error('Ошибка при подключении к серверу:', error);
+    }
+  };
 
   const getUser = async () => {
     try {
@@ -97,6 +119,7 @@ useEffect(() => {
 
 useEffect(() => {
   getUser();
+  getChannel();
 }, [post]);
 
 
@@ -104,8 +127,19 @@ useEffect(() => {
   // Отображение постa
   return (
     <div  >
+
+{channel? ( <>
+        <div style={{width:'100%'}}  className='container' >
+        <div style={{marginBottom:'100px',width:'100%'}}  >
+       
+            <div className='backgroundImage'>
+             <Image src={channel?.channelBanner} alt="Banner Image" width={800} height={600}
+             style={{ width: '100%', height: 'auto', objectFit: 'cover' }} />          
+            </div>
+            <div className='content' style={{width:'100%'}}>
+
       <div style={{width:'100%',display:'flex',justifyContent:'end',marginTop:'-50px',marginBottom:'20px'}}>
-        <Link href={"/post/createpost/"+post?.channelSettingsId} style={{padding:'10px'}}>
+        <Link href={"/gotochannel/"+channel?.id} style={{padding:'10px',backgroundColor:'lightgray',borderRadius:'50%'}}>
              <BiArrowBack size={24} color="black" />
          </Link>
       </div>
@@ -164,7 +198,7 @@ useEffect(() => {
                   </div>
 
     </div>
-
+    </div> </div> </>):<></>} </div>
   );
 };
 

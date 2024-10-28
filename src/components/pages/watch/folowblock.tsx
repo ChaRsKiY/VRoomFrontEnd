@@ -32,10 +32,10 @@ const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
         <div>
            {isfolow? ( <div>
             <div className="flex items-center space-x-2.5" onClick={toggleFolowWindow} 
-            style={{border:'2px solid gray',borderRadius:'15px',padding:'5px',marginLeft:'10px',color:'gray'}}>
+            style={{borderRadius:'5px',padding:'5px',marginLeft:'10px',backgroundColor:'lightgray'}}>
                 <IoMdNotifications size={22} />
                 <div className="font-[300] cursor-pointer"
-                style={{fontWeight:'bold'}}>Subscribed </div>
+                style={{fontWeight:'bold'}}>Following </div>
                 <HiOutlineChevronDown size={22} />
             </div>
 
@@ -44,8 +44,7 @@ const FolowComponent: React.FC<IProps> = ({isfolowed, onDelete, onAdd}) => {
                 <div className="absolute bg-white border border-gray-300 rounded-md shadow-lg p-4 mt-2 "
                 style={{maxWidth:'410px'}}>
                     <div style={{display:'flex',width:'100%',justifyContent:'end'}}>
-                    {/* <button  style={{padding:'10px',paddingTop:'0', fontWeight:'bold',color:'gray'}} onClick={onCloseFolow}>
-                        X </button> */}
+                   
                     </div>
                     <div>
                     

@@ -298,3 +298,4 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 }
 
 export default CreatePost
+
