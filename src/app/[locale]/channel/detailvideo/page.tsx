@@ -93,14 +93,25 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const handleButtonClick = () => {
     document.getElementById('thumbnailInput')?.click();
   };
-  const fileToBase64 = (file: File): Promise<string | ArrayBuffer | null> => {
+  
+  const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                const base64String = reader.result.split(",")[1]; 
+                resolve(base64String);
+            } else {
+                reject(new Error("Error: FileReader result is not a string."));
+            }
+        };
+
+        reader.onerror = (error) => reject(error);
     });
-  };
+};
+
   useEffect(() => {
     const loadTranslations = async () => {
       try {
@@ -153,10 +164,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
         formData.append(key, value.toString());
       } else if (value instanceof Blob) {
         formData.append(key, value);
-      } else if (value instanceof ArrayBuffer) {
-        const blob = new Blob([value], { type: 'application/octet-stream' });
-        formData.append(key, blob);
-      } else if (value !== null) {
+      }  else if (value !== null) {
         formData.append(key, value.toString());
       }
     });
