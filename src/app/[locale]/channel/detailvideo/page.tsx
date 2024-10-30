@@ -2,7 +2,6 @@
 import React ,{ useEffect, useState, useRef } from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
-import { useVideo } from '@/app/[locale]/channel/videocontext';
 import initTranslations from "@/app/i18n";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
@@ -10,10 +9,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Info } from 'lucide-react'
-import { Progress } from "@/components/ui/progress"
+import { Upload, X, Info, Plus, Badge} from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import ReactPlayer from 'react-player'; 
 interface IHomeProps {
     params: {
         locale: string;
@@ -27,52 +24,112 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [t, setT] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [visibility, setVisibility] = useState('private');
-  const [language, setLanguage] = useState<string | null>(null);
-  const [titleLanguage, setTitleLanguage] = useState<string | null>(null);
-  const [recordingDate, setRecordingDate] = useState<string | null>(null);
   const [videoLocation, setVideoLocation] = useState<string | null>(null);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false);
-  const [isTitleLanguageOpen, setIsTitleLanguageOpen] = useState(false);
-  const [isRecordingDateOpen, setIsRecordingDateOpen] = useState(false);
   const [isVideoLocationOpen, setIsVideoLocationOpen] = useState(false);
   const [madeForKids, setMadeForKids] = useState(false);
   const [ageRestricted, setAgeRestricted] = useState(false);
-  const [title, setTitle] = useState('');
+  const [titl, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Стан для вибраного файлу
   const [thumbnailPreview, setThumbnailPreview] = useState<string | ArrayBuffer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [newCategory, setNewCategory] = useState('')
+  const [tags, setTags] = useState<string[]>([])
+  const [currentTag, setCurrentTag] = useState('')
  
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0]
+    if (selectedFile && selectedFile.type.startsWith('video/')) {
+      setFile(selectedFile)
+      const fileUrl = URL.createObjectURL(selectedFile)
+      setPreview(fileUrl)
+      const videoElement = document.createElement('video');
+      videoElement.src = fileUrl;
 
+      videoElement.onloadedmetadata = () => {
+        const durationInSeconds = Math.floor(videoElement.duration); 
+        sessionStorage.setItem('videoDuration', durationInSeconds.toString());
+        URL.revokeObjectURL(fileUrl); 
+      };
+    } else {
+      alert('Please select a valid video file.')
+    }
+  }
   useEffect(() => {
     fetch('https://localhost:7154/api/Category')
       .then((response) => response.json())
       .then((data: Category[]) => setCategories(data))
       .catch((error) => console.error('Error fetching categories:', error));
   }, []);
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+  }
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    if (file) {
-      setSelectedFile(file); 
-      const fileURL = URL.createObjectURL(file);
-      sessionStorage.setItem('fileURL', fileURL);
-      sessionStorage.setItem('fileName', file.name);
+  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    const droppedFile = event.dataTransfer.files[0]
+    if (droppedFile && droppedFile.type.startsWith('video/')) {
+      setFile(droppedFile)
+      const fileUrl = URL.createObjectURL(droppedFile)
+      setPreview(fileUrl)
+    } else {
+      alert('Please drop a valid video file.')
+    }
+  }
 
-      const videoElement = document.createElement('video');
-      videoElement.src = fileURL;
-
-      videoElement.onloadedmetadata = () => {
-        const durationInSeconds = Math.floor(videoElement.duration); 
-        sessionStorage.setItem('videoDuration', durationInSeconds.toString());
-        URL.revokeObjectURL(fileURL); 
+  const removeFile = () => {
+    setFile(null)
+    setPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+  const addCategory = () => {
+    if (newCategory && !categories.some((category) => category.name === newCategory)) {
+      const newCategoryObj: Category = {
+        id: Date.now(),
+        name: newCategory,
       };
+      setCategories([...categories, newCategoryObj]);
+      setSelectedCategory(newCategoryObj);
+      setNewCategory('');
     }
   };
+
+  const addTag = () => {
+    if (currentTag && !tags.includes(currentTag)) {
+      setTags([...tags, currentTag])
+      setCurrentTag('')
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove))
+  }
+  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0] || null;
+  //   if (file) {
+  //     setSelectedFile(file); 
+  //     const fileURL = URL.createObjectURL(file);
+  //     sessionStorage.setItem('fileURL', fileURL);
+  //     sessionStorage.setItem('fileName', file.name);
+
+  //     const videoElement = document.createElement('video');
+  //     videoElement.src = fileURL;
+
+  //     videoElement.onloadedmetadata = () => {
+  //       const durationInSeconds = Math.floor(videoElement.duration); 
+  //       sessionStorage.setItem('videoDuration', durationInSeconds.toString());
+  //       URL.revokeObjectURL(fileURL); 
+  //     };
+  //   }
+  // };
 
   const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -80,7 +137,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       setThumbnail(file); 
       const reader = new FileReader();
       reader.onload = () => {
-        setThumbnailPreview(reader.result); // Показуємо попередній перегляд обкладинки
+        setThumbnailPreview(reader.result); 
       };
       reader.readAsDataURL(file);
     } else {
@@ -125,24 +182,24 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
     };
     loadTranslations();
   }, [locale]);
-
+  if (loading) return <div>Loading...</div>;
   const handleSubmit = async () => {
     const formData = new FormData();
 
-    if (!selectedFile) {
+    if (!file) {
       console.error('No video file selected!');
       return;
     }
     const duration = Number(sessionStorage.getItem('videoDuration')) || 0;
-    formData.append('videoFile', selectedFile);
+    formData.append('videoFile', file);
     const emptyFile = new Blob([], { type: 'application/octet-stream' });
     formData.append('file', emptyFile, 'empty-file.bin');
-    const videoUrls = await fileToBase64(selectedFile);
+    const videoUrls = await fileToBase64(file);
     const videoData = {
       id: 0,
       objectID: 'some-generated-id',
       channelSettingsId: 3,
-      title: title,
+      title: titl,
       description: description ,
       uploadDate: new Date().toISOString(),
       duration,
@@ -183,72 +240,94 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
     }
   };
 
-  if (loading) return <div>Loading...</div>;
     return (
         <>
             <HeaderHome t={t} />
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t} />
-                <main className="pl-[20%] ml-[5%] max-lg:pl-[15%] max-md:pl-[10%] max-sm:pl-0 max-w-[75%]">
+                <main className="pl-[10%] ml-[35%] max-lg:pl-[15%] max-md:pl-[10%] max-sm:pl-0 max-w-[75%]">
                 <div className="container  p-4">
                 <Tabs defaultValue="details" className="right">
-                    <TabsList className="grid w-full grid-cols-6 mb-4">
+                    <TabsList className="grid w-full grid-cols-4 mb-4">
                     <TabsTrigger value="details">Details</TabsTrigger>
-                    <TabsTrigger value="monetisation">Monetisation</TabsTrigger>
-                    <TabsTrigger value="ad-suitability">Ad suitability</TabsTrigger>
+                    {/* <TabsTrigger value="monetisation">Monetisation</TabsTrigger>
+                    <TabsTrigger value="ad-suitability">Ad suitability</TabsTrigger> */}
                     <TabsTrigger value="video-elements">Video elements</TabsTrigger>
                     <TabsTrigger value="checks">Checks</TabsTrigger>
                     <TabsTrigger value="visibility">Visibility</TabsTrigger>
                     </TabsList>
                     <TabsContent value="details" className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div className="md:col-span-2 space-y-8">
-                        <div className="upload-section">
-                    <h1 className="text-2xl font-bold">{t('Upload media')}</h1>
-                    
-                    <div className="upload-box" onClick={openFilePicker}>
-                        
-                        <p>{t('Click "Upload" to select a video file from your computer')}</p>
-    
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="video/mp4, video/webm, video/ogg"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                        />
-                        
-                        <Button type="button">
-                            {t('select_file')}
-                        </Button>
-      
-                </div>
-                        
-                    </div>
-                    <Label className="text-lg">Title </Label>
-                    <Input
-                        value={title}
+                    <h1 className="text-2xl font-bold mb-6">Upload Video</h1>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-gray-400 transition-colors duration-400"
+                                        onDragOver={handleDragOver}
+                                        onDrop={handleDrop}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        {file ? (
+                                            <div className="relative">
+                                                <video className="w-full h-48 object-cover rounded" src={preview || undefined} />
+                                                <Button
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    className="absolute top-2 right-2"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        removeFile();
+                                                    }}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                    <span className="sr-only">Remove video</span>
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                                                <p className="mt-2 text-sm text-gray-600">Drag and drop a video file here, or click to select a file</p>
+                                            </div>
+                                        )}
+                                        <Input
+                                            type="file"
+                                            accept="video/*"
+                                            className="hidden"
+                                            onChange={handleFileChange}
+                                            ref={fileInputRef}
+                                        />
+                                    </div>
+                                </div>
+                    <h1 className="text-2xl font-bold mb-6">Title </h1>
+                    <Input placeholder="Enter video title"
+                        value={titl}
                         onChange={(e) => setTitle(e.target.value)} 
                         className="text-2xl font-bold"
                       />
-                        <div className="space-y-2">
-                            <Label className="text-lg">Visibility</Label>
-                            <RadioGroup value={visibility} onValueChange={setVisibility} className="flex space-x-4">
-                            <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
-                                Private
-                            </RadioGroupItem>
-                            <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
-                                Unlisted
-                            </RadioGroupItem>
+                        <div>
+                        <Label>Privacy Settings</Label>
+                        <RadioGroup value={visibility} onValueChange={setVisibility}>
+                          <div className="flex items-center space-x-2">
                             <RadioGroupItem value="public" id="public" selectedValue={visibility} onValueChange={setVisibility}>
-                                Public
+                              Public
                             </RadioGroupItem>
-                            </RadioGroup>
-                        </div>
-                        {visibility === "private" && (
-                            <Button variant="outline">Grant access</Button>
-                        )}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
+                              Private
+                            </RadioGroupItem>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
+                              Unlisted
+                            </RadioGroupItem>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                      <div>
+                      <Label>Selected Privacy Setting</Label>
+                      <p className="text-sm font-medium">{visibility.charAt(0).toUpperCase() + visibility.slice(1)}</p>
+                    </div>
+                        
                          <Textarea
+                         placeholder="Enter video description"
                           value={description} 
                           onChange={(e) => setDescription(e.target.value)} 
                           className="min-h-[200px]"
@@ -314,69 +393,54 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                     ))}
                 </SelectContent>
             </Select>
+            <Input
+                  placeholder="New category"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                />
+                <Button type="button" onClick={addCategory}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add
+                </Button>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Video language</Label>
-            <Select>
-              <SelectTrigger onClick={() => setIsLanguageOpen(!isLanguageOpen)}>
-                <SelectValue value={language} placeholder="Not selected" />
-              </SelectTrigger>
-              <SelectContent isOpen={isLanguageOpen}>
-                <SelectItem value="en" onClick={() => { setLanguage('en'); setIsLanguageOpen(false); }}>
-                  English
-                </SelectItem>
-                <SelectItem value="es" onClick={() => { setLanguage('es'); setIsLanguageOpen(false); }}>
-                  Spanish
-                </SelectItem>
-                <SelectItem value="fr" onClick={() => { setLanguage('fr'); setIsLanguageOpen(false); }}>
-                  French
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Title and description language</Label>
-            <Select>
-              <SelectTrigger onClick={() => setIsTitleLanguageOpen(!isTitleLanguageOpen)}>
-                <SelectValue value={titleLanguage} placeholder="Not selected" />
-              </SelectTrigger>
-              <SelectContent isOpen={isTitleLanguageOpen}>
-                <SelectItem value="en" onClick={() => { setTitleLanguage('en'); setIsTitleLanguageOpen(false); }}>
-                  English
-                </SelectItem>
-                <SelectItem value="es" onClick={() => { setTitleLanguage('es'); setIsTitleLanguageOpen(false); }}>
-                  Spanish
-                </SelectItem>
-                <SelectItem value="fr" onClick={() => { setTitleLanguage('fr'); setIsTitleLanguageOpen(false); }}>
-                  French
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-            <Label>Video location</Label>
-            <Select>
-              <SelectTrigger onClick={() => setIsVideoLocationOpen(!isVideoLocationOpen)}>
-                <SelectValue value={videoLocation} placeholder="Not specified" />
-              </SelectTrigger>
-              <SelectContent isOpen={isVideoLocationOpen}>
-                <SelectItem value="usa" onClick={() => { setVideoLocation('usa'); setIsVideoLocationOpen(false); }}>
-                  United States
-                </SelectItem>
-                <SelectItem value="uk" onClick={() => { setVideoLocation('uk'); setIsVideoLocationOpen(false); }}>
-                  United Kingdom
-                </SelectItem>
-                <SelectItem value="canada" onClick={() => { setVideoLocation('canada'); setIsVideoLocationOpen(false); }}>
-                  Canada
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-
+            <div>
+              <Label htmlFor="tags">Tags</Label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {tags.map((tag) => (
+                  <Badge key={tag} className="text-sm">
+                    {tag}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-1 h-4 w-4 p-0"
+                      onClick={() => removeTag(tag)}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove tag</span>
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  id="tags"
+                  placeholder="Enter a tag"
+                  value={currentTag}
+                  onChange={(e) => setCurrentTag(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addTag()
+                    }
+                  }}
+                />
+                <Button type="button" onClick={addTag}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Tag
+                </Button>
+              </div>
+            </div>
         </div>
       </div>
       <div className="space-y-4">
@@ -421,62 +485,67 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       <p className="text-xs text-gray-500 mb-4">
         Age-restricted videos are not shown in certain areas of YouTube. These videos may have limited or no ads monetisation. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
       </p>
-      <div className="space-y-2">
-        <label className="flex items-center">
-          <input
-            type="radio"
-            className="form-radio"
-            name="ageRestriction"
-            checked={ageRestricted}
-            onChange={() => setAgeRestricted(true)}
-          />
-          <span className="ml-2">Yes, restrict my video to viewers over 18</span>
-        </label>
-        <label className="flex items-center">
-          <input
-            type="radio"
-            className="form-radio"
-            name="ageRestriction"
-            checked={!ageRestricted}
-            onChange={() => setAgeRestricted(false)}
-          />
-          <span className="ml-2">No, don't restrict my video to viewers over 18 only</span>
-        </label>
-      </div>
-    </div>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        className="form-radio"
+                        name="ageRestriction"
+                        checked={ageRestricted}
+                        onChange={() => setAgeRestricted(true)}
+                      />
+                      <span className="ml-2">Yes, restrict my video to viewers over 18</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        className="form-radio"
+                        name="ageRestriction"
+                        checked={!ageRestricted}
+                        onChange={() => setAgeRestricted(false)}
+                      />
+                      <span className="ml-2">No, don't restrict my video to viewers over 18 only</span>
+                    </label>
+                  </div>
+                </div>
                         <Button onClick={handleSubmit}>Upload </Button>
-                        </div>
                         <div className="space-y-8">
-                        <div className="space-y-2">
-                            <div className="text-sm font-medium">Upload status</div>
-                            <Progress value={66} />
-                            <div className="grid grid-cols-3 text-sm">
-                            <div>
-                                <div className="font-medium">HD</div>
-                                <div className="text-green-600">Complete</div>
-                            </div>
-                            <div>
-                                <div className="font-medium">SD</div>
-                                <div className="text-green-600">Complete</div>
-                            </div>
-                            <div>
-                                <div className="font-medium">Downloads</div>
-                                <div className="text-blue-600">Processing...</div>
-                            </div>
-                            </div>
+                        <div>
+                        <h2 className="text-xl font-semibold mb-4">Video Preview</h2>
+                        <div className="bg-gray-100 p-4 rounded-lg">
+                          <div className="aspect-video bg-gray-200 rounded-lg mb-4">
+                            {preview ? (
+                              <video className="w-full h-full object-cover rounded-lg" src={preview} controls />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                Video preview will appear here
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="font-semibold mb-2">Video Title</h3>
+                          <p className="text-sm text-gray-500">
+                            0 views • Just now
+                          </p>
+                          <p className="text-sm text-gray-500 mt-2">
+                          Privacy: {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
+                        </p>
                         </div>
-                        </div>
-                    </div>
+                      </div>
+                      </div>
+                    
                     </TabsContent>
                     <TabsContent value="monetisation">Monetisation content</TabsContent>
                     <TabsContent value="ad-suitability">Ad suitability content</TabsContent>
                     <TabsContent value="video-elements">Video elements content</TabsContent>
                     <TabsContent value="checks">Checks content</TabsContent>
                     <TabsContent value="visibility">Visibility content</TabsContent>
+                    
                 </Tabs>
                 </div>
                 </main>
+                
             </div>
+            
         </>
     );
 };
