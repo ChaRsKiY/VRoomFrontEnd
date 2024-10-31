@@ -60,12 +60,12 @@ const ShortWatch: React.FC<IProps> = ({id}) => {
                 </div>
 
                 /*<div className="w-3/4 px-8">
-                    <VideoPlayer src={video.videoUrl} id={video.id}/>
+                    <VideoPlayer src={video.videoUrl} [id]={video.[id]}/>
                     <UnderVideoBlock video={video} />
                     <UnderLine />
                     <DescriptionBlock description={video.description} />
                     <UnderLine />
-                    <CommentsBlock videoid={id} />
+                    <CommentsBlock videoid={[id]} />
                 </div>*/
             ) : (
                 <></>
