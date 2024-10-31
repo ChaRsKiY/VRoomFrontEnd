@@ -138,11 +138,11 @@ useEffect(() => {
             </div>
             <div className='content' style={{width:'100%'}}>
 
-      <div style={{width:'100%',display:'flex',justifyContent:'end',marginTop:'-50px',marginBottom:'20px'}}>
+      {/* <div style={{width:'100%',display:'flex',justifyContent:'end',marginTop:'-50px',marginBottom:'20px'}}>
         <Link href={"/gotochannel/"+channel?.id} style={{padding:'10px',backgroundColor:'lightgray',borderRadius:'50%'}}>
              <BiArrowBack size={24} color="black" />
          </Link>
-      </div>
+      </div> */}
           
                 <div className='flex ' style={{width:'100%',justifyContent:'space-between',}}>
                   <div className='flex '>

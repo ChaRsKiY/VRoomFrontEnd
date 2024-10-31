@@ -5,7 +5,8 @@ import { FaTwitter, FaTelegram, FaWhatsapp, FaInstagram,
 import { IChannel } from '@/types/channelinfo.interface';
 import RadioButtonList  from "@/components/pages/comments/report";
 import { FiFlag } from 'react-icons/fi';
-import ShareComponent from "./share"
+import ShareComponent from "./share";
+import { IUser } from '@/types/user.interface';
 
     interface IProps{
         ch:IChannel;
@@ -21,6 +22,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
     const [url,setUrl]=useState('');
     const [display2, setDisplay2] = useState('none'); 
     const [display1, setDisplay1] = useState('block'); 
+
 
     const openReport = () => {
         if(display2==='none'){ 
@@ -44,7 +46,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
       }, [channel]);
 
       useEffect(() => {
-        setChannel(ch);      
+        setChannel(ch);   
       }, [ch]);
 
     return (
@@ -134,7 +136,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         <div className="flex" style={{padding:'2px',paddingLeft:'10px'}}>                                                
                             <FaEnvelope size={12} className="text-600 cursor-pointer" title='email'/> 
                             <div style={{paddingLeft:'20px',fontSize:'12px', width:"105px"}}>Email</div>   
-                           <div style={{paddingLeft:'10px',fontSize:'12px'}}> channelVroom@gmail.com</div>                          
+                           <div style={{paddingLeft:'10px',fontSize:'12px'}}>channelVroom@gmail.com</div>                          
                         </div>
                         <div className="flex" style={{padding:'2px',paddingLeft:'10px'}}>                                                
                             <FaUsers size={14} className="text-600 cursor-pointer" title='followers'/>
@@ -196,8 +198,6 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                      </div>
 
                     </div>
-                                    
-            <div className="mb-24" />
         </div>
     )
 }

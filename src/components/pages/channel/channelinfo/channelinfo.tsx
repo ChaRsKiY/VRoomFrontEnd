@@ -33,6 +33,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [videosShorts,setVideosShorts]=useState<IVideo[]>([]);
     const [videosLiked,setVideosLiked]=useState<IVideo[]>([]);
     const [videosAll,setVideosAll]=useState<IVideo[]>([]);
+    const [videosAll2,setVideosAll2]=useState<IVideo[]>([]);
     const [display1,setDisplay1] =useState('block');
     const [display2,setDisplay2] =useState('block');
     const [display3,setDisplay3] =useState('block');
@@ -62,12 +63,15 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
     const [border6,setBorder6] =useState('');
     const [isFolowed, setIsFolowed] = useState(false); 
     const {user}=useUser();
-    const [color1,setColor1] =useState('lightgray');
-    const [color2,setColor2] =useState('black');
+    const [color7,setColor7] =useState('black');
+    const [color8,setColor8] =useState('white');
     const [color3,setColor3] =useState('lightgray');
     const [color4,setColor4] =useState('black');
     const [color5,setColor5] =useState('lightgray');
     const [color6,setColor6] =useState('black');
+    const [color1,setColor1] =useState('lightgray');
+    const [color2,setColor2] =useState('black');
+    
 
 
     const checkIsFolowed = async ( ) => {
@@ -134,7 +138,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                 if (response.ok) {
                     const data: IChannel = await response.json();
                     setChannel(data);
-                    getMentors();
+                    getMentions();
                 } else {
                     console.error('Ошибка при получении channel:', response.statusText);
                  }
@@ -142,7 +146,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
             console.error('Ошибка при подключении к серверу:', error);
         }
       };
-      const getMentors = async () => {
+      const getMentions = async () => {
         try {
           
                 const response = await fetch('https://localhost:7154/api/ChannelSettings/2' , {
@@ -178,6 +182,8 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
                 if (response.ok) {
                     const data: IVideo[] = await response.json();
                     setVideos(data);
+                    setVideosAll2(  data.filter((video: any) => video.isShort === false)) ;  
+                    setVideosAll(  data.filter((video: any) => video.isShort === false)) ;  
                     console.log(data);
                     
                 } else {
@@ -206,8 +212,8 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
        const chooseMoreLiked = ()=>{     
             setVideosLiked(  videos.sort((a: any, b: any) => b.likeCount - a.likeCount)) ;     
            }
-           const chooseAll = ()=>{     
-            setVideosAll(  videos.filter((video: any) => video.isShort === false)) ;     
+       const chooseAll = ()=>{      
+            setVideosAll(videosAll2) ;   
            }
 
         const showAllShorts = ()=>{     
@@ -257,6 +263,8 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
           setColor4('black'); 
           setColor5('lightgray');   
           setColor6('black');  
+          setColor7('lightgray');   
+          setColor8('black'); 
       }  
         const showPosts = ()=>{     
             breackDisplays();
@@ -274,6 +282,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
             breackBorders();
             setFont2('bold') ; 
             setBorder2('3px solid black') ;  
+           
         }  
         const showMain = ()=>{     
             breackDisplays(); 
@@ -311,20 +320,27 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
           breackColors();
           setColor1('black');
           setColor2('white');
-          setVideosAll(  videos.sort((a: any, b: any) =>new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())) ; 
+          setVideosAll(  videosAll.sort((a: any, b: any) =>new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())) ; 
       } 
       const showOldest = ()=>{ 
         breackColors();
         setColor3('black');
         setColor4('white');
-        setVideosAll(  videos.sort((a: any, b: any) =>new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime())) ; 
+        setVideosAll(  videosAll.sort((a: any, b: any) =>new Date(a.uploadDate).getTime() - new Date(b.uploadDate).getTime())) ; 
       } 
+
+      const showAlls=()=>{
+        breackColors();
+        setColor7('black');
+        setColor8('white');
+        setVideosAll(videosAll2);
+      }
       
       const showPop = ()=>{ 
         breackColors();
         setColor5('black');
         setColor6('white');
-        setVideosAll(  videos.sort((a: any, b: any) => b.viewCount - a.viewCount)) ; 
+        setVideosAll(  videosAll.sort((a: any, b: any) => b.viewCount - a.viewCount)) ; 
       } 
 
       useEffect(() => {
@@ -339,7 +355,7 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
         chooseNewOnce();
         chooseMoreViwed();
         chooseMoreLiked();
-        chooseAll();
+        chooseAll();      
       }, [videos]);
 
     return (
@@ -470,6 +486,10 @@ const ChannelInfoComponent : React.FC<IProps> =({ channelid }) => {
 
         <div onClick={showAll} style={{display:display7, marginTop:'20px' }} >
           <div>
+          <button onClick={showAlls} style={{padding:'5px',borderRadius:'5px',
+                marginLeft:'20px',margin:'2px',fontSize:"16px",
+                backgroundColor:color7, color:color8}}>All  
+                </button>
           <button onClick={showLatest} style={{padding:'5px',borderRadius:'5px',
                 marginLeft:'20px',margin:'2px',fontSize:"16px",
                 backgroundColor:color1, color:color2}}>Latest 

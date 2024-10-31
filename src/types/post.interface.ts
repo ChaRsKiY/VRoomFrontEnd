@@ -7,4 +7,6 @@ export interface IPost {
     video?:string,
     likeCount:number,
     dislikeCount:number,
+    type?:string,
+    options:[]
 }

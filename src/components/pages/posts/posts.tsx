@@ -17,6 +17,22 @@ interface IPropsPost {
  
  }
 
+ interface IOPtion{
+  index:number,
+   rate:number,
+  allCounts:number,
+}
+
+interface ICheckPost{
+  isVoted:boolean,
+  allVotes:number,
+  options:[IOPtion ],
+}
+interface ICheckPostNew{
+  postId: number,
+  votePost:ICheckPost;
+}
+
 const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const [posts, setPosts] = useState<IPost[]>([]); // Храним список постов
   const [loading, setLoading] = useState<boolean>(true); // Для отображения состояния загрузки
@@ -31,8 +47,11 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(posts.length).fill(false));
   const [isTextOverflowing, setIsTextOverflowing] = useState<boolean[]>([]);
   const [deleteMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<{ [postId: number]: number | null }>({});
+  const [checksPosts, setChecksPosts] = useState<{ [postId: number]: ICheckPost }>({});
 
 
+  
   const getComments = async (postId: number) => {
     try {
       const response = await fetch('https://localhost:7154/api/CommentPost/getbypostid/' + postId, {
@@ -205,15 +224,28 @@ useEffect(() => {
         prevPosts.filter((post) => post.id !== deletedPost.id)
       );
     }
-  };
 
+    if (messageType === 'vote-post') {
+      console.log("vote-post",payload);
+      const pp={isVoted : payload.isVoted,allVotes:payload.allVotes, options:payload.options};
+      setChecksPosts(prevState => ({
+        ...prevState,
+        [payload.postId]: {
+          ...prevState[payload.postId], 
+          ...pp 
+        }
+      }));
+      console.log('new chekpost',checksPosts[payload.postId]);
+    }
+
+  };
   signalRService.onMessageReceived(handleMessage);
 
     // Очистка подписки при размонтировании компонента
     return () => {
         signalRService.offMessageReceived(handleMessage);
     };
-}, [posts, channelId]);
+}, [posts, channelId,checksPosts]);
 
  const fetchPosts = async () => {
       try {
@@ -230,7 +262,7 @@ useEffect(() => {
       }
     };
 
-  // Получаем посты по channelId
+
   useEffect(() => {
 
     fetchPosts();
@@ -239,21 +271,21 @@ useEffect(() => {
   }, [channelId]);
 
   useEffect(() => {
-    const postIds = Object.keys(posts).map(Number); // Получаем все ключи postId в виде чисел
+    const postIds = Object.keys(posts).map(Number); 
 
     postIds.forEach((postId) => {
-      getComments(posts[postId].id); // Вызываем getComments для каждого поста
+      getComments(posts[postId].id); 
     });
   }, [posts]);
 
   useEffect(() => {
-    const postIds = Object.keys(commentsByPost).map(Number); // Получаем все ключи postId в виде чисел
+    const postIds = Object.keys(commentsByPost).map(Number); 
 
     postIds.forEach((postId) => {
       setAllComments((prevAllComments) => ({
         ...prevAllComments,
-        [postId]: commentsByPost[postId].length, // Сохраняем количество комментариев
-      })); // Вызываем getComments для каждого поста
+        [postId]: commentsByPost[postId].length, 
+      })); 
     });
     console.log(allComments);
    
@@ -266,34 +298,149 @@ useEffect(() => {
     );
   };
 
+
+  const handleOptionChange = (postId: number, optionIndex: number) => {
+    setSelectedOptions((prevSelected) => ({
+      ...prevSelected,
+      [postId]: optionIndex,
+    }));
+  };
+
+
+  async function fetchVotingData(postId: number): Promise<ICheckPost> {
+    const response = await fetch(`https://localhost:7154/api/Vote/getbypostanduser/${postId}/${user?.id}`);
+    if (!response.ok) {
+       if (response.status === 404) {
+        console.log(`Vote с ID ${postId} не найден.`);
+      } else {
+        
+        console.log(`Ошибка сервера: ${response.status} ${response.statusText}`);
+      }
+        return {
+          isVoted: false,
+          allVotes: 0,
+          options: [{
+            index:0,
+            rate: 0,
+            allCounts: 0}],
+          }
+      
+    }
+    const data = await response.json(); 
+    console.log('vote found',data);
+    // Преобразование данных с сервера в структуру ICheckPost
+    return {
+      isVoted: data.isVoted,
+      allVotes: data.allVotes,
+      options: data.options.map((option: any, index: number) => ({
+        index,
+        rate: option.rate,
+        allCounts: option.allCounts,
+      })),
+    };
+  }
+
+  async function createCheckPosts(posts: { id: number }[]): Promise<void> {
+    const checkP = await Promise.all(
+      posts.map(post => fetchVotingData(post.id))
+    );
+    console.log('votes',checkP);
+    // Преобразуем массив `checkP` в объект с ключами `postId`
+    const checkPObject = posts.reduce((acc, post, index) => {
+      acc[post.id] = checkP[index];
+      return acc;
+    }, {} as { [postId: number]: ICheckPost });  
+    setChecksPosts(checkPObject);
+  }
+
+  const handleVoteSubmit = async (index: number) => {
+    const selectedOption = selectedOptions[posts[index].id];
+
+    if (selectedOption !== null) {
+      try {
+        const response = await fetch(`https://localhost:7154/api/Vote/add`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ PostId: posts[index].id, OptionId: selectedOption , UserId:user?.id}),
+        });
+
+        if (response.ok) {
+          console.log('Голос успешно отправлен');
+        } else {
+          console.error('Ошибка при отправке голоса');
+        }
+      } catch (error) {
+        console.error('Ошибка сети:', error);
+      }
+    }
+  };
+
+
+    // Инициализируем начальные значения для каждого postId
+    const initialCheckPosts = posts.reduce((acc, post) => {
+      acc[post.id] = {
+        isVoted: false,
+        allVotes: 0,
+        options: [
+          {
+            index: 0,
+            rate: 0,
+            allCounts: 0,
+          },
+        ],
+      };
+      console.log('init checkvotes',acc)
+      return acc;
+    }, {} as { [postId: number]: ICheckPost });
+  
+   
+ 
+
   useEffect(() => {
+    setChecksPosts(initialCheckPosts);
     // Проверяем, все ли текстовые области помещают текст
     const overflowStatuses = textAreasRefs.current.map((textarea) => {
       if (textarea) {
-        return textarea.scrollHeight > textarea.clientHeight; // Возвращает true, если есть скролл
+        return textarea.scrollHeight > textarea.clientHeight; 
       }
       return false;
     });
-    setIsTextOverflowing(overflowStatuses); // Обновляем состояние
+    setIsTextOverflowing(overflowStatuses); 
     setExpandedStates(Array(posts.length).fill(false)); 
+    console.log('start cheking');
+    createCheckPosts(posts);
   
   }, [posts]);
 
-  // Отображаем состояние загрузки или ошибки
+  const initialSelectedOptions = posts.reduce((acc, post) => {
+    acc[post.id] = null; // Устанавливаем начальное значение `null` для каждого postId
+    return acc;
+  }, {} as { [postId: number]: number | null });
+
+  useEffect(() => {
+
+    setSelectedOptions(initialSelectedOptions);
+  }, [posts]);
+
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
-  // Отображение постов
   return (
-    <div>
+    <div  >
       <div style={{display}}>
     <div className=" w-3/4" >
     
       {posts.length === 0 ? (
         <p>No posts</p>
       ) : (
+        
         <ul>
           {posts.map((post,index) => (
+           <>
+     
             <li key={post.id} style={{borderRadius:'10px',border:'1px solid lightgray',padding:'20px',marginTop:'20px',
               paddingRight:'30px',paddingLeft:'30px',textAlign:'center'}}>
                 <div className='flex ' style={{width:'100%',justifyContent:'space-between'}}>
@@ -309,7 +456,7 @@ useEffect(() => {
        <small style={{fontWeight:'bold',color:'gray'}}>{formatTimeAgo(new Date(post.date)) }</small>
                 
                 </div>
-
+                {(post.type==='text' || post.type === 'videolink')?(<>
 <div key={index} style={{ marginBottom: '20px',paddingLeft:'50px' }}>
              <textarea
                  ref={(el) => {
@@ -356,8 +503,11 @@ useEffect(() => {
                   </button>
                 )}
                  </div>
-            
+            </>):<>
+            <h2 className="text-xl font-semibold mb-4">{post.text}</h2>
+            </>}
              <br />
+             {post.type==='text' ||post.type==='videolink'?(<>
              <Link href={"/post/comments/" +post.id} className="block pl-0 pr-4 py-2 rounded-full">  
               {post.photo && 
               <img src={post.photo} alt="Post image" width="100%" style={{paddingLeft:'50px'}}/>}
@@ -373,11 +523,86 @@ useEffect(() => {
                        {post.video}
                       </a>
                     </div>
-                   
                   </div>
+                 
                 </>
-              )}
+              )}  
+               {/* {post.type ==='videolink'?(<>
+               
+               </>):<></>}   */}
               </Link>
+                </>):<>
+                          <div>
+           <div className="p-4 border rounded-md shadow-md w-full  bg-white">
+
+ {checksPosts[post.id] && (checksPosts[post.id].isVoted||!checksPosts[post.id].isVoted)?( <>
+<ul className="space-y-2">
+  {post.options.map((option, index) => {
+
+   const maxCount = Math.max(...checksPosts[post.id].options.map(opt => opt.rate));
+    // Условная стилизация: синий, если текущий `count` максимальный, серый — в остальных случаях
+    const backgroundColor =  'rgba(128, 128, 128, 0.3)';
+
+    return (
+      <li key={index} className="flex items-center">
+        
+        <input
+          type="radio"
+          name={`poll-${post.id}`}
+          id={`option-${post.id}-${index}`}
+          value={index}
+          checked={selectedOptions[post.id] === index}
+          onChange={() => handleOptionChange(post.id, index)}
+          className="mr-2"
+        />
+        <label
+          htmlFor={`option-${post.id}-${index}`}
+          className="text-gray-700"
+          style={{
+            padding: '5px',
+            width: '100%',
+            border: '2px solid rgba(0, 128, 0, 0.5)',
+            borderRadius: '5px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background:( (  checksPosts[post.id]?.isVoted || user?.id===iAmUser?.clerk_Id ) && checksPosts[post.id].options[index]?.rate === maxCount)
+            ? `linear-gradient(to right, rgba(0, 180, 255, 0.2) ${checksPosts[post.id].options[index]?.rate}%,
+             transparent ${checksPosts[post.id].options[index]?.rate}%)`
+            : (checksPosts[post.id]?.isVoted || user?.id===iAmUser?.clerk_Id) ?`linear-gradient(to right, rgba(211, 211, 211, 0.5) ${checksPosts[post.id].options[index]?.rate}%,
+             transparent ${checksPosts[post.id].options[index]?.rate}%)`:'initial',
+          }}
+        >
+          {option}
+          {checksPosts[post.id] && checksPosts[post.id].isVoted || user?.id===iAmUser?.clerk_Id ?(
+          <small style={{  fontWeight: 'bold' }}>{checksPosts[post.id].options[index]?.rate}%</small>
+        ):<></>}
+        </label>
+      
+      </li>
+    );
+  })}
+</ul>
+
+{!checksPosts[post.id].isVoted?(
+      <button
+        onClick={()=>handleVoteSubmit(index)}
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
+        disabled={selectedOptions[post.id] === null}
+        style={{backgroundColor:'#00b4ff',fontWeight:'bold'}}
+      >
+       Vote
+      </button>
+       ):< ></>}
+ {checksPosts[post.id].isVoted || user?.id===iAmUser?.clerk_Id ?(
+        <><small >&nbsp;&nbsp;&nbsp;
+        Total votes </small><span >{checksPosts[post.id].allVotes}</span></>):<></>}
+       
+       </> ):<> </>}
+  
+    </div>
+    </div>   
+                </>}
               <div className="flex items-center space-x-8 pt-5" style={{paddingLeft:"55px", width:'100%',justifyContent:'space-between'}}>
                    <div className="flex items-center space-x-2.5">
                     <div className="flex items-center space-x-2.5 pr-10">
@@ -435,13 +660,15 @@ useEffect(() => {
         style={{display:'flex', justifyContent:'center'}}
         onClick={closeReport}>
         <span style={{fontSize:'18px'}}>Cancel</span></div>
-        </div>):(<></>)}
+        </div>
+      ):(<></>)}
 
     </div>):(<></>)}
 
                 </div>
             </li>
-          ))}
+
+            </> ))}
         </ul>
       )}
     </div>
