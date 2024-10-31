@@ -24,11 +24,8 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [t, setT] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [visibility, setVisibility] = useState('private');
-  const [videoLocation, setVideoLocation] = useState<string | null>(null);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isVideoLocationOpen, setIsVideoLocationOpen] = useState(false);
-  const [madeForKids, setMadeForKids] = useState(false);
-  const [ageRestricted, setAgeRestricted] = useState(false);
+  const [isAgeRestricted, setAgeRestricted] = useState(false);
   const [titl, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -36,12 +33,16 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | ArrayBuffer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File | null>(null)
+  const [video, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [currentTag, setCurrentTag] = useState('')
+  const [isCopyright, setIsCopyright] = useState<boolean>(false); // true = є авторські права, false = немає
+  const [audience, setAudience] = useState<string>('all'); // 'children', 'adults', 'all'
+  
+
  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0]
@@ -104,11 +105,47 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
 
   const addTag = () => {
     if (currentTag && !tags.includes(currentTag)) {
+      const newCategoryObj: Category = {
+        id: 0,
+        name: newCategory,
+      };
       setTags([...tags, currentTag])
+      setSelectedCategory(newCategoryObj);
+      DownloadCategory(newCategoryObj);
       setCurrentTag('')
     }
   }
-
+  const DownloadCategory = async (category: Category) => {
+    try {
+      const response = await fetch('https://localhost:7154/api/Category/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(category),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add category');
+      }
+      console.log('Category added successfully');
+      await fetchCategories();
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('https://localhost:7154/api/Category');
+      if (!response.ok) {
+        throw new Error('Error fetching categories');
+      }
+      const data: Category[] = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove))
   }
@@ -186,15 +223,15 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const handleSubmit = async () => {
     const formData = new FormData();
 
-    if (!file) {
+    if (!video) {
       console.error('No video file selected!');
       return;
     }
     const duration = Number(sessionStorage.getItem('videoDuration')) || 0;
-    formData.append('videoFile', file);
+    formData.append('videoFile', video);
     const emptyFile = new Blob([], { type: 'application/octet-stream' });
     formData.append('file', emptyFile, 'empty-file.bin');
-    const videoUrls = await fileToBase64(file);
+    const videoUrls = await fileToBase64(video);
     const videoData = {
       id: 0,
       objectID: 'some-generated-id',
@@ -210,6 +247,9 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       isShort: false,
       cover: thumbnail ? URL.createObjectURL(thumbnail) : '',
       visibility: visibility === 'public',
+      isAgeRestriction: isAgeRestricted,
+      isCopyright: isCopyright,
+      audience: audience,
       lastViewedPosition: '00:00:00',
       file: emptyFile
     };
@@ -264,7 +304,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                                         onDrop={handleDrop}
                                         onClick={() => fileInputRef.current?.click()}
                                     >
-                                        {file ? (
+                                        {video ? (
                                             <div className="relative">
                                                 <video className="w-full h-48 object-cover rounded" src={preview || undefined} />
                                                 <Button
@@ -444,71 +484,64 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
         </div>
       </div>
       <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-2">'Made for Kids'</h3>
-      <p className="text-sm text-gray-600 mb-2">This video is set to {madeForKids ? "'Made for Kids'" : "not 'Made for Kids'"}</p>
-      <p className="text-xs text-gray-500 mb-4">
-        Regardless of your location, you're legally required to comply with the Children's Online Privacy Protection Act (COPPA) and/or other laws. You're required to tell us whether your videos are 'Made for Kids'. <a href="#" className="text-blue-500 hover:underline">What is 'Made for Kids' content?</a>
-      </p>
-      <div className="flex items-center space-x-2 mb-2">
-        <Info/>
-        <p className="text-xs text-gray-500">
-          Features like personalised ads and notifications won't be available on videos 'Made for Kids'. Videos that are set as 'Made for Kids' by you are more likely to be recommended alongside other children's videos. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
-        </p>
-      </div>
+       {/* Налаштування "Age Restriction" */}
+  <h3 className="text-lg font-semibold mb-2">Age Restriction</h3>
+  <p className="text-sm text-gray-600 mb-2">Would you like to restrict this video to viewers over 18 years old?</p>
+  <p className="text-xs text-gray-500 mb-4">
+    Age-restricted content may not appear in certain parts of the platform and could have limited advertising options. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
+  </p>
+  <div className="space-y-2">
+    <label className="flex items-center">
+      <input
+        type="radio"
+        className="form-radio"
+        name="ageRestriction"
+        checked={isAgeRestricted}
+        onChange={() => setAgeRestricted(true)}
+      />
+      <span className="ml-2">Yes, restrict to viewers over 18 only</span>
+    </label>
+    <label className="flex items-center">
+      <input
+        type="radio"
+        className="form-radio"
+        name="ageRestriction"
+        checked={!isAgeRestricted}
+        onChange={() => setAgeRestricted(false)}
+      />
+      <span className="ml-2">No, allow all viewers</span>
+    </label>
+  </div>
 
+      {/* 'Age restriction' налаштування */}
+      <h3 className="text-lg font-semibold mb-2">Copyright Status</h3>
+      <p className="text-sm text-gray-600 mb-2">Does this video contain copyrighted material?</p>
+      <p className="text-xs text-gray-500 mb-4">
+        Ensure compliance with copyright regulations by declaring whether this content contains copyrighted materials. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
+      </p>
       <div className="space-y-2">
         <label className="flex items-center">
           <input
             type="radio"
             className="form-radio"
-            name="madeForKids"
-            checked={madeForKids}
-            onChange={() => setMadeForKids(true)}
+            name="copyrightStatus"
+            checked={isCopyright}
+            onChange={() => setIsCopyright(true)}
           />
-          <span className="ml-2">Yes, it is 'Made for Kids'</span>
+          <span className="ml-2">Yes, this video contains copyrighted content</span>
         </label>
         <label className="flex items-center">
           <input
             type="radio"
             className="form-radio"
-            name="madeForKids"
-            checked={!madeForKids}
-            onChange={() => setMadeForKids(false)}
+            name="copyrightStatus"
+            checked={!isCopyright}
+            onChange={() => setIsCopyright(false)}
           />
-          <span className="ml-2">No, it is not 'Made for Kids'</span>
+          <span className="ml-2">No, this video does not contain copyrighted content</span>
         </label>
       </div>
-
-      {/* 'Age restriction' налаштування */}
-      <h3 className="text-lg font-semibold mb-2">Age restriction</h3>
-      <p className="text-sm text-gray-600 mb-2">Do you want to restrict your video to an adult audience?</p>
-      <p className="text-xs text-gray-500 mb-4">
-        Age-restricted videos are not shown in certain areas of YouTube. These videos may have limited or no ads monetisation. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
-      </p>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        className="form-radio"
-                        name="ageRestriction"
-                        checked={ageRestricted}
-                        onChange={() => setAgeRestricted(true)}
-                      />
-                      <span className="ml-2">Yes, restrict my video to viewers over 18</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        className="form-radio"
-                        name="ageRestriction"
-                        checked={!ageRestricted}
-                        onChange={() => setAgeRestricted(false)}
-                      />
-                      <span className="ml-2">No, don't restrict my video to viewers over 18 only</span>
-                    </label>
-                  </div>
                 </div>
-                        <Button onClick={handleSubmit}>Upload </Button>
                         <div className="space-y-8">
                         <div>
                         <h2 className="text-xl font-semibold mb-4">Video Preview</h2>
@@ -532,7 +565,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                         </div>
                       </div>
                       </div>
-                    
+                      <Button onClick={handleSubmit}>Upload </Button>
                     </TabsContent>
                     <TabsContent value="monetisation">Monetisation content</TabsContent>
                     <TabsContent value="ad-suitability">Ad suitability content</TabsContent>
