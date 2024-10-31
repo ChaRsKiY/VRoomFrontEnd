@@ -1,0 +1,226 @@
+
+.shorts-container {
+    position: relative;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: black;
+}
+
+.shorts {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    object-fit: contain;
+    background-color: black;
+}
+
+.controls-top-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.play-pause-btn,
+.mute-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 50%;
+    padding: 8px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.play-pause-btn svg,
+.mute-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+.timeline-container {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding: 5px 0;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.volume-high-icon,
+.volume-low-icon,
+.volume-muted-icon {
+    display: none;
+}
+
+.shorts-container[data-volume-level="high"] .volume-high-icon {
+    display: block;
+}
+
+.shorts-container[data-volume-level="low"] .volume-low-icon {
+    display: block;
+}
+
+.shorts-container[data-volume-level="muted"] .volume-muted-icon {
+    display: block;
+}
+
+.shorts-volume-container {
+    display: flex;
+    align-items: center;
+    @apply space-x-2
+}
+
+.shorts-volume-slider {
+    width: 0;
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: width 150ms ease-in-out, transform 150ms ease-in-out;
+}
+
+.shorts-volume-container:hover .shorts-volume-slider,
+.shorts-volume-slider:focus-within {
+    width: 100px;
+    transform: scaleX(1);
+}
+
+.shorts-timeline-container {
+    height: 5px;
+    margin-inline: .5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+}
+
+.shorts-timeline {
+    background-color: rgba(255, 0, 0, 0.5);
+    height: 2px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+.shorts-timeline::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgb(150, 150, 150);
+    display: none;
+}
+
+.shorts-timeline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: red;
+}
+
+
+.shorts-timeline .shorts-thumb-indicator {
+    --scale: 0;
+    position: absolute;
+    transform: translateX(-50%) scale(var(--scale));
+    height: 200%;
+
+    top: -50%;
+    background-color: red;
+    border-radius: 50%;
+    transition: transform 150ms ease-in-out;
+    aspect-ratio: 0.5 / 0.5;
+}
+
+.shorts-timeline .shorts-preview-img {
+    position: absolute;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    top: -1rem;
+    transform: translate(-50%, -100%);
+    border-radius: .25rem;
+    border: 2px solid white;
+    display: none;
+}
+
+.shorts-container.scrubbing .preview-img,
+.shorts-timeline-container:hover .preview-img {
+    display: block;
+}
+
+.shorts-container.scrubbing .shorts-timeline::before,
+.shorts-timeline-container:hover .shorts-timeline::before {
+    display: block;
+}
+
+.shorts-container.scrubbing .thumb-indicator,
+.shorts-timeline-container:hover .thumb-indicator {
+    --scale: 1;
+}
+
+.shorts-container.scrubbing .shorts-timeline,
+.shorts-timeline-container:hover .shorts-timeline {
+    height: 100%;
+
+}
+
+.shorts-controls-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
+}
+
+.shorts-controls-container::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, .75), transparent);
+    width: 100%;
+    aspect-ratio: 6 / 1;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.shorts-container:hover .shorts-controls-container,
+.shorts-container:focus-within .shorts-controls-container,
+.shorts-container.paused .shorts-controls-container {
+    opacity: 1;
+}
+
+.shorts-controls {
+    display: flex;
+    gap: .5rem;
+    padding: .25rem;
+    align-items: center;
+    /*border: solid 1px red;*/
+}
+
+.shorts-controls button {
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 0;
+    height: 30px;
+    width: 30px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: .85;
+    transition: opacity 150ms ease-in-out;
+}
+
+.shorts-controls button:hover {
+    opacity: 1;
+}

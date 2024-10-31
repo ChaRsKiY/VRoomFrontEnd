@@ -7,6 +7,7 @@ export interface IContentVideo {
     uploadDate: Date,
     duration: number,
     videoUrl: string,
+    vRoomVideoUrl: string,
     cover: string,
     viewCount: number,
     likeCount: number,
