@@ -18,8 +18,14 @@ interface IHomeProps {
 }
 
 interface Category {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
+  videosId : []
+}
+interface Tag{
+  id: number;
+  name: string;
+  videosId : []
 }
 const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [t, setT] = useState<any>(null);
@@ -27,7 +33,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [visibility, setVisibility] = useState('private');
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isAgeRestricted, setAgeRestricted] = useState(false);
-  const [titl, setTitle] = useState('');
+  const [videoName, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
@@ -95,27 +101,48 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const addCategory = () => {
     if (newCategory && !categories.some((category) => category.name === newCategory)) {
       const newCategoryObj: Category = {
-        id: Date.now(),
+        id: 0,
         name: newCategory,
+        videosId: []
       };
       setCategories([...categories, newCategoryObj]);
-      setSelectedCategory(newCategoryObj);
+      DownloadCategory(newCategoryObj);
       setNewCategory('');
     }
   };
 
   const addTag = () => {
     if (currentTag && !tags.includes(currentTag)) {
-      const newCategoryObj: Category = {
+      const newTagObj: Tag = {
         id: 0,
-        name: newCategory,
+        name: currentTag,
+        videosId:[]
       };
       setTags([...tags, currentTag])
-      setSelectedCategory(newCategoryObj);
-      DownloadCategory(newCategoryObj);
+      setSelectedCategory(newTagObj);
+      DownloadTag(newTagObj);
       setCurrentTag('')
     }
   }
+  const DownloadTag = async (tag: Tag) => {
+    try {
+      const response = await fetch('https://localhost:7154/api/Tag/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tag),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add Tag');
+      }
+      console.log('Tag added successfully');
+      await fetchCategories();
+    } catch (error) {
+      console.error('Error adding tag:', error);
+    }
+  };
   const DownloadCategory = async (category: Category) => {
     try {
       const response = await fetch('https://localhost:7154/api/Category/add', {
@@ -150,25 +177,6 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const removeTag = (tagToRemove: string) => {
     setTags(tags.filter(tag => tag !== tagToRemove))
   }
-  // const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0] || null;
-  //   if (file) {
-  //     setSelectedFile(file); 
-  //     const fileURL = URL.createObjectURL(file);
-  //     sessionStorage.setItem('fileURL', fileURL);
-  //     sessionStorage.setItem('fileName', file.name);
-
-  //     const videoElement = document.createElement('video');
-  //     videoElement.src = fileURL;
-
-  //     videoElement.onloadedmetadata = () => {
-  //       const durationInSeconds = Math.floor(videoElement.duration); 
-  //       sessionStorage.setItem('videoDuration', durationInSeconds.toString());
-  //       URL.revokeObjectURL(fileURL); 
-  //     };
-  //   }
-  // };
-
   const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
@@ -237,7 +245,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       id: 0,
       objectID: 'some-generated-id',
       channelSettingsId: 3,
-      title: titl,
+      tittle: videoName,
       description: description ,
       uploadDate: new Date().toISOString(),
       duration,
@@ -256,7 +264,9 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
     };
    
     Object.entries(videoData).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
+      if (typeof value === 'string' || typeof value === 'number') {
+        formData.append(key, value.toString());
+    } if (Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
       } else if (typeof value === 'boolean' || typeof value === 'number') {
         formData.append(key, value.toString());
@@ -337,10 +347,11 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
                                     </div>
                                 </div>
                     <h1 className="text-2xl font-bold mb-6">Title </h1>
-                    <Input placeholder="Enter video title"
-                        value={titl}
-                        onChange={(e) => setTitle(e.target.value)} 
-                        className="text-2xl font-bold"
+                    <Input 
+                          placeholder="Enter video title"
+                          value={videoName}
+                          onChange={(e) => setTitle(e.target.value)}
+                          className="text-2xl font-bold"
                       />
                         <div>
                         <Label>Privacy Settings</Label>
