@@ -1,5 +1,5 @@
 "use client";
-import React ,{ useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
 import initTranslations from "@/app/i18n";
@@ -16,9 +16,10 @@ interface IHomeProps {
         locale: string;
     };
 }
+
 interface Category {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
 }
 const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [t, setT] = useState<any>(null);
@@ -266,23 +267,23 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       }
     });
 
-    try {
-      const response = await fetch('https://localhost:7154/api/Video/add', {
-        method: 'POST',
-        body: formData,
-      });
+        try {
+            const response = await fetch('https://localhost:7154/api/Video/add', {
+                method: 'POST',
+                body: formData,
+            });
 
-      if (!response.ok) throw new Error('Failed to upload video data');
-      const result = await response.json();
-      console.log('Video uploaded successfully:', result);
-    } catch (error) {
-      console.error('Error uploading video data:', error);
-    }
-  };
+            if (!response.ok) throw new Error('Failed to upload video data');
+            const result = await response.json();
+            console.log('Video uploaded successfully:', result);
+        } catch (error) {
+            console.error('Error uploading video data:', error);
+        }
+    };
 
     return (
         <>
-            <HeaderHome t={t} />
+            <HeaderHome t={t}/>
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t} />
                 <main className="pl-[10%] ml-[35%] max-lg:pl-[15%] max-md:pl-[10%] max-sm:pl-0 max-w-[75%]">
@@ -378,17 +379,17 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
       <p>Set a thumbnail that stands out and draws viewers' attention.</p>
       <p className="text-sm text-gray-500">Recommended size is 1280x720</p>
 
-      <Button variant="outline" onClick={handleButtonClick}>
-                        Choose file
-                      </Button>
+                                                <Button variant="outline" onClick={handleButtonClick}>
+                                                    Choose file
+                                                </Button>
 
-                      <input
-      id="thumbnailInput"
-      type="file"
-      accept="image/png, image/jpeg, image/jpg"
-      className="hidden"
-      onChange={handleThumbnailChange}
-    />
+                                                <input
+                                                    id="thumbnailInput"
+                                                    type="file"
+                                                    accept="image/png, image/jpeg, image/jpg"
+                                                    className="hidden"
+                                                    onChange={handleThumbnailChange}
+                                                />
 
     {thumbnailPreview && (
       <div className="mt-4">

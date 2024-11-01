@@ -14,6 +14,7 @@ import {formatNumber} from "@/utils/format";
 import {IContentVideo} from "@/types/videoDTO.interface";
 import ShareDialogComponent from "@/components/pages/shorts/share-dialog";
 import OpenShareDialogButton from "@/components/pages/shorts/share-button";
+import OpenCommentsDialogButton from "@/components/pages/shorts/comments/comments-button";
 
 interface IRightShortBlockProps {
     short: IVideo;
@@ -117,11 +118,12 @@ const RightShortBlock: React.FC<IRightShortBlockProps> = ({short}: IRightShortBl
                         <div className="font-[300]"
                              title={newVideo.dislikeCount.toString()}>{formatNumber(newVideo.dislikeCount)}</div>
                     </div>
-                    <div className="flex flex-col items-center space-x-2.5">
+                    <OpenCommentsDialogButton video={newVideo}/>
+                    {/* <div className="flex flex-col items-center space-x-2.5">
                         <MdInsertComment size={24} className="cursor-pointer"/>
                         <div className="font-[300]"
                              title={newVideo.commentCount.toString()}>{newVideo.commentCount}</div>
-                    </div>
+                    </div>*/}
                     {/*<div className="flex flex-col items-center space-x-2.5">*/}
                     <OpenShareDialogButton URL={newVideo.vRoomVideoUrl}/>
                     {/*<ShareDialogComponent URL={newVideo.videoUrl}/>

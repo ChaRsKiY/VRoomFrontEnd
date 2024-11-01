@@ -1,6 +1,6 @@
 'use client'
 
-import React ,{useState, useEffect }from 'react'
+import React, {useState, useEffect} from 'react'
 import VideoPlayer from "@/components/pages/watch/player";
 import UnderVideoBlock from "@/components/pages/watch/under-video-block";
 import UnderLine from "@/components/pages/watch/underline";
@@ -14,12 +14,12 @@ import AsideHome from "@/components/pages/home/aside/aside";
 import Watch from "@/components/pages/watch/watch"
 
 // const WatchPage: React.FC = async ({ params }: any) => {
-//     const { id } = params;
+//     const { [id] } = params;
 
 //     const { t } = await initTranslations(params.locale, ['common', 'categories'])
 
 //     const testVideo = {
-//         id: 1,
+//         [id]: 1,
 //         title: "Cyberpunk 2077 - Official Trailer 2022",
 //         views: 223000,
 //         description: "Hello this is my new video about cars",
@@ -50,20 +50,18 @@ import Watch from "@/components/pages/watch/watch"
 // export default WatchPage
 
 
+const WatchPage: React.FC = async ({params}: any) => {
+    const {id, locale} = params;
+    const {t} = await initTranslations(locale, ['common', 'categories']);
 
 
-const WatchPage: React.FC = async ({ params }: any) => {
-  const {id, locale } = params;
-  const { t } = await initTranslations(locale, ['common', 'categories']);
+    return (
+        <div className="flex w-full mt-20">
+            {t && <HeaderHome t={t}/>}
 
-
-  return (
-    <div className="flex w-full mt-20">
-      {t && <HeaderHome t={t} />}    
-           
-            <Watch id={id} />     
-    </div>
-  );
+            <Watch id={id}/>
+        </div>
+    );
 };
 
 export default WatchPage;

@@ -11,7 +11,7 @@ import MyAnswerComment from '@/components/pages/comments/myanswercomment'
 import {formatTimeAgo} from "@/utils/format";
 import {useRef} from 'react';
 import {IUser} from '@/types/user.interface';
-import AnswersComments from './answerscomment';
+import AnswersComments from './answersshortscomment';
 import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
 import {MdMoreVert} from 'react-icons/md';
 import RadioButtonList from '@/components/pages/comments/report';
@@ -20,15 +20,17 @@ import {FaThumbtack} from 'react-icons/fa';
 import {MdPushPin} from 'react-icons/md';
 import {ISimpleUser} from '@/types/simpleuser.interface';
 import {FaPen} from 'react-icons/fa';
+import MyAnswerShortsComment from "@/components/pages/shorts/comments/myanswershortscomment";
+import AnswersShortsComments from "./answersshortscomment";
 
-interface CommentsProps {
+interface ShortsCommentsProps {
     comments: ICommentVideo[];
     answers: { [key: number]: IAnswerCommentVideo[] };
     id: number;
 }
 
 
-const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
+const ShortsComments: React.FC<ShortsCommentsProps> = ({comments, answers, id}) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
     const {user} = useUser();
@@ -348,11 +350,11 @@ const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
                             {visibleInput === index && user && (
                                 <>
                                     <br/>
-                                    <MyAnswerComment commentId={comment.id} onCancel={handleCancel}/>
+                                    <MyAnswerShortsComment commentId={comment.id} onCancel={handleCancel}/>
                                 </>
                             )}
 
-                            <AnswersComments commentId={comment.id} ans={answers[comment.id] || []}/>
+                            <AnswersShortsComments commentId={comment.id} ans={answers[comment.id] || []}/>
                             <br/>
 
                         </div>
@@ -367,15 +369,8 @@ const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
                             {reportMenuOpenIndex === index && (
                                 <div>
                                     <div
-                                        className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[180px]"
-                                        style={{
-                                            paddingTop: '4px',
-                                            paddingBottom: '4px',
-                                            position: 'absolute',
-                                            display: display1,
-
-                                        }}
-                                    >
+                                        className="absolute pt-1 pb-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[180px] right-0"
+                                        style={{display: display1,}}>
                                         <div onClick={() => openReport()}
                                              className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
                                              style={{display: 'flex', justifyContent: 'center'}}>
@@ -401,24 +396,17 @@ const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
 
 
                                     <div
-                                        className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
+                                        className="absolute mt-[-150px] ml-[-300px] pt-[10px] tb-[10px] max-w-[400px] min-w-[300px] rounded-[20px] bg-white border border-gray-300 shadow-lg z-10"
                                         style={{
-                                            paddingTop: '10px',
-                                            paddingBottom: '10px',
-                                            position: 'absolute',
-                                            marginTop: '-150px',
-                                            marginLeft: '-300px',
+
                                             display: display2,
-                                            maxWidth: '400px',
-                                            minWidth: '300px',
-                                            borderRadius: '20px'
                                         }}
                                     >
                                         <RadioButtonList userName={comment.userName} onClose={closeReport}/>
 
                                     </div>
                                     <div
-                                        className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
+                                        className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 right-3"
                                         style={{
                                             paddingTop: '10px',
                                             paddingBottom: '10px',
@@ -426,8 +414,8 @@ const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
                                             marginTop: '-50px',
                                             marginLeft: '-550px',
                                             display: display4,
-                                            width: '100%',
-                                            minWidth: '550px',
+                                            width: '80%',
+                                            minWidth: '470px',
                                             borderRadius: '16px',
                                             border: '2px solid gray',
 
@@ -453,6 +441,6 @@ const Comments: React.FC<CommentsProps> = ({comments, answers, id}) => {
     );
 }
 
-export default Comments;
+export default ShortsComments;
 
 

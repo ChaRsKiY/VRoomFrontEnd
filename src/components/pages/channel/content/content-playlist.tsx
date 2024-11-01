@@ -25,7 +25,7 @@ const ContentPlaylists = () => {
         try {
             const firstResponse = await axios.get(`https://localhost:7154/api/PlayList/getbyuserid/${userId}`);
             // Используем данные из первого запроса для второго запроса
-            //const secondResponse = await axios.get(`https://localhost:7154/api/Video/getbyuserid/${firstResponse.data.id}`);
+            //const secondResponse = await axios.get(`https://localhost:7154/api/Video/getbyuserid/${firstResponse.data.[id]}`);
 
             setData(firstResponse.data); // Сохраняем данные в состоянии
         } catch (error) {
