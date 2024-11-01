@@ -9,12 +9,12 @@ import {IUser} from '@/types/user.interface';
 import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
 
-interface MyCommentProps {
+interface ShortsMyCommentProps {
     videoId: number;
     amuser: IUser;
 }
 
-const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
+const ShortsMyComment: React.FC<ShortsMyCommentProps> = ({videoId, amuser}) => {
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [fullName, setName] = useState('');
@@ -185,30 +185,13 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
                             border: 'none',
                             borderBottom: `2px solid ${lineColor}`,
                             outline: 'none',
-                            width: '100%',
+                            width: '85%',
                             display: 'flex',
                             flexWrap: 'wrap',
                             marginLeft: '50px',
 
                         }}
                     />
-
-                    {/* <textarea
-       value={inputValue}
-        onChange={handleChange2}
-        onFocus={handleFocus}
-        ref={textAreaRef2}
-        rows={1} 
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`,
-          outline: 'none',
-          width: '100%',
-          resize: 'none',   
-          overflow: 'hidden', 
-          padding: '5px' 
-        }}
-      /> */}
 
                 </div>
                 <div style={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
@@ -244,26 +227,8 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
 };
 
 
-export default MyComment;
+export default ShortsMyComment;
 
-
-{/* <textarea
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        rows={1} 
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`,
-          outline: 'none',
-          width: '100%',
-          resize: 'none',   
-          overflow: 'hidden', 
-          padding: '5px' 
-        }}
-      />*/
-}
 
 
     

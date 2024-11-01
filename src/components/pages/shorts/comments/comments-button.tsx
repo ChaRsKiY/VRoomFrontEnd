@@ -7,7 +7,7 @@ import Link from "next/link";
 import ShareDialog from "@/components/pages/shorts/share-dialog";
 import {RiShareForwardFill} from "react-icons/ri";
 import Comments from "@/components/pages/comments/comments";
-import CommentsDialog from "@/components/pages/shorts/comments-dialog";
+import CommentsDialog from "@/components/pages/shorts/comments/comments-dialog";
 import {MdInsertComment} from "react-icons/md";
 import {IVideo} from "@/types/videoinfo.interface";
 

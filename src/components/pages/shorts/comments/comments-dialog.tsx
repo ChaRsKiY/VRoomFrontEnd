@@ -16,6 +16,8 @@ import {signalRService} from "@/services/signalr.service";
 import {GoSortDesc} from "react-icons/go";
 import MyComment from "@/components/pages/comments/mycomment";
 import Comments from "@/components/pages/comments/comments";
+import ShortsMyComment from "@/components/pages/shorts/comments/shorts-mycomment";
+import ShortsComments from "@/components/pages/shorts/comments/shorts-comments";
 
 
 interface CommentsDialogProps {
@@ -232,7 +234,7 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-20">
             <dialog ref={dialogRef} onClose={closeDialog}
-                    className=" bg-white w-2/5 h-2/4 flex rounded-lg p-5">
+                    className=" bg-white w-2/5 h-3/4 flex rounded-lg p-5">
 
                 <div className="flex flex-col w-full relative">
 
@@ -290,9 +292,9 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
                         </div>
                         <br/>
                         <div style={{marginTop: '30'}}>
-                            {iAmUser ? <MyComment videoId={videoId} amuser={iAmUser}/> : <p></p>}
+                            {iAmUser ? <ShortsMyComment videoId={videoId} amuser={iAmUser}/> : <p></p>}
                             <br/>
-                            <Comments id={videoId} comments={comments} answers={answersByComment || []}/>
+                            <ShortsComments id={videoId} comments={comments} answers={answersByComment || []}/>
                         </div>
                     </div>
 

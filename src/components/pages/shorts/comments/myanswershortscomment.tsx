@@ -7,12 +7,12 @@ import {IUser} from '@/types/user.interface';
 import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
 
-interface AnsCommentProps {
+interface AnsShCommentProps {
     commentId: number;
     onCancel: () => void;
 }
 
-const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
+const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel}) => {
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [fullName, setName] = useState('');
@@ -68,6 +68,14 @@ const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
         else
             setDisabled(false);
     };
+
+    // const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    //   setInputValue(event.target.value);
+    //   if(inputValue==''||event.target.value=='')
+    //     setDisabled(true);
+    //   else
+    //     setDisabled(false);
+    // };
 
     const handleSubmit = async () => {
 
@@ -126,7 +134,7 @@ const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
     return (
 
         <div style={{display}}>
-            <div style={{display: 'flex', alignItems: 'center', width: '100%', marginLeft: '100px'}}>
+            <div style={{display: 'flex', alignItems: 'center', width: '90%', marginLeft: '75px'}}>
                 {avatarUrl ? (
                     <img
                         src={avatarUrl}
@@ -153,7 +161,7 @@ const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
                                 border: 'none',
                                 borderBottom: `2px solid ${lineColor}`,
                                 outline: 'none',
-                                width: '100%',
+                                width: '90%',
                                 display: 'flex',
                                 flexWrap: 'wrap',
                                 marginLeft: '50px',
@@ -164,7 +172,7 @@ const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
                     </div>
                 </div>
 
-                <div style={{display: 'flex', width: '100%', fontSize: '12px', marginLeft: '100px'}}>
+                <div style={{display: 'flex', width: '85%', fontSize: '12px', marginLeft: '100px'}}>
                     <button onClick={handleSubmit} disabled={disabled}
                             style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Answer
                     </button>
@@ -182,4 +190,4 @@ const MyAnswerComment: React.FC<AnsCommentProps> = ({commentId, onCancel}) => {
 };
 
 
-export default MyAnswerComment;
+export default MyAnswerShortsComment;

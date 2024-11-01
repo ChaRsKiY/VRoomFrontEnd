@@ -14,7 +14,7 @@ import {formatNumber} from "@/utils/format";
 import {IContentVideo} from "@/types/videoDTO.interface";
 import ShareDialogComponent from "@/components/pages/shorts/share-dialog";
 import OpenShareDialogButton from "@/components/pages/shorts/share-button";
-import OpenCommentsDialogButton from "@/components/pages/shorts/comments-button";
+import OpenCommentsDialogButton from "@/components/pages/shorts/comments/comments-button";
 
 interface IRightShortBlockProps {
     short: IVideo;
