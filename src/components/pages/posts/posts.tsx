@@ -11,6 +11,9 @@ import Link from "next/link";
 import { BiTrash } from 'react-icons/bi';
 import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 import { signalRService } from '@/services/signalr.service';
+import { IVideo } from '@/types/videoinfo.interface';
+import {formatNumber} from "@/utils/format";
+import { FaCircle } from 'react-icons/fa';
 
 interface IPropsPost {
  channelId:  number,
@@ -49,6 +52,7 @@ const PostList : React.FC<IPropsPost>= ({ channelId }) => {
   const [deleteMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<{ [postId: number]: number | null }>({});
   const [checksPosts, setChecksPosts] = useState<{ [postId: number]: ICheckPost }>({});
+  const [videosLink, setVideosLink] = useState<VideosMap>({});
 
 
   
@@ -425,6 +429,68 @@ useEffect(() => {
   }, [posts]);
 
 
+  type VideosMap = {
+    [key: number]: IVideo; // Указываем, что ключи — числа, а значения — объекты VideoData
+};
+
+const getVideobyLink =async (link2:string)=>{
+  const url = encodeURIComponent(link2);
+  try {
+    const response = await fetch('https://localhost:7154/api/Video/getvideoinfobyvideourl/' + url, {
+        method: 'GET',
+    });
+
+    if (response.ok) {
+        const data: IVideo = await response.json();
+       return data;
+    } else {
+        console.error('Ошибка при получении video:', response.statusText);
+        return null;
+    }
+
+} catch (error) {
+console.error('Ошибка при подключении к серверу:', error);
+return null;
+}
+  
+}
+
+  useEffect(() => {
+    // Функция для получения данных видео из базы данных
+    const fetchVideoData = async (post:IPost) => {
+        if (post.type === 'videolink') {
+            try {
+                // Запрос на получение видео по post.Video
+                // const response = await fetch(`/api/video/${post.video}`);
+                // const videoData : IVideo = await response.json();
+                if(post.video!=null)
+                  {
+                    const videoData : IVideo | null = await getVideobyLink(post.video)
+                return videoData;}
+                return null;
+            } catch (error) {
+                console.error('Ошибка загрузки видео:', error);
+                return null;
+            }
+        }
+        return null;
+    };
+
+    // Перебираем все postIds и загружаем видео, если post.type === 'videolink'
+    const loadVideos = async () => {
+      const videoDataMap: VideosMap = {}; // Временный объект для хранения загруженных данных видео
+        for (const post of posts) {
+            const videoData :IVideo | null = await fetchVideoData(post);
+            if (videoData) {
+                videoDataMap[post.id] = videoData; // Записываем данные видео с ключом post.Id
+            }
+        }
+        setVideosLink(videoDataMap); // Обновляем состояние с загруженными видео
+    };
+
+    loadVideos();
+}, [posts]);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
@@ -514,15 +580,28 @@ useEffect(() => {
               {post.video && (
                 <>
                 <div className='flex'>
+                {post.type ==='videolink'?(<>
                   <video src={post.video} controls width="350px" style={{paddingLeft:'50px'}}>
                     Ваш браузер не поддерживает видео.
                   </video>
+                 <div>
                   <div  style={{paddingRight:'10px'}}>
                       <a href={post.video} target="_blank" rel="noopener noreferrer"
                        className="ml-4 text-blue-600 underline ">
                        {post.video}
                       </a>
                     </div>
+                    <div><small>{formatNumber(videosLink[post.id]?.viewCount)} views 
+                      {/* <span style={{ fontSize: '10px', color: 'gray', margin: '0 8px' }}>•</span> */}
+                     <FaCircle style={{ fontSize: '5px', color: 'gray', margin: '0 8px',display:'inline' }} /> 
+                       {formatTimeAgo(new Date(videosLink[post.id]?.uploadDate))}</small></div>
+                    <div>{videosLink[post.id]?.description}</div>
+                    </div>
+                    </>):<>
+                    <video src={post.video} controls width="100%" style={{paddingLeft:'50px'}}>
+                    Ваш браузер не поддерживает видео.
+                  </video>
+                    </>}
                   </div>
                  
                 </>

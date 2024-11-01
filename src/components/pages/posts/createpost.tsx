@@ -12,6 +12,8 @@ import {IPost} from "@/types/post.interface";
 import PostList from "@/components/pages/posts/posts";
 import {IUser} from "@/types/user.interface"
 import { useUser } from '@clerk/nextjs';
+import { IVideo } from '@/types/videoinfo.interface';
+import { FaEye } from 'react-icons/fa';
 
 
 interface ICreatePostProps {
@@ -24,7 +26,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     
     const [lineColor, setLineColor] = useState('lightgray');
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-    const [text, setText] = useState('');
+    const [text, setText] = useState('  ');
+    const [link, setLink] = useState('');
     const [image, setImage] = useState<File | null>(null);
     const [video, setVideo] = useState<File | null>(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -40,9 +43,15 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
     const [display2, setDisplay2] = useState('block');
     const [display1, setDisplay1] = useState('none');
     const [display3, setDisplay3] = useState('block');
+    const [display4, setDisplay4] = useState('none');
+    const [display5, setDisplay5] = useState('none');
     const [displayVideoMenu, setDisplayVideoMenu] = useState('none');
     const [postOwner, setPostOwner] = useState<IUser | null>(null);
-    const {user}=useUser();
+    const [videoPost, setVideoPost] = useState<IVideo | null>(null);
+    const {user}=useUser();  
+  const [pollOptions, setPollOptions] = useState<string[]>(['', '']); // Изначально два пустых варианта для опроса
+  const [postType, setPostType] = useState<'text' | 'poll' | 'vote'>('text'); // Тип поста
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
 
     const findOwner = async (id: number) => {
       try {
@@ -80,29 +89,35 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
       }
     };
-  
-    // const handleSubmit = async () => {
-    //   const formData = new FormData();
-    //   formData.append('text', text);
-    //   formData.append('id', id+'');
-    //   if (image) formData.append('img', image);
-    //   if (video) formData.append('video', video);
-    //      const r=video?.size
-    //   const res = await fetch('https://localhost:7154/api/Post/add', {
-    //     method: 'POST',
-    //     body: formData,
-    //   });
-  
-    //   if (res.ok) {
-    //     alert('Данные успешно сохранены');
-    //     handleCancelImg ();
-    //     handleCancelVideo ();
-    //     setText('');
-    //   } else {
-    //     alert('Ошибка при сохранении данных');
-    //     alert(res.statusText);
-    //   }
-    // };
+    const handleVideoLinkChange = (value: string) => {
+      
+          setLink(value);
+    };
+
+    const previewVideoLink =()=>{    
+      getVideobyLink(link); 
+    }
+
+    const getVideobyLink =async (link2:string)=>{
+      const url = encodeURIComponent(link2);
+      try {
+        const response = await fetch('https://localhost:7154/api/Video/getvideoinfobyvideourl/' + url, {
+            method: 'GET',
+        });
+
+        if (response.ok) {
+            const data: IVideo = await response.json();
+            setVideoPost(data);
+        } else {
+            console.error('Ошибка при получении video:', response.statusText);
+        }
+    
+} catch (error) {
+    console.error('Ошибка при подключении к серверу:', error);
+}
+      
+    }
+
 
     const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
        
@@ -119,23 +134,46 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       };
       
       const addImage = () => {
-        setDisplay2('none'); 
         setDisplay('block'); 
         setDisplayVideoMenu('none'); 
+        setDisplay3('none');
       };
       const addVideo = () => {
-        setDisplay3('none'); 
         setDisplay1('block'); 
-        setDisplayVideoMenu('none'); 
+        setDisplayVideoMenu('none');
+        setDisplay2('none');  
       };
+      const addVideoLink = () => {
+         setDisplay4('block'); 
+         setDisplayVideoMenu('none');
+         setDisplay2('none');  
+       };
 
       const openVideoMenu = () => {
-        setDisplayVideoMenu('block'); 
-        setDisplay3('none');
+        if(displayVideoMenu=== 'none'&& display4==='block')
+            { 
+               setDisplayVideoMenu('block'); 
+               setDisplay4('none');  
+            }
+           else if(displayVideoMenu=== 'block')
+              {
+                setDisplayVideoMenu('none');
+                if(display4==='none')
+                  setDisplay2('block'); 
+              }
+              else if(displayVideoMenu=== 'none'&& display1==='block'){
+                setDisplay1('none');
+                setDisplay2('block'); 
+                setDisplay3('block'); 
+              }
+            else
+           {  setDisplayVideoMenu('block'); 
+        setDisplay2('none');  }
       };
       const closeMenuVideo = () => {
         setDisplayVideoMenu('none'); 
         setDisplay3('block');
+        setDisplay2('block');
       };
 
       useEffect(() => {    
@@ -164,148 +202,21 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         setDisplay2('block'); 
         setVideo(null);
         setVideoPreview(null);
+        if(videoPost!=null)
+       {  setVideoPost(null);
+        setLink('');}
+        else{
+          setDisplay4('none');
+        }
     if (fileVideoRef.current) {
       fileVideoRef.current.value = ''; // Очищаем поле выбора файла
     }
     setDisplay1('none'); 
     setDisplay3('block'); 
       };
-    
 
-    // return (
-     
-    //     <div className=" w-full  mt-20" style={{justifyItems:'center',marginBottom:'20px'}}>
+  const handleAddOption = () => setPollOptions([...pollOptions, '']); 
 
-    //       {user && user?.id === postOwner?.clerk_Id && (  
-      //     <div className=" w-full  mt-20" >           
-      //       <div className=" w-3/4 px-8"  style={{border:'1px solid lightgray', padding:'10px',borderRadius:'10px'}}>
-      //       <div style={{display:'flex', justifyContent:'space-around'}}>
-      //       <small style={{textAlign:'center'}}>Enter text or/and add media</small>
-      //       <button onClick={handleSubmit} onMouseEnter={() => setIsHovered(true)}
-      //               onMouseLeave={() => setIsHovered(false)}
-      //            style={isHovered ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}>
-      //                 Publish </button>
-      //       </div>
-      //  <textarea
-      //  ref={textareaRef}
-      //  value={text}
-      //   onChange={handleChange}
-      //   onFocus={handleFocus}
-      //   placeholder='Write text here'
-      //   style={{
-      //     border: 'none',
-      //     borderBottom: `2px solid ${lineColor}`,
-      //     outline: 'none',
-      //     width: '100%',
-      //     resize: 'none',   
-      //     overflow: 'hidden', 
-      //     padding: '5px', 
-      //     height:'30px',
-      //     minHeight: '30px',
-      //   }}
-      // />
-      //     <div className='flex' style={{justifyContent:'space-around'}}>
-      //     <div onClick={addImage} style={{display: display2} } >
-      //     <TooltipProvider>
-      //           <Tooltip >
-      //           <TooltipTrigger className="max-sm:hidden">
-      //           <FaImage size={40} color="#00b4ff"  style={{ opacity: 0.9 }}/>
-      //           </TooltipTrigger>
-      //               <TooltipContent>
-      //                   <p>add image</p>
-      //               </TooltipContent>
-      //           </Tooltip>
-      //       </TooltipProvider>
-      //      </div>
-      //       <div style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',margin:'10px', display}}>
-      //       <label>Add image:</label>
-      //       {imagePreview!=''&&( 
-      //                   <Image src={imagePreview} alt="Banner Image" width={200} height={150}
-      //                         className="w-35 h-25 bg-gray-200 mr-6 mt-2" /> )}
-      //                   <div>
-      //                       <input type="file"  ref={fileImageRef}
-      //                           className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-      //   file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
-      //   dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" 
-      //                              onChange={handleImageChange}
-      //                       />
-      //                      <button onClick={handleCancelImg}   style={isHovered2 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
-      // onMouseEnter={() => setIsHovered2(true)}
-      // onMouseLeave={() => setIsHovered2(false)}>Cancel</button>
-      //                   </div>
-      //               </div>
-      //               <div onClick={openVideoMenu} style={{display: display3} } >
-                   
-      //               <TooltipProvider>
-      //           <Tooltip >
-      //           <TooltipTrigger className="max-sm:hidden">
-      //                <FaVideo size={40} color="green" style={{ opacity: 0.5 }} />
-      //           </TooltipTrigger>
-      //               <TooltipContent>
-      //                   <p>add video</p>
-      //               </TooltipContent>
-      //           </Tooltip>
-      //       </TooltipProvider>
-      //               </div>
-      //               <div style={{display:displayVideoMenu,border:'1px solid lightgray',borderRadius:'20px'}}>
-      //                 <div style={{display:'flex'}}> <div>
-      //                 <div   style={isHovered5 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
-      // onMouseEnter={() => setIsHovered5(true)}
-      // onMouseLeave={() => setIsHovered5(false)} >
-      //                 <p>Choose from list</p></div>
-      //                 <div onClick={addVideo}  style={isHovered4 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
-      // onMouseEnter={() => setIsHovered4(true)}
-      // onMouseLeave={() => setIsHovered4(false)}>
-      //                 <p>Add new video</p></div>
-      //               </div>
-      //              <div> <button  style={{paddingRight:'10px',  color:'gray'}} onClick={closeMenuVideo}>
-      //                 X</button></div>
-      //             </div></div>
-
-      // <div  style={{border:'2px solid gray', padding:'10px',borderRadius:'10px',display: display1}}>
-      //   <label>Add video:</label>
-            
-      //   {videoPreview && (
-      //   <div className="mt-4">
-      //     <video controls width="400" autoPlay  muted    loop >
-      //       <source src={videoPreview} type="video/mp4" />
-      //       Ваш браузер не поддерживает просмотр видео.
-      //     </video>
-        
-      //   </div>
-      // )}
-
-      //   <input type="file"  ref={fileVideoRef}
-      //                           className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-      //   file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
-      //   dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" 
-      //                              onChange={handleVideoChange}
-      //                       />
-
-      //      <button onClick={handleCancelVideo}   style={isHovered3 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
-      // onMouseEnter={() => setIsHovered3(true)}
-      // onMouseLeave={() => setIsHovered3(false)}>Cancel</button>
-      // </div>
-      //       </div>
-
-      //   </div>
-      //   </div> 
-//       )}
-
-//            <PostList channelId={id}/>
-
-//         </div>
-//     )
-// }
-
-// export default CreatePost
-
-
-  const [pollOptions, setPollOptions] = useState<string[]>(['', '']); // Изначально два пустых варианта для опроса
-  const [postType, setPostType] = useState<'text' | 'poll' | 'vote'>('text'); // Тип поста
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-
-  const handleAddOption = () => setPollOptions([...pollOptions, '']); // Добавляет новый пустой вариант
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...pollOptions];
     newOptions[index] = value;
@@ -330,10 +241,10 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       });
   
       if (res.ok) {
-        alert('Данные успешно сохранены');
-        handleCancelImg ();
-        handleCancelVideo ();
-        setText('');
+        // handleCancelImg ();
+        // handleCancelVideo ();
+        // setText('');
+        window.location.reload();
       } else {
         alert('Ошибка при сохранении данных');
         alert(res.statusText);
@@ -342,11 +253,16 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
       const formData = new FormData();
       formData.append('text', text);
       formData.append('id', id+'');
-      formData.append('type','text')
+      console.log("formdata",formData)
+      if(videoPost != null)
+        {
+          formData.append('type','videolink');
+          formData.append('videolink',link);
+        }
+        else
+           formData.append('type','text');
       if (image) formData.append('img', image);
       if (video) formData.append('video', video);
-          { formData.append('type','videolink');}
-         const r=video?.size
       const res = await fetch('https://localhost:7154/api/Post/add', {
         method: 'POST',
         body: formData,
@@ -358,26 +274,13 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         handleCancelVideo ();
         setText('');
       } else {
-        alert('Ошибка при сохранении данных');
+        alert('Ошибка при сохранении данных regular-post');
         alert(res.statusText);
       }
     }
   };
 
-  
 
-  // Обработка выбора ответа
-  const handleOptionChange3 = (optionId: number) => {
-    setSelectedOption(optionId);
-  };
-
-  // Обработка отправки ответа
-  const handleSubmit3 = () => {
-    if (selectedOption !== null) {
-      console.log(selectedOption); // Отправляем выбранный ответ в функцию onAnswerSubmit
-    }
-  };
-  
 
 return (
   <div className="w-full mt-20" style={{ justifyItems: 'center', marginBottom: '20px' }}>
@@ -468,7 +371,7 @@ return (
                         </div>
                     </div>
                     <div onClick={openVideoMenu} style={{display: display3} } >
-                   
+                    {/* <div onClick={addVideo} style={{display: display3} } > */}
                     <TooltipProvider>
                 <Tooltip >
                 <TooltipTrigger className="max-sm:hidden">
@@ -480,16 +383,38 @@ return (
                 </Tooltip>
             </TooltipProvider>
                     </div>
+                    <div style={{display:display4}}>
+                      <input type='text' name='videolink'
+                       value={link}
+                       onChange={(e) => handleVideoLinkChange( e.target.value)}                   
+                      placeholder={`video-link`}
+                      style={{ flex: 1, padding: '5px', border: '1px solid lightgray', borderRadius: '5px' ,
+                        minWidth:'300px'
+                      }}></input>
+                      <button onClick={previewVideoLink} style={{padding:'10px'}}>
+                        <FaEye style={{display:'inline'}}/><small>&nbsp;Preview</small></button>
+                        <button onClick={handleCancelVideo} title='Cancel'
+                        style={{padding:'10px'}}>X</button>
+           {videoPost?(           
+        <div className="mt-4" >
+          <video controls width="400" autoPlay  muted    loop >
+            <source src={videoPost?.videoUrl} type="video/mp4" />
+            Ваш браузер не поддерживает просмотр видео.
+          </video>
+        
+        </div>
+      ):<></>} 
+                      </div>
                     <div style={{display:displayVideoMenu}}>
                       <div style={{display:'flex'}}> <div>
-                      <div   style={isHovered5 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
+                      <div onClick={addVideoLink}   style={isHovered5 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
       onMouseEnter={() => setIsHovered5(true)}
       onMouseLeave={() => setIsHovered5(false)} >
-                      <p>Choose from list</p></div>
+                      <p>Add the video-link</p></div>
                       <div onClick={addVideo}  style={isHovered4 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
       onMouseEnter={() => setIsHovered4(true)}
       onMouseLeave={() => setIsHovered4(false)}>
-                      <p>Add new video</p></div>
+                      <p>Upload new video</p></div>
                     </div>
                    <div> <button  style={{paddingRight:'10px',  color:'gray'}} onClick={closeMenuVideo}>
                       X</button></div>
