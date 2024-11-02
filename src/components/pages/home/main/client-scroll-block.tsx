@@ -30,7 +30,7 @@ const ClientScrollBlock: React.FC<IProps> = ({ videolist }) => {
                 if (newVideos.length > 0) {
                     setVideos(prev => [...prev, ...newVideos]);
                 } else {
-                    setHasMore(false); // Если новых видео больше нет
+                    setHasMore(false);
                 }
             }
         } catch (error) {
