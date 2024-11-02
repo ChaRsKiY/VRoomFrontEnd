@@ -3,6 +3,7 @@ export interface IAnswerCommentVideo {
     userId: string,
     userName: string,
     channelBanner:string,
+    channelId:number,
     commentVideo_Id:number,
     text: string,
     answerDate: Date,

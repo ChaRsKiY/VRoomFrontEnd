@@ -50,3 +50,5 @@ export function formatTimeAgo(date: Date): string {
         return `${years} ${getPlural(years, "год", "года", "лет")} назад`;
     }
 }
+
+

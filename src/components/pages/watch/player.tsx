@@ -37,7 +37,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [isMiniPlayer, setIsMiniPlayer] = useState<boolean>(false);
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
     const [viewed, setViewed] = useState(false);
-    const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
+    const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);    
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -49,6 +49,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
             increaseViewCount(); // Увеличиваем счётчик просмотров
           }
+
         }
       };
 

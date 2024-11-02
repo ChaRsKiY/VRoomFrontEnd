@@ -247,7 +247,7 @@ const handleInputChange = (index: number, value: string) => {
             <div style={{paddingLeft:'0px' }}>
               <div style={{ display: 'flex' , justifyContent:'space-between', borderBottom:comment.isPinned? '2px solid lightgray':'none'}}>
                 <div>
-              <Link  href='#' style={{paddingRight:'20px',fontWeight:'bolder' }}>@{comment.userName}</Link>
+              <Link  href={"/gotochannel/" + comment.channelId} style={{paddingRight:'20px',fontWeight:'bolder' }}>@{comment.userName}</Link>
              <small>{formatTimeAgo(new Date(comment.date)) }</small>
              </div>
              <div style={{ display: 'flex', alignItems: 'center',marginLeft:'50px' }}>

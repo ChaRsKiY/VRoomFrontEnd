@@ -135,8 +135,8 @@ const MyCommentPost : React.FC<MyCommentProps> = ( {postId,amuser}) => {
             setDisplay2('block');
             setWrite('Write a comment...');
             setUserId(amuser.clerk_Id);
-            setAvatarUrl(amuser.channelBanner) ; 
-             setName(amuser.channelName);
+            setAvatarUrl(amuser.channelProfilePhoto) ; 
+             setName(amuser.channelNikName);
             }  
           else{ 
             setDisplayMain('none');}

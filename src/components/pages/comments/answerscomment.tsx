@@ -249,7 +249,7 @@ const openReport = () => {
             <div style={{paddingLeft:'0px' ,width:'100%'}}>
             <div style={{display:'flex',justifyContent:'space-between',width:'100%'}} >
               <div>
-              <Link  href='#' style={{paddingRight:'20px',fontWeight:'bolder', fontSize:'14px' }}>@{comment.userName}</Link>
+              <Link  href={"/gotochannel/" + comment.channelId} style={{paddingRight:'20px',fontWeight:'bolder', fontSize:'14px' }}>@{comment.userName}</Link>
              <small>{formatTimeAgo(new Date(comment.answerDate)) }</small>
 </div>
              <div   key={comment.id} className="relative"  style={{marginRight:'-65px'}}> 

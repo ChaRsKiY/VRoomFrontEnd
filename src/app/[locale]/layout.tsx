@@ -4,6 +4,7 @@ import {
     ClerkProvider,
 } from '@clerk/nextjs'
 import i18nConfig from '@/../i18nConfig';
+import { VideoProvider } from '@/app/[locale]/channel/videocontext';
 import { dir } from 'i18next';
 import TranslationsProvider from "@/components/providers/translations.provider";
 import initTranslations from "@/app/i18n";
@@ -33,6 +34,7 @@ async function RootLayout({ children, params: { locale } }: Readonly<IRootLayout
     const { resources } = await initTranslations(locale, i18nNamespaces);
 
   return (
+    <VideoProvider>
       <ThemeProvider>
           <ClerkProvider localization={clerkLocalization(locale)}>
             <html lang={locale} dir={dir(locale)} className="light">
@@ -49,6 +51,7 @@ async function RootLayout({ children, params: { locale } }: Readonly<IRootLayout
             </html>
           </ClerkProvider>
       </ThemeProvider>
+      </VideoProvider>
   );
 }
 
