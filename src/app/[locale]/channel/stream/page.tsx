@@ -1,79 +1,61 @@
-// import React, { useState, useEffect, useRef } from 'react'
-// import Navbar from '../../components/Navbar/Navbar'
-// import BroadcastButton from '../../components/Buttons/BroadcastButton'
-// import Timer from '../../components/Timer/Timer'
-// import formatTime from '../../utils/formatTime'
-// import getCookie from '../../utils/getCookie'
-// import API from '../../api/api'
-// import './Broadcast.css'
+'use client'
 
-// const CAPTURE_OPTIONS = {
-//   audio: true,
-//   video: true,
-// }
+import React, { useState, useEffect, useRef } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Camera, Mic, MicOff, Video, VideoOff, Monitor } from 'lucide-react'
+import { useTimer } from 'react-timer-hook'
+import { format } from 'date-fns'
+import Cookies from 'universal-cookie'
+//import { API } from '@/lib/api'
 
+const CAPTURE_OPTIONS = {
+  audio: true,
+  video: true,
+}
 
-// function Broadcast() {
-//   const [isVideoOn, setisVideoOn] = useState(true)
-//   const [mute, setMute] = useState(false)
-//   const [seconds, setSeconds] = useState(0)
-//   const [isActive, setIsActive] = useState(false)
+export default function Broadcast() {
+  const [isVideoOn, setIsVideoOn] = useState(true)
+  const [isMuted, setIsMuted] = useState(false)
+  const [seconds, setSeconds] = useState(0)
+  const [isActive, setIsActive] = useState(false)
+  const [userFacing, setUserFacing] = useState(true)
+  const [streamTitle, setStreamTitle] = useState('')
+  const [streamDescription, setStreamDescription] = useState('')
+  const [privacy, setPrivacy] = useState('public')
 
-//   const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
-//   const [youtubeStreamName, setYoutubeStreamName] = useState('')
-//   const [facebookStreamKey, setFacebookStreamKey] = useState('')
-//   const [twitchStreamKey, setTwitchStreamKey] = useState('')
+  const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
+  const [youtubeStreamName, setYoutubeStreamName] = useState('')
+  const [facebookStreamKey, setFacebookStreamKey] = useState('')
+  const [twitchStreamKey, setTwitchStreamKey] = useState('')
 
-//   const [mediaStream, setMediaStream] = useState(null)
-//   const [userFacing, setuserFacing] = useState(false)
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
+  const [streamId, setStreamId] = useState('')
+  const [broadcastId, setBroadcastId] = useState('')
 
-//   const [streamId, setstreamId] = useState('')
-//   const [broadcastId, setbroadcastId] = useState('')
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const ws = useRef<WebSocket | null>(null)
 
-//   const videoRef = useRef()
-//   const ws = useRef()
+  const productionWsUrl = 'wss://www.ohmystream.xyz/websocket'
+  const developmentWsUrl = 'ws://localhost:3001'
 
-//   const productionWsUrl = 'wss://www.ohmystream.xyz/websocket'
-//   const developmentWsUrl = 'ws://localhost:3001'
-
-//   const youtubeUrl = youtubeIngestionUrl + '/' + youtubeStreamName
-
-//   const streamUrlParams = `?twitchStreamKey=${twitchStreamKey}&youtubeUrl=${youtubeUrl}&facebookStreamKey=${facebookStreamKey}`
-
-//   let liveStream
-//   let liveStreamRecorder
-
-//   if (mediaStream && videoRef.current && !videoRef.current.srcObject) {
-//     videoRef.current.srcObject = mediaStream
-//   }
-
-//   async function enableStream() {
-//     try {
-//       let stream = await navigator.mediaDevices.getUserMedia({
-//         video: isVideoOn,
-//         audio: true,
-//       })
-//       setMediaStream(stream)
-//     } catch (err) {
-//       console.log(err)
-//     }
-//   }
+  useEffect(() => {
+    if (!mediaStream) {
+      enableStream()
+    } else {
+      return function cleanup() {
+        mediaStream.getTracks().forEach((track) => track.stop())
+      }
+    }
+  }, [mediaStream])
 
 //   useEffect(() => {
-//     if (!mediaStream) {
-//       enableStream()
-//     } else {
-//       return function cleanup() {
-//         mediaStream.getVideoTracks().forEach((track) => {
-//           track.stop()
-//         })
-//       }
-//     }
-//   }, [mediaStream])
-
-//   useEffect(() => {
-//     let userId = getCookie('userId')
-
+//     const cookies = new Cookies()
+//     const userId = cookies.get('userId')
 //     API.post('/destinations', { userId })
 //       .then((response) => {
 //         if (response) {
@@ -84,277 +66,187 @@
 //       .catch((err) => console.log(err))
 //   }, [])
 
-//   useEffect(() => {
-//     ws.current =
-//       process.env.NODE_ENV === 'production'
-//         ? new WebSocket(productionWsUrl + streamUrlParams)
-//         : new WebSocket(developmentWsUrl + streamUrlParams)
+  useEffect(() => {
+    const youtubeUrl = `${youtubeIngestionUrl}/${youtubeStreamName}`
+    const streamUrlParams = `?twitchStreamKey=${twitchStreamKey}&youtubeUrl=${youtubeUrl}&facebookStreamKey=${facebookStreamKey}`
 
-//     console.log(ws.current)
+    ws.current = new WebSocket(
+      (process.env.NODE_ENV === 'production' ? productionWsUrl : developmentWsUrl) + streamUrlParams
+    )
 
-//     ws.current.onopen = () => {
-//       console.log('WebSocket Open')
-//     }
+    ws.current.onopen = () => console.log('WebSocket Open')
 
-//     return () => {
-//       ws.current.close()
-//     }
-//   }, [twitchStreamKey, youtubeStreamName])
+    return () => ws.current?.close()
+  }, [twitchStreamKey, youtubeStreamName, youtubeIngestionUrl, facebookStreamKey])
 
-//   useEffect(() => {
-//     let interval = null
-//     if (isActive) {
-//       interval = setInterval(() => {
-//         setSeconds((seconds) => seconds + 1)
-//       }, 1000)
-//     } else if (!isActive && seconds !== 0) {
-//       clearInterval(interval)
-//     }
-//     return () => clearInterval(interval)
-//   }, [isActive, seconds])
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    if (isActive) {
+      interval = setInterval(() => setSeconds((seconds) => seconds + 1), 1000)
+    } else if (!isActive && seconds !== 0) {
+      clearInterval(interval!)
+    }
+    return () => clearInterval(interval!)
+  }, [isActive, seconds])
 
-//   const toggle = () => {
-//     setIsActive(!isActive)
-//   }
+  const enableStream = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: isVideoOn,
+        audio: true,
+      })
+      setMediaStream(stream)
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-//   const startStream = () => {
-//     if (!twitchStreamKey || !youtubeStreamName) {
-//       alert(
-//         'Please add your twitch and youtube stream keys first under destinations'
-//       )
-//     } else {
-//       toggle()
-//       liveStream = videoRef.current.captureStream(30) // 30 FPS
-//       liveStreamRecorder = new MediaRecorder(liveStream, {
-//         mimeType: 'video/webm;codecs=h264',
-//         videoBitsPerSecond: 3 * 1024 * 1024,
-//       })
-//       liveStreamRecorder.ondataavailable = (e) => {
-//         ws.current.send(e.data)
-//         console.log('send data', e.data)
-//       }
-//       // Start recording, and dump data every second
-//       liveStreamRecorder.start(1000)
-//     }
-//   }
+  const startStream = () => {
+    if (!twitchStreamKey && !youtubeStreamName && !facebookStreamKey) {
+      alert('Please add at least one streaming destination')
+      return
+    }
 
-//   const stopStream = () => {
-//     setIsActive(false)
-//     ws.current.close()
-//     liveStreamRecorder = null
-//     // liveStreamRecorder.stop()
-//   }
+    setIsActive(true)
+    // const liveStream = videoRef.current?.captureStream(30) // 30 FPS
+    // const liveStreamRecorder = new MediaRecorder(liveStream!, {
+    //   mimeType: 'video/webm;codecs=h264',
+    //   videoBitsPerSecond: 3 * 1024 * 1024,
+    // })
+    // liveStreamRecorder.ondataavailable = (e) => {
+    //   ws.current?.send(e.data)
+    // }
+    // liveStreamRecorder.start(1000)
+  }
 
-//   const toggleMute = () => {
-//     setMute(!mute)
-//   }
+  const stopStream = () => {
+    setIsActive(false)
+    ws.current?.close()
+  }
 
-//   const toggleCamera = () => {
-//     // toggle camera on and off here
-//     setisVideoOn(false)
-//   }
+  const toggleMute = () => setIsMuted(!isMuted)
+  const toggleCamera = () => setIsVideoOn(!isVideoOn)
 
-//   const recordScreen = async () => {
-//     let stream
-//     !userFacing
-//       ? (stream = await navigator.mediaDevices.getDisplayMedia(CAPTURE_OPTIONS))
-//       : (stream = await navigator.mediaDevices.getUserMedia(CAPTURE_OPTIONS))
-//     setMediaStream(stream)
+  const toggleScreenShare = async () => {
+    try {
+      let stream
+      if (!userFacing) {
+        stream = await navigator.mediaDevices.getDisplayMedia(CAPTURE_OPTIONS)
+      } else {
+        stream = await navigator.mediaDevices.getUserMedia(CAPTURE_OPTIONS)
+      }
+      setMediaStream(stream)
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+      }
+      setUserFacing(!userFacing)
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-//     videoRef.current.srcObject = stream
-//     setuserFacing(!userFacing)
-//   }
+  const handleCanPlay = () => {
+    videoRef.current?.play()
+  }
 
-//   const handleCanPlay = () => {
-//     videoRef.current.play()
-//   }
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return format(new Date(0, 0, 0, 0, minutes, remainingSeconds), 'mm:ss')
+  }
 
-//   //!!! authenticate AND loadClient ARE CALLED FIRST
-//   const authenticate = () => {
-//     return gapi.auth2
-//       .getAuthInstance()
-//       .signIn({ scope: 'https://www.googleapis.com/auth/youtube.force-ssl' })
-//       .then((res) => {
-//         console.log(res)
-//       })
-//       .catch((err) => console.log(err))
-//   }
+  return (
+    <div className="container mx-auto p-4">
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Start a New Stream</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Stream Title</Label>
+            <Input 
+              id="title" 
+              value={streamTitle} 
+              onChange={(e) => setStreamTitle(e.target.value)} 
+              placeholder="Enter your stream title" 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Stream Description</Label>
+            <Textarea 
+              id="description" 
+              value={streamDescription} 
+              onChange={(e) => setStreamDescription(e.target.value)} 
+              placeholder="Describe your stream" 
+              rows={4} 
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Privacy</Label>
+            <RadioGroup value={privacy} onValueChange={setPrivacy}>
+            <div className="flex items-center space-x-2">
+                <RadioGroupItem value="public" id="public" selectedValue={privacy} onValueChange={setPrivacy}>
+                <Label htmlFor="public">Public</Label>
+                </RadioGroupItem>
+            </div>
+            <div className="flex items-center space-x-2">
+                <RadioGroupItem value="unlisted" id="unlisted" selectedValue={privacy} onValueChange={setPrivacy}>
+                <Label htmlFor="unlisted">Unlisted</Label>
+                </RadioGroupItem>
+            </div>
+            <div className="flex items-center space-x-2">
+                <RadioGroupItem value="private" id="private" selectedValue={privacy} onValueChange={setPrivacy}>
+                <Label htmlFor="private">Private</Label>
+                </RadioGroupItem>
+            </div>
+            </RadioGroup>
+          </div>
 
-//   const loadClient = () => {
-//     gapi.client.setApiKey(process.env.REACT_APP_GOOGLE_API_KEY)
-//     return gapi.client
-//       .load('https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest')
-//       .then((res) => {
-//         console.log('GAPI client loaded for API')
-//         console.log(res)
-//       })
-//       .catch((err) => console.log('Error loading GAPI client for API', err))
-//   }
+          <div className="aspect-video bg-muted">
+            <video
+              ref={videoRef}
+              onCanPlay={handleCanPlay}
+              autoPlay
+              playsInline
+              muted={isMuted}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-//   //!!! createBroadcast IS CALLED SECOND. BROADCAST APPEARS ON YOUTUBE
-//   const createBroadcast = () => {
-//     return gapi.client.youtube.liveBroadcasts
-//       .insert({
-//         part: ['id,snippet,contentDetails,status'],
-//         resource: {
-//           snippet: {
-//             title: `New Video: ${new Date().toISOString()}`,
-//             scheduledStartTime: `${new Date().toISOString()}`,
-//             description:
-//               'A description of your video stream. This field is optional.',
-//           },
-//           contentDetails: {
-//             recordFromStart: true,
-//             // startWithSlate: true,
-//             enableAutoStart: false,
-//             monitorStream: {
-//               enableMonitorStream: false,
-//             },
-//           },
-//           status: {
-//             privacyStatus: 'public',
-//             selfDeclaredMadeForKids: true,
-//           },
-//         },
-//       })
-//       .then((res) => {
-//         console.log('Response', res)
-//         console.log(res.result.id)
-//         setbroadcastId(res.result.id)
-//       })
-//       .catch((err) => {
-//         console.error('Execute error', err)
-//       })
-//   }
+          <div className="flex justify-center space-x-2">
+            <Button onClick={toggleCamera} variant="outline" size="icon">
+              {isVideoOn ? <Video size="24" /> : <VideoOff size="24" />}
+            </Button>
+            <Button onClick={toggleMute} variant="outline" size="icon">
+              {isMuted ? <MicOff size="24" /> : <Mic size="24" />}
+            </Button>
+            <Button onClick={toggleScreenShare} variant="outline" size="icon">
+              <Monitor size="24" />
+            </Button>
+          </div>
 
-//   //!!! CALL createStream AFTER createBroadcast. IN THE RESPONSE SET youtubeIngestionUrl AND youtubeStreamName
-//   const createStream = () => {
-//     return gapi.client.youtube.liveStreams
-//       .insert({
-//         part: ['snippet,cdn,contentDetails,status'],
-//         resource: {
-//           snippet: {
-//             title: "Your new video stream's name",
-//             description:
-//               'A description of your video stream. This field is optional.',
-//           },
-//           cdn: {
-//             frameRate: 'variable',
-//             ingestionType: 'rtmp',
-//             resolution: 'variable',
-//             format: '',
-//           },
-//           contentDetails: {
-//             isReusable: true,
-//           },
-//         },
-//       })
-//       .then((res) => {
-//         console.log('Response', res)
+          <div className="text-center">
+            <p className="text-muted">Streaming Duration: {formatTime(seconds)}</p>
+          </div>
+        </CardContent>
 
-//         setstreamId(res.result.id)
-//         console.log('streamID' + res.result.id)
-
-//         setYoutubeIngestionUrl(res.result.cdn.ingestionInfo.ingestionAddress)
-//         console.log(res.result.cdn.ingestionInfo.ingestionAddress)
-
-//         setYoutubeStreamName(res.result.cdn.ingestionInfo.streamName)
-//         console.log(res.result.cdn.ingestionInfo.streamName)
-//       })
-//       .catch((err) => {
-//         console.log('Execute error', err)
-//       })
-//   }
-
-//   //!!! CALL AFTER CREATING STREAM.
-//   const bindBroadcastToStream = () => {
-//     return gapi.client.youtube.liveBroadcasts
-//       .bind({
-//         part: ['id,snippet,contentDetails,status'],
-//         id: broadcastId,
-//         streamId: streamId,
-//       })
-//       .then((res) => {
-//         console.log('Response', res)
-//       })
-//       .catch((err) => {
-//         console.error('Execute error', err)
-//       })
-//   }
-
-//   //!!! CLICK GO LIVE FIRST TO SEND VIDEO TO THE SERVER and then CALL transitionToLive
-//   const transitionToLive = () => {
-//     return gapi.client.youtube.liveBroadcasts
-//       .transition({
-//         part: ['id,snippet,contentDetails,status'],
-//         broadcastStatus: 'live',
-//         id: broadcastId,
-//       })
-//       .then((res) => {
-//         // Handle the results here (response.result has the parsed body).
-//         console.log('Response', res)
-//       })
-//       .catch((err) => {
-//         console.log('Execute error', err)
-//       })
-//   }
-
-//   gapi.load('client:auth2', function () {
-//     gapi.auth2.init({
-//       client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
-//     })
-//   })
-
-//   return (
-//     <>
-//       <Navbar />
-//       <div className='dashboard-container'>
-//         <div id='container'>
-//           <div
-//             style={
-//               seconds === 0
-//                 ? { visibility: 'hidden' }
-//                 : { visibility: 'visible' }
-//             }
-//           >
-//             <Timer>
-//               {isActive ? 'LIVE' : 'END'}: {formatTime(seconds)}
-//             </Timer>
-//           </div>
-//           <video
-//             className='video-container'
-//             ref={videoRef}
-//             onCanPlay={handleCanPlay}
-//             autoPlay
-//             playsInline
-//             muted={mute}
-//           />
-//         </div>
-//         <div className='button-container'>
-//           <BroadcastButton
-//             title={!isActive ? '5) Go Live' : 'Stop Recording'}
-//             fx={!isActive ? startStream : stopStream}
-//           />
-//           {/* <BroadcastButton title='Disable Camera' fx={toggleCamera} /> */}
-//           <BroadcastButton
-//             title={!userFacing ? 'Share Screen' : 'Stop Sharing'}
-//             fx={recordScreen}
-//           />
-//           <BroadcastButton title={!mute ? 'Mute' : 'Muted'} fx={toggleMute} />
-//         </div>
-
-//         <div style={{ marginTop: '1rem' }}>
-//           <button onClick={() => authenticate().then(loadClient)}>
-//             1. authenticate
-//           </button>
-//           <button onClick={createBroadcast}>2. create broadcast</button>
-//           <button onClick={createStream}>3. create stream</button>
-//           <button onClick={bindBroadcastToStream}>4. bind broadcast</button>
-//           <button onClick={transitionToLive}>6. transition to live</button>
-//         </div>
-//       </div>
-//     </>
-//   )
-// }
-
-// export default Broadcast
+        <CardFooter>
+          {isActive ? (
+            <Button onClick={stopStream} variant="destructive" className="w-full">
+              Stop Stream
+            </Button>
+          ) : (
+            <Button onClick={startStream} className="w-full">
+              Start Stream
+            </Button>
+          )}
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}
