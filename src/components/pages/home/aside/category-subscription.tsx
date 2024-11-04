@@ -38,7 +38,7 @@ const CategorySubscription: React.FC = () => {
 
         try {
             // Выполняем запрос к API для получения данных подписок пользователя
-            const response = await api.get(`https://localhost:7154/api/Subscription/findbyuserid/${user?.id}`);
+            const response = await api.get(`/Subscription/findbyuserid/${user?.id}`);
 
             if (response.status != 200) {
                 throw new Error('Ошибка получения данных');
@@ -49,14 +49,14 @@ const CategorySubscription: React.FC = () => {
             console.log(subscriptions);
             // Преобразуем данные в нужный формат для вашего массива и берем только первые 5 элементов
             setMainPageFollowedCategories(subscriptions.slice(0, 5).map((subscription: any) => ({
-                iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
+                iconPath: subscription.channelProfilePhoto ,  // URL иконки, можно задать значение по умолчанию
                 name: subscription.channelNikName,  // Имя категории или пользователя
                 path: "/gotochannel/" + subscription.id,  // Путь на страницу подписки
                 iconClassNames: "rounded-full"  // Класс иконки
             })));
 
             setAllFollowed(subscriptions.map((subscription: any) => ({
-                iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
+                iconPath: subscription.channelProfilePhoto ,  // URL иконки, можно задать значение по умолчанию
                 name: subscription.channelNikName,  // Имя категории или пользователя
                 path: `/gotochannel/${subscription.id}`,  // Путь на страницу подписки
                 iconClassNames: "rounded-full"  // Класс иконки

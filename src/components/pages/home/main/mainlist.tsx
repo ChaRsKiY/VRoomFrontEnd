@@ -11,7 +11,7 @@ const MainInfo: React.FC = () => {
 
   const getVideos = async () => {
     try {
-      const response = await api.get('https://localhost:7154/api/Video');
+      const response = await api.get('/Video');
 
       if (response.status === 200) {
         const mydata: IVideo[] = await response.data;
