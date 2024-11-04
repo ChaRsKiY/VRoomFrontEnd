@@ -1,19 +1,20 @@
 "use client"
 
-import React, {useRef, useState, useEffect, ChangeEvent, MouseEvent} from 'react';
+import React, { useRef, useState, useEffect, ChangeEvent, MouseEvent } from 'react';
 import Image from "next/image";
-import {useUser} from "@clerk/nextjs";
-import {IVideo} from "@/types/videoinfo.interface";
-import {signalRService} from "@/services/signalr.service";
-import {IContentVideo} from "@/types/videoDTO.interface";
+import { useUser } from "@clerk/nextjs";
+import { IVideo } from "@/types/videoinfo.interface";
+import { signalRService } from "@/services/signalr.service";
+import { IContentVideo } from "@/types/videoDTO.interface";
+import api from '@/services/axiosApi';
 
 interface IFollowShortBlockProps {
     short: IVideo;
 
 }
 
-const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({short}: IFollowShortBlockProps) => {
-    const {user} = useUser();
+const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({ short }: IFollowShortBlockProps) => {
+    const { user } = useUser();
     const [newVideo, setVideo] = useState<IVideo>();
     const [displayR, setDisplayR] = useState('none');
     const [isFolowed, setIsFolowed] = useState(false);
@@ -22,11 +23,9 @@ const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({short}: IFollowShor
     const checkIsFolowed = async () => {
         if (user) {
             try {
-                const response = await fetch('https://localhost:7154/api/Subscription/isfolowed/' + short.channelSettingsId + '/' + user.id, {
-                    method: 'GET',
-                });
+                const response = await api.get('/Subscription/isfolowed/' + short.channelSettingsId + '/' + user.id);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     setIsFolowed(true);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
@@ -40,11 +39,9 @@ const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({short}: IFollowShor
     const addSubscription = async () => {
         if (user) {
             try {
-                const response = await fetch('https://localhost:7154/api/Subscription/add/' + short.channelSettingsId + '/' + user.id, {
-                    method: 'POST',
-                });
+                const response = await api.post('/Subscription/add/' + short.channelSettingsId + '/' + user.id);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     setIsFolowed(true);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
@@ -59,11 +56,9 @@ const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({short}: IFollowShor
     const deleteSubscription = async () => {
         if (user) {
             try {
-                const response = await fetch('https://localhost:7154/api/Subscription/delete/' + short.channelSettingsId + '/' + user.id, {
-                    method: 'DELETE',
-                });
+                const response = await api.delete('/Subscription/delete/' + short.channelSettingsId + '/' + user.id);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     setIsFolowed(false);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
@@ -117,7 +112,7 @@ const FollowShortBlock: React.FC<IFollowShortBlockProps> = ({short}: IFollowShor
             {newVideo ? (
                 <div className="flex flex-row items-center">
                     <Image src={newVideo.channelProfilePhoto} width={42} alt={newVideo.channelName} height={42}
-                           style={{minHeight: '40px'}} className="rounded-full"/>
+                        style={{ minHeight: '40px' }} className="rounded-full" />
 
                     <div className="text-white pl-3">{newVideo.channelName}</div>
                     <div className="pl-4">

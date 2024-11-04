@@ -1,4 +1,4 @@
-export interface INotification{
+export interface INotification {
     id: number,
     userId: number,
     message: string,

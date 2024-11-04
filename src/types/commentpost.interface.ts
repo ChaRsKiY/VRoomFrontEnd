@@ -1,16 +1,16 @@
 export interface ICommentPost {
-    id:number,
+    id: number,
     userId: string,
     userName: string,
-    channelBanner:string,
-    channelId?:number,
-    postId:number,
+    channelBanner: string,
+    channelId?: number,
+    postId: number,
     comment: string,
     date: Date,
-    likeCount:number,
-    dislikeCount:number,
-    answerPostId?:number,
-    isPinned:boolean,
-    isEdited:boolean,
-    users?:[]
+    likeCount: number,
+    dislikeCount: number,
+    answerPostId?: number,
+    isPinned: boolean,
+    isEdited: boolean,
+    users?: []
 }

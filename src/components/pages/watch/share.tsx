@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
-import {BsShare} from 'react-icons/bs'; // Иконка Share
-import {FaFacebook, FaTwitter, FaTelegram, FaWhatsapp} from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { BsShare } from 'react-icons/bs'; // Иконка Share
+import { FaFacebook, FaTwitter, FaTelegram, FaWhatsapp } from 'react-icons/fa';
 import ShareDialog from "@/components/pages/shorts/share-dialog"; // Иконки соцсетей
 
 interface IProps {
@@ -42,10 +42,10 @@ const ShareComponent: React.FC<IProps> = (URL) => {
     return (
         <div>
             <div className="flex items-center space-x-2.5" onClick={openDialog}>
-                <BsShare size={22}/>
+                <BsShare size={22} />
                 <div className="font-[300] cursor-pointer">Share</div>
             </div>
-            <ShareDialog isOpen={isDialogOpen} onClose={closeDialog} URL={URL}/>
+            <ShareDialog isOpen={isDialogOpen} onClose={closeDialog} URL={URL} />
             {/* Кнопка Share */}
             {/* <div className="flex items-center space-x-2.5" onClick={toggleShareWindow}>
                 <BsShare size={22}/>

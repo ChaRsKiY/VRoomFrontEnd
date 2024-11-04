@@ -1,29 +1,29 @@
 'use client'
 import React from 'react';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import Link from "next/link";
-import {SlDislike, SlLike} from "react-icons/sl";
-import {useUser} from '@clerk/nextjs';
-import {FiFlag} from 'react-icons/fi';
-import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
-import {HiOutlineChevronUp, HiOutlineChevronDown} from 'react-icons/hi';
-import {MdMoreVert} from 'react-icons/md';
+import { SlDislike, SlLike } from "react-icons/sl";
+import { useUser } from '@clerk/nextjs';
+import { FiFlag } from 'react-icons/fi';
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import { HiOutlineChevronUp, HiOutlineChevronDown } from 'react-icons/hi';
+import { MdMoreVert } from 'react-icons/md';
 import RadioButtonList from '@/components/pages/comments/report';
 import EditAnswer from '@/components/pages/comments/editanswer';
-import {FaPen} from 'react-icons/fa';
-import {formatTimeAgo} from "@/utils/format";
-// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
-import {signalRService} from '@/services/signalr.service';
+import { FaPen } from 'react-icons/fa';
+import { formatTimeAgo } from "@/utils/format";
+import { signalRService } from '@/services/signalr.service';
+import api from '@/services/axiosApi'
 
 interface ShortsCommentsProps {
     commentId: number;
     ans: IAnswerCommentVideo[]
 }
 
-const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) => {
+const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
-    const {user} = useUser();
+    const { user } = useUser();
     const [display, setDisplay] = useState('none');
     const [display2, setDisplay2] = useState('block');
     const [visibleInput, setVisibleInput] = useState<number | null>(null);
@@ -45,11 +45,9 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
         if (user) {
             try {
 
-                const response = await fetch('https://localhost:7154/api/AnswerVideo/dislike/' + id + '/' + user.id + '/' + userid, {
-                    method: 'PUT',
-                });
+                const response = await api.put('/AnswerVideo/dislike/' + id + '/' + user.id + '/' + userid);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     console.log('успешный лайк');
                 } else {
                     console.error('Ошибка при like:', response.statusText);
@@ -64,11 +62,9 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
     const like = async (id: number, userid: string) => {
         if (user) {
             try {
-                const response = await fetch('https://localhost:7154/api/AnswerVideo/like/' + id + '/' + user.id + '/' + userid, {
-                    method: 'PUT',
-                });
+                const response = await api.put('/AnswerVideo/like/' + id + '/' + user.id + '/' + userid);
 
-                if (response.ok) {
+                if (response.status === 200) {
                     console.log('успешный лайк');
                 } else {
                     console.error('Ошибка при like:', response.statusText);
@@ -123,7 +119,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === likedAnswer.id
-                            ? {...answer, likeCount: likedAnswer.likeCount} // Обновляем количество лайков
+                            ? { ...answer, likeCount: likedAnswer.likeCount } // Обновляем количество лайков
                             : answer
                     )
                 );
@@ -134,7 +130,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === likedAnswer.id
-                            ? {...answer, dislikeCount: likedAnswer.dislikeCount} // Обновляем количество лайков
+                            ? { ...answer, dislikeCount: likedAnswer.dislikeCount } // Обновляем количество лайков
                             : answer
                     )
                 );
@@ -144,21 +140,15 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === upAnswer.id
-                            ? {...answer, text: upAnswer.text, isEdited: upAnswer.isEdited} // Обновляем количество лайков
+                            ? { ...answer, text: upAnswer.text, isEdited: upAnswer.isEdited } // Обновляем количество лайков
                             : answer
                     )
                 );
             }
         };
 
-        // signalRService.on('answerMessage', handleMessage);
-
-        // return () => {
-        //      signalRService.off('answerMessage', handleMessage);
-        // };
         signalRService.onMessageReceived(handleMessage);
 
-        // Очистка подписки при размонтировании компонента
         return () => {
             signalRService.offMessageReceived(handleMessage);
         };
@@ -215,8 +205,8 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
     return (
 
 
-        <div style={{width: '100%'}}>
-            <div style={{paddingLeft: '50px'}}>
+        <div style={{ width: '100%' }}>
+            <div style={{ paddingLeft: '50px' }}>
                 {allAnswers > 0 ? (<div onClick={() => {
                     if (display === 'none') {
                         setDisplay('block');
@@ -226,25 +216,25 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                         setDisplay2('block');
                     }
                 }}
-                                        style={{display: 'inline-block', width: 'auto'}}>
+                    style={{ display: 'inline-block', width: 'auto' }}>
 
-                    <div style={{display: 'flex'}}>
-                        <HiOutlineChevronUp size={24} color="blue" style={{display}}/> {/* Стрелка вверх */}
-                        <HiOutlineChevronDown size={24} color="blue" style={{display: display2}}/> {/* Стрелка вниз */}
-                        <button style={{marginBottom: '5px', color: 'blue'}}>
+                    <div style={{ display: 'flex' }}>
+                        <HiOutlineChevronUp size={24} color="blue" style={{ display }} />
+                        <HiOutlineChevronDown size={24} color="blue" style={{ display: display2 }} />
+                        <button style={{ marginBottom: '5px', color: 'blue' }}>
                             {allAnswers}&nbsp;Answers
                         </button>
                     </div>
                 </div>) : <></>}
-                <div style={{width: '100%', display: 'flex'}}>
+                <div style={{ width: '100%', display: 'flex' }}>
 
-                    <div style={{display, width: '100%'}}>
+                    <div style={{ display, width: '100%' }}>
                         {answers.length > 0 ? (
                             answers.map((comment, index) => (
 
-                                <div style={{width: '100%', display: 'flex'}}>
+                                <div style={{ width: '100%', display: 'flex' }}>
 
-                                    <div key={comment.commentVideo_Id} style={{display: 'flex', width: '100%'}}>
+                                    <div key={comment.commentVideo_Id} style={{ display: 'flex', width: '100%' }}>
                                         <div>
 
                                             <img
@@ -252,11 +242,11 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                                 alt=""
                                                 width="25px"
                                                 height="25px"
-                                                style={{borderRadius: '50%', marginRight: '10px'}}
+                                                style={{ borderRadius: '50%', marginRight: '10px' }}
                                             /></div>
-                                        <div style={{width: '100%'}}>
+                                        <div style={{ width: '100%' }}>
 
-                                            <div style={{paddingLeft: '0px', width: '100%'}}>
+                                            <div style={{ paddingLeft: '0px', width: '100%' }}>
                                                 <div style={{
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
@@ -271,12 +261,12 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                                         <small>{formatTimeAgo(new Date(comment.answerDate))}</small>
                                                     </div>
                                                     <div key={comment.id} className="relative"
-                                                         style={{marginRight: '-65px'}}>
+                                                        style={{ marginRight: '-65px' }}>
 
                                                         <button onClick={(event) => toggleReportMenu(index, event)}
-                                                                className="flex pl-10 pt-2 space-x-2"
-                                                                style={{position: 'relative', zIndex: 10}}>
-                                                            <MdMoreVert size={24} color="black"/>
+                                                            className="flex pl-10 pt-2 space-x-2"
+                                                            style={{ position: 'relative', zIndex: 10 }}>
+                                                            <MdMoreVert size={24} color="black" />
                                                         </button>
 
                                                         {reportMenuOpenIndex === index && (
@@ -291,31 +281,31 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                                                     }}
                                                                 >
                                                                     <div onClick={() => openReport()}
-                                                                         className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
-                                                                         style={{
-                                                                             display: 'flex',
-                                                                             justifyContent: 'center'
-                                                                         }}>
+                                                                        className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                                                                        style={{
+                                                                            display: 'flex',
+                                                                            justifyContent: 'center'
+                                                                        }}>
                                                                         <div>
-                                                                            <FiFlag size={16}/></div>
+                                                                            <FiFlag size={16} /></div>
                                                                         <div>
                                                                             <span
-                                                                                style={{fontSize: '20px'}}>Report</span>
+                                                                                style={{ fontSize: '20px' }}>Report</span>
                                                                         </div>
                                                                     </div>
                                                                     {comment.userId === user?.id && (
                                                                         <>
                                                                             <div onClick={() => openEdit()}
-                                                                                 className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
-                                                                                 style={{
-                                                                                     display: 'flex',
-                                                                                     justifyContent: 'center'
-                                                                                 }}>
+                                                                                className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                                                                                style={{
+                                                                                    display: 'flex',
+                                                                                    justifyContent: 'center'
+                                                                                }}>
                                                                                 <div>
-                                                                                    <FaPen size={15} color="blue"/>
+                                                                                    <FaPen size={15} color="blue" />
                                                                                 </div>
                                                                                 <div>
-                                                                                    <span style={{fontSize: '18px'}}>Edit answer</span>
+                                                                                    <span style={{ fontSize: '18px' }}>Edit answer</span>
                                                                                 </div>
                                                                             </div>
                                                                         </>)}
@@ -339,7 +329,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                                                     }}
                                                                 >
                                                                     <EditAnswer answer={comment}
-                                                                                onClose={closeEdit}/>
+                                                                        onClose={closeEdit} />
 
                                                                 </div>
 
@@ -358,7 +348,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                                                     }}
                                                                 >
                                                                     <RadioButtonList userName={comment.userName}
-                                                                                     onClose={closeReport}/>
+                                                                        onClose={closeReport} />
 
                                                                 </div>
 
@@ -372,46 +362,46 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) 
                                             </div>
                                             <div>
                                                 <div>
-             <textarea
-                 style={{
-                     border: 'none',
-                     fontSize: '16px',
-                     padding: '5px',
-                     height: 'auto',
-                     resize: 'none',
-                     wordWrap: 'break-word',
-                     width: '100%',
-                     backgroundColor: 'white',
+                                                    <textarea
+                                                        style={{
+                                                            border: 'none',
+                                                            fontSize: '16px',
+                                                            padding: '5px',
+                                                            height: 'auto',
+                                                            resize: 'none',
+                                                            wordWrap: 'break-word',
+                                                            width: '100%',
+                                                            backgroundColor: 'white',
 
-                 }}
-                 disabled
-                 value={comment.text}
-                 readOnly
-                 rows={1} // Минимальное количество строк
-             />
+                                                        }}
+                                                        disabled
+                                                        value={comment.text}
+                                                        readOnly
+                                                        rows={1} // Минимальное количество строк
+                                                    />
 
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-8">
                                                 <div className="flex items-center space-x-2.5">
-                                                    <SlLike onClick={() => like(comment.id, comment.userId)} size={15}/>
+                                                    <SlLike onClick={() => like(comment.id, comment.userId)} size={15} />
                                                     <div
-                                                        style={{fontSize: "14px"}}>{comment.likeCount !== 0 && comment.likeCount}</div>
+                                                        style={{ fontSize: "14px" }}>{comment.likeCount !== 0 && comment.likeCount}</div>
                                                 </div>
                                                 <div className="flex items-center space-x-2.5">
                                                     <SlDislike onClick={() => dislike(comment.id, comment.userId)}
-                                                               size={15}/>
+                                                        size={15} />
                                                     <div
-                                                        style={{fontSize: "14px"}}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
+                                                        style={{ fontSize: "14px" }}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
                                                 </div>
 
                                                 {comment.isEdited && (
                                                     <>
 
-                                                        <div style={{fontSize: '11px', color: 'brown'}}> Edited</div>
+                                                        <div style={{ fontSize: '11px', color: 'brown' }}> Edited</div>
                                                     </>)}
                                             </div>
-                                            <br/>
+                                            <br />
 
                                         </div>
                                     </div>

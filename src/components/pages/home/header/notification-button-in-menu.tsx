@@ -1,10 +1,11 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
-import {IoMdNotifications} from "react-icons/io";
-import {useUser} from "@clerk/nextjs";
-import {INotification} from "@/types/inotification.interface";
-import {IoNotificationsOutline} from "react-icons/io5";
+import React, { useEffect, useState } from 'react'
+import { IoMdNotifications } from "react-icons/io";
+import { useUser } from "@clerk/nextjs";
+import { INotification } from "@/types/inotification.interface";
+import { IoNotificationsOutline } from "react-icons/io5";
+import api from '@/services/axiosApi';
 
 const NotificationButtonMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -24,8 +25,8 @@ const NotificationButtonMenu: React.FC = () => {
 
     const fetchNotifications = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/Notification/getbyuserid/1/10/${userId}`);
-            const data: any[] = await response.json();
+            const response = await api.get(`/Notification/getbyuserid/1/10/${userId}`);
+            const data: any[] = await response.data;
 
             // Преобразуем данные в массив объектов типа INotification
             const notifications: INotification[] = data.map(item => ({
@@ -76,7 +77,7 @@ const NotificationButtonMenu: React.FC = () => {
 
             <div className="min-sm:relative self-center flex">
                 <IoNotificationsOutline
-                                   className="text-2xl cursor-pointer self-center"/>
+                    className="text-2xl cursor-pointer self-center" />
                 {unreadNotifications >= 1 && <div
                     className="absolute text-[0.74rem] bg-green rounded-full p-0.5 top-[-1px] right-[-3px] h-3.5 w-3.5 flex items-center justify-center">
                     <div>{unreadNotifications}</div>

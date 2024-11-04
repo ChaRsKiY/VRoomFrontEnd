@@ -1,23 +1,24 @@
 "use client"
 
-import React, {ReactElement, useEffect, useRef, useState} from 'react';
-import {ITranslationFunction} from "@/types/translation.interface";
-import {useTranslation} from "next-i18next";
-import {MdOutlineClose} from "react-icons/md";
-import {FaFacebook, FaTelegram, FaTwitter, FaWhatsapp} from "react-icons/fa";
-import {UrlObject} from "node:url";
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import { ITranslationFunction } from "@/types/translation.interface";
+import { useTranslation } from "next-i18next";
+import { MdOutlineClose } from "react-icons/md";
+import { FaFacebook, FaTelegram, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { UrlObject } from "node:url";
 import * as Url from "node:url";
-import {useUser} from "@clerk/nextjs";
-import {ICommentVideo} from "@/types/commentvideo.interface";
-import {IUser} from "@/types/user.interface";
-import {IAnswerCommentVideo} from "@/types/answercommentvideo.interface";
-import {IVideo} from "@/types/videoinfo.interface";
-import {signalRService} from "@/services/signalr.service";
-import {GoSortDesc} from "react-icons/go";
+import { useUser } from "@clerk/nextjs";
+import { ICommentVideo } from "@/types/commentvideo.interface";
+import { IUser } from "@/types/user.interface";
+import { IAnswerCommentVideo } from "@/types/answercommentvideo.interface";
+import { IVideo } from "@/types/videoinfo.interface";
+import { signalRService } from "@/services/signalr.service";
+import { GoSortDesc } from "react-icons/go";
 import MyComment from "@/components/pages/comments/mycomment";
 import Comments from "@/components/pages/comments/comments";
 import ShortsMyComment from "@/components/pages/shorts/comments/shorts-mycomment";
 import ShortsComments from "@/components/pages/shorts/comments/shorts-comments";
+import api from '@/services/axiosApi';
 
 
 interface CommentsDialogProps {
@@ -27,9 +28,9 @@ interface CommentsDialogProps {
 }
 
 
-const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId}) => {
+const CommentsDialog: React.FC<CommentsDialogProps> = ({ isOpen, onClose, videoId }) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
-    const {user} = useUser();
+    const { user } = useUser();
     const [comments, setComments] = useState<ICommentVideo[]>([]);
     const [allComments, setAllComments] = useState(0);
     const [iAmUser, setUser] = useState<IUser | null>(null);
@@ -55,12 +56,10 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
     const getUser = async (user: any, setUser: (prev: IUser) => void) => {
         try {
             if (user) {
-                const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
-                    method: 'GET',
-                });
+                const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
 
-                if (response.ok) {
-                    const data: IUser = await response.json();
+                if (response.status === 200) {
+                    const data: IUser = await response.data;
                     setUser(data);
                 } else {
                     console.error('Ошибка при получении пользователя:', response.statusText);
@@ -73,12 +72,10 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
 
     const getAnswers = async (commentId: number) => {
         try {
-            const response = await fetch('https://localhost:7154/api/AnswerVideo/getbycommentid/' + commentId, {
-                method: 'GET',
-            });
+            const response = await api.get('/AnswerVideo/getbycommentid/' + commentId);
 
-            if (response.ok) {
-                const data: IAnswerCommentVideo[] = await response.json();
+            if (response.status === 200) {
+                const data: IAnswerCommentVideo[] = await response.data;
                 setAnswersByComment((prevAnswers) => ({
                     ...prevAnswers,
                     [commentId]: data,
@@ -106,12 +103,10 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
     // Получение комментариев с сервера через обычный HTTP запрос
     const getComments = async () => {
         try {
-            const response = await fetch('https://localhost:7154/api/CommentVideo/getbyvideoid/' + videoId, {
-                method: 'GET',
-            });
+            const response = await api.get('/CommentVideo/getbyvideoid/' + videoId);
 
-            if (response.ok) {
-                const data: ICommentVideo[] = await response.json();
+            if (response.status) {
+                const data: ICommentVideo[] = await response.data;
 
                 setAllComments(data.length);
 
@@ -195,7 +190,7 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
                 setComments((prevComments) =>
                     prevComments.map((com) =>
                         com.id === upComment.id
-                            ? {...com, isEdited: upComment.isEdited, comment: upComment.text} // Обновляем количество лайков
+                            ? { ...com, isEdited: upComment.isEdited, comment: upComment.text } // Обновляем количество лайков
                             : com
                     )
                 );
@@ -227,38 +222,38 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
 
     }, [comments]);
 
-    const {t}: { t: ITranslationFunction } = useTranslation();
+    const { t }: { t: ITranslationFunction } = useTranslation();
 
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-20">
             <dialog ref={dialogRef} onClose={closeDialog}
-                    className=" bg-white w-2/5 h-3/4 flex rounded-lg p-5">
+                className=" bg-white w-2/5 h-3/4 flex rounded-lg p-5">
 
                 <div className="flex flex-col w-full relative">
 
                     <div className='flex justify-between absolute top-[-10px] right-[-5px]'>
-                        <MdOutlineClose size={34} onClick={closeDialog} className="cursor-pointer"/>
+                        <MdOutlineClose size={34} onClick={closeDialog} className="cursor-pointer" />
                     </div>
                     {/* Основное содержимое диалогового окна */}
                     <div onClick={() => {
                         if (isSortMenuOpen) {
                             setSortMenuOpen(false);
                         }
-                    }} style={{marginBottom: "100px"}}>
+                    }} style={{ marginBottom: "100px" }}>
                         <div className="flex items-center space-x-8">
                             <div className="text-[1.15rem] font-[600]">Comments {allComments}</div>
                             <div
                                 className="flex space-x-1 relative"
                                 onClick={() => setSortMenuOpen(!isSortMenuOpen)}
                             >
-                                <GoSortDesc size={22}/>
+                                <GoSortDesc size={22} />
                                 <div className="text-[1rem] font-[500]">Sort</div>
                                 {!isSortMenuOpen && (
                                     <div
                                         className="absolute left-[-30px] top-7 ml-2 p-1 rounded-md shadow-lg bg-gray-500 text-white hidden hover-tooltip w-[120px]"
-                                        style={{textAlign: 'center'}}>
+                                        style={{ textAlign: 'center' }}>
                                         select sorting
                                     </div>
                                 )}
@@ -275,26 +270,26 @@ const CommentsDialog: React.FC<CommentsDialogProps> = ({isOpen, onClose, videoId
                                 {isSortMenuOpen && (
                                     <div
                                         className="absolute bg-white border border-gray-300 rounded-md shadow-lg left-0 top-full mt-2 z-10 w-[180px]"
-                                        style={{paddingTop: '6px', paddingBottom: '6px'}}>
-                                        <div style={{textAlign: 'center'}}
-                                             onClick={() => handleSortMethodChange('likes')}
-                                             className={`cursor-pointer p-2 ${sortMethod === 'likes' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
+                                        style={{ paddingTop: '6px', paddingBottom: '6px' }}>
+                                        <div style={{ textAlign: 'center' }}
+                                            onClick={() => handleSortMethodChange('likes')}
+                                            className={`cursor-pointer p-2 ${sortMethod === 'likes' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
                                             By rating
                                         </div>
-                                        <div style={{textAlign: 'center'}}
-                                             onClick={() => handleSortMethodChange('date')}
-                                             className={`cursor-pointer p-2 ${sortMethod === 'date' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
+                                        <div style={{ textAlign: 'center' }}
+                                            onClick={() => handleSortMethodChange('date')}
+                                            className={`cursor-pointer p-2 ${sortMethod === 'date' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
                                             New first
                                         </div>
                                     </div>
                                 )}
                             </div>
                         </div>
-                        <br/>
-                        <div style={{marginTop: '30'}}>
-                            {iAmUser ? <ShortsMyComment videoId={videoId} amuser={iAmUser}/> : <p></p>}
-                            <br/>
-                            <ShortsComments id={videoId} comments={comments} answers={answersByComment || []}/>
+                        <br />
+                        <div style={{ marginTop: '30' }}>
+                            {iAmUser ? <ShortsMyComment videoId={videoId} amuser={iAmUser} /> : <p></p>}
+                            <br />
+                            <ShortsComments id={videoId} comments={comments} answers={answersByComment || []} />
                         </div>
                     </div>
 

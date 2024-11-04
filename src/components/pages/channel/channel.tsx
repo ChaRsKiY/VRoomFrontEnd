@@ -1,9 +1,9 @@
 "use client"
-import {RxAvatar} from "react-icons/rx";
-import React, {useState} from 'react';
+import { RxAvatar } from "react-icons/rx";
+import React, { useState } from 'react';
 // import axios from 'axios';
 
-const CreateChannelModal: React.FC<{ open: boolean; onClose: () => void; }> = ({open, onClose}) => {
+const CreateChannelModal: React.FC<{ open: boolean; onClose: () => void; }> = ({ open, onClose }) => {
 
     if (!open) return null;
 

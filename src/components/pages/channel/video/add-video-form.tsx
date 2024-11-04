@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import StageOne from "@/components/pages/channel/video/stage-one";
 import StageTwo from "@/components/pages/channel/video/stage-two";
 

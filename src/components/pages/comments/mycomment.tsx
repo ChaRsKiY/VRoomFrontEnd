@@ -1,20 +1,21 @@
 'use client'
-import {useEffect, useState} from 'react';
-import {useUser} from '@clerk/nextjs';
+import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import Link from "next/link";
-import {FaSmile} from 'react-icons/fa';
-import React, {useRef} from 'react';
-import {ICommentVideo} from '@/types/commentvideo.interface'
-import {IUser} from '@/types/user.interface';
-import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
-import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
+import { FaSmile } from 'react-icons/fa';
+import React, { useRef } from 'react';
+import { ICommentVideo } from '@/types/commentvideo.interface'
+import { IUser } from '@/types/user.interface';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
+import api from '@/services/axiosApi';
 
 interface MyCommentProps {
     videoId: number;
     amuser: IUser;
 }
 
-const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
+const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [fullName, setName] = useState('');
@@ -84,20 +85,13 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
             userName: fullName
         };
         try {
-            const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(comment),
-            });
-
-            if (response.ok) {
+            const response = await api.post('/CommentVideo/add', comment);
+            if (response.status === 200) {
                 setWrite('comment sent successfully, write new here');
                 setInputValue('');
                 setDisplay('none');
                 setDisplay2('block');
-                const data = await response.json();
+                const data = await response.data;
                 console.log('Комментарий успешно отправлен:', data);
 
 
@@ -149,22 +143,22 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
 
 
     return (
-        <div style={{display: displayMain}}>
-            <div style={{display}}>
+        <div style={{ display: displayMain }}>
+            <div style={{ display }}>
                 You are writing a comment in account:
             </div>
-            <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
 
                 {avatarUrl ? (
                     <img
                         src={avatarUrl}
                         alt="User Avatar"
-                        style={{width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px'}}
+                        style={{ width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px' }}
                     />
                 ) : (
                     <p>Аватарка не найдена</p>
                 )}
-                <span style={{display, fontWeight: 'bolder'}}>{fullName}&nbsp;&nbsp;</span>
+                <span style={{ display, fontWeight: 'bolder' }}>{fullName}&nbsp;&nbsp;</span>
                 <div onClick={toWrite} style={{
                     display: display2, width: '100%', border: 'none', background: 'lightgray',
                     padding: '5px', borderBottom: `2px solid ${lineColor}`, borderRadius: '10px'
@@ -172,7 +166,7 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
                     <span> {write}</span>
                 </div>
             </div>
-            <div style={{display}}>
+            <div style={{ display }}>
                 <div>
                     <input
                         type="text"
@@ -211,29 +205,29 @@ const MyComment: React.FC<MyCommentProps> = ({videoId, amuser}) => {
       /> */}
 
                 </div>
-                <div style={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
-                    <div style={{display: 'flex'}}>
-                        <div style={{margin: '5px', marginLeft: '50px'}}>
-                            <FaSmile size={25} color="lightgray"/>
+                <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex' }}>
+                        <div style={{ margin: '5px', marginLeft: '50px' }}>
+                            <FaSmile size={25} color="lightgray" />
                         </div>
-                        <div style={{marginLeft: '20px'}}>
-                            <div style={{fontSize: '11px', paddingTop: '5px', marginBottom: '-5px'}}>By sending a
+                        <div style={{ marginLeft: '20px' }}>
+                            <div style={{ fontSize: '11px', paddingTop: '5px', marginBottom: '-5px' }}>By sending a
                                 comment, you agree to
                             </div>
                             <Link href="http://localhost:3000/ru/termsofservice" passHref target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{color: 'blue', fontSize: '11px'}}>
+                                rel="noopener noreferrer"
+                                style={{ color: 'blue', fontSize: '11px' }}>
                                 VRoom's Terms of Service.</Link>
                         </div>
                     </div>
                     <div>
                         <button onClick={handleCancel}
-                                style={isHovered ? {...buttonCancelStyles.base, ...buttonCancelStyles.hover} : buttonCancelStyles.base}
-                                onMouseEnter={() => setIsHovered(true)}
-                                onMouseLeave={() => setIsHovered(false)}>Cancel
+                            style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}>Cancel
                         </button>
                         <button onClick={handleSubmit} disabled={disabled}
-                                style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Send Comment
+                            style={!disabled ? { ...buttonSubmitStyles.base } : buttonSubmitStyles.disab}>Send Comment
                         </button>
                     </div>
                 </div>
@@ -266,4 +260,3 @@ export default MyComment;
 }
 
 
-    

@@ -65,27 +65,37 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
 .new-amsterdam {
   font-family: "New Amsterdam", sans-serif;
 }
-dialog::backdrop { inset: 0px; --tw-bg-opacity: 1;     background-color: rgb(0 0 0 / var(--tw-bg-opacity));--tw-bg-opacity: 0.2;
+
+dialog::backdrop {
+  inset: 0px;
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+  --tw-bg-opacity: 0.2;
   /*background-color: rgb(204, 204, 204, 0.8);
   background-color: rgba(0, 0, 0, 0.8);  Более темное затемнение */
 }

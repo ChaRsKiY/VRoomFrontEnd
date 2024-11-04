@@ -1,9 +1,10 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
-import {IoMdNotifications} from "react-icons/io";
-import {useUser} from "@clerk/nextjs";
-import {INotification} from "@/types/inotification.interface";
+import React, { useEffect, useState } from 'react'
+import { IoMdNotifications } from "react-icons/io";
+import { useUser } from "@clerk/nextjs";
+import { INotification } from "@/types/inotification.interface";
+import api from '@/services/axiosApi';
 
 const NotificationButton: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false)
@@ -23,8 +24,8 @@ const NotificationButton: React.FC = () => {
 
     const fetchNotifications = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/Notification/getbyuserid/1/10/${userId}`);
-            const data: any[] = await response.json();
+            const response = await api.get(`/Notification/getbyuserid/1/10/${userId}`);
+            const data: any[] = await response.data;
 
             // Преобразуем данные в массив объектов типа INotification
             const notifications: INotification[] = data.map(item => ({
@@ -70,7 +71,7 @@ const NotificationButton: React.FC = () => {
 
     return (
         <div className="relative self-center flex">
-            <IoMdNotifications onClick={handleCloseOpen} className="text-2xl text-neutral-500 cursor-pointer self-center"/>
+            <IoMdNotifications onClick={handleCloseOpen} className="text-2xl text-neutral-500 cursor-pointer self-center" />
             {unreadNotifications >= 1 && <div className="absolute text-[0.74rem] bg-green rounded-full p-0.5 top-[-1px] right-[-3px] h-3.5 w-3.5 flex items-center justify-center">
                 <div>{unreadNotifications}</div>
             </div>}
@@ -86,9 +87,9 @@ const NotificationButton: React.FC = () => {
                         <div className="text-neutral-500">{notification.date.toLocaleDateString()}</div>
                     </div>
                 ))}
-                    </div>}
-            </div>
-                )
-            }
+            </div>}
+        </div>
+    )
+}
 
-            export default NotificationButton
+export default NotificationButton

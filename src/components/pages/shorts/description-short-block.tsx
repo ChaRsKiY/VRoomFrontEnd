@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useRef, useState, useEffect, ChangeEvent, MouseEvent} from 'react';
+import React, { useRef, useState, useEffect, ChangeEvent, MouseEvent } from 'react';
 import Image from "next/image";
 
 interface IDescriptionShortBlockProps {
@@ -9,9 +9,9 @@ interface IDescriptionShortBlockProps {
 }
 
 const DescriptionShortBlock: React.FC<IDescriptionShortBlockProps> = ({
-                                                                          description,
-                                                                          tags
-                                                                      }: IDescriptionShortBlockProps) => {
+    description,
+    tags
+}: IDescriptionShortBlockProps) => {
 
     return (
         <>

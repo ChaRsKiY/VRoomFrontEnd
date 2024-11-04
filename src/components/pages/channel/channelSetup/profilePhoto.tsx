@@ -1,13 +1,14 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from "next/image";
-import {useUser} from "@clerk/nextjs";
-import {ITranslationFunction} from "@/types/translation.interface";
-import {useTranslation} from "next-i18next";
+import { useUser } from "@clerk/nextjs";
+import { ITranslationFunction } from "@/types/translation.interface";
+import { useTranslation } from "next-i18next";
+import api from '@/services/axiosApi';
 
 const ProfilePhotoBlock = () => {
-    const {user} = useUser(); // Получаем текущего пользователя
+    const { user } = useUser(); // Получаем текущего пользователя
     const [avatar, setAvatar] = useState<string>('https://placehold.co/120x80.svg');
     // const [name, setName] = useState<string>();
 
@@ -18,16 +19,17 @@ const ProfilePhotoBlock = () => {
     }, [user]);
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/ChannelSettings/getinfochannel/${userId}`);
-            const data: any = await response.json();
-
-            setAvatar(data.channelBanner);
-            // setName(data.channelName);
+            const response = await api.get(`/ChannelSettings/getinfochannel/${userId}`);
+            if (response.status === 200) {
+                const data: any = await response.data;
+                setAvatar(data.channelBanner);
+                // setName(data.channelName);
+            }
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
     };
-    const {t}: { t: ITranslationFunction } = useTranslation();
+    const { t }: { t: ITranslationFunction } = useTranslation();
 
     return (
         <div className="bg-white shadow rounded-lg p-6 mb-6">
@@ -37,7 +39,7 @@ const ProfilePhotoBlock = () => {
             <div className="flex items-center">
                 <div className="flex items-center">
                     <Image className="w-100 h-100 mx-auto mr-2 rounded-full mt-3" width={120} height={120}
-                           src={avatar} alt="Banner Image"/>
+                        src={avatar} alt="Banner Image" />
                     <div className="ml-4">
                         <p className="text-sm text-gray-600">The profile photo is shown, for example, next to
                             your video or comments on YouTube.</p>

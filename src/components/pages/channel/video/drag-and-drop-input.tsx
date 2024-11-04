@@ -1,7 +1,7 @@
 "use client"
 
-import {useState, DragEvent, ChangeEvent, useEffect} from 'react';
-import {CiVideoOn} from "react-icons/ci";
+import { useState, DragEvent, ChangeEvent, useEffect } from 'react';
+import { CiVideoOn } from "react-icons/ci";
 import {
     AlertDialog, AlertDialogAction,
     AlertDialogContent, AlertDialogDescription, AlertDialogFooter,

@@ -1,11 +1,12 @@
 'use client'
 
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import UnlimitedScrollBlock from "@/components/pages/results/unlimited-scroll-block";
-import {IVideo} from "@/types/videoinfo.interface";
-import {searchVideos} from '@/services/algoliaservice';
-import {useSearchParams} from 'next/navigation';
+import { IVideo } from "@/types/videoinfo.interface";
+import { searchVideos } from '@/services/algoliaservice';
+import { useSearchParams } from 'next/navigation';
 import FilterComponent from './filtersearch';
+import api from '@/services/axiosApi';
 
 
 const ResultInfo: React.FC = () => {
@@ -22,12 +23,10 @@ const ResultInfo: React.FC = () => {
 
     const getVideo = async (id: number): Promise<IVideo | null> => {
         try {
-            const response = await fetch(`https://localhost:7154/api/Video/getvideoinfo/` + id, {
-                method: 'GET',
-            });
+            const response = await api.get(`/Video/getvideoinfo/` + id);
 
-            if (response.ok) {
-                const mydata: IVideo = await response.json();
+            if (response.status === 200) {
+                const mydata: IVideo = await response.data;
                 console.log('успешный video', mydata);
                 return mydata;
             } else {
@@ -101,9 +100,9 @@ const ResultInfo: React.FC = () => {
 
 
     return (
-        <div style={{marginTop: '100px', width: '100%'}}>
-            <FilterComponent applyFilters={applyFilters}/>
-            <UnlimitedScrollBlock data={moreVideos}/>
+        <div style={{ marginTop: '100px', width: '100%' }}>
+            <FilterComponent applyFilters={applyFilters} />
+            <UnlimitedScrollBlock data={moreVideos} />
         </div>
 
     )

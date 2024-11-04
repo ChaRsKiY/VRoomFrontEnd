@@ -1,5 +1,5 @@
 export interface ISearchVideo {
-    objectId:string,
+    objectId: string,
     title: string,
     description: string,
     channelsettings: string

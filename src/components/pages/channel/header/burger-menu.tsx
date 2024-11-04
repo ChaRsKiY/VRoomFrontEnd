@@ -1,5 +1,5 @@
 import React from 'react'
-import {RxHamburgerMenu} from "react-icons/rx";
+import { RxHamburgerMenu } from "react-icons/rx";
 
 const BurgerMenu: React.FC = () => {
     return (
