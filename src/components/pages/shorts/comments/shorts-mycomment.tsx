@@ -8,6 +8,7 @@ import {ICommentVideo} from '@/types/commentvideo.interface'
 import {IUser} from '@/types/user.interface';
 import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
+import api from '@/services/axiosApi';
 
 interface ShortsMyCommentProps {
     videoId: number;
@@ -84,20 +85,18 @@ const ShortsMyComment: React.FC<ShortsMyCommentProps> = ({videoId, amuser}) => {
             userName: fullName
         };
         try {
-            const response = await fetch('https://localhost:7154/api/CommentVideo/add', {
-                method: 'POST',
+            const response = await api.post('/CommentVideo/add',comment, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(comment),
+                }
             });
 
-            if (response.ok) {
+            if (response.status===200) {
                 setWrite('comment sent successfully, write new here');
                 setInputValue('');
                 setDisplay('none');
                 setDisplay2('block');
-                const data = await response.json();
+                const data = await response.data;
                 console.log('Комментарий успешно отправлен:', data);
 
 

@@ -1,11 +1,11 @@
 "use client";
 
-import React, {useEffect, useState} from 'react';
-import {IoIosSearch} from "react-icons/io";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {useTranslation} from "next-i18next";
-import {ITranslationFunction} from "@/types/translation.interface";
-import {FaMicrophone} from "react-icons/fa";
+import React, { useEffect, useState } from 'react';
+import { IoIosSearch } from "react-icons/io";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslation } from "next-i18next";
+import { ITranslationFunction } from "@/types/translation.interface";
+import { FaMicrophone } from "react-icons/fa";
 
 const Search: React.FC = () => {
     const { t }: { t: ITranslationFunction } = useTranslation();
@@ -76,7 +76,7 @@ const Search: React.FC = () => {
                         <Tooltip>
                             <TooltipTrigger className="absolute right-0" type="submit">
                                 <div className="header-search-icon bg-blue rounded-full py-2 px-2 hover:cursor-pointer">
-                                    <IoIosSearch color="white" size={20}/>
+                                    <IoIosSearch color="white" size={20} />
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -93,9 +93,9 @@ const Search: React.FC = () => {
                         <TooltipTrigger>
                             <button
                                 onClick={startListening}
-                                style={isListening ? { backgroundColor: "#00A1FF" } : { }}
+                                style={isListening ? { backgroundColor: "#00A1FF" } : {}}
                                 className="rounded-full bg-neutral-300 p-1.5 flex items-center aspect-[1/1] h-full justify-center duration-150 hover:bg-neutral-400 hover:cursor-pointer dark:bg-neutral-600 dark:hover:bg-neutral-500">
-                                <FaMicrophone color="white"/>
+                                <FaMicrophone color="white" />
                             </button>
                         </TooltipTrigger>
                         <TooltipContent>

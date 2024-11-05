@@ -1,17 +1,18 @@
 'use client'
 
-import {useEffect, useState} from 'react';
-import React, {useRef} from 'react';
-import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
-import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
-import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
+import { useEffect, useState } from 'react';
+import React, { useRef } from 'react';
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
+import api from '@/services/axiosApi';
 
 interface MyCommentProps {
     answer: IAnswerCommentVideo;
     onClose: () => void;
 }
 
-const EditAnswer: React.FC<MyCommentProps> = ({answer, onClose}) => {
+const EditAnswer: React.FC<MyCommentProps> = ({ answer, onClose }) => {
 
     const [inputValue, setInputValue] = useState(answer.text);
     const [lineColor, setLineColor] = useState('lightgray');
@@ -52,24 +53,18 @@ const EditAnswer: React.FC<MyCommentProps> = ({answer, onClose}) => {
             channelId: 0,
         };
         try {
-            const response = await fetch('https://localhost:7154/api/AnswerVideo/update', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(answer2),
-            });
+            const response = await api.put('/AnswerVideo/update', answer2);
 
-            if (response.ok) {
+            if (response.status === 200) {
                 onClose();
-                const data = await response.json();
-                console.log('Комментарий успешно изменен:', data);
+                console.log('Комментарий успешно изменен:', response.data);
             } else {
                 console.error('Ошибка при отправке комментария:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
         }
+
     };
 
     useEffect(() => {
@@ -106,16 +101,16 @@ const EditAnswer: React.FC<MyCommentProps> = ({answer, onClose}) => {
 
 
                 </div>
-                <div style={{display: 'flex', width: '100%', justifyContent: 'space-around'}}>
+                <div style={{ display: 'flex', width: '100%', justifyContent: 'space-around' }}>
 
                     <div>
                         <button onClick={onClose}
-                                style={isHovered ? {...buttonCancelStyles.base, ...buttonCancelStyles.hover} : buttonCancelStyles.base}
-                                onMouseEnter={() => setIsHovered(true)}
-                                onMouseLeave={() => setIsHovered(false)}>Cancel
+                            style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}>Cancel
                         </button>
                         <button onClick={handleSubmit} disabled={disabled}
-                                style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Edit Comment
+                            style={!disabled ? { ...buttonSubmitStyles.base } : buttonSubmitStyles.disab}>Edit Comment
                         </button>
                     </div>
                 </div>

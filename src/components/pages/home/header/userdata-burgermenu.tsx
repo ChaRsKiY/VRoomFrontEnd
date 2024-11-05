@@ -1,8 +1,8 @@
 "use client"
 
 import React from 'react'
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {UserResource} from "@clerk/types";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserResource } from "@clerk/types";
 import Link from "next/link";
 
 const UserDataInBurgerMenu: React.FC<{ user: UserResource | undefined | null }> = ({ user }: { user: UserResource | undefined | null }) => {

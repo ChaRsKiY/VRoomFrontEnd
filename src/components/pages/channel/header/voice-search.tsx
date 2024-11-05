@@ -1,7 +1,7 @@
 import React from 'react'
-import {FaMicrophone} from "react-icons/fa";
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {ITranslationFunction} from "@/types/translation.interface";
+import { FaMicrophone } from "react-icons/fa";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ITranslationFunction } from "@/types/translation.interface";
 
 interface IVoiceSearchProps {
     t: ITranslationFunction
@@ -14,7 +14,7 @@ const VoiceSearch: React.FC<IVoiceSearchProps> = ({ t }: IVoiceSearchProps) => {
                 <TooltipTrigger>
                     <div
                         className="rounded-full bg-neutral-400 p-1.5 flex items-center aspect-[1/1] h-full justify-center duration-150 hover:bg-neutral-500 hover:cursor-pointer dark:bg-neutral-600 dark:hover:bg-neutral-500">
-                        <FaMicrophone color="white"/>
+                        <FaMicrophone color="white" />
                     </div>
                 </TooltipTrigger>
                 <TooltipContent>

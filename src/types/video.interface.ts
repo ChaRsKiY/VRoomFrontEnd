@@ -1,4 +1,4 @@
-import {IPresentedChannel} from "@/types/channel.interface";
+import { IPresentedChannel } from "@/types/channel.interface";
 
 export interface IPresentedVideo {
     id: number,
@@ -8,5 +8,5 @@ export interface IPresentedVideo {
     cover: string,
     channel: IPresentedChannel,
     href: string,
-   
+
 }

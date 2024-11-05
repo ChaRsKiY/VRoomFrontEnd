@@ -1,13 +1,13 @@
 "use client"
 
 import React from 'react'
-import {IoIosSettings, IoMdNotifications} from "react-icons/io";
-import {SignedIn, SignedOut, UserButton} from "@clerk/nextjs";
+import { IoIosSettings, IoMdNotifications } from "react-icons/io";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useSpring, animated } from '@react-spring/web'
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {ITranslationFunction} from "@/types/translation.interface";
-import {useTranslation} from "next-i18next";
-import {useRouter} from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ITranslationFunction } from "@/types/translation.interface";
+import { useTranslation } from "next-i18next";
+import { useRouter } from "next/navigation";
 
 const HeaderBlock: React.FC = () => {
     const { t }: { t: ITranslationFunction } = useTranslation()
@@ -63,7 +63,7 @@ const HeaderBlock: React.FC = () => {
                             onMouseLeave={handleNotificationsMouseLeave}
                             style={springs}
                         >
-                            <IoMdNotifications className="text-2xl text-neutral-500 cursor-pointer"/>
+                            <IoMdNotifications className="text-2xl text-neutral-500 cursor-pointer" />
                         </animated.div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -78,7 +78,7 @@ const HeaderBlock: React.FC = () => {
                             onMouseLeave={handleSettingsMouseLeave}
                             style={springsSettings}
                         >
-                            <IoIosSettings className="text-2xl text-neutral-500 cursor-pointer"/>
+                            <IoIosSettings className="text-2xl text-neutral-500 cursor-pointer" />
                         </animated.div>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -92,7 +92,7 @@ const HeaderBlock: React.FC = () => {
                 <button onClick={() => push("/auth/signup")} className="border-2 border-neutral-500 px-1.5 rounded">Sign up</button>
             </SignedOut>
             <SignedIn>
-            <UserButton/>
+                <UserButton />
             </SignedIn>
         </div>
     )

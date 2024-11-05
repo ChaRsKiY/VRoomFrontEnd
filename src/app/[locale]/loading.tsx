@@ -2,7 +2,7 @@ import React from 'react'
 import { Nunito } from "next/font/google"
 import quotes from "@/testdata/quotes.json"
 
-const font  = Nunito({ subsets: ['latin'], weight: ["600"] })
+const font = Nunito({ subsets: ['latin'], weight: ["600"] })
 
 const MainLoading: React.FC = async () => {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];

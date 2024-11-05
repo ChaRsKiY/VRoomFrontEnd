@@ -6,6 +6,7 @@ import VideoCard from "@/components/pages/home/main/video-card";
 import { useInView } from 'framer-motion';
 import VideoSkeleton from "@/components/styled/video-skeleton";
 
+
 interface IProps {
     videolist: IVideo[]
 }

@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
 import initTranslations from "@/app/i18n";
@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button"
 import { Upload, X, Info, Plus, Badge} from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 interface IHomeProps {
-    params: {
-        locale: string;
-    };
+  params: {
+    locale: string;
+  };
 }
 
 interface Category {

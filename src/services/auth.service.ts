@@ -1,4 +1,4 @@
-import {SignInResource} from "@clerk/types";
+import { SignInResource } from "@clerk/types";
 
 class AuthService {
     private signIn: SignInResource | undefined;

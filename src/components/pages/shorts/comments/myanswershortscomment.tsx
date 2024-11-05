@@ -1,18 +1,19 @@
 'use client'
-import {useEffect, useState} from 'react';
-import {useUser} from '@clerk/nextjs';
-import React, {useRef} from 'react';
-import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
-import {IUser} from '@/types/user.interface';
-import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
-import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
+import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
+import React, { useRef } from 'react';
+import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
+import { IUser } from '@/types/user.interface';
+import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
+import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
+import api from '@/services/axiosApi';
 
 interface AnsShCommentProps {
     commentId: number;
     onCancel: () => void;
 }
 
-const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel}) => {
+const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCancel }) => {
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [fullName, setName] = useState('');
@@ -27,18 +28,16 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel
     const [comid, setCommentId] = useState(0);
     const inputRef2 = useRef<HTMLInputElement>(null);
     const [iAmUser, setUser] = useState<IUser | null>(null);
-    const {user} = useUser();
+    const { user } = useUser();
 
     const getUser = async () => {
 
         try {
             if (user) {
-                const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
-                    method: 'GET',
-                });
+                const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
 
-                if (response.ok) {
-                    const data: IUser = await response.json();
+                if (response.status === 200) {
+                    const data: IUser = await response.data;
                     setUser(data);
                     setUserId(data.clerk_Id);
                     setAvatarUrl(data.channelBanner);
@@ -93,19 +92,17 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel
             channelId: 0,
         };
         try {
-            const response = await fetch('https://localhost:7154/api/AnswerVideo/add', {
-                method: 'POST',
+            const response = await api.post('/AnswerVideo/add', answer, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(answer),
+                }
             });
 
-            if (response.ok) {
+            if (response.status === 200) {
 
                 setInputValue('');
                 setDisplay('none');
-                const data = await response.json();
+                const data = await response.data;
 
             } else {
                 console.error('Ошибка при отправке комментария:', response.statusText);
@@ -133,22 +130,22 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel
 
     return (
 
-        <div style={{display}}>
-            <div style={{display: 'flex', alignItems: 'center', width: '90%', marginLeft: '75px'}}>
+        <div style={{ display }}>
+            <div style={{ display: 'flex', alignItems: 'center', width: '90%', marginLeft: '75px' }}>
                 {avatarUrl ? (
                     <img
                         src={avatarUrl}
                         alt="User Avatar"
-                        style={{width: '25px', height: '25px', borderRadius: '50%', marginRight: '10px'}}
+                        style={{ width: '25px', height: '25px', borderRadius: '50%', marginRight: '10px' }}
                     />
                 ) : (
                     <p>Аватарка не найдена</p>
                 )}
-                <span style={{fontWeight: 'bolder', fontSize: '12pxs'}}>{fullName}&nbsp;&nbsp;</span>
+                <span style={{ fontWeight: 'bolder', fontSize: '12pxs' }}>{fullName}&nbsp;&nbsp;</span>
 
             </div>
             <div>
-                <div style={{paddingLeft: '50px'}}>
+                <div style={{ paddingLeft: '50px' }}>
                     <div>
                         <input
                             type="text"
@@ -172,14 +169,14 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({commentId, onCancel
                     </div>
                 </div>
 
-                <div style={{display: 'flex', width: '85%', fontSize: '12px', marginLeft: '100px'}}>
+                <div style={{ display: 'flex', width: '85%', fontSize: '12px', marginLeft: '100px' }}>
                     <button onClick={handleSubmit} disabled={disabled}
-                            style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Answer
+                        style={!disabled ? { ...buttonSubmitStyles.base } : buttonSubmitStyles.disab}>Answer
                     </button>
                     <button onClick={handleCancel}
-                            style={isHovered ? {...buttonCancelStyles.base, ...buttonCancelStyles.hover} : buttonCancelStyles.base}
-                            onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}>Cancel
+                        style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}>Cancel
                     </button>
 
                 </div>
