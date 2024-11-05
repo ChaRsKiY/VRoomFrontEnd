@@ -48,7 +48,7 @@ const VideoUploadInterface: React.FC<IHomeProps> = ({ params: { locale } }) => {
   const [currentTag, setCurrentTag] = useState('')
   const [isCopyright, setIsCopyright] = useState<boolean>(false); // true = є авторські права, false = немає
   const [audience, setAudience] = useState<string>('all'); // 'children', 'adults', 'all'
-  const { id } = params;
+  //const { id } = params;
 
  
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
