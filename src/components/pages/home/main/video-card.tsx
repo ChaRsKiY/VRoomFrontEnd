@@ -1,12 +1,8 @@
 import React from 'react'
 import Image from "next/image";
-import { IPresentedVideo } from "@/types/video.interface";
 import Link from "next/link";
 import { formatNumber, formatTimeAgo } from "@/utils/format";
 import { IVideo } from "@/types/videoinfo.interface";
-import AsideHome from "@/components/pages/home/aside/aside";
-import HeaderHome from "@/components/pages/home/header/header";
-import initTranslations from "@/app/i18n";
 
 
 interface IVideoCardProps {
