@@ -134,8 +134,7 @@ const Home: React.FC<Props> = async ({ params: { locale } }: Props) => {
             <div className="flex pt-20 overflow-hidden">
                 {t && <AsideHome t={t} />}
             </div>
-            <main className="pl-[20%] w-full max-w-[1300px] flex justify-center max-lg:pl-[12%] max-sm:pl-0">
-                {/* <UnlimitedScrollBlock  /> */}
+            <main className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
                 <MainInfo />
             </main>
         </>

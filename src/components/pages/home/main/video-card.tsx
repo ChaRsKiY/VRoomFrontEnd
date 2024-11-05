@@ -15,7 +15,6 @@ const VideoCard: React.FC<IVideoCardProps> = async ({ el }: IVideoCardProps) => 
 
     return (
         <div>
-
             <Link href={"/watch/" + el.id} className="space-y-2.5">
                 <Image src={el.cover} alt={el.tittle} width={1000} height={1000} className="rounded-xl aspect-[16/9]" />
                 <div className="flex space-x-2.5">
