@@ -33,7 +33,7 @@ const MainInfo: React.FC = () => {
 
 
   return (
-    <div style={{ marginTop: '80px', width: '80%' }}>
+        <div style={{ marginTop: '80px', width: '98%' }}>
       <div>
         <TagNavigation tagName='All' />
         <UnlimitedScrollBlock data={moreVideos} />

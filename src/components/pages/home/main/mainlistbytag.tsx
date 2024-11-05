@@ -22,7 +22,6 @@ const MainByTagInfo: React.FC = () => {
 
             if (response.status === 200) {
                 const mydata: IVideo = await response.data;
-                console.log('успешный video', mydata);
                 return mydata;
             } else {
                 console.error('Ошибка получения видео:', response.statusText);
@@ -60,7 +59,7 @@ const MainByTagInfo: React.FC = () => {
 
 
     return (
-        <div style={{ marginTop: '80px', width: '95%' }}>
+        <div style={{ marginTop: '80px', width: '98%' }}>
             <div>
                 <TagNavigation tagName={search} />
                 <UnlimitedScrollBlock data={moreVideos} />
