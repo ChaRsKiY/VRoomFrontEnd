@@ -33,7 +33,7 @@ const channelPage = async ({ params: { locale } }: IChannelEditProps) => {
                             <p style={{ textAlign: 'center', wordWrap: 'normal', width: '340px' }}>Here you will see the
                                 metrics of the video that you upload last.
                                 To add a video, click the button below.</p><br />
-                            <Link href={'/channel/detailvideo'}
+                            <Link href='/channel/detailvideo'
                             style={{
                                 display: 'block',
                                 borderRadius: '20px',
