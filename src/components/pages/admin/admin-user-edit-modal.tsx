@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -20,10 +20,12 @@ import {
 } from "@/components/ui/accordion"
 import EditUserDataForm from "@/components/pages/admin/edit-userdata-form";
 import {updateUserBaseData} from "@/actions/admin";
+import EditUserEmailsForm from "@/components/pages/admin/edit-user-emails-form";
 
 
 interface Props {
-    user: DataUser
+    user: DataUser,
+    fetchUser: () => Promise<void>
 }
 
 export interface EditData {
@@ -31,48 +33,58 @@ export interface EditData {
         username: string,
         firstName: string,
         lastName: string,
-        avatar: File | null,
     }
 }
 
-const AdminUserEditModal = ({ user }: Props) => {
+const AdminUserEditModal = ({ user, fetchUser }: Props) => {
     const [data, setData] = useState<EditData>({
         userData: {
             username: user.username,
             firstName: user.firstName,
             lastName: user.lastName,
-            avatar: null
         }
     })
+    const [isPending, setIsPending] = useState<boolean>(false)
+    const [open, setOpen] = useState<boolean>(false)
+    const [stateChanged, setStateChanged] = useState<boolean>(false)
 
     const saveChanges = async () => {
+        setIsPending(true)
         const formData = new FormData()
-        formData.append('userData', data.userData as any)
-        formData.append('avatar', data.userData.avatar as File)
+        formData.append('firstName', data.userData.firstName as string)
+        formData.append('lastName', data.userData.lastName as string)
+        formData.append('username', data.userData.username as string)
 
         const response = await updateUserBaseData(user.id, formData)
 
         if (response === 'success') {
-            console.log('User data updated')
+            setIsPending(false)
+            setOpen(false)
+            setStateChanged(false)
+            fetchUser()
             return
         }
 
         console.error('Error updating user data:', response)
+        setIsPending(false)
     }
 
     const compareIfChanged = () => {
-        return JSON.stringify(data) === JSON.stringify({
+        JSON.stringify(data) === JSON.stringify({
             userData: {
                 username: user.username,
                 firstName: user.firstName,
                 lastName: user.lastName,
-                avatar: null,
             }
-        })
+        }) ? setStateChanged(false) : setStateChanged(true)
     }
 
+    useEffect(() => {
+        compareIfChanged()
+    }, [data]);
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button className="mr-2 mb-2" variant="outline">Edit</Button>
             </DialogTrigger>
@@ -93,19 +105,13 @@ const AdminUserEditModal = ({ user }: Props) => {
                     <AccordionItem value="emails">
                         <AccordionTrigger>Emails</AccordionTrigger>
                         <AccordionContent>
-
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="External Accounts">
-                        <AccordionTrigger>External Accounts</AccordionTrigger>
-                        <AccordionContent>
-
+                            <EditUserEmailsForm user={user} fetchUser={fetchUser} />
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
 
                 <DialogFooter>
-                    <Button onClick={saveChanges} disabled={compareIfChanged()} type="submit">Save changes</Button>
+                    <Button onClick={saveChanges} disabled={!stateChanged || isPending} type="submit">Save changes</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

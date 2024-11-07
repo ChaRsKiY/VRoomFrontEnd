@@ -4,7 +4,7 @@ export interface DataUser {
     firstName: string
     lastName: string
     imageUrl: string
-    emailAddresses: { emailAddress: string, id: string }[]
+    emailAddresses: { emailAddress: string, id: string, verification: { status: string, strategy: string, attempts: number } }[]
     phoneNumbers: { phoneNumber: string, id: string }[]
     externalAccounts: { verification: { strategy: string }, emailAddress: string, id: string }[]
     privateMetadata: { isAdmin: boolean, adminLevel: number },
@@ -17,5 +17,5 @@ export interface DataUser {
     backupCodeEnabled: boolean,
     updatedAt: number,
     lastSignInAt: number,
-    hasImage: boolean
+    hasImage: boolean,
 }

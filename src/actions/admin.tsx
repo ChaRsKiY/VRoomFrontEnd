@@ -94,6 +94,8 @@ export const getUserById = async (userId: string) => {
 
     const user = await client.users.getUser(userId)
 
+    user.emailAddresses[0].verification?.status
+
     return JSON.stringify(user)
 }
 
@@ -216,14 +218,17 @@ export const updateUserBaseData = async (userId: string, formData: FormData) => 
         return 'unauthorized'
     }
 
-    if ((currentUser.privateMetadata.adminLevel as number) !== 3) return 'unauthorized';
+    if (currentUser.privateMetadata.adminLevel !== 3 && userId !== currentUserId) return 'unauthorized'
 
     const user = await client.users.getUser(userId)
 
     if (!user) return 'user_not_found'
 
-    const userData = formData.get('userData') as any
-    const file = formData.get('avatar') as File
+    const userData = {
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string,
+        username: formData.get('username') as string,
+    }
 
     try {
         await client.users.updateUser(userId, {
@@ -232,14 +237,92 @@ export const updateUserBaseData = async (userId: string, formData: FormData) => 
             username: userData.username,
         })
 
-        if (!file) return 'success'
-
-        await client.users.updateUserProfileImage(userId, { file })
-
         return 'success'
     } catch (e) {
         console.error('Error updating user data:', e)
         return 'update_failed'
     }
+}
 
+export const deleteUserEmail = async (userId: string, emailId: string) => {
+    const { userId: currentUserId } = auth()
+
+    if (!currentUserId) {
+        return 'unauthorized'
+    }
+
+    const currentUser = await client.users.getUser(currentUserId)
+    if (!currentUser?.privateMetadata?.isAdmin) {
+        return 'unauthorized'
+    }
+
+    if (currentUser.privateMetadata.adminLevel !== 3 && userId !== currentUserId) return 'unauthorized'
+
+    const user = await client.users.getUser(userId)
+
+    if (!user) return 'user_not_found'
+
+    try {
+        await client.emailAddresses.deleteEmailAddress(emailId)
+
+        return 'success'
+    } catch (e: any) {
+        console.error('Error deleting user email:', e)
+        return JSON.stringify(e.errors[0])
+    }
+}
+
+export const addUserEmail = async (userId: string, emailAddress: string) => {
+    const { userId: currentUserId } = auth()
+
+    if (!currentUserId) {
+        return 'unauthorized'
+    }
+
+    const currentUser = await client.users.getUser(currentUserId)
+    if (!currentUser?.privateMetadata?.isAdmin) {
+        return 'unauthorized'
+    }
+
+    if (currentUser.privateMetadata.adminLevel !== 3 && userId !== currentUserId) return 'unauthorized'
+
+    const user = await client.users.getUser(userId)
+
+    if (!user) return 'user_not_found'
+
+    try {
+        await client.emailAddresses.createEmailAddress({ userId, emailAddress })
+        return 'success'
+    } catch (e: any) {
+        console.error('Error adding user email:', e)
+        return JSON.stringify(e.errors[0])
+    }
+}
+
+export const makeEmailPrimary = async (userId: string, emailId: string) => {
+    const { userId: currentUserId } = auth()
+
+    if (!currentUserId) {
+        return 'unauthorized'
+    }
+
+    const currentUser = await client.users.getUser(currentUserId)
+    if (!currentUser?.privateMetadata?.isAdmin) {
+        return 'unauthorized'
+    }
+
+    if (currentUser.privateMetadata.adminLevel !== 3 && userId !== currentUserId) return 'unauthorized'
+
+    const user = await client.users.getUser(userId)
+
+    if (!user) return 'user_not_found'
+
+    try {
+        await client.emailAddresses.updateEmailAddress(emailId, { primary: true })
+
+        return 'success'
+    } catch (e: any) {
+        console.error('Error making email primary:', e)
+        return JSON.stringify(e.errors[0])
+    }
 }

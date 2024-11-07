@@ -285,11 +285,12 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {(!isPending && table.getRowModel().rows?.length) ? table.getRowModel().rows?.length ? (
+                        {(!isPending || table.getRowModel().rows?.length) ? table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
+                                    className={row.original.banned ? "bg-red-50" : ""}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>

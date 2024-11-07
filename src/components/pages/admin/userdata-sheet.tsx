@@ -58,7 +58,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
         fetchUser();
     }, [currentUser]);
 
-    if (loading || !user || !currentUser) {
+    if (!user || !currentUser || (loading && !user)) {
         return (
             <div className="w-full h-full flex justify-center items-center font-bold">
                 <Label className="text-[1.5rem]">Loading</Label>
@@ -214,7 +214,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                                 {user.banned ? "Unban" : "Ban"}
                             </Button>
                         )}
-                        {canEdit && <AdminUserEditModal user={user}/>}
+                        {canEdit && <AdminUserEditModal user={user} fetchUser={fetchUser} />}
                         {canChangeAdmin && <SetAdminModal user={user} userId={user.id} fetchUser={fetchUser}
                                                           currentUserAdminLevel={currentUserAdminLevel}/>}
                         {canDelete && <DeleteUserModal userId={user.id} username={user.username}
