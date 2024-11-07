@@ -41,7 +41,7 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
     };
   
    
-  const  dislike= async (id: number, userid:string  )=>{
+  const dislike = async (id: number, userid: string)=>{
     if(user){ 
     try {
       
@@ -62,10 +62,12 @@ const AnswersComments: React.FC<CommentsProps> = ({ commentId , ans}) => {
   }
   const like = async (id: number, userid:string ) => {
     if(user){ 
-    try {     
-      const response = await fetch('https://localhost:7154/api/AnswerVideo/like/'+id +'/'+ user.id +'/'+ userid, {
+    try {
+      const response = await fetch('https://localhost:7154/api/AnswerVideo/like/' + id +'/' + user.id +'/'+ userid, {
         method: 'PUT',
       });
+
+      //const response = await axios.put('https://localhost:7154/api/AnswerVideo/like/' + id +'/' + user.id +'/'+ userid)
 
       if (response.ok) {
        console.log('успешный лайк');
