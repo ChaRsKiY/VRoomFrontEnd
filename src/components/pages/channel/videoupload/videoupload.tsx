@@ -271,7 +271,8 @@ const VideoUploadInterface: React.FC = () => {
             isCopyright: isCopyright,
             audience: audience,
             lastViewedPosition: '00:00:00',
-            file: emptyFile
+            file: emptyFile,
+          
         };
 
         Object.entries(videoData).forEach(([key, value]) => {

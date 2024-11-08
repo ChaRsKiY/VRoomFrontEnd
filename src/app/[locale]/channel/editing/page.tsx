@@ -1,3 +1,4 @@
+
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
@@ -11,6 +12,7 @@ interface IChannelEditProps {
 
 const channelPage = async ({ params: { locale } }: IChannelEditProps) => {
     const { t } = await initTranslations(locale, ['common', 'categories']);
+
 
     return (
 
@@ -31,16 +33,18 @@ const channelPage = async ({ params: { locale } }: IChannelEditProps) => {
                             <p style={{ textAlign: 'center', wordWrap: 'normal', width: '340px' }}>Here you will see the
                                 metrics of the video that you upload last.
                                 To add a video, click the button below.</p><br />
-                            <Link href={'/channel/detailvideo'}>
-                                <button style={{
-                                    display: 'block',
-                                    borderRadius: '20px',
-                                    background: 'black',
-                                    color: 'white',
-                                    padding: '5px 15px',
-                                    margin: '5px auto 5px auto'
-                                }}>Add video
-                                </button> </Link>
+                            <Link href='/channel/detailvideo'
+                            style={{
+                                display: 'block',
+                                borderRadius: '20px',
+                                background: 'black',
+                                color: 'white',
+                                padding: '5px 15px',
+                                margin: '5px auto 5px auto',
+                                textAlign:'center'
+                            }}
+                            >Add video
+                            </Link>
                         </div>
                         <div className="ml-16">
                             <h1 className="text-[1.3rem]"><strong>Channel analytics</strong></h1>

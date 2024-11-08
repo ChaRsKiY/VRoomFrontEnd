@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import UnlimitedScrollBlock from "@/components/pages/home/main/unlimited-scroll-block";
 import { IVideo } from "@/types/videoinfo.interface";
 import api from '@/services/axiosApi';
+import TagNavigation from './tag-navigation';
 
 const MainInfo: React.FC = () => {
 
@@ -32,8 +33,11 @@ const MainInfo: React.FC = () => {
 
 
   return (
-    <div className="pr-[2%] max-sm:pr-0 flex-1 " style={{ marginTop: '100px' }}>
-      <UnlimitedScrollBlock data={moreVideos} />
+        <div style={{ marginTop: '80px', width: '98%' }}>
+      <div>
+        <TagNavigation tagName='All' />
+        <UnlimitedScrollBlock data={moreVideos} />
+      </div>
     </div>
   )
 }
