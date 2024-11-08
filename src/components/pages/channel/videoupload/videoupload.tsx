@@ -40,8 +40,9 @@ const VideoUploadInterface: React.FC = () => {
     const [description, setDescription] = useState('');
     const [category, setCategory] = useState('');
     const [categories, setCategories] = useState<Category[]>([]);
-    const [thumbnail, setThumbnail] = useState<File | null>(null);
-    const [thumbnailPreview, setThumbnailPreview] = useState<string | ArrayBuffer | null>(null);
+    const [thumbnail, setThumbnail] =useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+    const [thumbnailBase64, setThumbnailBase64] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [video, setFile] = useState<File | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
@@ -184,17 +185,23 @@ const VideoUploadInterface: React.FC = () => {
     }
     const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
+        
         if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
-            setThumbnail(file);
+            setThumbnail(file); // Зберігаємо об'єкт File
+            
             const reader = new FileReader();
             reader.onload = () => {
-                setThumbnailPreview(reader.result);
+                const base64String = reader.result?.toString().split(',')[1] || ""; // Виділяємо чистий Base64
+                setThumbnailBase64(base64String); // Зберігаємо Base64 для передачі на сервер
+                setThumbnailPreview(`data:${file.type};base64,${base64String}`); // Для попереднього перегляду
             };
-            reader.readAsDataURL(file);
+    
+            reader.readAsDataURL(file); // Читаємо файл у форматі Base64
         } else {
             console.error("Unsupported file format. Please select a PNG or JPEG image.");
         }
     };
+    
     const openFilePicker = () => {
         fileInputRef.current?.click();
     };
@@ -255,7 +262,8 @@ const VideoUploadInterface: React.FC = () => {
         const videoData = {
             id: 0,
             objectID: 'some-generated-id',
-            channelSettingsId: userChannel?.id,
+            //channelSettingsId: userChannel?.id,
+            channelSettingsId:4,
             tittle: videoName,
             description: description,
             uploadDate: new Date().toISOString(),
@@ -265,7 +273,7 @@ const VideoUploadInterface: React.FC = () => {
             likeCount: 0,
             dislikeCount: 0,
             isShort: false,
-            cover: thumbnail ? URL.createObjectURL(thumbnail) : '',
+            cover: thumbnailBase64,
             visibility: visibility === 'public',
             isAgeRestriction: isAgeRestricted,
             isCopyright: isCopyright,
