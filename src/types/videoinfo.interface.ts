@@ -13,6 +13,7 @@ export interface IVideo {
     videoUrl: string,
     vRoomVideoUrl: string,
     description: string,
+    channelSubscriptionCount: number,
     viewCount: number,
     likeCount: number,
     dislikeCount: number,

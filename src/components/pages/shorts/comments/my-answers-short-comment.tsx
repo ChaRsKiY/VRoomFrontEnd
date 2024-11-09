@@ -1,11 +1,11 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import React, { useRef } from 'react';
-import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
-import { IUser } from '@/types/user.interface';
-import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
-import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
+import {useEffect, useState} from 'react';
+import {useUser} from '@clerk/nextjs';
+import React, {useRef} from 'react';
+import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
+import {IUser} from '@/types/user.interface';
+import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
+import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
 import api from '@/services/axiosApi';
 
 interface AnsShCommentProps {
@@ -13,7 +13,7 @@ interface AnsShCommentProps {
     onCancel: () => void;
 }
 
-const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCancel }) => {
+const MyAnswersShortComment: React.FC<AnsShCommentProps> = ({commentId, onCancel}) => {
 
     const [avatarUrl, setAvatarUrl] = useState('');
     const [fullName, setName] = useState('');
@@ -28,7 +28,7 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCance
     const [comid, setCommentId] = useState(0);
     const inputRef2 = useRef<HTMLInputElement>(null);
     const [iAmUser, setUser] = useState<IUser | null>(null);
-    const { user } = useUser();
+    const {user} = useUser();
 
     const getUser = async () => {
 
@@ -130,22 +130,22 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCance
 
     return (
 
-        <div style={{ display }}>
-            <div style={{ display: 'flex', alignItems: 'center', width: '90%', marginLeft: '75px' }}>
+        <div style={{display}}>
+            <div style={{display: 'flex', alignItems: 'center', width: '90%', marginLeft: '75px'}}>
                 {avatarUrl ? (
                     <img
                         src={avatarUrl}
                         alt="User Avatar"
-                        style={{ width: '25px', height: '25px', borderRadius: '50%', marginRight: '10px' }}
+                        style={{width: '25px', height: '25px', borderRadius: '50%', marginRight: '10px'}}
                     />
                 ) : (
                     <p>Аватарка не найдена</p>
                 )}
-                <span style={{ fontWeight: 'bolder', fontSize: '12pxs' }}>{fullName}&nbsp;&nbsp;</span>
+                <span style={{fontWeight: 'bolder', fontSize: '12pxs'}}>{fullName}&nbsp;&nbsp;</span>
 
             </div>
             <div>
-                <div style={{ paddingLeft: '50px' }}>
+                <div style={{paddingLeft: '50px'}}>
                     <div>
                         <input
                             type="text"
@@ -169,14 +169,14 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCance
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', width: '85%', fontSize: '12px', marginLeft: '100px' }}>
+                <div style={{display: 'flex', width: '85%', fontSize: '12px', marginLeft: '100px'}}>
                     <button onClick={handleSubmit} disabled={disabled}
-                        style={!disabled ? { ...buttonSubmitStyles.base } : buttonSubmitStyles.disab}>Answer
+                            style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Answer
                     </button>
                     <button onClick={handleCancel}
-                        style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
-                        onMouseEnter={() => setIsHovered(true)}
-                        onMouseLeave={() => setIsHovered(false)}>Cancel
+                            style={isHovered ? {...buttonCancelStyles.base, ...buttonCancelStyles.hover} : buttonCancelStyles.base}
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}>Cancel
                     </button>
 
                 </div>
@@ -187,4 +187,4 @@ const MyAnswerShortsComment: React.FC<AnsShCommentProps> = ({ commentId, onCance
 };
 
 
-export default MyAnswerShortsComment;
+export default MyAnswersShortComment;

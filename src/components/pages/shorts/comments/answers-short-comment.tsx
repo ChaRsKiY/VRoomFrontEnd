@@ -1,29 +1,31 @@
 'use client'
 import React from 'react';
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import Link from "next/link";
-import { SlDislike, SlLike } from "react-icons/sl";
-import { useUser } from '@clerk/nextjs';
-import { FiFlag } from 'react-icons/fi';
-import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
-import { HiOutlineChevronUp, HiOutlineChevronDown } from 'react-icons/hi';
-import { MdMoreVert } from 'react-icons/md';
+import {SlDislike, SlLike} from "react-icons/sl";
+import {useUser} from '@clerk/nextjs';
+import {FiFlag} from 'react-icons/fi';
+import {IAnswerCommentVideo} from '@/types/answercommentvideo.interface';
+import {HiOutlineChevronUp, HiOutlineChevronDown} from 'react-icons/hi';
+import {MdMoreVert} from 'react-icons/md';
 import RadioButtonList from '@/components/pages/comments/report';
 import EditAnswer from '@/components/pages/comments/editanswer';
-import { FaPen } from 'react-icons/fa';
-import { formatTimeAgo } from "@/utils/format";
-import { signalRService } from '@/services/signalr.service';
+import {FaPen} from 'react-icons/fa';
+import {formatTimeAgo} from "@/utils/format";
+import {signalRService} from '@/services/signalr.service';
 import api from '@/services/axiosApi'
+import {RiDeleteBinLine} from "react-icons/ri";
+import DeleteAnswer from "@/components/pages/comments/deleteanswer";
 
 interface ShortsCommentsProps {
     commentId: number;
     ans: IAnswerCommentVideo[]
 }
 
-const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }) => {
+const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({commentId, ans}) => {
 
     const [avatars, setAvatars] = useState<{ [key: string]: string }>({});
-    const { user } = useUser();
+    const {user} = useUser();
     const [display, setDisplay] = useState('none');
     const [display2, setDisplay2] = useState('block');
     const [visibleInput, setVisibleInput] = useState<number | null>(null);
@@ -35,6 +37,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
     const [reportMenuOpenIndex, setReportMenuOpenIndex] = useState<number | null>(null);
     const [expandedStates, setExpandedStates] = useState<boolean[]>(Array(answers.length).fill(false));
     const [display4, setDisplay4] = useState('none');
+    const [display5, setDisplay5] = useState('none');
 
     const handleReplayClick = (index: number) => {
         setVisibleInput(visibleInput === index ? null : index); // Переключаем видимость конкретного поля
@@ -119,7 +122,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === likedAnswer.id
-                            ? { ...answer, likeCount: likedAnswer.likeCount } // Обновляем количество лайков
+                            ? {...answer, likeCount: likedAnswer.likeCount} // Обновляем количество лайков
                             : answer
                     )
                 );
@@ -130,7 +133,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === likedAnswer.id
-                            ? { ...answer, dislikeCount: likedAnswer.dislikeCount } // Обновляем количество лайков
+                            ? {...answer, dislikeCount: likedAnswer.dislikeCount} // Обновляем количество лайков
                             : answer
                     )
                 );
@@ -140,11 +143,26 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                 setAnswers((prevAnswers) =>
                     prevAnswers.map((answer) =>
                         answer.id === upAnswer.id
-                            ? { ...answer, text: upAnswer.text, isEdited: upAnswer.isEdited } // Обновляем количество лайков
+                            ? {...answer, text: upAnswer.text, isEdited: upAnswer.isEdited} // Обновляем количество лайков
                             : answer
                     )
                 );
             }
+            if (messageType === "delete_answer") {
+                const a: IAnswerCommentVideo = payload;
+                if (a.commentVideo_Id === commentId) {
+                    setAnswers((prevAnswers) => {
+                        // Проверка, если ответ существует для удаления
+                        const isAnswerExists = prevAnswers.some((answer) => answer.id === a.id);
+                        if (isAnswerExists) {
+                            setAllAnswers((prev) => Math.max(prev - 1, 0)); // Уменьшаем счетчик ответов, но не ниже 0
+                            return prevAnswers.filter((answer) => answer.id !== a.id);
+                        }
+                        return prevAnswers;
+                    });
+                }
+            }
+
         };
 
         signalRService.onMessageReceived(handleMessage);
@@ -175,7 +193,16 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
         setDisplay4('none');
         setReportMenuOpenIndex(null);
     };
+    const openDelete = () => {
+        setDisplay5('block');
+        setDisplay1('none');
+    };
 
+    const closeDelete = () => {
+        setDisplay1('block');
+        setDisplay5('none');
+        setReportMenuOpenIndex(null);
+    };
     useEffect(() => {
         setExpandedStates(Array(answers.length).fill(false));
 
@@ -184,6 +211,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
     const toggleReportMenu = (index: number, event: React.MouseEvent) => {
         setDisplay3('none');
         setDisplay4('none');
+        setDisplay5('none');
         setDisplay1('block');
         if (reportMenuOpenIndex === index) {
             setReportMenuOpenIndex(null); // Закрываем, если уже открыто
@@ -196,6 +224,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
         setDisplay3('none');
         setDisplay1('block');
         setDisplay4('none');
+        setDisplay5('none');
         setExpandedStates((prevState) =>
             prevState.map((state, i) => (i === index ? !state : state)) // Переключаем состояние только для конкретного комментария
         );
@@ -205,8 +234,8 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
     return (
 
 
-        <div style={{ width: '100%' }}>
-            <div style={{ paddingLeft: '50px' }}>
+        <div style={{width: '100%'}}>
+            <div style={{paddingLeft: '50px'}}>
                 {allAnswers > 0 ? (<div onClick={() => {
                     if (display === 'none') {
                         setDisplay('block');
@@ -216,25 +245,25 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                         setDisplay2('block');
                     }
                 }}
-                    style={{ display: 'inline-block', width: 'auto' }}>
+                                        style={{display: 'inline-block', width: 'auto'}}>
 
-                    <div style={{ display: 'flex' }}>
-                        <HiOutlineChevronUp size={24} color="blue" style={{ display }} />
-                        <HiOutlineChevronDown size={24} color="blue" style={{ display: display2 }} />
-                        <button style={{ marginBottom: '5px', color: 'blue' }}>
+                    <div style={{display: 'flex'}}>
+                        <HiOutlineChevronUp size={24} color="blue" style={{display}}/>
+                        <HiOutlineChevronDown size={24} color="blue" style={{display: display2}}/>
+                        <button style={{marginBottom: '5px', color: 'blue'}}>
                             {allAnswers}&nbsp;Answers
                         </button>
                     </div>
                 </div>) : <></>}
-                <div style={{ width: '100%', display: 'flex' }}>
+                <div style={{width: '100%', display: 'flex'}}>
 
-                    <div style={{ display, width: '100%' }}>
+                    <div style={{display, width: '100%'}}>
                         {answers.length > 0 ? (
                             answers.map((comment, index) => (
 
-                                <div style={{ width: '100%', display: 'flex' }}>
+                                <div style={{width: '100%', display: 'flex'}}>
 
-                                    <div key={comment.commentVideo_Id} style={{ display: 'flex', width: '100%' }}>
+                                    <div key={comment.commentVideo_Id} style={{display: 'flex', width: '100%'}}>
                                         <div>
 
                                             <img
@@ -242,11 +271,11 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                                                 alt=""
                                                 width="25px"
                                                 height="25px"
-                                                style={{ borderRadius: '50%', marginRight: '10px' }}
+                                                style={{borderRadius: '50%', marginRight: '10px'}}
                                             /></div>
-                                        <div style={{ width: '100%' }}>
+                                        <div style={{width: '100%'}}>
 
-                                            <div style={{ paddingLeft: '0px', width: '100%' }}>
+                                            <div style={{paddingLeft: '0px', width: '100%'}}>
                                                 <div style={{
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
@@ -261,18 +290,18 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                                                         <small>{formatTimeAgo(new Date(comment.answerDate))}</small>
                                                     </div>
                                                     <div key={comment.id} className="relative"
-                                                        style={{ marginRight: '-65px' }}>
+                                                         style={{marginRight: '-65px'}}>
 
                                                         <button onClick={(event) => toggleReportMenu(index, event)}
-                                                            className="flex pl-10 pt-2 space-x-2"
-                                                            style={{ position: 'relative', zIndex: 10 }}>
-                                                            <MdMoreVert size={24} color="black" />
+                                                                className="flex pl-10 pt-2 space-x-2"
+                                                                style={{position: 'relative', zIndex: 10}}>
+                                                            <MdMoreVert size={24} color="black"/>
                                                         </button>
 
                                                         {reportMenuOpenIndex === index && (
                                                             <div>
                                                                 <div
-                                                                    className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[180px] right-0"
+                                                                    className="absolute z-20 bg-white border border-gray-300 rounded-md shadow-lg w-[180px] right-0"
                                                                     style={{
                                                                         paddingTop: '4px',
                                                                         paddingBottom: '4px',
@@ -281,31 +310,48 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                                                                     }}
                                                                 >
                                                                     <div onClick={() => openReport()}
-                                                                        className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
-                                                                        style={{
-                                                                            display: 'flex',
-                                                                            justifyContent: 'center'
-                                                                        }}>
+                                                                         className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                                                                         style={{
+                                                                             display: 'flex',
+                                                                             justifyContent: 'center'
+                                                                         }}>
                                                                         <div>
-                                                                            <FiFlag size={16} /></div>
+                                                                            <FiFlag size={16}/></div>
                                                                         <div>
                                                                             <span
-                                                                                style={{ fontSize: '20px' }}>Report</span>
+                                                                                style={{fontSize: '20px'}}>Report</span>
                                                                         </div>
                                                                     </div>
                                                                     {comment.userId === user?.id && (
                                                                         <>
                                                                             <div onClick={() => openEdit()}
-                                                                                className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
-                                                                                style={{
-                                                                                    display: 'flex',
-                                                                                    justifyContent: 'center'
-                                                                                }}>
+                                                                                 className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                                                                                 style={{
+                                                                                     display: 'flex',
+                                                                                     justifyContent: 'center'
+                                                                                 }}>
                                                                                 <div>
-                                                                                    <FaPen size={15} color="blue" />
+                                                                                    <FaPen size={15} color="blue"/>
                                                                                 </div>
                                                                                 <div>
-                                                                                    <span style={{ fontSize: '18px' }}>Edit answer</span>
+                                                                                    <span style={{fontSize: '18px'}}>Edit answer</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </>)}
+                                                                    {comment.userId === user?.id && (
+                                                                        <>
+                                                                            <div onClick={() => openDelete()}
+                                                                                 className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                                                                                 style={{
+                                                                                     display: 'flex',
+                                                                                     justifyContent: 'center'
+                                                                                 }}>
+                                                                                <div>
+                                                                                    <RiDeleteBinLine size={15}
+                                                                                                     color="blue"/>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <span style={{fontSize: '18px'}}>Delete answer</span>
                                                                                 </div>
                                                                             </div>
                                                                         </>)}
@@ -313,26 +359,43 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
 
 
                                                                 <div
-                                                                    className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 right-3"
+                                                                    className="absolute top-16 bg-white border border-gray-300 rounded-md shadow-lg z-20 right-[3px]"
                                                                     style={{
                                                                         paddingTop: '10px',
                                                                         paddingBottom: '10px',
                                                                         position: 'absolute',
                                                                         marginTop: '-50px',
-                                                                        marginLeft: '-550px',
                                                                         display: display4,
                                                                         width: '80%',
-                                                                        minWidth: '470px',
+                                                                        minWidth: '375px',
                                                                         borderRadius: '16px',
                                                                         border: '2px solid gray',
 
                                                                     }}
                                                                 >
                                                                     <EditAnswer answer={comment}
-                                                                        onClose={closeEdit} />
+                                                                                onClose={closeEdit}/>
 
                                                                 </div>
+                                                                <div
+                                                                    className="absolute top-16 bg-white border border-gray-300 rounded-md shadow-lg z-20 right-[3px]"
+                                                                    style={{
+                                                                        paddingTop: '10px',
+                                                                        paddingBottom: '10px',
+                                                                        position: 'absolute',
+                                                                        marginTop: '-50px',
+                                                                        display: display5,
+                                                                        width: '80%',
+                                                                        minWidth: '375px',
+                                                                        borderRadius: '16px',
+                                                                        border: '2px solid gray',
 
+                                                                    }}
+                                                                >
+                                                                    <DeleteAnswer answerId={comment.id}
+                                                                                  onClose={closeDelete}/>
+
+                                                                </div>
                                                                 <div
                                                                     className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10"
                                                                     style={{
@@ -348,7 +411,7 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                                                                     }}
                                                                 >
                                                                     <RadioButtonList userName={comment.userName}
-                                                                        onClose={closeReport} />
+                                                                                     onClose={closeReport}/>
 
                                                                 </div>
 
@@ -384,24 +447,24 @@ const AnswersShortsComments: React.FC<ShortsCommentsProps> = ({ commentId, ans }
                                             </div>
                                             <div className="flex items-center space-x-8">
                                                 <div className="flex items-center space-x-2.5">
-                                                    <SlLike onClick={() => like(comment.id, comment.userId)} size={15} />
+                                                    <SlLike onClick={() => like(comment.id, comment.userId)} size={15}/>
                                                     <div
-                                                        style={{ fontSize: "14px" }}>{comment.likeCount !== 0 && comment.likeCount}</div>
+                                                        style={{fontSize: "14px"}}>{comment.likeCount !== 0 && comment.likeCount}</div>
                                                 </div>
                                                 <div className="flex items-center space-x-2.5">
                                                     <SlDislike onClick={() => dislike(comment.id, comment.userId)}
-                                                        size={15} />
+                                                               size={15}/>
                                                     <div
-                                                        style={{ fontSize: "14px" }}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
+                                                        style={{fontSize: "14px"}}>{comment.dislikeCount !== 0 && comment.dislikeCount}</div>
                                                 </div>
 
                                                 {comment.isEdited && (
                                                     <>
 
-                                                        <div style={{ fontSize: '11px', color: 'brown' }}> Edited</div>
+                                                        <div style={{fontSize: '11px', color: 'brown'}}> Edited</div>
                                                     </>)}
                                             </div>
-                                            <br />
+                                            <br/>
 
                                         </div>
                                     </div>

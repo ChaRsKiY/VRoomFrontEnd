@@ -9,6 +9,8 @@ import {IUser} from '@/types/user.interface';
 import {buttonSubmitStyles} from '@/styles/buttonstyles/buttonSubmitStyles';
 import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
 import api from '@/services/axiosApi';
+import {buttonCancelLowPaddingStyles} from "@/styles/buttonstyles/buttonCancelLowPaddingStyles";
+import Image from "next/image";
 
 interface ShortsMyCommentProps {
     videoId: number;
@@ -85,13 +87,13 @@ const ShortsMyComment: React.FC<ShortsMyCommentProps> = ({videoId, amuser}) => {
             userName: fullName
         };
         try {
-            const response = await api.post('/CommentVideo/add',comment, {
+            const response = await api.post('/CommentVideo/add', comment, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
 
-            if (response.status===200) {
+            if (response.status === 200) {
                 setWrite('comment sent successfully, write new here');
                 setInputValue('');
                 setDisplay('none');
@@ -148,17 +150,17 @@ const ShortsMyComment: React.FC<ShortsMyCommentProps> = ({videoId, amuser}) => {
 
 
     return (
-        <div style={{display: displayMain}}>
+        <div style={{display: displayMain}} className={'absolute right-0 left-0 bg-white'}>
             <div style={{display}}>
                 You are writing a comment in account:
             </div>
             <div style={{display: 'flex', alignItems: 'center', width: '100%'}}>
 
                 {avatarUrl ? (
-                    <img
-                        src={avatarUrl}
-                        alt="User Avatar"
-                        style={{width: '40px', height: '40px', borderRadius: '50%', marginRight: '10px'}}
+                    <Image width={24} height={24}
+                           src={avatarUrl}
+                           alt="User Avatar"
+                           style={{width: '30px', height: '30px', borderRadius: '50%', marginRight: '10px'}}
                     />
                 ) : (
                     <p>Аватарка не найдена</p>
@@ -184,38 +186,25 @@ const ShortsMyComment: React.FC<ShortsMyCommentProps> = ({videoId, amuser}) => {
                             border: 'none',
                             borderBottom: `2px solid ${lineColor}`,
                             outline: 'none',
-                            width: '85%',
+                            width: '100%',
                             display: 'flex',
                             flexWrap: 'wrap',
-                            marginLeft: '50px',
-
+                            marginTop: '10px',
                         }}
                     />
 
                 </div>
-                <div style={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
-                    <div style={{display: 'flex'}}>
-                        <div style={{margin: '5px', marginLeft: '50px'}}>
-                            <FaSmile size={25} color="lightgray"/>
-                        </div>
-                        <div style={{marginLeft: '20px'}}>
-                            <div style={{fontSize: '11px', paddingTop: '5px', marginBottom: '-5px'}}>By sending a
-                                comment, you agree to
-                            </div>
-                            <Link href="http://localhost:3000/ru/termsofservice" passHref target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{color: 'blue', fontSize: '11px'}}>
-                                VRoom's Terms of Service.</Link>
-                        </div>
-                    </div>
-                    <div>
+                <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', marginBottom: '5px'}}>
+
+                    <div className={'mt-1.5'}>
                         <button onClick={handleCancel}
-                                style={isHovered ? {...buttonCancelStyles.base, ...buttonCancelStyles.hover} : buttonCancelStyles.base}
+                                style={isHovered ? {...buttonCancelLowPaddingStyles.baseplus, ...buttonCancelLowPaddingStyles.hover} : buttonCancelLowPaddingStyles.baseplus}
                                 onMouseEnter={() => setIsHovered(true)}
                                 onMouseLeave={() => setIsHovered(false)}>Cancel
                         </button>
                         <button onClick={handleSubmit} disabled={disabled}
-                                style={!disabled ? {...buttonSubmitStyles.base} : buttonSubmitStyles.disab}>Send Comment
+                                style={!disabled ? {...buttonSubmitStyles.baselowpadding} : buttonSubmitStyles.disablowpadding}>Send
+                            Comment
                         </button>
                     </div>
                 </div>

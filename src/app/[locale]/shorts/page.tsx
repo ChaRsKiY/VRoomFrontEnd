@@ -12,14 +12,15 @@ const ShortsPage = async ({params: {locale}}: IChannelEditProps) => {
     const {t} = await initTranslations(locale, ['common', 'categories']);
     return (
         <>
-            <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">
-                <HeaderHome t={t}/>
-            </div>
-            <div className="flex">
+            {/*<div className="flex items-center justify-between border-b ">*/}
+            <HeaderHome t={t}/>
+            {/*</div> ml-[45%]*/}
+            <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t}/>
             </div>
 
-            <div className="flex items-center text-sm lg:flex ml-[45%] w-full pt-[4.22rem]">
+            <div
+                className="flex pl-[20%] overflow-hidden max-lg:pl-[12%] items-center text-sm lg:flex w-full pt-[4rem]">
                 <ShortWatch id={4}/>
             </div>
         </>
