@@ -1,4 +1,4 @@
-'use client'
+'use client'  
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
@@ -11,7 +11,6 @@ import { Camera, Mic, MicOff, Video, VideoOff, Monitor } from 'lucide-react'
 import { useTimer } from 'react-timer-hook'
 import { format } from 'date-fns'
 import Cookies from 'universal-cookie'
-//import { API } from '@/lib/api'
 
 const CAPTURE_OPTIONS = {
   audio: true,
@@ -52,19 +51,6 @@ export default function Broadcast() {
       }
     }
   }, [mediaStream])
-
-//   useEffect(() => {
-//     const cookies = new Cookies()
-//     const userId = cookies.get('userId')
-//     API.post('/destinations', { userId })
-//       .then((response) => {
-//         if (response) {
-//           setTwitchStreamKey(response.data.twitch_stream_key)
-//           setFacebookStreamKey(response.data.facebook_stream_key)
-//         }
-//       })
-//       .catch((err) => console.log(err))
-//   }, [])
 
   useEffect(() => {
     const youtubeUrl = `${youtubeIngestionUrl}/${youtubeStreamName}`
@@ -111,15 +97,8 @@ export default function Broadcast() {
     }
 
     setIsActive(true)
-    // const liveStream = videoRef.current?.captureStream(30) // 30 FPS
-    // const liveStreamRecorder = new MediaRecorder(liveStream!, {
-    //   mimeType: 'video/webm;codecs=h264',
-    //   videoBitsPerSecond: 3 * 1024 * 1024,
-    // })
-    // liveStreamRecorder.ondataavailable = (e) => {
-    //   ws.current?.send(e.data)
-    // }
-    // liveStreamRecorder.start(1000)
+    // Старт трансляції через YouTube API
+    // Включити код для роботи з API тут
   }
 
   const stopStream = () => {
@@ -189,21 +168,21 @@ export default function Broadcast() {
           <div className="space-y-2">
             <Label>Privacy</Label>
             <RadioGroup value={privacy} onValueChange={setPrivacy}>
-            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="public" id="public" selectedValue={privacy} onValueChange={setPrivacy}>
-                <Label htmlFor="public">Public</Label>
+                  <Label htmlFor="public">Public</Label>
                 </RadioGroupItem>
-            </div>
-            <div className="flex items-center space-x-2">
+              </div>
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="unlisted" id="unlisted" selectedValue={privacy} onValueChange={setPrivacy}>
-                <Label htmlFor="unlisted">Unlisted</Label>
+                  <Label htmlFor="unlisted">Unlisted</Label>
                 </RadioGroupItem>
-            </div>
-            <div className="flex items-center space-x-2">
+              </div>
+              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="private" id="private" selectedValue={privacy} onValueChange={setPrivacy}>
-                <Label htmlFor="private">Private</Label>
+                  <Label htmlFor="private">Private</Label>
                 </RadioGroupItem>
-            </div>
+              </div>
             </RadioGroup>
           </div>
 
@@ -229,22 +208,10 @@ export default function Broadcast() {
               <Monitor size="24" />
             </Button>
           </div>
-
-          <div className="text-center">
-            <p className="text-muted">Streaming Duration: {formatTime(seconds)}</p>
-          </div>
         </CardContent>
-
-        <CardFooter>
-          {isActive ? (
-            <Button onClick={stopStream} variant="destructive" className="w-full">
-              Stop Stream
-            </Button>
-          ) : (
-            <Button onClick={startStream} className="w-full">
-              Start Stream
-            </Button>
-          )}
+        <CardFooter className="flex justify-between items-center">
+          <Button onClick={startStream} disabled={isActive}>Start Stream</Button>
+          <Button onClick={stopStream} disabled={!isActive}>Stop Stream</Button>
         </CardFooter>
       </Card>
     </div>

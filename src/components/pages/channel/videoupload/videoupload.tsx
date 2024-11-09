@@ -187,16 +187,16 @@ const VideoUploadInterface: React.FC = () => {
         const file = event.target.files?.[0];
         
         if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
-            setThumbnail(file); // Зберігаємо об'єкт File
+            setThumbnail(file);
             
             const reader = new FileReader();
             reader.onload = () => {
-                const base64String = reader.result?.toString().split(',')[1] || ""; // Виділяємо чистий Base64
-                setThumbnailBase64(base64String); // Зберігаємо Base64 для передачі на сервер
-                setThumbnailPreview(`data:${file.type};base64,${base64String}`); // Для попереднього перегляду
+                const base64String = reader.result?.toString().split(',')[1] || ""; 
+                setThumbnailBase64(base64String); 
+                setThumbnailPreview(`data:${file.type};base64,${base64String}`);
             };
     
-            reader.readAsDataURL(file); // Читаємо файл у форматі Base64
+            reader.readAsDataURL(file); 
         } else {
             console.error("Unsupported file format. Please select a PNG or JPEG image.");
         }
@@ -262,8 +262,7 @@ const VideoUploadInterface: React.FC = () => {
         const videoData = {
             id: 0,
             objectID: 'some-generated-id',
-            //channelSettingsId: userChannel?.id,
-            channelSettingsId:4,
+            channelSettingsId: userChannel?.id,
             tittle: videoName,
             description: description,
             uploadDate: new Date().toISOString(),
