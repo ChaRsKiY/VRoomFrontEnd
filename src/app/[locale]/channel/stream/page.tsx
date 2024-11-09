@@ -11,103 +11,191 @@ import { Camera, Mic, MicOff, Video, VideoOff, Monitor } from 'lucide-react'
 import { useTimer } from 'react-timer-hook'
 import { format } from 'date-fns'
 import Cookies from 'universal-cookie'
+import { gapi } from 'gapi-script'
 
 const CAPTURE_OPTIONS = {
   audio: true,
   video: true,
 }
+const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube'
+
+const clientId = '22'
+const apiKey = 'AIzaSyDvXp8Wi0-Y6BPC55SDA953CFIid2g6TtY'
 
 export default function Broadcast() {
   const [isVideoOn, setIsVideoOn] = useState(true)
-  const [isMuted, setIsMuted] = useState(false)
-  const [seconds, setSeconds] = useState(0)
-  const [isActive, setIsActive] = useState(false)
-  const [userFacing, setUserFacing] = useState(true)
-  const [streamTitle, setStreamTitle] = useState('')
-  const [streamDescription, setStreamDescription] = useState('')
-  const [privacy, setPrivacy] = useState('public')
+const [isMuted, setIsMuted] = useState(false)
+const [seconds, setSeconds] = useState(0)
+const [isActive, setIsActive] = useState(false)
+const [userFacing, setUserFacing] = useState(true)
+const [streamTitle, setStreamTitle] = useState('')
+const [streamDescription, setStreamDescription] = useState('')
+const [privacy, setPrivacy] = useState('public')
+const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
+const [youtubeStreamName, setYoutubeStreamName] = useState('')
+const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
+const [streamId, setStreamId] = useState('')
+const videoRef = useRef<HTMLVideoElement>(null)
+const ws = useRef<WebSocket | null>(null)
+const productionWsUrl = 'wss://your-production-url.com'
+const developmentWsUrl = 'ws://localhost:3000'
+const [isAuthenticated, setIsAuthenticated] = useState(false)
+const [broadcastId, setBroadcastId] = useState('')
 
-  const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
-  const [youtubeStreamName, setYoutubeStreamName] = useState('')
-  const [facebookStreamKey, setFacebookStreamKey] = useState('')
-  const [twitchStreamKey, setTwitchStreamKey] = useState('')
+// Ініціалізація Google API та автентифікація
+useEffect(() => {
+  gapi.load('client:auth2', () => {
+    gapi.client.init({
+      apiKey: apiKey,
+      clientId: clientId,
+      discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
+      scope: YOUTUBE_SCOPE,
+    }).then(() => {
+      const authInstance = gapi.auth2.getAuthInstance()
+      setIsAuthenticated(authInstance.isSignedIn.get())
+      authInstance.isSignedIn.listen(setIsAuthenticated)
+    })
+  })
+}, [])
 
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
-  const [streamId, setStreamId] = useState('')
-  const [broadcastId, setBroadcastId] = useState('')
+// Функції для автентифікації
+const authenticate = () => {
+  gapi.auth2.getAuthInstance().signIn()
+}
 
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const ws = useRef<WebSocket | null>(null)
+const signOut = () => {
+  gapi.auth2.getAuthInstance().signOut()
+}
 
-  const productionWsUrl = 'wss://www.ohmystream.xyz/websocket'
-  const developmentWsUrl = 'ws://localhost:3001'
+// Функція створення трансляції
+const createBroadcast = async () => {
+  try {
+    const broadcastResponse = await gapi.client.youtube.liveBroadcasts.insert({
+      part: 'snippet,status',
+      resource: {
+        snippet: {
+          title: streamTitle || 'My Live Stream',
+          description: streamDescription || 'Live streaming via API',
+          scheduledStartTime: new Date().toISOString(),
+        },
+        status: {
+          privacyStatus: privacy,
+        },
+      },
+    })
 
-  useEffect(() => {
-    if (!mediaStream) {
-      enableStream()
-    } else {
-      return function cleanup() {
-        mediaStream.getTracks().forEach((track) => track.stop())
-      }
-    }
-  }, [mediaStream])
+    const newBroadcastId = broadcastResponse.result.id
+    setBroadcastId(newBroadcastId)
 
-  useEffect(() => {
-    const youtubeUrl = `${youtubeIngestionUrl}/${youtubeStreamName}`
-    const streamUrlParams = `?twitchStreamKey=${twitchStreamKey}&youtubeUrl=${youtubeUrl}&facebookStreamKey=${facebookStreamKey}`
+    const streamResponse = await gapi.client.youtube.liveStreams.insert({
+      part: 'snippet,cdn',
+      resource: {
+        snippet: {
+          title: `${streamTitle} Stream Key`,
+        },
+        cdn: {
+          format: '1080p',
+          ingestionType: 'rtmp',
+        },
+      },
+    })
 
-    ws.current = new WebSocket(
-      (process.env.NODE_ENV === 'production' ? productionWsUrl : developmentWsUrl) + streamUrlParams
-    )
+    const streamId = streamResponse.result.id
+    setStreamId(streamId)
+    setYoutubeIngestionUrl(streamResponse.result.cdn.ingestionInfo.ingestionAddress)
+    setYoutubeStreamName(streamResponse.result.cdn.ingestionInfo.streamName)
 
-    ws.current.onopen = () => console.log('WebSocket Open')
+    await gapi.client.youtube.liveBroadcasts.bind({
+      part: 'id,contentDetails',
+      id: newBroadcastId,
+      streamId: streamId,
+    })
 
-    return () => ws.current?.close()
-  }, [twitchStreamKey, youtubeStreamName, youtubeIngestionUrl, facebookStreamKey])
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
-    if (isActive) {
-      interval = setInterval(() => setSeconds((seconds) => seconds + 1), 1000)
-    } else if (!isActive && seconds !== 0) {
-      clearInterval(interval!)
-    }
-    return () => clearInterval(interval!)
-  }, [isActive, seconds])
-
-  const enableStream = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: isVideoOn,
-        audio: true,
-      })
-      setMediaStream(stream)
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-      }
-    } catch (err) {
-      console.log(err)
-    }
+    console.log('Broadcast created and bound to stream:', newBroadcastId)
+  } catch (error) {
+    console.error('Error creating broadcast:', error)
   }
+}
 
-  const startStream = () => {
-    if (!twitchStreamKey && !youtubeStreamName && !facebookStreamKey) {
-      alert('Please add at least one streaming destination')
-      return
-    }
+// Підключення до WebSocket та RTMP сервера
+useEffect(() => {
+  const youtubeUrl = `${youtubeIngestionUrl}/${youtubeStreamName}`
+  const streamUrlParams = `?youtubeUrl=${youtubeUrl}`
+  
+  ws.current = new WebSocket(
+    (process.env.NODE_ENV === 'production' ? productionWsUrl : developmentWsUrl) + streamUrlParams
+  )
 
-    setIsActive(true)
-    // Старт трансляції через YouTube API
-    // Включити код для роботи з API тут
+  ws.current.onopen = () => console.log('WebSocket Open')
+  
+  return () => ws.current?.close()
+}, [youtubeStreamName, youtubeIngestionUrl])
+
+// Старт потоку
+const startStream = async () => {
+  if (!youtubeStreamName) {
+    alert('Please add at least one streaming destination')
+    return
   }
-
-  const stopStream = () => {
+  setIsActive(true)
+  try {
+    if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      await authenticate()
+    }
+    await createBroadcast()
+  } catch (error) {
+    console.error('Error starting stream:', error)
     setIsActive(false)
-    ws.current?.close()
+  }
+}
+
+// Зупинка потоку
+const stopStream = () => {
+  setIsActive(false)
+  ws.current?.close()
+}
+
+// Увімкнення медіа потоку
+const enableStream = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: isVideoOn,
+      audio: !isMuted,
+    })
+    setMediaStream(stream)
+    if (videoRef.current) {
+      videoRef.current.srcObject = stream
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted)
+    updateAudioStream(!isMuted)
   }
 
-  const toggleMute = () => setIsMuted(!isMuted)
-  const toggleCamera = () => setIsVideoOn(!isVideoOn)
+  const toggleCamera = () => {
+    setIsVideoOn(!isVideoOn)
+    updateVideoStream(!isVideoOn)
+  }
+
+  const updateAudioStream = (isMuted: boolean) => {
+    if (mediaStream) {
+      mediaStream.getAudioTracks().forEach((track) => {
+        track.enabled = !isMuted
+      })
+    }
+  }
+
+  const updateVideoStream = (isVideoOn: boolean) => {
+    if (mediaStream) {
+      mediaStream.getVideoTracks().forEach((track) => {
+        track.enabled = isVideoOn
+      })
+    }
+  }
 
   const toggleScreenShare = async () => {
     try {
@@ -136,6 +224,7 @@ export default function Broadcast() {
     const remainingSeconds = seconds % 60
     return format(new Date(0, 0, 0, 0, minutes, remainingSeconds), 'mm:ss')
   }
+
 
   return (
     <div className="container mx-auto p-4">
