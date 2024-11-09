@@ -61,7 +61,7 @@ const AdminUserEditModal = ({ user, fetchUser }: Props) => {
             setIsPending(false)
             setOpen(false)
             setStateChanged(false)
-            fetchUser()
+            await fetchUser()
             return
         }
 

@@ -69,7 +69,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
     const isCurrentUser = user.id === currentUser.id;
     const canEdit = currentUserAdminLevel === 3 || isCurrentUser;
     const canBan = currentUserAdminLevel === 3 && !isCurrentUser;
-    const canChangeAdmin = currentUserAdminLevel >= user.privateMetadata.adminLevel && !isCurrentUser;
+    const canChangeAdmin = currentUserAdminLevel >= (user.privateMetadata.adminLevel || 0) && !isCurrentUser;
     const canDelete = currentUserAdminLevel === 3 && !isCurrentUser;
 
     return (
@@ -220,6 +220,13 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                         {canDelete && <DeleteUserModal userId={user.id} username={user.username}
                                                      onOpenSheetChange={onOpenSheetChange}
                                                      fetchTableUsers={fetchTableUsers}/>}
+
+                        <div className="space-x-2">
+                            <Button variant="outline">Account settings</Button>
+                            <Button variant="outline">To comments</Button>
+                            <Button variant="outline">To activity</Button>
+                        </div>
+
                     </div>
                 </article>
             </div>

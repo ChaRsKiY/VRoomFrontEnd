@@ -11,8 +11,6 @@ import BurgerMenu from "@/components/pages/home/header/burger-menu";
 const HeaderBlock: React.FC = () => {
     const { t }: { t: ITranslationFunction } = useTranslation()
 
-    const { push } = useRouter()
-
     return (
         <div className="flex space-x-5 items-center max-lg:space-x-3.5">
             <TooltipProvider>

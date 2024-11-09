@@ -30,6 +30,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {getUsersWithPaginationAndQuery} from "@/actions/admin";
 import {IoIosSearch} from "react-icons/io";
 import UserDropdownMenu from "@/components/pages/admin/user-dropdown-menu";
+import MassUserActions from "@/components/pages/admin/mass-user-actions";
 
 export interface ITableUser {
     id: string,
@@ -290,7 +291,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className={row.original.banned ? "bg-red-50" : ""}
+                                    className={row.original.banned ? "bg-red-50 dark:bg-red-900" : ""}
                                 >
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
@@ -348,6 +349,10 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                     </Button>
                 </div>
             </div>
+
+            {Object.keys(rowSelection).length > 0 && (
+                <MassUserActions setSelection={setRowSelection} selection={rowSelection} fetchUsers={fetchUsers}  />
+            )}
         </div>
     )
 }

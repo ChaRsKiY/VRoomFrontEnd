@@ -13,11 +13,11 @@ const UsersTable = async () => {
 
             <div className="h-[1px] bg-neutral-300 rounded mt-10 mb-6"/>
 
-            <h2 className="mb-2 text-xl">Logs</h2>
+            <h2 className="mb-2 text-xl" id="logs">Logs</h2>
 
             <div className="h-[1px] bg-neutral-300 rounded mt-10 mb-6"/>
 
-            <h2 className="mb-2 text-xl">Analytics</h2>
+            <h2 className="mb-2 text-xl" id="analytics">Analytics</h2>
 
             <div className="h-[1px] bg-neutral-300 rounded mt-10 mb-8"/>
 

@@ -326,3 +326,59 @@ export const makeEmailPrimary = async (userId: string, emailId: string) => {
         return JSON.stringify(e.errors[0])
     }
 }
+
+export const banUnbanUsers = async (userIds: string[], ban: boolean) => {
+    const { userId: currentUserId } = auth()
+
+    if (!currentUserId) {
+        return 'unauthorized'
+    }
+
+    const currentUser = await client.users.getUser(currentUserId)
+    if (!currentUser?.privateMetadata?.isAdmin) {
+        return 'unauthorized'
+    }
+
+    if (ban && userIds.includes(currentUserId)) return 'ban_self'
+
+    if (currentUser.privateMetadata.adminLevel !== 3) return 'unauthorized'
+
+    try {
+        if (ban) {
+            await Promise.all(userIds.map(userId => client.users.banUser(userId)))
+        } else {
+            await Promise.all(userIds.map(userId => client.users.unbanUser(userId)))
+        }
+
+        return 'success'
+    } catch (e: any) {
+        console.error('Error banning/unbanning users:', e)
+        return JSON.stringify(e.errors[0])
+    }
+}
+
+export const deleteUsers = async (userIds: string[]) => {
+    const { userId: currentUserId } = auth()
+
+    if (!currentUserId) {
+        return 'unauthorized'
+    }
+
+    const currentUser = await client.users.getUser(currentUserId)
+    if (!currentUser?.privateMetadata?.isAdmin) {
+        return 'unauthorized'
+    }
+
+    if (userIds.includes(currentUserId)) return 'delete_self'
+
+    if (currentUser.privateMetadata.adminLevel !== 3) return 'unauthorized'
+
+    try {
+        await Promise.all(userIds.map(userId => client.users.deleteUser(userId)))
+
+        return 'success'
+    } catch (e: any) {
+        console.error('Error deleting users:', e)
+        return JSON.stringify(e.errors[0])
+    }
+}
