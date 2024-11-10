@@ -6,7 +6,6 @@ import { IVideo } from "@/types/videoinfo.interface";
 import { searchVideos } from '@/services/algoliaservice';
 import { useSearchParams } from 'next/navigation';
 import api from '@/services/axiosApi';
-import TagNavigation from './tag-navigation';
 
 
 const MainByCategoryInfo: React.FC = () => {
@@ -34,7 +33,7 @@ const MainByCategoryInfo: React.FC = () => {
     };
 
     const loadVideos = async (results: { id: number }[]) => {
-
+        setMoreVideos([]);
         const videoPromises = results.map(result => getVideo(result.id));
         const videos = await Promise.all(videoPromises);
         const successfulVideos = videos.filter(video => video !== null) as IVideo[];
@@ -55,7 +54,7 @@ const MainByCategoryInfo: React.FC = () => {
 
     useEffect(() => {
         handleSearch();
-    }, []);
+    }, [search]);
 
 
     return (
