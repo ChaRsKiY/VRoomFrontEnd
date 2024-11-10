@@ -1,15 +1,11 @@
 "use client"
 
-import React, { useState, useEffect } from 'react';
-import { IVideo } from "@/types/videoinfo.interface"
-import ShortsPlayer from "@/components/pages/shorts/shorts-player";
-import FollowShortBlock from "@/components/pages/shorts/follow-short-block";
-import DescriptionShortBlock from "@/components/pages/shorts/description-short-block";
-import RightShortBlock from "@/components/pages/shorts/right-shorts-block";
-import { IContentVideo } from "@/types/videoDTO.interface";
-import ClientHome from "@/components/pages/channel/ClientHome";
-import OpenShareDialogButton from "@/components/pages/shorts/share-button";
+import React, {useState, useEffect} from 'react';
+import {IVideo} from "@/types/videoinfo.interface"
 import api from '@/services/axiosApi';
+import ShortFollowInfo from "@/components/pages/shorts/short-follow-info";
+import ShortCommentsBlock from "@/components/pages/shorts/comments/short-comments-block";
+import ShortPlayer from "@/components/pages/shorts/shorts-player";
 
 interface IProps {
 
@@ -17,7 +13,7 @@ interface IProps {
 
 }
 
-const ShortWatch: React.FC<IProps> = ({ id }) => {
+const ShortWatch: React.FC<IProps> = ({id}) => {
 
     const [video, setVideo] = useState<IVideo | null>(null);
 
@@ -45,27 +41,25 @@ const ShortWatch: React.FC<IProps> = ({ id }) => {
         <>
             {video ? (
                 <div className="items-center text-sm lg:flex">
-                    <div className="relative">
-                        <ShortsPlayer src={video.videoUrl} id={video.id} />
-                        <div className="absolute bottom-4 left-0 right-0 pl-3 justify-items-start">
-                            <div className="flex flex-col justify-between mb-2">
-                                <FollowShortBlock short={video} />
-                                <DescriptionShortBlock description={video.description} tags={'#tags'} />
-                            </div>
+                    <div className="flex flex-row">
+                        <ShortFollowInfo video={video}/>
+                        <div className={'shrink-0 ml-3.5'}>
+                            <ShortPlayer src={video.videoUrl} id={video.id} viewCount={video.viewCount}/>
                         </div>
+                        <div className={'shrink-0 ml-3.5 w-max'}>
+                            <ShortCommentsBlock videoid={video.id}/>
+                        </div>
+                        {/*<div className="absolute bottom-4 left-0 right-0 pl-3 justify-items-start">
+                            <div className="flex flex-col justify-between mb-2">
+                                <FollowShortBlock short={video}/>
+                                <DescriptionShortBlock description={video.description} tags={'#tags'}/>
+                            </div>
+                        </div>*/}
                     </div>
-                    <RightShortBlock short={video} />
-                    {/*<OpenShareDialogButton/>*/}
+                    {/*<RightShortBlock short={video}/>*/}
+
                 </div>
 
-                /*<div className="w-3/4 px-8">
-                    <VideoPlayer src={video.videoUrl} [id]={video.[id]}/>
-                    <UnderVideoBlock video={video} />
-                    <UnderLine />
-                    <DescriptionBlock description={video.description} />
-                    <UnderLine />
-                    <CommentsBlock videoid={[id]} />
-                </div>*/
             ) : (
                 <></>
             )}
