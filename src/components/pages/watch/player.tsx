@@ -40,18 +40,40 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [viewed, setViewed] = useState(false);
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
 
+    useEffect(() => {
+        const video = videoRef.current;
+        if (video && src.endsWith('.m3u8')) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                setDuration(video.duration);
+            });
+
+            return () => {
+                hls.destroy();
+            };
+        } else if (video) {
+            video.src = src;
+            video.onloadedmetadata = () => {
+                setDuration(video.duration);
+            };
+        }
+    }, [src]);
+
+    // Update currentTime as video plays
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
-            const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-
-            // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-            if (percentagePlayed > 40 && !viewed) {
-                setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
-                increaseViewCount(); // Увеличиваем счётчик просмотров
-            }
-
         }
+    };
+
+    // Format time display for UI
+    const formatTime = (time: number): string => {
+        const minutes = Math.floor(time / 60);
+        const seconds = Math.floor(time % 60);
+        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
     };
 
     const saveWatchHistory = () => {
@@ -270,7 +292,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setIsPlaying(!isPlaying);
         }
     };
-
     const toggleFullScreen = () => {
         const videoContainer = videoContainerRef.current;
         if (videoContainer) {
@@ -304,7 +325,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setIsMuted(!isMuted);
         }
     };
-
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const video = videoRef.current;
         if (video) {
