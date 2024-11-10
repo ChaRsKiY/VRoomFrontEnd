@@ -16,7 +16,7 @@ const VideoCard: React.FC<IVideoCardProps> = ({ el }: IVideoCardProps) => {
     return (
         <Link href={"/watch/" + el.id} className="flex w-full max-sm:flex-col max-sm:px-[5%]">
             <Image src={el.cover} alt={el.tittle} width={600} height={600} className="w-2/3 mr-4 rounded-xl aspect-[16/9] max-sm:w-full" 
-            style={{minWidth:'65%', maxWidth:'65%'}}/>
+            style={{minWidth:'50%', maxWidth:'50%'}}/>
             <div className="flex space-x-2.5  max-sm:w-full max-sm:mt-2" >
                 <div >
                     <div className="font-bold mb-0.5">{el.tittle}</div>

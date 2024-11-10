@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react';
+
 import Link from "next/link";
 import { MdExpandMore } from "react-icons/md";
 import api from '@/services/axiosApi';
 import { BiBook, BiBroadcast, BiCategory, BiFilm, BiFootball, BiLogoPlayStore, BiMusic, BiNews, BiSolidFlame } from 'react-icons/bi';
+import { useTranslation } from 'react-i18next';
 
 interface IBlock {
     name: string,
@@ -20,7 +22,8 @@ const CategoryVideos: React.FC = () => {
     const [mainPageCategories, setMainPageCategories] = useState<IBlock[]>([]);
     const [allCategories, setAllCategories] = useState<IBlock[]>([]);
     const [visibleCount, setVisibleCount] = useState(5);
-
+    //const t = useTranslation();
+    
 
     const handleClick = () => {
         const nextVisibleCount = visibleCount + 5;
