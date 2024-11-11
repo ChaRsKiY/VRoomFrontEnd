@@ -39,28 +39,63 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
     const [viewed, setViewed] = useState(false);
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
+    const [videoSrc, setVideoSrc] = useState<string | null>(null);
+    const [videoError, setVideoError] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchVideo = async () => {
+          try {
+            const response = await fetch(`/api/Video/${id}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch video data");
+            }
+            const videoData = await response.json();
+            
+            if (videoData && videoData.VideoStream) {
+              // Якщо отримали відео в байтах
+              const videoBlob = new Blob([new Uint8Array(videoData.VideoStream)], { type: 'video/mp4' });
+              const videoUrl = URL.createObjectURL(videoBlob);
+              setVideoSrc(videoUrl);
+            } else {
+              setVideoError("Video stream not available");
+            }
+          } catch (error) {
+            setVideoError("Empty video");
+          }
+        };
+    
+        fetchVideo();
+      }, [id]);
+    
+      useEffect(() => {
         const video = videoRef.current;
-        if (video && src.endsWith('.m3u8')) {
-            const hls = new Hls();
-            hls.loadSource(src);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                setDuration(video.duration);
-            });
-
-            return () => {
-                hls.destroy();
-            };
-        } else if (video) {
-            video.src = src;
-            video.onloadedmetadata = () => {
-                setDuration(video.duration);
-            };
+        
+        // Перевірка, чи потрібно використовувати HLS
+        if (video && videoSrc && videoSrc.endsWith('720.m3u8')) {
+          const hls = new Hls();
+          
+          // Завантажуємо і підключаємо джерело, якщо воно є в форматі HLS
+          hls.loadSource(videoSrc);
+          hls.attachMedia(video);
+        
+          // Оновлення тривалості після парсингу маніфесту
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            setDuration(video.duration);
+          });
+    
+          // Очищення, коли компонент буде демонтуватися
+          return () => {
+            hls.destroy();
+          };
+        } else if (video && videoSrc) {
+          // Для звичайного відео
+          video.src = videoSrc;
+          video.onloadedmetadata = () => {
+            setDuration(video.duration);
+          };
         }
-    }, [src]);
+      }, [videoSrc]);
+    
 
     // Update currentTime as video plays
     const handleTimeUpdate = () => {

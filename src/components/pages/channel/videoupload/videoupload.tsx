@@ -164,6 +164,7 @@ const VideoUploadInterface: React.FC = () => {
             }
             console.log('Category added successfully');
             await fetchCategories();
+            return response.data.id;
         } catch (error) {
             console.error('Error adding category:', error);
         }
@@ -258,6 +259,7 @@ const VideoUploadInterface: React.FC = () => {
         formData.append('videoFile', video);
         const emptyFile = new Blob([], { type: 'application/octet-stream' });
         formData.append('file', emptyFile, 'empty-file.bin');
+        const categoryId = 0;
         const videoUrls = await fileToBase64(video);
         const videoData = {
             id: 0,
@@ -278,6 +280,8 @@ const VideoUploadInterface: React.FC = () => {
             isCopyright: isCopyright,
             audience: audience,
             lastViewedPosition: '00:00:00',
+            categoryIds: [categoryId],
+            tagIds:[],
             file: emptyFile,
           
         };
