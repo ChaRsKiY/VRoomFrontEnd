@@ -1,4 +1,4 @@
-
+'use client'
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
@@ -34,6 +34,7 @@ const channelPage = async ({ params: { locale } }: IChannelEditProps) => {
                                 metrics of the video that you upload last.
                                 To add a video, click the button below.</p><br />
                             <Link href='/channel/detailvideo'
+                            role="button"
                             style={{
                                 display: 'block',
                                 borderRadius: '20px',
@@ -41,8 +42,10 @@ const channelPage = async ({ params: { locale } }: IChannelEditProps) => {
                                 color: 'white',
                                 padding: '5px 15px',
                                 margin: '5px auto 5px auto',
-                                textAlign:'center'
+                                textAlign:'center',
+                                zIndex: 10
                             }}
+                            onClick={() => console.log('Link clicked')}
                             >Add video
                             </Link>
                         </div>
