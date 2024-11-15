@@ -53,9 +53,20 @@ const VideoUploadInterface: React.FC = () => {
     const [isCopyright, setIsCopyright] = useState<boolean>(false); // true = є авторські права, false = немає
     const [audience, setAudience] = useState<string>('all'); // 'children', 'adults', 'all'
     const [userChannel, setUserChannel] = useState<IChannel | null>();
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [filteredTags, setFilteredTags] = useState<string[]>([]); 
+    const [availableTags] = useState(["React", "JavaScript", "HTML", "CSS", "Node.js", "ASP.NET", "C#"]);
     const { user } = useUser();
 
-
+    const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const input = e.target.value;
+        setCurrentTag(input);
+        setFilteredTags(
+            availableTags.filter(
+              (tag) => tag.toLowerCase().includes(input.toLowerCase()) && !tags.includes(tag)
+            )
+          );
+    };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0]
@@ -118,14 +129,14 @@ const VideoUploadInterface: React.FC = () => {
         }
     };
 
-    const addTag = () => {
-        if (currentTag && !tags.includes(currentTag)) {
+    const addTag = (tagToAdd: string) => {
+        if (tagToAdd && !tags.includes(tagToAdd)) {
             const newTagObj: Tag = {
                 id: 0,
-                name: currentTag,
+                name: tagToAdd,
                 videosId: []
             };
-            setTags([...tags, currentTag])
+            setTags([...tags, tagToAdd])
             setSelectedCategory(newTagObj);
             DownloadTag(newTagObj);
             setCurrentTag('')
@@ -164,6 +175,7 @@ const VideoUploadInterface: React.FC = () => {
             }
             console.log('Category added successfully');
             await fetchCategories();
+            return response.data.id;
         } catch (error) {
             console.error('Error adding category:', error);
         }
@@ -181,7 +193,7 @@ const VideoUploadInterface: React.FC = () => {
         }
     };
     const removeTag = (tagToRemove: string) => {
-        setTags(tags.filter(tag => tag !== tagToRemove))
+        setTags(tags.filter((tag) => tag !== tagToRemove));
     }
     const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -245,8 +257,6 @@ const VideoUploadInterface: React.FC = () => {
         getUserChannel();
     }, []);
 
-
-    // if (loading) return <div>Loading...</div>;
     const handleSubmit = async () => {
         const formData = new FormData();
 
@@ -278,23 +288,20 @@ const VideoUploadInterface: React.FC = () => {
             isCopyright: isCopyright,
             audience: audience,
             lastViewedPosition: '00:00:00',
+            categoryIds: selectedCategoryId,
             file: emptyFile,
           
         };
 
+
         Object.entries(videoData).forEach(([key, value]) => {
             if (typeof value === 'string' || typeof value === 'number') {
                 formData.append(key, value.toString());
-            } if (Array.isArray(value)) {
-                formData.append(key, JSON.stringify(value));
             } else if (typeof value === 'boolean' || typeof value === 'number') {
                 formData.append(key, value.toString());
             } else if (value instanceof Blob) {
                 formData.append(key, value);
-            } else if (value !== null) {
-                if (value)
-                    formData.append(key, value.toString());
-            }
+            } 
         });
 
         try {
@@ -452,6 +459,7 @@ const VideoUploadInterface: React.FC = () => {
                                                     key={categoryItem.id}
                                                     value={categoryItem.name}
                                                     onClick={() => {
+                                                        setSelectedCategoryId(categoryItem.id);
                                                         setCategory(categoryItem.name);
                                                         setIsCategoryOpen(false);
                                                     }}
@@ -472,44 +480,58 @@ const VideoUploadInterface: React.FC = () => {
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label htmlFor="tags">Tags</Label>
-                                        <div className="flex flex-wrap gap-2 mb-2">
-                                            {tags.map((tag) => (
-                                                <Badge key={tag} className="text-sm">
-                                                    {tag}
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="ml-1 h-4 w-4 p-0"
-                                                        onClick={() => removeTag(tag)}
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                        <span className="sr-only">Remove tag</span>
-                                                    </Button>
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                id="tags"
-                                                placeholder="Enter a tag"
-                                                value={currentTag}
-                                                onChange={(e) => setCurrentTag(e.target.value)}
-                                                onKeyPress={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        e.preventDefault()
-                                                        addTag()
-                                                    }
-                                                }}
-                                            />
-                                            <Button type="button" onClick={addTag}>
-                                                <Plus className="h-4 w-4 mr-2" />
-                                                Add Tag
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
+            <div>
+                <div>
+    <Label htmlFor="tags">Tags</Label>
+    <div className="flex flex-wrap gap-2 mb-2">
+        {tags.map((tag) => (
+            <Badge key={tag} className="text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
+                {tag}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-1 h-4 w-4 p-0"
+                    onClick={() => removeTag(tag)}
+                >
+                    <X className="h-3 w-3" />
+                    <span className="sr-only">Remove tag</span>
+                </Button>
+            </Badge>
+        ))}
+    </div>
+    
+    <div className="flex items-center gap-2">
+        <input
+            type="text"
+            placeholder="Enter a tag"
+            value={currentTag}
+            onChange={handleTagInputChange}
+            className="border border-gray-300 rounded-md px-2 py-1"
+        />
+        <Button onClick={() => addTag(currentTag)}>+ Add Tag</Button>
+    </div>
+</div>
+
+                {/* Відображення запропонованих тегів */}
+                {filteredTags.length > 0 && (
+                    <div className="mt-2">
+                        <p className="text-sm text-gray-500">Suggested Tags:</p>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                            {filteredTags.map((tag) => (
+                                <Badge
+                                    key={tag}
+                                    className="cursor-pointer text-sm"
+                                    onClick={() => addTag(tag)}
+                                >
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+
                             </div>
                             <div className="space-y-4">
                                 {/* Налаштування "Age Restriction" */}

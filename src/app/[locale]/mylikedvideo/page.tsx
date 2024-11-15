@@ -4,12 +4,13 @@ import HeaderHome from "@/components/pages/home/header/header";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
 import LikedVideo from "@/components/pages/channel/mylikedvideo/likedvideo"
+import { useRouter } from 'next/router';
+import { request } from 'http';
 
 const PostListPage: React.FC = async ({ params }: any) => {
     
    
     const { t } = await initTranslations(params.locale, ['common', 'categories'])
-
 
     return (
         <div className="flex w-full mt-20">

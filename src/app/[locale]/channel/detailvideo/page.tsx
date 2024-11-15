@@ -3,7 +3,6 @@ import React from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
 import initTranslations from "@/app/i18n";
-
 import VideoUploadInterface from "@/components/pages/channel/videoupload/videoupload"
 
 interface IHomeProps {

@@ -39,30 +39,67 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
     const [viewed, setViewed] = useState(false);
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
+    const [videoSrc, setVideoSrc] = useState<string | null>(null);
+    const [videoError, setVideoError] = useState<string | null>(null);
 
     useEffect(() => {
+        const fetchVideo = async () => {
+          try {
+            const response = await fetch(`/api/Video/${id}`);
+            if (!response.ok) {
+              throw new Error("Failed to fetch video data");
+            }
+            const videoData = await response.json();
+            if (videoData && videoData.VideoStream) {
+              const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
+                ? videoData.VideoStream
+                : `${videoData.VideoStream}/720.m3u8`;
+              setVideoSrc(videoUrl);
+            } else {
+              setVideoError("Video stream not available");
+            }
+          } catch (error) {
+            setVideoError("Error fetching video");
+          }
+        };
+    
+        fetchVideo();
+      }, [id]);
+    
+      useEffect(() => {
         const video = videoRef.current;
-        if (video && src.endsWith('.m3u8')) {
+    
+        if (video && videoSrc && videoSrc.endsWith('.m3u8')) {
+          if (Hls.isSupported()) {
             const hls = new Hls();
-            hls.loadSource(src);
+            hls.loadSource(videoSrc);
             hls.attachMedia(video);
-
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              if (video) {
                 setDuration(video.duration);
+              }
             });
-
+    
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              console.error("HLS error:", data);
+              setVideoError("Error playing video");
+            });
             return () => {
-                hls.destroy();
+              hls.destroy();
             };
-        } else if (video) {
-            video.src = src;
-            video.onloadedmetadata = () => {
-                setDuration(video.duration);
-            };
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = videoSrc;
+            video.addEventListener('loadedmetadata', () => {
+              setDuration(video.duration);
+            });
+          }
+        } else if (video && videoSrc) {
+          video.src = videoSrc;
+          video.addEventListener('loadedmetadata', () => {
+            setDuration(video.duration);
+          });
         }
-    }, [src]);
-
-    // Update currentTime as video plays
+      }, [videoSrc]);
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);

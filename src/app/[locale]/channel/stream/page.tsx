@@ -38,7 +38,7 @@ const [streamId, setStreamId] = useState('')
 const videoRef = useRef<HTMLVideoElement>(null)
 const ws = useRef<WebSocket | null>(null)
 const productionWsUrl = 'wss://your-production-url.com'
-const developmentWsUrl = 'ws://localhost:3000'
+const developmentWsUrl = 'https://localhost:3000'
 const [isAuthenticated, setIsAuthenticated] = useState(false)
 const [broadcastId, setBroadcastId] = useState('')
 

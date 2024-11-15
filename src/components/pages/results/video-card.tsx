@@ -12,7 +12,6 @@ interface IVideoCardProps {
 
 const VideoCard: React.FC<IVideoCardProps> = ({ el }: IVideoCardProps) => {
 
-
     return (
         <Link href={"/watch/" + el.id} className="flex w-full max-sm:flex-col max-sm:px-[5%]">
             <Image src={el.cover} alt={el.tittle} width={600} height={600} className="w-2/3 mr-4 rounded-xl aspect-[16/9] max-sm:w-full" 
