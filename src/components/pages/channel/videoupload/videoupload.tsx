@@ -255,7 +255,7 @@ const VideoUploadInterface: React.FC = () => {
     useEffect(() => {
 
         getUserChannel();
-    }, []);
+    }, [user]);
 
     const handleSubmit = async () => {
         const formData = new FormData();

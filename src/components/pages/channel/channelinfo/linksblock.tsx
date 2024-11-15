@@ -55,7 +55,7 @@ const LinkBlock: React.FC<IProps> = async ({ch}) => {
 
                         <div>
                         <div  style={{padding:'5px'}}>
-                        <a href={hrefFB} target="_blank" >
+                        <a href={hrefTW} target="_blank" >
                             <FaTwitter size={18} className="text-black-600 cursor-pointer" title='Twitter'/></a>
                         </div>
                         </div>
@@ -69,14 +69,14 @@ const LinkBlock: React.FC<IProps> = async ({ch}) => {
 
                         <div>
                         <div  style={{padding:'5px'}}>
-                        <a href={hrefFB} target="_blank"  >
+                        <a href={hrefT} target="_blank"  >
                             <FaTelegram size={18} className="text-black-600 cursor-pointer" title='Telegram'/> </a>                      
                         </div>
                         </div>
 
                         <div>
                         <div   style={{padding:'5px'}}>  
-                        <a href={hrefFB} target="_blank"  >                        
+                        <a href={hrefW} target="_blank"  >                        
                             <FaWhatsapp size={18} className="text-black-600 cursor-pointer" title='Whatsapp'/></a>
                         </div>
                         </div>
@@ -84,7 +84,7 @@ const LinkBlock: React.FC<IProps> = async ({ch}) => {
                         <div>
                         <div   style={{padding:'5px'}}>  
                         <a href={hrefL} target="_blank"  >                        
-                            <FaLink size={18} className="text-black-600 cursor-pointer" title='Link'/></a>
+                            <FaLink size={18} className="text-black-600 cursor-pointer" title={hrefL}/></a>
                         </div>
                         </div>
                     
