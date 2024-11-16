@@ -41,6 +41,8 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
+    const [realWatchTime, setRealWatchTime] = useState(0); 
+    const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -100,11 +102,28 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
           });
         }
       }, [videoSrc]);
+   
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-            setCurrentTime(videoRef.current.currentTime);
+          setCurrentTime(videoRef.current.currentTime);
+          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+    
+        //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+        //   if (percentagePlayed > 40 && !viewed) {
+        //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+        //     increaseViewCount(); // Увеличиваем счётчик просмотров
+        //   }
+        if (percentagePlayed > 60 && !viewed) {
+            setViewed(true);
+            increaseViewCount(); // Увеличиваем счётчик просмотров
+          }
+          if (isPlaying) {
+            const delta = videoRef.current.currentTime - lastUpdateTime; 
+            setRealWatchTime((prevTime) => prevTime + delta); 
+          }
+          setLastUpdateTime(videoRef.current.currentTime);
         }
-    };
+      };
 
     const saveWatchHistory = () => {
         if (videoRef.current) {
@@ -169,7 +188,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
 
     const increaseViewCount = () => {
-        alert("Просмотр засчитан!");
+        // alert("Просмотр засчитан!");
         Viewed(id);
     };
 
@@ -231,7 +250,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, []);
 
-
+   
     useEffect(() => {
         const handleFullScreenChange = () => {
             setIsFullScreen(!!document.fullscreenElement);
