@@ -106,13 +106,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
-    // Format time display for UI
-    const formatTime = (time: number): string => {
-        const minutes = Math.floor(time / 60);
-        const seconds = Math.floor(time % 60);
-        return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
     const saveWatchHistory = () => {
         if (videoRef.current) {
             const lastViewedPosition = videoRef.current.currentTime;
