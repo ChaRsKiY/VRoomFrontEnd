@@ -1,14 +1,15 @@
 
 import { useState } from 'react';
 import { FaFilter } from 'react-icons/fa';
+import { Button } from "@/components/ui/button";
 
 const FilterButton = ({ openModal, filter }: { openModal: () => void, filter: string }) => {
     return (
         <div style={{ width: '100%' }}>
-            <button onClick={openModal} className="filter-button flex items-center ml-5 mb-5">
+            <Button onClick={openModal} className="filter-button flex items-center ml-5 mb-5">
                 <FaFilter size={20} />
                 <span className="ml-2">{filter}</span>
-            </button>
+            </Button>
         </div>
     );
 };
