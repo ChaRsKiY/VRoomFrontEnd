@@ -137,7 +137,7 @@ const ChannelEditBlock = () => {
                 return;
             }
             setChannelBanner(file);
-            setChannelBannerValid(URL.createObjectURL(file));
+            setChannelBannerPreview(URL.createObjectURL(file));
         } else setChannelBannerPreview(chBannerPrevOld);
 
     };
