@@ -1,10 +1,11 @@
 
 import React from 'react'
-import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
+import initTranslations from "@/app/i18n";
 import HeaderHome from "@/components/pages/home/header/header";
-import MainInfo from "@/components/pages/home/main/mainlist"
-
+import MainByTagInfo from '@/components/pages/home/main/mainlistbytag';
+import ResultInfo from '@/components/pages/results/resultlist';
+import MainByCategoryInfo from '@/components/pages/home/main/mainlistbycategory';
 
 interface Props {
     params: {
@@ -12,8 +13,7 @@ interface Props {
     }
 }
 
-const Home: React.FC<Props> = async ({ params: { locale } }: Props) => {
-
+const MainByCategoryPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
     const { t } = await initTranslations(locale, ['common', 'categories']);
 
 
@@ -26,10 +26,14 @@ const Home: React.FC<Props> = async ({ params: { locale } }: Props) => {
                 {t && <AsideHome t={t} />}
             </div>
             <main className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
-                <MainInfo />
+                <div className='flex'>
+                    <MainByCategoryInfo />
+
+                </div>
+
             </main>
         </>
-    );
-};
+    )
+}
 
-export default Home;
+export default MainByCategoryPage

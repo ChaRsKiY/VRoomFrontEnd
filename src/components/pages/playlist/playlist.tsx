@@ -1,14 +1,14 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import UnlimitedScrollBlock from "@/components/pages/home/main/unlimited-scroll-block";
+import React, { useEffect, useState } from 'react'
 import { IVideo } from "@/types/videoinfo.interface";
+import VideoCard from "@/components/pages/home/main/video-card";
 import api from '@/services/axiosApi';
-import TagNavigation from './tag-navigation';
 
-const MainInfo: React.FC = () => {
 
-  const [moreVideos, setMoreVideos] = useState<IVideo[]>([]);
+const Playlist: React.FC = () => {
+
+    const [moreVideos, setMoreVideos] = useState<IVideo[]>([]);
 
   const getVideos = async () => {
     try {
@@ -31,15 +31,19 @@ const MainInfo: React.FC = () => {
   }, []);
 
 
+    return (
+        <div style={{ marginTop: '100px',  }}>
+            {moreVideos.map((el, key) => (
+                <div key={key} >
+                    <VideoCard el={el} />
+                </div>
+            ))}
+            {moreVideos.length == 0 ? (<div   >
+                    You do not have the playlist yet...
+                </div>) : <></>}
+        </div>
 
-  return (
-        <div style={{ marginTop: '80px', width: '98%' }}>
-      <div>
-        <TagNavigation tagName='All' />
-        <UnlimitedScrollBlock data={moreVideos} />
-      </div>
-    </div>
-  )
+    )
 }
 
-export default MainInfo
+export default Playlist

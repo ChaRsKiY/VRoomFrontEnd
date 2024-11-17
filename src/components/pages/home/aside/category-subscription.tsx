@@ -17,49 +17,44 @@ interface IBlock {
 
 const CategorySubscription: React.FC = () => {
 
-    const [mainPageFollowedCategories, setMainPageFollowedCategories] = useState<IBlock[]>([]);
+    const [mainPageFollowed, setMainPageFollowed] = useState<IBlock[]>([]);
     const [allFollowed, setAllFollowed] = useState<IBlock[]>([]);
     const { user } = useUser();
     const [visibleCount, setVisibleCount] = useState(2);
 
-    //    const handleClick = () => {
-    //     window.location.href = '/subscriptions'; 
-    //   };
 
     const handleClick = () => {
         const nextVisibleCount = visibleCount + 5;
         setVisibleCount(nextVisibleCount);
 
         const nextItems = allFollowed.slice(visibleCount, nextVisibleCount);
-        setMainPageFollowedCategories(prevCategories => [...prevCategories, ...nextItems]);
+        setMainPageFollowed(prevCategories => [...prevCategories, ...nextItems]);
     };
 
     const getFollowedCategories = async () => {
 
         try {
-            // Выполняем запрос к API для получения данных подписок пользователя
-            const response = await api.get(`https://localhost:7154/api/Subscription/findbyuserid/${user?.id}`);
+            const response = await api.get(`/Subscription/findbyuserid/${user?.id}`);
 
             if (response.status != 200) {
                 throw new Error('Ошибка получения данных');
             }
 
-            // Преобразуем данные в JSON
             const subscriptions = await response.data;
             console.log(subscriptions);
-            // Преобразуем данные в нужный формат для вашего массива и берем только первые 5 элементов
-            setMainPageFollowedCategories(subscriptions.slice(0, 5).map((subscription: any) => ({
-                iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
-                name: subscription.channelNikName,  // Имя категории или пользователя
-                path: "/gotochannel/" + subscription.id,  // Путь на страницу подписки
-                iconClassNames: "rounded-full"  // Класс иконки
+
+            setMainPageFollowed(subscriptions.slice(0, 5).map((subscription: any) => ({
+                iconPath: subscription.channelProfilePhoto ,  
+                name: subscription.channelNikName, 
+                path: "/gotochannel/" + subscription.id,  
+                iconClassNames: "rounded-full"  
             })));
 
             setAllFollowed(subscriptions.map((subscription: any) => ({
-                iconPath: subscription.channelProfilePhoto || "/defaultIconUrl.jpg",  // URL иконки, можно задать значение по умолчанию
-                name: subscription.channelNikName,  // Имя категории или пользователя
-                path: `/gotochannel/${subscription.id}`,  // Путь на страницу подписки
-                iconClassNames: "rounded-full"  // Класс иконки
+                iconPath: subscription.channelProfilePhoto ,  
+                name: subscription.channelNikName,  
+                path: `/gotochannel/${subscription.id}`,  
+                iconClassNames: "rounded-full"  
             })));
 
 
@@ -81,9 +76,9 @@ const CategorySubscription: React.FC = () => {
         <div>
             <div>
                 <div className="pl-5 font-bold mb-2">Followed</div>
-                {mainPageFollowedCategories.length > 0 ? (
+                {mainPageFollowed.length > 0 ? (
                     <div className="flex flex-col space-y-1">
-                        {mainPageFollowedCategories.map((el, key) => (
+                        {mainPageFollowed.map((el, key) => (
                             <Link href={el.path} key={key} className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 py-1 min-h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
                                 {el.icon ? (
                                     <div className="text-2xl">{el.icon}</div>
@@ -99,11 +94,11 @@ const CategorySubscription: React.FC = () => {
                     <div style={{ paddingLeft: '50px' }}>------------</div>}
             </div>
             <div className="flex flex-col space-y-1 mt-1 hover:cursor-pointer">
-                {visibleCount < mainPageFollowedCategories.length && (
+                {visibleCount < allFollowed.length && (
                     <div onClick={handleClick} style={{ cursor: 'pointer' }}
                         className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
                         <div className="text-2xl"><MdExpandMore /></div>
-                        <div> More</div>
+                        <div> More followed</div>
                     </div>)}
             </div>
         </div>

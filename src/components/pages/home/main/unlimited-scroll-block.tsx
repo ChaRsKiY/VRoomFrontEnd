@@ -16,8 +16,11 @@ const UnlimitedScrollBlock: React.FC<IUnlimitedScrollBlockProps> = ({ data }: IU
                     <VideoCard el={el} />
                 </div>
             ))}
+            {data.length == 0 ? (<div className="px-3 mb-8 space-y-2.5"  >
+                    No results were found...
+                </div>) : <></>}
 
-            <ClientScrollBlock videolist={data}/>
+            {/* <ClientScrollBlock videolist={data}/> */}
         </div>
     )
 }

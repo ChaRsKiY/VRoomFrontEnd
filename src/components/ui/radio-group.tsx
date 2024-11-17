@@ -32,7 +32,7 @@ interface RadioGroupItemProps {
 
 export const RadioGroupItem: React.FC<RadioGroupItemProps> = ({ value, id, selectedValue, onValueChange, children }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2" data-selectedvalue={selectedValue}>
       <input
         type="radio"
         id={id}
