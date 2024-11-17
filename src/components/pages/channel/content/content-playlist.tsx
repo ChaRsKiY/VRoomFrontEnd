@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useUser } from "@clerk/nextjs";
+import React, {useEffect, useState} from 'react';
+import {useUser} from "@clerk/nextjs";
 import Image from "next/image";
-import { IContentVideo } from "@/types/videoDTO.interface";
+import {IContentVideo} from "@/types/videoDTO.interface";
 import api from '@/services/axiosApi';
-import { CgPlayList } from "react-icons/cg";
-import { IPlayList } from "@/types/playlist.interface";
-import { formatDate } from "@/utils/dateformat";
+import {CgPlayList} from "react-icons/cg";
+import {IPlayList} from "@/types/playlist.interface";
+import {formatDate} from "@/utils/dateformat";
 
 const ContentPlaylists = () => {
-    const { user } = useUser(); // Получаем текущего пользователя
+    const {user} = useUser(); // Получаем текущего пользователя
     const [data, setData] = useState<IPlayList[]>([]);
     const [isLoading, setIsLoading] = useState(true); // Новое состояние для отслеживания загрузки
 
@@ -39,7 +39,7 @@ const ContentPlaylists = () => {
 
     if (data.length == 0) {
         return (<div className="flex flex-col items-center justify-center h-96">
-            <img src="https://placehold.co/120x120" alt="No content illustration" className="mb-4" />
+            <img src="https://placehold.co/120x120" alt="No content illustration" className="mb-4"/>
             <p className="text-gray-500">Здесь пока ничего нет.</p>
             <button className="bg-black text-white px-6 py-2 rounded-md mt-4">Добавить плейлист</button>
         </div>);
@@ -53,37 +53,39 @@ const ContentPlaylists = () => {
                 </div>
                 <table className="table-auto w-full  bg-white shadow-md rounded-lg">
                     <thead className="bg-gray-200 text-gray-600  text-sm leading-normal">
-                        <tr className=" text-left">
-                            <th className="py-3 px-3"><input type="checkbox" className="w-5 h-5" /></th>
-                            <th className="py-3 px-3 ">PlayList</th>
-                            <th className="py-3 px-3 ">Visibility</th>
-                            <th className="py-3 px-3 ">Date</th>
-                            <th className="py-3 px-3 ">Video count</th>
-                        </tr>
+                    <tr className=" text-left">
+                        <th className="py-3 px-3"><input type="checkbox" className="w-5 h-5"/></th>
+                        <th className="py-3 px-3 ">PlayList</th>
+                        <th className="py-3 px-3 ">Type</th>
+                        <th className="py-3 px-3 ">Visibility</th>
+                        <th className="py-3 px-3 ">Date</th>
+                        <th className="py-3 px-3 ">Video count</th>
+                    </tr>
                     </thead>
                     <tbody className="text-gray-700 text-sm">
 
-                        {data.map((el, key) => (
-                            <tr key={key} className="border-b text-left border-gray-200 hover:bg-gray-100">
-                                <td className="py-3 px-3"><input type="checkbox" className="w-5 h-5" /></td>
-                                <td className="py-3 px-3  flex items-center">
-                                    <div className="relative w-max">
-                                        <img src="https://placehold.co/125x70" alt="Playlist thumbnail"
-                                            className="w-full h-auto object-cover rounded-lg" />
-                                        <div
-                                            className="absolute top-0 right-0 h-full w-1/2 bg-black bg-opacity-50 flex-col items-center justify-center rounded-r-lg">
-                                            <p className="text-white text-lg mt-3 font-normal w-full text-center">10</p>
-                                            <CgPlayList className="h-9 w-9 mt-[-0.35rem] ml-4 text-white " />
-                                        </div>
+                    {data.map((el, key) => (
+                        <tr key={key} className="border-b text-left border-gray-200 hover:bg-gray-100">
+                            <td className="py-3 px-3"><input type="checkbox" className="w-5 h-5"/></td>
+                            <td className="py-3 px-3  flex items-center">
+                                <div className="relative w-max">
+                                    <img src="https://placehold.co/125x70" alt="Playlist thumbnail"
+                                         className="w-full h-auto object-cover rounded-lg"/>
+                                    <div
+                                        className="absolute top-0 right-0 h-full w-1/2 bg-black bg-opacity-50 flex-col items-center justify-center rounded-r-lg">
+                                        <p className="text-white text-lg mt-3 font-normal w-full text-center">10</p>
+                                        <CgPlayList className="h-9 w-9 mt-[-0.35rem] ml-4 text-white "/>
                                     </div>
-                                    <span className="pl-2">{el.title}</span>
-                                </td>
-                                {el?.access === true && (<td className="py-3 px-3 ">Public</td>)}
-                                {el?.access === false && (<td className="py-3 px-3 ">Private</td>)}
-                                <td className="py-3 px-3 ">{formatDate(new Date(el.date))} <br />Published</td>
-                                <td className="py-3 px-3 ">{el.videosId?.length}</td>
-                            </tr>
-                        ))}
+                                </div>
+                                <span className="pl-2">{el.title}</span>
+                            </td>
+                            <td className="py-3 px-3 "></td>
+                            {el?.access === true && (<td className="py-3 px-3 ">Public</td>)}
+                            {el?.access === false && (<td className="py-3 px-3 ">Private</td>)}
+                            <td className="py-3 px-3 ">{formatDate(new Date(el.date))} <br/>Published</td>
+                            <td className="py-3 px-3 ">{el.videosId?.length}</td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </>

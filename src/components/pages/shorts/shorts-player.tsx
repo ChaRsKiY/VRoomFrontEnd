@@ -11,6 +11,7 @@ import api from '@/services/axiosApi';
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {IoEyeOutline} from "react-icons/io5";
 import {formatNumber} from "@/utils/format";
+import {RiArrowLeftDoubleFill, RiArrowRightDoubleFill} from "react-icons/ri";
 
 class WatchHistory {
     constructor(public videoId: number, public lastViewedPosition: number) {
@@ -21,14 +22,19 @@ interface IVideoPlayerProps {
     src: string;
     id: number;
     viewCount: number;
+    isActive: boolean;
 }
 
-const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount}) => {
+const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
     const volumeSliderRef = useRef<HTMLInputElement | null>(null);
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
+
+
+    // const videoContainerRef = useRef<HTMLDivElement>(null);
+    // const videoRef = useRef<HTMLVideoElement>(null);
 
     // State
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -45,6 +51,37 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount}) => {
     const [captionsEnabled, setCaptionsEnabled] = useState<boolean>(true);
     const [viewed, setViewed] = useState(false);
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
+
+
+    // Функция для начала воспроизведения видео
+    const handlePlay = () => {
+        setIsPlaying(true);
+    };
+
+
+    useEffect(() => {
+        // Видео должно начинать воспроизведение сразу после монтирования компонента
+        setIsPlaying(true);
+    }, [src]); // Если изменяется источник видео, начинаем воспроизведение
+
+
+    useEffect(() => {
+        if (isActive) {
+            videoRef.current?.play();
+        } else {
+            if (videoRef.current) {
+                videoRef.current.pause();
+                videoRef.current.currentTime = 0; // Сброс к началу
+            }
+        }
+    }, [isActive]);
+
+    // Плавное прокручивание видео
+    const scrollToVideo = (videoElement: HTMLVideoElement | null) => {
+        if (videoElement) {
+            videoElement.scrollIntoView({behavior: "smooth", block: "center"});
+        }
+    };
 
     const handleTimeUpdate = () => {
         if (videoRef.current) {
@@ -376,7 +413,7 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount}) => {
     // Render
     return (
         <div
-            ref={videoContainerRef}
+            ref={videoContainerRef} style={{overflowY: "auto", height: "90vh"}}
             className={`video-container ${isPlaying ? "playing" : "paused"} ${isTheaterMode ? "theater" : ""} ${isFullScreen ? "full-screen" : ""} ${isMiniPlayer ? "mini-player" : ""}`}
             data-volume-level={volume > 0.5 ? "high" : volume > 0 ? "low" : "muted"}
         >
@@ -447,6 +484,7 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount}) => {
                             onChange={handleVolumeChange}
                         />
                     </div>
+
                     <div className="duration-container text-[12.5px]">
                         <span className="current-time">{formatDuration(currentTime)}</span>
                         <span> / </span>
@@ -470,8 +508,10 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount}) => {
             </div>
             <video
                 ref={videoRef}
-                className="videoV2 aspect-[9/16.5]"
+                className="videoV2 aspect-[9/16]"
                 onClick={togglePlayPause}
+                autoPlay={isPlaying}
+                onPlay={handlePlay}
                 muted={isMuted}
                 controls={false}
                 preload="metadata"
