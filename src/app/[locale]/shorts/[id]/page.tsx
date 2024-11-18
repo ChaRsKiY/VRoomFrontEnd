@@ -37,7 +37,6 @@ const reducer = (state: State, action: Action): State => {
                 (newVideo) => !state.videos.some((existingVideo) => existingVideo.id === newVideo.id)
             );
             const updatedVideos = [...state.videos, ...uniqueVideos];
-            //console.log('Reducer - Updated videos:', updatedVideos);  Лог после обновления
             return {...state, videos: updatedVideos, isLoading: false};
         case 'SET_CURRENT_INDEX':
             return {...state, currentIndex: action.index};
@@ -132,9 +131,9 @@ const ShortsPage = ({params}: { params: { id?: string } }) => {
             if (!isLoading && currentIndex == videos.length - 1) {
                 setTimeout(() => {
                     dispatch({type: 'SET_PAGE', page: page + 1});// Загружаем следующую страницу, если достигли конца
-                }, 500);// dispatch({type: 'SET_CURRENT_INDEX', index: currentIndex + 1});
+                }, 500);
             }
-        }// else
+        }
     };
 
     const handlePrevVideo = () => {
