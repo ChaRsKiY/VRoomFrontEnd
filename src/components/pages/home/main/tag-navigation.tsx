@@ -4,19 +4,26 @@ import React, { useState, useEffect, useRef } from 'react'
 import api from '@/services/axiosApi';
 import { BiArrowBack } from 'react-icons/bi';
 import { buttonMyScroll } from '@/styles/buttonstyles/scrollbutton';
+import { useTranslation } from 'react-i18next';
 
 interface IProps {
-    tagName: string | null
+    tagName: string | null,
+}
+interface ITag {
+    name: string,
+    translatedName: string
 }
 
 const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
 
-    const [tags, setTags] = useState<string[]>([]);
+    const [tagsDB, setTagsDB] = useState<string[]>([]);
+    const [tags, setTags] = useState<ITag[]>([]);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const [showLeftButton, setShowLeftButton] = useState(false);
     const [showRightButton, setShowRightButton] = useState(false);
     const [isHovering, setIsHovering] = useState(false);
     const [isHovering2, setIsHovering2] = useState(false);
+    const { t } = useTranslation();
 
     const getTags = async () => {
         try {
@@ -24,10 +31,15 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
 
             if (response.status === 200) {
                 const mydata: string[] = await response.data;
-                console.log('успешный list of video', mydata);
-                setTags(mydata);
+                setTagsDB(mydata);
+                // const translatedTags: ITag[] = mydata.map((nameT) => ({
+                //     name: nameT, 
+                //     translatedName: t("tags:"+nameT), 
+                // }));
+                // console.log('успешный list of translatedTags', translatedTags);
+                // setTags(translatedTags);
             } else {
-                console.error('Ошибка получения видео:', response.statusText);
+                console.error('Ошибка получения tags:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -38,13 +50,22 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
         getTags();
     }, []);
 
+    useEffect(() => {
+        const translatedTags: ITag[] = tagsDB.map((nameT) => ({
+            name: nameT,
+            translatedName: t("tagname:" + nameT),
+        }));
+        console.log('успешный list of translatedTags', translatedTags);
+        setTags(translatedTags);
+    }, [tagsDB, t]);
+
 
 
     const updateButtonsVisibility = () => {
         if (containerRef.current) {
             const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
-            setShowLeftButton(scrollLeft > 0); 
-            setShowRightButton(scrollLeft + clientWidth < scrollWidth); 
+            setShowLeftButton(scrollLeft > 0);
+            setShowRightButton(scrollLeft + clientWidth < scrollWidth);
         }
     };
 
@@ -69,7 +90,7 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
         return () => {
             window.removeEventListener('resize', updateButtonsVisibility);
         };
-    }, [tags]);
+    }, [tagsDB]);
 
 
 
@@ -99,7 +120,8 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
                 onScroll={updateButtonsVisibility}
             >
 
-                {tags ? (
+                {tagsDB ? (
+
                     <div
                         style={{
                             padding: '5px', width: '40px', margin: '5  5px',
@@ -108,29 +130,31 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
                         }}
                         onClick={() => { window.location.href = `/`; }}
                     >
-                        All
+                      
+                       {t("tagname:All")}
                     </div>
                 ) : null}
 
                 {tags.map((tag, index) => (
                     <div key={index} style={{
-                        margin: '0 5px', backgroundColor: tagName === tag ? 'black' : 'rgba(211, 211, 211, 0.5)',
-                        borderRadius: '10px', color: tagName === tag ? 'white' : 'black'
+                        margin: '0 5px', backgroundColor: tagName === tag.name ? 'black' : 'rgba(211, 211, 211, 0.5)',
+                        borderRadius: '10px', color: tagName === tag.name ? 'white' : 'black'
                     }}>
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault();
-                                window.location.href = `/mainbytag?search=${tag}`;
+                                window.location.href = `/mainbytag?search=${tag.name}`;
                             }}
                         >
                             <input
                                 style={{ padding: '5px', cursor: 'pointer' }}
                                 type='submit'
-                                value={tag}
+                                value={tag.translatedName}
                             />
                         </form>
                     </div>
                 ))}
+                
             </div>
 
             {showRightButton && (

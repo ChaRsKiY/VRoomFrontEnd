@@ -14,12 +14,10 @@ const NotificationButtonMenu: React.FC = () => {
 
     useEffect(() => {
         if (user) {
-            fetchNotifications(user.id); // Загружаем уведомления при наличии пользователя
+            fetchNotifications(user.id); 
         }
-
-        // Очистка уведомлений при выходе пользователя
         if (!user && isLoaded) {
-            setNotifications([]); // Очищаем уведомления, если пользователь вышел
+            setNotifications([]); 
         }
     }, [user, isLoaded]);
 
@@ -28,16 +26,14 @@ const NotificationButtonMenu: React.FC = () => {
             const response = await api.get(`/Notification/getbyuserid/1/10/${userId}`);
             const data: any[] = await response.data;
 
-            // Преобразуем данные в массив объектов типа INotification
             const notifications: INotification[] = data.map(item => ({
                 id: item.id,
                 userId: item.userId,
                 message: item.message,
                 isRead: item.isRead,
-                date: new Date(item.date) // Преобразуем дату в объект Date
+                date: new Date(item.date) 
             }));
 
-            // Обновляем состояние с полученными уведомлениями
             setNotifications(notifications);
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
