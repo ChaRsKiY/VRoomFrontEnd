@@ -3,38 +3,31 @@
 import React, {useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent} from "react";
 import "@/styles/videojsplayer.css";
 import "@/styles/shortjsplayer.css";
-import {PiPictureInPicture, PiScreencast} from "react-icons/pi";
-import {TbLayersSubtract} from "react-icons/tb";
-import {RxEnterFullScreen, RxExitFullScreen} from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
-import {BsThreeDotsVertical} from "react-icons/bs";
 import {IoEyeOutline} from "react-icons/io5";
 import {formatNumber} from "@/utils/format";
-import {RiArrowLeftDoubleFill, RiArrowRightDoubleFill} from "react-icons/ri";
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {traceSegment} from "@jridgewell/trace-mapping";
 
 class WatchHistory {
     constructor(public videoId: number, public lastViewedPosition: number) {
     }
 }
 
-interface IVideoPlayerProps {
+interface IShortsPlayerXProps {
     src: string;
     id: number;
     viewCount: number;
     isActive: boolean;
 }
 
-const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}) => {
+const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isActive}) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
     const volumeSliderRef = useRef<HTMLInputElement | null>(null);
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
-
-
-    // const videoContainerRef = useRef<HTMLDivElement>(null);
-    // const videoRef = useRef<HTMLVideoElement>(null);
 
     // State
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -56,25 +49,16 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
     const [realWatchTime, setRealWatchTime] = useState(0);
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
-    // Функция для начала воспроизведения видео
-    // const handlePlay = () => {
-    //     setIsPlaying(true);
-    // };
-
-
-    // useEffect(() => {
-    //     // Видео должно начинать воспроизведение сразу после монтирования компонента
-    //     setIsPlaying(true);
-    // }, [src]); // Если изменяется источник видео, начинаем воспроизведение
-
     useEffect(() => {
         const fetchVideo = async () => {
             try {
                 const response = await fetch(`/api/Video/${id}`);
+
                 if (!response.ok) {
                     throw new Error("Failed to fetch video data");
                 }
                 const videoData = await response.json();
+                alert(`res=${videoData}`);
                 if (videoData && videoData.VideoStream) {
                     const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
                         ? videoData.VideoStream
@@ -126,26 +110,18 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
         }
     }, [videoSrc]);
 
-    useEffect(() => {
-        if (isActive) {
-            videoRef.current?.play();
-        } else {
-            if (videoRef.current) {
-                videoRef.current.pause();
-                videoRef.current.currentTime = 0; // Сброс к началу
-            }
-        }
-    }, [isActive]);
-
-
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
             const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
 
-            // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-            if (percentagePlayed > 40 && !viewed) {
-                setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+            //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+            //   if (percentagePlayed > 40 && !viewed) {
+            //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+            //     increaseViewCount(); // Увеличиваем счётчик просмотров
+            //   }
+            if (percentagePlayed > 60 && !viewed) {
+                setViewed(true);
                 increaseViewCount(); // Увеличиваем счётчик просмотров
             }
             if (isPlaying) {
@@ -219,7 +195,7 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
 
 
     const increaseViewCount = () => {
-        alert("Просмотр засчитан!");
+        // alert("Просмотр засчитан!");
         Viewed(id);
     };
 
@@ -372,7 +348,6 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
             setIsPlaying(!isPlaying);
         }
     };
-
     const toggleFullScreen = () => {
         const videoContainer = videoContainerRef.current;
         if (videoContainer) {
@@ -406,7 +381,6 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
             setIsMuted(!isMuted);
         }
     };
-
     const handleVolumeChange = (e: ChangeEvent<HTMLInputElement>) => {
         const video = videoRef.current;
         if (video) {
@@ -468,7 +442,10 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
             return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`;
         }
     };
-
+    // Функция для начала воспроизведения видео
+    const handlePlay = () => {
+        setIsPlaying(true);
+    };
     // Render
     return (
         <div
@@ -543,12 +520,10 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
                             onChange={handleVolumeChange}
                         />
                     </div>
-
                     <div className="duration-container text-[12.5px]">
                         <span className="current-time">{formatDuration(currentTime)}</span>
                         <span> / </span>
-                        <span
-                            className="total-time">{!isNaN(Number(formatDuration(duration))) ?? formatDuration(duration)}</span>
+                        <span className="total-time">{formatDuration(duration)}</span>
                     </div>
                     <div className="captions-btn" onClick={toggleCaptions}>
                         <svg viewBox="0 0 24 24">
@@ -556,29 +531,24 @@ const ShortPlayer: React.FC<IVideoPlayerProps> = ({src, id, viewCount, isActive}
                                   d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
                         </svg>
                     </div>
-                    <div className={'flex items-center gap-[0.3125rem] flex-[1_0_0]'}>
+
+                    <div className={'flex items-center gap-[0.3125rem]'}>
                         <IoEyeOutline size={22}/>
                         {formatNumber(viewCount)}
                     </div>
-                    <button className="play-pause-btn" onClick={togglePlayPause}>
+                    <button className="play-pause-btn">
                         <BsThreeDotsVertical/>
                     </button>
                 </div>
             </div>
-            <video
-                ref={videoRef}
-                className="videoV2 aspect-[9/16]"
-                onClick={togglePlayPause}
-                /*autoPlay={isPlaying}
-                onPlay={handlePlay}*/
-                muted={isMuted}
-                controls={false}
-                preload="metadata"
-            >
+            <video ref={videoRef} className="videoV2 aspect-[9/16]"
+                   onClick={togglePlayPause} muted
+                   controls={false} preload="metadata" autoPlay loop={true}
+                   onPlay={handlePlay}>
                 <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default/>
             </video>
         </div>
     );
 };
 
-export default ShortPlayer;
+export default ShortsPlayerX;
