@@ -19,15 +19,10 @@ const items = [
         title: "Users",
         url: "/",
         icon: Users,
-        subContent: [
-            { title: "All Users", url: "" },
-            { title: "Logs", url: "#logs" },
-            { title: "Analytics", url: "#analytics" }
-        ]
     },
     {
-        title: "Inbox",
-        url: "#",
+        title: "Content Reports",
+        url: "/content-reports",
         icon: Inbox,
         subContent: null
     },
@@ -63,27 +58,14 @@ export function AppSidebar() {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
-                                <Collapsible key={item.title} defaultOpen className="group/collapsible">
-                                    <SidebarMenuItem>
-                                        <CollapsibleTrigger asChild>
+                                    <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton asChild>
-                                                <button className="p-5">
+                                                <Link href={"/admin" + item.url} className="pl-5">
                                                     <item.icon />
                                                     <span>{item.title}</span>
-                                                </button>
+                                                </Link>
                                             </SidebarMenuButton>
-                                        </CollapsibleTrigger>
-                                        {item.subContent?.length && <CollapsibleContent>
-                                            <SidebarMenuSub>
-                                                {item.subContent.map((subItem, key) => (
-                                                    <SidebarMenuSubItem key={key}>
-                                                        <a href={"/admin" + subItem.url} className="p-1.5 px-2 hover:bg-neutral-100 rounded block">{subItem.title}</a>
-                                                    </SidebarMenuSubItem>
-                                                ))}
-                                            </SidebarMenuSub>
-                                        </CollapsibleContent>}
                                     </SidebarMenuItem>
-                                </Collapsible>
                             ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
