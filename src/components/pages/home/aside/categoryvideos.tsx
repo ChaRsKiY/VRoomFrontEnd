@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode } from 'react';
+
 import Link from "next/link";
 import { MdExpandMore } from "react-icons/md";
 import api from '@/services/axiosApi';
 import { BiBook, BiBroadcast, BiCategory, BiFilm, BiFootball, BiLogoPlayStore, BiMusic, BiNews, BiSolidFlame } from 'react-icons/bi';
+import { useTranslation } from 'react-i18next';
 
 interface IBlock {
     name: string,
@@ -20,7 +22,8 @@ const CategoryVideos: React.FC = () => {
     const [mainPageCategories, setMainPageCategories] = useState<IBlock[]>([]);
     const [allCategories, setAllCategories] = useState<IBlock[]>([]);
     const [visibleCount, setVisibleCount] = useState(5);
-
+    const {t} = useTranslation();
+    
 
     const handleClick = () => {
         const nextVisibleCount = visibleCount + 5;
@@ -29,26 +32,26 @@ const CategoryVideos: React.FC = () => {
         setMainPageCategories(allCategories);
     };
     const findIcon = (name: string) => {
-        if (name == 'Music')
+        if (name == 'music')
             return <BiMusic />;
-        if (name == 'Films')
+        if (name == 'films')
             return <BiFilm />;
-        if (name == 'Education')
+        if (name == 'education')
             return <BiBook />;
-        if (name == "Trending")
+        if (name == "trending")
             return <BiSolidFlame />;
-        if (name == "Sport")
+        if (name == "sport")
             return <BiFootball />;
-        if (name == "Games")
+        if (name == "games")
             return <BiLogoPlayStore />;
-        if (name == "News")
+        if (name == "news")
             return <BiNews />;
-        if (name == "Live")
+        if (name == "live")
             return <BiBroadcast />
         return <BiCategory />;
     };
 
-    const getFollowedCategories = async () => {
+    const getCategories = async () => {
 
         try {
             const response = await api.get(`/Category`);
@@ -59,19 +62,19 @@ const CategoryVideos: React.FC = () => {
 
             const categories = await response.data;
 
-            setMainPageCategories(categories.slice(0, 5).map((category: any) => ({
+            setMainPageCategories(categories.slice(0, visibleCount).map((category: any) => ({
                 iconPath: findIcon(category.name),
-                name: category.name,
+                name: t("categories:"+category.name),
                 path: "/mainbycategory?search=" + category.name,
                 iconClassNames: "rounded-full"
             })));
 
-            setAllCategories(categories.map((category: any) => ({
-                iconPath: findIcon(category.name),
-                name: category.name,
-                path: "/mainbycategory?search=" + category.name,
-                iconClassNames: "rounded-full"
-            })));
+            // setAllCategories(categories.map((category: any) => ({
+            //     iconPath: findIcon(category.name),
+            //     name: category.name,
+            //     path: "/mainbycategory?search=" + category.name,
+            //     iconClassNames: "rounded-full"
+            // })));
 
 
 
@@ -84,9 +87,10 @@ const CategoryVideos: React.FC = () => {
 
     useEffect(() => {
 
-        getFollowedCategories();
+        getCategories();
 
-    }, []);
+    }, [visibleCount]);
+   
 
     return (
         <div>

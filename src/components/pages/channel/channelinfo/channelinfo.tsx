@@ -150,7 +150,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({ channelid }) => {
   const getMentions = async () => {
     try {
 
-      const response = await api.get('/ChannelSettings/2');
+      const response = await api.get('/ChannelSettings/1');
 
       if (response.status === 200) {
         const data: IChannel = await response.data;

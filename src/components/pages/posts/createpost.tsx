@@ -275,9 +275,9 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
 
   return (
-    <div className="w-full mt-20" style={{ justifyItems: 'center', marginBottom: '20px' }}>
+    <div className="w-full " style={{ justifyItems: 'center', marginBottom: '20px',}}>
       {user && user?.id === postOwner?.clerk_Id && (
-        <div className="w-full mt-20">
+        <div className="w-full  "  style={{minWidth:'500px' }}>
           <div className="w-3/4 px-8" style={{ border: '3px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px' }}>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
