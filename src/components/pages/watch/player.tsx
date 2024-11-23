@@ -7,6 +7,9 @@ import { TbLayersSubtract } from "react-icons/tb";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
+import { useUser } from '@clerk/nextjs';
+import { usePathname } from "next/navigation";
+
 
 class WatchHistory {
     constructor(public videoId: number, public lastViewedPosition: number) { }
@@ -17,6 +20,7 @@ interface IVideoPlayerProps {
     id: number;
 }
 
+
 const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -25,6 +29,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
 
     // State
+    const { user } = useUser();
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(false);
     const [volume, setVolume] = useState<number>(1);
@@ -41,89 +46,100 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
-    const [realWatchTime, setRealWatchTime] = useState(0); 
+    const [realWatchTime, setRealWatchTime] = useState(0);
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
+    const pathname = usePathname();
+    const [previousPath, setPreviousPath] = useState("");
 
     useEffect(() => {
         const fetchVideo = async () => {
-          try {
-            const response = await fetch(`/api/Video/${id}`);
-            if (!response.ok) {
-              throw new Error("Failed to fetch video data");
+            try {
+                const response = await api.get(`/Video/${id}`);
+                if (response.status != 200) {
+                    throw new Error("Failed to fetch video data");
+                }
+                const videoData = await response.data;
+                console.log("vide0000**", videoData);
+                if (videoData && videoData.VideoStream) {
+                    const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
+                        ? videoData.VideoStream
+                        : `${videoData.VideoStream}/720.m3u8`;
+                    setVideoSrc(videoUrl);
+                } else {
+                    setVideoError("Video stream not available");
+                }
+            } catch (error) {
+                setVideoError("Error fetching video");
             }
-            const videoData = await response.json();
-            if (videoData && videoData.VideoStream) {
-              const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
-                ? videoData.VideoStream
-                : `${videoData.VideoStream}/720.m3u8`;
-              setVideoSrc(videoUrl);
-            } else {
-              setVideoError("Video stream not available");
-            }
-          } catch (error) {
-            setVideoError("Error fetching video");
-          }
         };
-    
+
         fetchVideo();
-      }, [id]);
-    
-      useEffect(() => {
+    }, [id]);
+
+    useEffect(() => {
         const video = videoRef.current;
-    
+
         if (video && videoSrc && videoSrc.endsWith('.m3u8')) {
-          if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              if (video) {
-                setDuration(video.duration);
-              }
-            });
-    
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              console.error("HLS error:", data);
-              setVideoError("Error playing video");
-            });
-            return () => {
-              hls.destroy();
-            };
-          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (video) {
+                        setDuration(video.duration);
+                    }
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error("HLS error:", data);
+                    setVideoError("Error playing video");
+                });
+                return () => {
+                    hls.destroy();
+                };
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+                video.addEventListener('loadedmetadata', () => {
+                    setDuration(video.duration);
+                });
+            }
+        } else if (video && videoSrc) {
             video.src = videoSrc;
             video.addEventListener('loadedmetadata', () => {
-              setDuration(video.duration);
+                setDuration(video.duration);
             });
-          }
-        } else if (video && videoSrc) {
-          video.src = videoSrc;
-          video.addEventListener('loadedmetadata', () => {
-            setDuration(video.duration);
-          });
         }
-      }, [videoSrc]);
-   
+    }, [videoSrc]);
+
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-          setCurrentTime(videoRef.current.currentTime);
-          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-    
-        //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-        //   if (percentagePlayed > 40 && !viewed) {
-        //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
-        //     increaseViewCount(); // Увеличиваем счётчик просмотров
-        //   }
-        if (percentagePlayed > 60 && !viewed) {
-            setViewed(true);
-            increaseViewCount(); // Увеличиваем счётчик просмотров
-          }
-          if (isPlaying) {
-            const delta = videoRef.current.currentTime - lastUpdateTime; 
-            setRealWatchTime((prevTime) => prevTime + delta); 
-          }
-          setLastUpdateTime(videoRef.current.currentTime);
+            setCurrentTime(videoRef.current.currentTime);
+
+            const delta = currentTime - lastUpdateTime;
+            if (isPlaying && delta > 0 && delta < 5) { // Исключаем большие скачки ( перемотку)
+                setRealWatchTime((prevTime) => prevTime + delta);
+            }
+
+            if (realWatchTime / duration > 0.6 && !viewed) {
+                setViewed(true);
+                increaseViewCount();
+            }
+            setLastUpdateTime(videoRef.current.currentTime);
         }
-      };
+    };
+    const handlePauseOrSeek = () => {
+        if (videoRef.current) {
+            const currentTime = videoRef.current.currentTime;
+            const delta = currentTime - lastUpdateTime;
+
+            // Учитываем реальное время только для небольших изменений
+            if (delta > 0 && delta < 5) {
+                setRealWatchTime((prevTime) => prevTime + delta);
+            }
+
+            setLastUpdateTime(currentTime);
+        }
+    };
 
     const saveWatchHistory = () => {
         if (videoRef.current) {
@@ -154,11 +170,43 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         saveWatchHistory();
     };
 
+    const SaveViewDuration = async () => {
+        const formData = new FormData();
+        const language = navigator.language;
+        language.split('-')[0];
+
+        if (user)
+            formData.append('clerkId', user.id);
+        else
+            formData.append('clerkId', "***");
+        formData.append('videoId', id + '');
+        formData.append('location', language);
+        formData.append('duration', realWatchTime + "");
+        formData.append('date', new Date().toString());
+
+        await api.post("/Video/viewingduration", formData);
+    }
+
+    useEffect(() => {
+        if (previousPath) {
+            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
+
+            // Вызов вашей функции перед навигацией
+            SaveViewDuration();
+            saveWatchHistory();
+        }
+
+        // Обновляем предыдущий маршрут
+        setPreviousPath(pathname);
+    }, [pathname]);
+
     // Обработка закрытия вкладки или перезагрузки страницы
     useEffect(() => {
-        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+
+            await SaveViewDuration();
             saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
-            event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)
+            event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)          
         };
 
         if (videoRef.current) {
@@ -168,9 +216,10 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             video.addEventListener('timeupdate', handleTimeUpdate);
             video.addEventListener('pause', handleVideoPauseOrEnd);
             video.addEventListener('ended', handleVideoPauseOrEnd);
+            video.addEventListener("pause", handlePauseOrSeek);
+            video.addEventListener("seeked", handlePauseOrSeek);
         }
 
-        // Подписка на событие закрытия вкладки
         window.addEventListener('beforeunload', handleBeforeUnload);
 
         // Очистка событий при размонтировании
@@ -180,11 +229,13 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 video.removeEventListener('timeupdate', handleTimeUpdate);
                 video.removeEventListener('pause', handleVideoPauseOrEnd);
                 video.removeEventListener('ended', handleVideoPauseOrEnd);
+                video.removeEventListener("pause", handlePauseOrSeek);
+                video.removeEventListener("seeked", handlePauseOrSeek);
             }
 
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [id]);
+    }, [id, user, realWatchTime]);
 
 
     const increaseViewCount = () => {
@@ -218,6 +269,16 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, [viewed, id]);
 
+    useEffect(() => {
+
+        return () => {
+            if (duration > 0)
+                SaveViewDuration();
+            saveWatchHistory();
+            console.log("Компонент размонтирован");
+        };
+    }, []);
+
     // Effects
     useEffect(() => {
         const video = videoRef.current;
@@ -250,7 +311,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, []);
 
-   
+
     useEffect(() => {
         const handleFullScreenChange = () => {
             setIsFullScreen(!!document.fullscreenElement);

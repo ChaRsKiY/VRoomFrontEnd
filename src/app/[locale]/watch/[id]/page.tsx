@@ -59,7 +59,7 @@ const WatchPage: React.FC = async ({params}: any) => {
         <div className="flex w-full mt-20">
             {t && <HeaderHome t={t}/>}
 
-            <Watch id={id}/>
+            <Watch id={id} />
         </div>
     );
 };
