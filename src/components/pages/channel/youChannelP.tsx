@@ -1,14 +1,14 @@
 "use client"
 
 import React from 'react'
-import {useUser} from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
 import ShortChannelBlock from "@/components/pages/channel/aside/shortChannelBlock";
 import Link from "next/link";
 
 const YouChannelP = () => {
     const { isSignedIn } = useUser();
 
-    if (!isSignedIn){
+    if (!isSignedIn) {
         return (<div className="flex-grow flex flex-col justify-center items-center text-center p-10 pt-30">
             <i className="fas fa-play-circle text-7xl text-gray-400 mb-6"></i>
             <h1 className="text-2xl font-semibold">Войдите в аккаунт</h1>
@@ -19,7 +19,7 @@ const YouChannelP = () => {
 
     return (
         <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0 pt-20">
-            <ShortChannelBlock/>
+            <ShortChannelBlock />
             <div className="mt-8">
                 <h2 className="text-xl font-bold">История</h2>
                 <div className="flex justify-between items-center mt-4">

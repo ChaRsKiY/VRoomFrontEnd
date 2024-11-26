@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import {useUser} from "@clerk/nextjs";
 import Image from "next/image";
 import {IContentVideo} from "@/types/videoDTO.interface";
-import axios from "axios";
+import api from '@/services/axiosApi';
 import {CgPlayList} from "react-icons/cg";
 import {IPlayList} from "@/types/playlist.interface";
 import {formatDate} from "@/utils/dateformat";
@@ -23,9 +23,9 @@ const ContentPlaylists = () => {
 
     const fetchChannel1 = async (userId: string) => {
         try {
-            const firstResponse = await axios.get(`https://localhost:7154/api/PlayList/getbyuserid/${userId}`);
+            const firstResponse = await api.get(`/PlayList/getbyuserid/${userId}`);
             // Используем данные из первого запроса для второго запроса
-            //const secondResponse = await axios.get(`https://localhost:7154/api/Video/getbyuserid/${firstResponse.data.id}`);
+            //const secondResponse = await axios.get(`https://localhost:7154/api/Video/getbyuserid/${firstResponse.data.[id]}`);
 
             setData(firstResponse.data); // Сохраняем данные в состоянии
         } catch (error) {
@@ -56,6 +56,7 @@ const ContentPlaylists = () => {
                     <tr className=" text-left">
                         <th className="py-3 px-3"><input type="checkbox" className="w-5 h-5"/></th>
                         <th className="py-3 px-3 ">PlayList</th>
+                        <th className="py-3 px-3 ">Type</th>
                         <th className="py-3 px-3 ">Visibility</th>
                         <th className="py-3 px-3 ">Date</th>
                         <th className="py-3 px-3 ">Video count</th>
@@ -78,6 +79,7 @@ const ContentPlaylists = () => {
                                 </div>
                                 <span className="pl-2">{el.title}</span>
                             </td>
+                            <td className="py-3 px-3 "></td>
                             {el?.access === true && (<td className="py-3 px-3 ">Public</td>)}
                             {el?.access === false && (<td className="py-3 px-3 ">Private</td>)}
                             <td className="py-3 px-3 ">{formatDate(new Date(el.date))} <br/>Published</td>

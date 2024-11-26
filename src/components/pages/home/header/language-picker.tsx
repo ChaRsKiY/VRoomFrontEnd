@@ -17,8 +17,8 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import {useState} from "react";
-import {HiMiniLanguage} from "react-icons/hi2";
+import { useState } from "react";
+import { HiMiniLanguage } from "react-icons/hi2";
 
 const languages = [
     {
@@ -44,7 +44,7 @@ export function LanguagePicker({ handleLanguageChange, currentLanguage }: any) {
             <PopoverTrigger asChild>
                 <button
                     className="hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-[0.5rem] flex items-center p-2 text-[1.075rem] space-x-3">
-                    <HiMiniLanguage size={23}/>
+                    <HiMiniLanguage size={23} />
                     <div>{`Language: ${languages.filter(el => el.value === currentLanguage)[0]?.label}`}</div>
                 </button>
             </PopoverTrigger>

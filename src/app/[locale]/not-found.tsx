@@ -3,7 +3,7 @@ import { Nunito } from "next/font/google"
 import Search from "@/components/pages/home/header/search";
 import Link from "next/link";
 
-const font  = Nunito({ subsets: ['latin'], weight: ["600"] })
+const font = Nunito({ subsets: ['latin'], weight: ["600"] })
 
 const MainNotFound: React.FC = async () => {
     return (

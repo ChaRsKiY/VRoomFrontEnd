@@ -6,6 +6,7 @@ import {useUser} from "@clerk/nextjs";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import Link from "next/link";
+import api from '@/services/axiosApi';
 
 const ShortChannelBlock = () => {
     const {user} = useUser(); // Получаем текущего пользователя
@@ -19,11 +20,12 @@ const ShortChannelBlock = () => {
     }, [user]);
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/ChannelSettings/getinfochannel/${userId}`);
-            const data: any = await response.json();
-
-            setAvatar(data.channelBanner);
-            setName(data.channelName);
+            const response = await api.get(`/ChannelSettings/getinfochannel/${userId}`);
+            if (response.status === 200) {
+                const data: any = await response.data;
+                setAvatar(data.channelProfilePhoto);
+                setName(data.channelName);
+            }
         } catch (error) {
             console.error('Ошибка при загрузке данных:', error);
         }

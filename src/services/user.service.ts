@@ -1,14 +1,13 @@
 import {IUser} from "@/types/user.interface";
+import api from "@/services/axiosApi"
 
 export const getUser = async (user: any, setUser: (prev: IUser) => void) => {
     try {
         if(user){
-            const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
-                method: 'GET',
-            });
+            const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
 
-            if (response.ok) {
-                const data: IUser = await response.json();
+            if (response.status===200) {
+                const data: IUser = await response.data;
                 setUser(data);
             } else {
                 console.error('Ошибка при получении пользователя:', response.statusText);

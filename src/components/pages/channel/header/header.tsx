@@ -3,7 +3,7 @@ import Search from "@/components/pages/home/header/search";
 import HeaderBlock from "@/components/pages/home/header/header-block";
 import VoiceSearch from "@/components/pages/channel/header/voice-search";
 import BurgerMenu from "@/components/pages/home/header/burger-menu";
-import {ITranslationFunction} from "@/types/translation.interface";
+import { ITranslationFunction } from "@/types/translation.interface";
 import Image from "next/image";
 import Link from "next/link";
 

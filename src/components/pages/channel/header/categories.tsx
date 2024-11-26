@@ -1,7 +1,7 @@
 "use client"
 
-import React, {useState} from 'react'
-import {Mukta} from "next/font/google";
+import React, { useState } from 'react'
+import { Mukta } from "next/font/google";
 
 const mukta = Mukta({ subsets: ['latin'], weight: ["400", "700"] })
 
@@ -16,11 +16,10 @@ const CategoriesHeader: React.FC = () => {
             {categories.map((category) => (
                 <div
                     key={category}
-                    className={`px-3 py-1 rounded ${mukta.className} ${
-                        selectedCategory === category
+                    className={`px-3 py-1 rounded ${mukta.className} ${selectedCategory === category
                             ? 'border-b-2 border-red-400'
                             : 'border-b-2 border-transparent'
-                    } hover:cursor-pointer`}
+                        } hover:cursor-pointer`}
                     onClick={() => setSelectedCategory(category)}
                 >
                     {category}

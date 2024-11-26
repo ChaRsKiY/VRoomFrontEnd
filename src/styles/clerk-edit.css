@@ -1,6 +1,7 @@
 .cl-socialButtonsIconButton {
     @apply h-9 rounded-[0.5rem]
 }
+
 .cl-socialButtonsIconButton:hover {
     @apply bg-neutral-200
 }

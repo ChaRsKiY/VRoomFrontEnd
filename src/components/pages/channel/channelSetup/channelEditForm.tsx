@@ -6,46 +6,46 @@ import {useUser} from "@clerk/nextjs";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import Link from "next/link";
-import axios from "axios";
+import api from '@/services/axiosApi';
 
 const ChannelEditBlock = () => {
     const {user} = useUser(); // Получаем текущего пользователя
     const [id, setId] = useState(0);
 
-
     const [channelBanner, setChannelBanner] = useState<File | null>();
     const [channelBannerPreview, setChannelBannerPreview] = useState<string>('https://placehold.co/150x100.svg');
+    const [channelBannerValid, setChannelBannerValid] = useState<string | null>(null);
     const [chBannerPrevOld, setChBannerPrevOld] = useState<string>("");
     const chBInputRef = useRef<HTMLInputElement | null>(null);
 
     const [profilePhoto, setProfilePhoto] = useState<File | null>();
     const [profilePhotoPreview, setProfilePhotoPreview] = useState<string>('https://placehold.co/120x80.svg');
+    const [profilePhotoValid, setProfilePhotoValid] = useState<string | null>(null);
     const [profPhotoPrevOld, setProfPhotoPrevOld] = useState<string>("");
     const profPhInputRef = useRef<HTMLInputElement | null>(null);
 
     const [channelNickName, setChannelNickName] = useState<string>("");
+    const [errorChannelNickName, setErrorChannelNickName] = useState<string>("");
     const [channelNickNameValid, setChannelNickNameValid] = useState(true);
-    const validateChannelNickName = (channelNickName: string) => channelNickName.length > 3;
 
     const [channelName, setChannelName] = useState<string>("");
     const [channelNameValid, setChannelNameValid] = useState(true);
     const validateChannelName = (channelName: string) => channelName.length > 3;
 
     const [channelDescription, setChannelDescription] = useState<string>("");
-
+    const [channelUrl, setChannelUrl] = useState<string>("");
 
     useEffect(() => {
         if (user) {
             fetchChannel(user.id);
         }
     }, [user]);
+
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await fetch(`https://localhost:7154/api/ChannelSettings/getbyownerid/` + userId, {
-                method: 'GET'
-            });
+            const response = await api.get(`/ChannelSettings/getbyownerid/` + userId);
 
-            const data: any = await response.json();
+            const data: any = await response.data;
             console.log(data.channelName);
 
             if (data.channelBanner == null) {
@@ -55,11 +55,15 @@ const ChannelEditBlock = () => {
             setId(data.id);
             setChannelBannerPreview(data.channelBanner);
             setChBannerPrevOld(data.channelBanner);
-            setProfilePhotoPreview(data.channelPlofilePhoto);
-            setProfPhotoPrevOld(data.channelPlofilePhoto);
+            setProfilePhotoPreview(data.channelProfilePhoto);
+            setProfPhotoPrevOld(data.channelProfilePhoto);
             setChannelName(data.channelName);
             setChannelNameValid(true);
             setChannelDescription(data.description);
+            setChannelNickName('@' + data.channelNikName);
+
+            setChannelNickNameValid(true);
+            setChannelUrl(data.channel_URL);
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
@@ -67,8 +71,8 @@ const ChannelEditBlock = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-alert('error');
-        if (channelNameValid) {
+
+        if (channelNameValid && channelNickNameValid) {
 
             const formData = new FormData();
 
@@ -82,20 +86,28 @@ alert('error');
             formData.append('id', id + '');
             formData.append('ChannelName', channelName);
             formData.append('Description', channelDescription);
-            axios({
-                url: "https://localhost:7154/api/ChannelSettings/updateShort",
-                method: "PUT",
+            formData.append('channelNikName', channelNickName.replaceAll("@", ""));
+
+            api.put("/ChannelSettings/updateShort", formData, {
                 headers: {"Content-Type": false},
-                data: formData,
-            }).then(function () {
-                location.reload();
-            }).catch(function (error) {
-                alert(error.message);
-            });
+            })
+                .then(() => {
+                    location.reload();
+                })
+                .catch((error) => {
+                    alert(error.message);
+                });
 
         }
     };
-// Функция для открытия окна выбора файла для первого поля
+
+    const handleButtonClick = () => {
+        if (user) {
+            fetchChannel(user.id);
+        }
+    };
+
+    // Функция для открытия окна выбора файла для первого поля
     const handleButtonClick1 = () => {
         if (chBInputRef.current) {
             chBInputRef.current.click();
@@ -109,26 +121,96 @@ alert('error');
     };
 
 
-    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const inpId = event.target.id;
-
+    const handleChannelBannerChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
 
-        if (inpId == "file1") {
-            if (file) {
-                setChannelBanner(file);
-                setChannelBannerPreview(URL.createObjectURL(file));
-            } else setChannelBannerPreview(chBannerPrevOld);
-        }
-
-        if (inpId == "file2") {
-            if (file) {
-                setProfilePhoto(file);
-                setProfilePhotoPreview(URL.createObjectURL(file));
-            } else setProfilePhotoPreview(profPhotoPrevOld);
-        }
+        if (file) {
+            setChannelBannerValid(null);
+            const maxSize = 6 * 1024 * 1024; // Проверка размера файла 6 MB
+            if (file.size > maxSize) {
+                setChannelBannerValid('Размер файла не должен превышать 6 MB');
+                return;
+            }
+            const isValidResolution = await validateImageResolution(file, 2048, 1152);// Проверка разрешения изображения
+            if (!isValidResolution) {
+                setChannelBannerValid('Изображение должно быть не менее 2048 x 1152 пикселей');
+                return;
+            }
+            setChannelBanner(file);
+            setChannelBannerPreview(URL.createObjectURL(file));
+        } else setChannelBannerPreview(chBannerPrevOld);
 
     };
+    const handleProfilePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setProfilePhotoValid(null);
+            const maxSize = 4 * 1024 * 1024; // Проверка размера файла 4 MB
+            if (file.size > maxSize) {
+                setProfilePhotoValid('Размер файла не должен превышать 4 MB');
+                return;
+            }
+
+            const isValidResolution = await validateImageResolution(file, 98, 98);// Проверка разрешения изображения
+            if (!isValidResolution) {
+                console.log('Изображение должно быть не менее 98 x 98 пикселей');
+                setProfilePhotoValid('Изображение должно быть не менее 98 x 98 пикселей');
+                return;
+            }
+            setProfilePhoto(file);
+            setProfilePhotoPreview(URL.createObjectURL(file));
+
+        } else setProfilePhotoPreview(profPhotoPrevOld);
+
+
+    };
+    // Функция для проверки разрешения изображения
+    const validateImageResolution = (file: File, minWidth: number, minHeight: number): Promise<boolean> => {
+        return new Promise((resolve) => {
+            const image = new window.Image();
+            image.src = URL.createObjectURL(file);
+
+            image.onload = () => {
+                const isValid = image.width >= minWidth && image.height >= minHeight;
+                URL.revokeObjectURL(image.src); // Освобождаем память
+                resolve(isValid);
+            };
+
+            image.onerror = () => {
+                URL.revokeObjectURL(image.src);
+                resolve(false);
+            };
+        });
+    };
+
+    const CheckNickNameUnique = async (nickName: string, chSettingsId: number) => {
+        try {
+            const response = await api.get(`/ChannelSettings/checknicknameunique/` + nickName + '/' + chSettingsId);
+            return await response.data;
+        } catch (error) {
+            console.error('Ошибка при загрузке уведомлений:', error);
+        }
+    };
+
+    const handleChannelNickChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const inputValue = event.target.value;
+        setChannelNickName(inputValue);
+
+        const isLongEnough = inputValue.trim().length > 3; // Условие на длину
+        const startsWithAt = inputValue.startsWith("@") && inputValue.indexOf("@") === inputValue.lastIndexOf("@"); // Условие на один символ "@" в начале
+        const isUnique = await CheckNickNameUnique(inputValue.replaceAll("@", "").trim(), id);
+
+        const allConditionsMet = isLongEnough && startsWithAt && isUnique.isUnique;
+
+        if (allConditionsMet) {
+            setErrorChannelNickName("");
+        } else {
+            setErrorChannelNickName('Некорректная длина, нет одного символа "@", или псевдоним занят');
+        }
+
+        setChannelNickNameValid(allConditionsMet);
+    };
+
 
     const {t}: { t: ITranslationFunction } = useTranslation();
 
@@ -142,9 +224,13 @@ alert('error');
                               className="text-gray-500 hover:text-gray-800 pb-2">Tab "main"</Link>
                     </div>
                     <div className="flex space-x-4">
-                        <button className="bg-gray-200 px-4 py-1 rounded">Перейти на канал</button>
-                        <button className="bg-gray-200 px-4 py-1 rounded">Отмена</button>
-                        <input type="submit" className="bg-blue-500 hover:bg-blue-800 text-white  px-4 py-1 rounded"
+                        <Link target={'_self'} href={channelUrl}
+                              className="text-gray-700 pt-1 hover:text-gray-800 ">Перейти на канал</Link>
+                        <button type="button" onClick={handleButtonClick}
+                                className="bg-gray-200 px-4 py-1 rounded">Отмена
+                        </button>
+                        <input type="submit"
+                               className="bg-blue-500 hover:bg-blue-800 text-white hover:cursor-pointer px-4 py-1 rounded"
                                value="Опубликовать"/>
                     </div>
                 </div>
@@ -154,21 +240,22 @@ alert('error');
                         image is shown at the top channel pages. </p>
                     <div className="flex items-center">
                         <Image src={channelBannerPreview} alt="Banner Image" width={150} height={100}
-                               className="w-[6.25rem] h-[6.25rem] shrink-0 rounded-[6.25rem]"/>
+                               className="w-[6.25rem] h-[6.25rem] shrink-0 rounded"/>
                         <div
                             className="w-[56.5rem] h-[8.75rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-solid border-[#E6E6E6]">
                             <p className="w-[46.5rem] mt-6 ml-6 text-[#000] font-Inter text-[0.875rem] font-not-italic font-400 leading-normal">To
                                 make the channel look attractive on
                                 all devices We recommend uploading an image of at least 2048 x 1152 pixels. Size
                                 file - no more than 6 MB.</p>
-                            <input type="file" className="hidden mt-3 ml-6  w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                            <input accept="image/*" type="file" className="hidden mt-3 ml-6  w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file1"
-                                   onChange={handleAvatarChange} ref={chBInputRef}/>
+                                   onChange={handleChannelBannerChange} ref={chBInputRef}/>
                             <button type="button"
-                                className=" mt-3 ml-6 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
-                                onClick={handleButtonClick1}>Update channel banner
+                                    className=" mt-3 ml-6 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
+                                    onClick={handleButtonClick1}>Update channel banner
                             </button>
+                            {channelBannerValid && <span className="text-red-600 ml-5">{channelBannerValid}</span>}
                         </div>
                     </div>
                 </div>
@@ -189,17 +276,17 @@ alert('error');
                                 At least 98 x 98 pixels in size in PNG or GIF format. Animated pictures
                                 upload it is forbidden. File size: no more than 4 MB. Remember that the image
                                 must comply with the rules YouTube community. </p>
-                            <input type="file" className="hidden mt-3 ml-6 w-full text-sm text-gray-500
+                            <input accept="image/*" type="file" className="hidden mt-3 ml-6 w-full text-sm text-gray-500
         file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-blue-600 file:text-white
         hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400" id="file2"
-                                   onChange={handleAvatarChange} ref={profPhInputRef}/>
+                                   onChange={handleProfilePhotoChange} ref={profPhInputRef}/>
                             <button type="button"
                                     className=" mt-3 ml-6 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
                                     onClick={handleButtonClick2}>Update profile picture
                             </button>
-
+                            {profilePhotoValid && <span className="text-red-600 ml-5">{profilePhotoValid}</span>}
                         </div>
                     </div>
                 </div>
@@ -230,11 +317,11 @@ alert('error');
                         every 14 days.</p>
                     <input type="text"
                            className="mt-4 pl-1 w-[51.5rem] h-[3.0625rem] shrink-0 rounded-[0.625rem] border-[0.0625rem] border-gray-400"
-                           value={channelNickName} onChange={(e) => {
-                        setChannelNickName(e.target.value);
-                        setChannelNickNameValid(validateChannelNickName(e.target.value));
-                    }}/>
-                    {!channelNameValid && <span className="span_error">Некорректное название</span>}
+                           value={channelNickName} onChange={handleChannelNickChange}/><br/>
+
+                    {!channelNickNameValid && (
+                        <span className="text-red-600 ml-5">{errorChannelNickName}</span>)}
+
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0 mt-8">
                     <h2 className="block font-semibold">Channel description</h2>
@@ -244,8 +331,8 @@ alert('error');
                 </div>
                 <div className="w-[62.5rem] h-[7rem] shrink-0  mt-8">
                     <h2 className="block font-semibold">Channel URL</h2>
-                    <input type="text" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
-                           value=""/>
+                    <input type="text" readOnly className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
+                           value={channelUrl}/>
                     <br/>
                     <button className="mt-2 text-blue-600 hover:underline">copy</button>
                 </div>

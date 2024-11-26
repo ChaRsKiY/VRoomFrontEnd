@@ -6,6 +6,7 @@ import VideoCard from "@/components/pages/home/main/video-card";
 import { useInView } from 'framer-motion';
 import VideoSkeleton from "@/components/styled/video-skeleton";
 
+
 interface IProps {
     videolist: IVideo[]
 }
@@ -24,7 +25,7 @@ const ClientScrollBlock: React.FC<IProps> = ({ videolist }) => {
         setLoading(true);
 
         try {
-            const response = await fetch('/api/videos?offset=' + videos.length);
+            const response = await fetch('/videos?offset=' + videos.length);
             if (response.ok) {
                 const newVideos: IVideo[] = await response.json();
                 if (newVideos.length > 0) {

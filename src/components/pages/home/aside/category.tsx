@@ -1,8 +1,8 @@
 import React from 'react'
 import Link from "next/link";
 import Image from "next/image";
-import {ICategoryBlock} from "@/components/pages/home/aside/category.interface";
-import {validateCategoryBlock} from "@/lib/category.utils";
+import { ICategoryBlock } from "@/components/pages/home/aside/category.interface";
+import { validateCategoryBlock } from "@/lib/category.utils";
 
 const CategoryBlock: React.FC<ICategoryBlock> = ({ title, data }: ICategoryBlock) => {
     validateCategoryBlock({ title, data })

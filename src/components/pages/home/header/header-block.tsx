@@ -1,10 +1,10 @@
 "use client"
 
 import React from 'react'
-import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
-import {ITranslationFunction} from "@/types/translation.interface";
-import {useTranslation} from "next-i18next";
-import {useRouter} from "next/navigation";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ITranslationFunction } from "@/types/translation.interface";
+import { useTranslation } from "next-i18next";
+import { useRouter } from "next/navigation";
 import NotificationButton from "@/components/pages/home/header/notitification-button";
 import BurgerMenu from "@/components/pages/home/header/burger-menu";
 

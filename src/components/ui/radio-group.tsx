@@ -22,18 +22,17 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({ value, onValueChange, ch
   );
 };
 
-// Типізація для RadioGroupItem
 interface RadioGroupItemProps {
   value: string;
   id: string;
   selectedValue: string;
   onValueChange: (value: string) => void;
-  children: ReactNode; // Діти компонента мають бути типу ReactNode
+  children: ReactNode; 
 }
 
 export const RadioGroupItem: React.FC<RadioGroupItemProps> = ({ value, id, selectedValue, onValueChange, children }) => {
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2" data-selectedvalue={selectedValue}>
       <input
         type="radio"
         id={id}

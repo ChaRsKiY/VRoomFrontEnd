@@ -5,10 +5,10 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
 import PostList from "@/components/pages/posts/posts"
 
-const PostListPage: React.FC = async ({ params }: any) => {
-    
-    const { id } = params;
-    const { t } = await initTranslations(params.locale, ['common', 'categories'])
+const PostListPage: React.FC = async ({params}: any) => {
+
+    const {id} = params;
+    const {t} = await initTranslations(params.locale, ['common', 'categories'])
 
 
     return (
@@ -18,8 +18,8 @@ const PostListPage: React.FC = async ({ params }: any) => {
                 <AsideHome t={t}/>
             </div>
             <div className="pl-[20%] w-full max-w-[1300px] flex justify-center max-lg:pl-[12%] max-sm:pl-0">
-                {/* <CreatePost  id={id}/> */}
-                <PostList channelId={id} />
+                {/* <CreatePost  [id]={[id]}/> */}
+                <PostList channelId={id}/>
             </div>
             <div>
 

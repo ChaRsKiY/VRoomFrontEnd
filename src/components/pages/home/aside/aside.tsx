@@ -17,6 +17,7 @@ import SmallCategoryBlock from "@/components/pages/home/aside/small-category";
 import {ITranslationFunction} from "@/types/translation.interface";
 import MiniFooter from "@/components/pages/home/aside/mini-footer";
 import CategorySubscription from './category-subscription';
+import CategoryVideos from './categoryvideos';
 
 
 interface IAsideHomeProps {
@@ -76,8 +77,13 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
+                    <CategoryVideos />
 
-                    <CategoryBlock data={mainPageCategories} title="Categories"/>
+                    {/* <div className="px-3 my-3">
+                        <div className="h-[1px] bg-neutral-300 rounded-full"/>
+                    </div>
+
+                    <CategoryBlock data={mainPageCategories} title="Categories"/> */}
 
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>

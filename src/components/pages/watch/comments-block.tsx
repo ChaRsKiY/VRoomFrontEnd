@@ -8,17 +8,17 @@ import { ICommentVideo } from '@/types/commentvideo.interface';
 import { useUser } from '@clerk/nextjs';
 import { IUser } from '@/types/user.interface';
 import { IAnswerCommentVideo } from '@/types/answercommentvideo.interface';
-// import { initializeConnection, subscribeToMessages, closeConnection, sendMessage } from '@/services/signalr.service';
 import { signalRService } from '@/services/signalr.service';
+import api from '@/services/axiosApi';
 
 interface MyProps {
-    videoid:number;
+    videoid: number;
 
-  }
+}
 
 
-const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
-   
+const CommentsBlock: React.FC<MyProps> = ({ videoid }) => {
+
     const { user } = useUser();
     const [comments, setComments] = useState<ICommentVideo[]>([]);
     const [allComments, setAllComments] = useState(0);
@@ -26,18 +26,16 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
     const [isSortMenuOpen, setSortMenuOpen] = useState(false); // Состояние для управления видимостью меню сортировки
     const [sortMethod, setSortMethod] = useState<'date' | 'likes'>('date'); // Состояние для метода сортировки
     const [answersByComment, setAnswersByComment] = useState<{ [key: number]: IAnswerCommentVideo[] }>({});
-   // const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
+    // const [socket, setSocket] = useState<WebSocket | null>(null); // WebSocket состояние
 
     // Получение текущего пользователя
     const getUser = async (user: any, setUser: (prev: IUser) => void) => {
         try {
-            if(user){
-                const response = await fetch('https://localhost:7154/api/ChannelSettings/getinfochannel/' + user?.id, {
-                    method: 'GET',
-                });
-    
-                if (response.ok) {
-                    const data: IUser = await response.json();
+            if (user) {
+                const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
+
+                if (response.status === 200) {
+                    const data: IUser = await response.data;
                     setUser(data);
                 } else {
                     console.error('Ошибка при получении пользователя:', response.statusText);
@@ -48,14 +46,12 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
         }
     };
 
-    const getAnswers = async  (commentId: number) => {
+    const getAnswers = async (commentId: number) => {
         try {
-            const response = await fetch('https://localhost:7154/api/AnswerVideo/getbycommentid/' + commentId, {
-                method: 'GET',
-            });
+            const response = await api.get('/AnswerVideo/getbycommentid/' + commentId);
 
-            if (response.ok) {
-                const data: IAnswerCommentVideo[] = await response.json();
+            if (response.status === 200) {
+                const data: IAnswerCommentVideo[] = await response.data;
                 setAnswersByComment((prevAnswers) => ({
                     ...prevAnswers,
                     [commentId]: data,
@@ -63,7 +59,7 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
 
 
                 console.log('answers успешно получены:', data);
-                console.log('*****'+ answersByComment);
+                console.log('*****' + answersByComment);
             }
             else if (response.status === 404) {
                 // Если ответов нет (404), устанавливаем пустой массив для этого комментария
@@ -72,7 +68,7 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
                     [commentId]: [],
                 }));
                 console.log(`Ответов для комментария ${commentId} не найдено (404).`);
-                console.log('*****'+ answersByComment);
+                console.log('*****' + answersByComment);
             } else {
                 console.error('Ошибка при получении списка ответов:', response.statusText);
             }
@@ -84,12 +80,10 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
     // Получение комментариев с сервера через обычный HTTP запрос
     const getComments = async () => {
         try {
-            const response = await fetch('https://localhost:7154/api/CommentVideo/getbyvideoid/' + videoid, {
-                method: 'GET',
-            });
+            const response = await api.get('/CommentVideo/getbyvideoid/' + videoid);
 
-            if (response.ok) {
-                const data: ICommentVideo[] = await response.json();
+            if (response.status === 200) {
+                const data: ICommentVideo[] = await response.data;
 
                 setAllComments(data.length);
 
@@ -144,20 +138,20 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
                 return 1;
             }
             if (sortMethod === 'date') {
-                return sortByDate([a, b])[0] === a ? -1 : 1; 
+                return sortByDate([a, b])[0] === a ? -1 : 1;
             } else if (sortMethod === 'likes') {
-                return sortByLikes([a, b])[0] === a ? -1 : 1; 
+                return sortByLikes([a, b])[0] === a ? -1 : 1;
             }
             return 0; // Если нет метода сортировки, ничего не меняем
         });
         setComments(sortedData);
     };
 
-   
+
     useEffect(() => {
-  // Обработчик сообщений
-  const handleMessage = (messageType: string, payload: any) => {
-    console.log('Сообщение от SignalR сервера:', messageType);
+        // Обработчик сообщений
+        const handleMessage = (messageType: string, payload: any) => {
+            console.log('Сообщение от SignalR сервера:', messageType);
 
             if (messageType === 'new_comment') {
 
@@ -171,41 +165,41 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
             if (messageType === 'update_comment') {
                 const upComment = payload;
                 setComments((prevComments) =>
-                  prevComments.map((com) =>
-                    com.id === upComment.id
-                      ? { ...com, isEdited: upComment.isEdited, comment:upComment.text } // Обновляем количество лайков
-                      : com
-                  )
+                    prevComments.map((com) =>
+                        com.id === upComment.id
+                            ? { ...com, isEdited: upComment.isEdited, comment: upComment.text } // Обновляем количество лайков
+                            : com
+                    )
                 );
-              }
+            }
         };
- 
-    signalRService.onMessageReceived(handleMessage);
 
-    // Очистка подписки при размонтировании компонента
-    return () => {
-        signalRService.offMessageReceived(handleMessage);
-    };
+        signalRService.onMessageReceived(handleMessage);
+
+        // Очистка подписки при размонтировании компонента
+        return () => {
+            signalRService.offMessageReceived(handleMessage);
+        };
     }, [videoid, comments]);
 
     // Получаем комментарии при загрузке компонента
     useEffect(() => {
-        getUser(user,setUser);
+        getUser(user, setUser);
         getComments();
-       
+
     }, [videoid, user, sortMethod]);
 
     useEffect(() => {
         comments.forEach((comment) => {
             getAnswers(comment.id);
         });
-       
+
         console.log('ответы------:', answersByComment);
 
     }, [comments]);
 
     return (
-        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }} style={{marginBottom:"100px"}}>
+        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }} style={{ marginBottom: "100px" }}>
             <div className="flex items-center space-x-8">
                 <div className="font-[500]">{allComments} Comments</div>
                 <div
@@ -231,13 +225,13 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
                     {isSortMenuOpen && (
                         <div className="absolute bg-white border border-gray-300 rounded-md shadow-lg left-0 top-full mt-2 z-10 w-[180px]" style={{ paddingTop: '6px', paddingBottom: '6px' }}>
                             <div style={{ textAlign: 'center' }}
-                                 onClick={() => handleSortMethodChange('likes')}
-                                 className={`cursor-pointer p-2 ${sortMethod === 'likes' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
+                                onClick={() => handleSortMethodChange('likes')}
+                                className={`cursor-pointer p-2 ${sortMethod === 'likes' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
                                 By rating
                             </div>
                             <div style={{ textAlign: 'center' }}
-                                 onClick={() => handleSortMethodChange('date')}
-                                 className={`cursor-pointer p-2 ${sortMethod === 'date' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
+                                onClick={() => handleSortMethodChange('date')}
+                                className={`cursor-pointer p-2 ${sortMethod === 'date' ? 'bg-gray-400' : 'hover:bg-gray-200'}`}>
                                 New first
                             </div>
                         </div>
@@ -248,7 +242,7 @@ const CommentsBlock: React.FC <MyProps>= ({videoid}) => {
             <div style={{ marginTop: '30' }}>
                 {iAmUser ? <MyComment videoId={videoid} amuser={iAmUser} /> : <p></p>}
                 <br />
-                <Comments id={videoid} comments={comments}  answers={answersByComment || []}/>
+                <Comments id={videoid} comments={comments} answers={answersByComment || []} />
             </div>
         </div>
     );

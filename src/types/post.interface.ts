@@ -4,7 +4,9 @@ export interface IPost {
     channelSettingsId: number,
     date: Date,
     photo?: string,
-    video?:string,
-    likeCount:number,
-    dislikeCount:number,
+    video?: string,
+    likeCount: number,
+    dislikeCount: number,
+    type?: string,
+    options: []
 }
