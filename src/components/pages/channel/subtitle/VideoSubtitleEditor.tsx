@@ -1,0 +1,813 @@
+
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import api from '@/services/axiosApi';
+import VideoPlayer from '../../watch/player';
+import { BiArrowFromTop, BiPlus, BiPlusCircle, BiSolidKeyboard, BiTrash, BiX } from 'react-icons/bi';
+import '@/styles/modalsubtitles.css';
+import handler from '@/services/upload';
+
+
+interface IProps {
+    videoId: number;
+    onClose: () => void;
+}
+
+const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
+
+    const [duration, setDuration] = useState(0); // Общая длина видео
+    const [currentTime, setCurrentTime] = useState(0); // Текущее время на шкале
+    const [videoUrl, setVideoUrl] = useState<string | null>(null); // URL видео
+    // const [subtitles, setSubtitles] = useState<{ start: number; end: number; text: string }[]>([]);
+    // const [currentSubtitle, setCurrentSubtitle] = useState({ start: 0, end: 0, text: '', });
+    const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    // const [currentStart, setCurrentSratr] = useState(0);
+    // const [currentEnd, setCurrentEnd] = useState(0);
+    const [timePoints, setTimePoints] = useState<number[]>([]);
+    const [deleteMenuOpenIndex, setDeleteMenuOpenIndex] = useState<number | null>(null);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+    const start = forms[selectedIndex]?.start || 0;
+    const end = forms[selectedIndex]?.end || 0;
+    const startPercentage = (start / duration) * 100;
+    const endPercentage = (end / duration) * 100;
+    const percentage = (currentTime / duration) * 100;
+    const [selectedLanguage, setSelectedLanguage] = useState("Русский");
+    const languages = ["Русский", "English", "Deutsch", "Español"];
+    const [languageIndex, setLanguageIndex] = useState<number>(0);
+    const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
+    const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
+    const [isValid1, setIsValid1] = useState<boolean>(true);
+    const [isValid2, setIsValid2] = useState<boolean>(true);
+
+
+    // const parseVTTFile = (file: File) => {
+    //     const reader = new FileReader();
+
+    //     reader.onload = (e) => {
+    //       const content = e.target?.result as string;
+
+    //       console.log("Raw content:", content);
+
+    //       // Убираем пустые строки и заголовок WEBVTT
+    //       const lines = content.split("\n").map((line) => line.trim()).filter((line) => line !== "" && line !== "WEBVTT");
+
+    //       const subtitles = [];
+    //       let i = 0;
+
+    //       while (i < lines.length) {
+    //         const index = parseInt(lines[i], 10); 
+    //         const [start, end] = lines[i + 1].split(" --> "); 
+    //         const text = lines[i + 2]; 
+    //         subtitles.push({
+    //           start: parseVTTTime(start),
+    //           end: parseVTTTime(end),
+    //           text,
+    //         });
+    //         i += 3; 
+    //       } 
+    //       console.log("Parsed subtitles:", subtitles);
+    //       setForms(subtitles);
+    //     };
+
+    //     reader.readAsText(file);
+    //   };
+
+    const parseVTTFile = (file: File) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const content = e.target?.result as string;
+
+            console.log("Raw content:", content);
+
+            const lines = content.split("\n").map((line) => line.trim()).filter((line) => line !== "" && line !== "WEBVTT");
+
+            const subtitles = [];
+            let i = 0;
+
+            while (i < lines.length) {
+                const index = parseInt(lines[i], 10); 
+                const [start, end] = lines[i + 1].split(" --> "); 
+                const textLines = [];
+                let j = i + 2;
+                while (j < lines.length && isNaN(parseInt(lines[j], 10))) {
+                    textLines.push(lines[j]);
+                    j++;
+                }
+                subtitles.push({
+                    index,
+                    start: parseVTTTime(start),
+                    end: parseVTTTime(end),
+                    text: textLines.join(" "),
+                });
+                i = j;
+            }
+
+            console.log("Parsed subtitles:", subtitles);
+            setForms(subtitles);
+        };
+
+        reader.readAsText(file);
+    };
+
+    const parseVTTTime = (time: string) => {
+        const [hours, minutes, seconds] = time.split(":");
+        const [sec, millis] = seconds.split(".");
+        return (
+            parseInt(hours, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(sec, 10) +
+            parseFloat("0." + millis)
+        );
+    };
+
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setFileSubtitle(file);
+        console.log("File:", file);
+        console.log("url", fileSubtitle?.name)
+        if (file && file.type === "text/vtt") {
+            const fileURL = URL.createObjectURL(file);
+            setUrlSubtitles(fileURL); 
+            console.log("Generated fileURL:", fileURL);
+            // uploadSubtitleToServer(file);
+            // console.log("!!////");
+            parseVTTFile(file);
+        } else {
+            alert("Пожалуйста, загрузите файл формата .vtt");
+        }
+    };
+    const uploadSubtitleToServer = async (file: File) => {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (response.ok) {
+            alert("Субтитры успешно загружены.");
+        } else {
+            alert("Ошибка при загрузке субтитров.");
+        }
+    };
+
+    useEffect(() => {
+        if (urlSubtitles) {
+            console.log("Updated urlSubtitles:", urlSubtitles);
+        }
+    }, [urlSubtitles]);
+
+    const handleLanguageChange = () => {
+        setLanguageIndex(languageIndex + 1)
+        if (languageIndex === 3)
+            setLanguageIndex(0)
+        setSelectedLanguage(languages[languageIndex]);
+    };
+
+    const formatTime = (time: number) => {
+        const hours = Math.floor(time / 3600);
+        const minutes = Math.floor((time % 3600) / 60);
+        const seconds = Math.floor(time % 60);
+        const milliseconds = Math.floor((time % 1) * 1000);
+
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(milliseconds).padStart(3, '0')}`;
+    };
+
+    const formatTime2 = (time: number) => {
+        const hours = Math.floor(time / 3600);
+        const minutes = Math.floor((time % 3600) / 60);
+        const seconds = Math.floor(time % 60);
+
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+
+    const parseTime2 = (time: string) => {
+        const [hours, minutes, seconds] = time.split(':').map(Number);
+        return hours * 3600 + minutes * 60 + seconds;
+    };
+    const parseTime = (time: string) => {
+        const [hours, minutes, secondsWithMillis] = time.split(':');
+        const [seconds, millis = '0'] = secondsWithMillis.split('.');
+
+        return (
+            parseInt(hours, 10) * 3600 +
+            parseInt(minutes, 10) * 60 +
+            parseInt(seconds, 10) +
+            parseFloat(`0.${millis}`)
+        );
+    };
+
+    const handleFormChangeNEW = (index: number, name: string, value: string) => {
+        const updatedForms = [...forms];
+        const timeInSeconds = parseTime2(value);
+        updatedForms[index] = { ...updatedForms[index], [name]: timeInSeconds };
+        setForms(updatedForms);
+    };
+
+    const handleTimeChangeNEW = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = parseFloat(e.target.value);
+        setCurrentTime(newTime);
+
+        if (videoRef.current) {
+            videoRef.current.currentTime = newTime;
+        }
+    };
+
+    const validateSubtitles = () => {
+
+        forms.forEach((subtitle, index) => {
+            if (subtitle.start >= subtitle.end || !subtitle.text.trim()) {
+                alert(`Ошибка в субтитре #${index + 1}: 
+              - Начало должно быть меньше конца.
+              - Текст не должен быть пустым.`);
+                setIsValid1(false);
+            }
+        });
+
+        if(isValid1)
+        {
+            setIsValid2(true);
+        }
+        else{
+            setIsValid2(false);
+            setIsValid1(true);
+        }
+    };
+
+    const downloadSubtitlesAsVTT = () => {
+        validateSubtitles();
+        if (isValid2) {
+            const vttContent = [
+                'WEBVTT\n\n',
+                ...forms.map(
+                    (subtitle, index) =>
+                        `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+                ),
+            ].join('');
+
+            const blob = new Blob([vttContent], { type: 'text/vtt' });
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'subtitles.vtt';
+            link.click();
+
+            URL.revokeObjectURL(link.href);
+        }
+    };
+
+    const uploadVTTToBackend = async (file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await api.post('Video/uploadsubtitles', formData);
+
+            if (response.status === 200) {
+                alert('Файл успешно загружен на сервер!');
+            } else {
+                alert('Ошибка загрузки файла.');
+            }
+        } catch (error) {
+            console.error('Ошибка при загрузке файла:', error);
+        }
+    };
+
+    const saveSubtitlesToBackend = async () => {
+        validateSubtitles();
+        if (isValid2) {
+            const vttContent = [
+                'WEBVTT\n',
+                ...forms.map(
+                    (subtitle, index) =>
+                        `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+                ),
+            ].join('');
+
+            const blob = new Blob([vttContent], { type: 'text/vtt' });
+            const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+
+            await uploadVTTToBackend(file);
+        }
+    };
+
+    const addForm = () => {
+        setForms([...forms, { text: '', start: 0, end: 0 }]);
+    };
+
+    const removeForm = (index: number) => {
+        setForms(forms.filter((_, i) => i !== index));
+        closeDelete();
+    };
+
+    const handleFormChange = (index: number, name: string, value: string | number) => {
+        const updatedForms = forms.map((form, i) =>
+            i === index ? { ...form, [name]: value } : form
+        );
+        setForms(updatedForms);
+    };
+    const clearText = (index: number) => {
+        handleFormChange(index, "text", "");
+    };
+
+    useEffect(() => {
+        async function fetchVideo() {
+            try {
+                const res = await api.get(`/Video/${videoId}`);
+                if (res.status === 200) {
+                    const data = await res.data;
+                    setVideoUrl(data.videoUrl);
+                } else {
+                    console.error('Ошибка загрузки видео');
+                    setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
+                }
+            } catch (error) {
+                console.error('Ошибка запроса:', error);
+                setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
+            }
+        }
+        fetchVideo();
+    }, [videoId]);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.addEventListener('loadedmetadata', () => {
+                setDuration(videoRef.current!.duration);
+            });
+
+            videoRef.current.addEventListener('timeupdate', () => {
+                setCurrentTime(videoRef.current!.currentTime);
+            });
+        }
+    }, [videoUrl]);
+
+
+    // Обновляем видео при выборе времени на шкале
+    const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newTime = parseFloat(e.target.value);
+        setCurrentTime(newTime);
+
+        if (videoRef.current) {
+            videoRef.current.currentTime = newTime;
+        }
+    };
+
+    // Форматируем время в mm:ss
+    //   const formatTime = (time: number) => {
+    //     const minutes = Math.floor(time / 60);
+    //     const seconds = Math.floor(time % 60);
+    //     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    //   };
+
+    // const handleSubtitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target;
+    //     setCurrentSubtitle({ ...currentSubtitle, [name]: name === 'text' ? value : Number(value) });
+    // };
+
+    // const handleSubtitleChangeText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    //     const { name, value } = e.target;
+    //     setCurrentSubtitle({ ...currentSubtitle, [name]: name === 'text' ? value : Number(value) });
+    // };
+
+    const handleFormChangeValue = (
+        index: number,
+        name: string,
+        value: string | number
+    ) => {
+        setForms((prevForms) =>
+            prevForms.map((form, i) =>
+                i === index ? { ...form, [name]: value } : form
+            )
+        );
+    };
+
+    const insertForm = (index: number) => {
+        const newForm = { text: '', start: 0, end: 0 };
+        setForms((prevForms) => {
+            const updatedForms = [...prevForms];
+            updatedForms.splice(index, 0, newForm);
+            return updatedForms;
+        });
+    };
+
+    // const addSubtitle = () => {
+    //     if (currentSubtitle.start < currentSubtitle.end && currentSubtitle.text.trim()) {
+    //         setSubtitles([...subtitles, currentSubtitle]);
+    //         setCurrentSubtitle({ start: 0, end: 0, text: '' });
+    //     } else {
+    //         alert('Укажите корректные временные метки и текст субтитров.');
+    //     }
+    // };
+
+    // const removeSubtitle = (index: number) => {
+    //     setSubtitles(subtitles.filter((_, i) => i !== index));
+    // };
+
+    // const saveSubtitles = async () => {
+    //     try {
+    //         const res = await api.post(`/Video/subtitleadd/${videoId}`, subtitles);
+
+    //         if (res.status == 200) {
+    //             alert('Субтитры сохранены успешно!');
+    //         } else {
+    //             alert('Ошибка сохранения субтитров.');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка сохранения:', error);
+    //     }
+    // };
+
+    // const setTimeCode = () => {
+    //     setForms((prevForms) =>
+    //         prevForms.map((form, i) =>
+    //             i === selectedIndex ? { ...form, ["start"]: currentTime } : form
+    //         )
+    //     );
+    // };
+
+    // const setTimeCode = () => {
+    //     setTimePoints((prevPoints) => {
+    //         // Если есть две точки времени — сброс
+    //         if (prevPoints.length === 2) {
+    //             // Обнуляем точки и форму
+    //             setForms((prevForms) =>
+    //                 prevForms.map((form, i) =>
+    //                     i === selectedIndex ? { ...form, start: 0, end: 0 } : form
+    //                 )
+    //             );
+    //             return [];
+    //         }
+    //         // Добавляем текущую точку
+    //         const updatedPoints = [...prevPoints, currentTime];
+    //         if (updatedPoints.length === 2) {
+    //             // Если уже выбраны start и end, обновляем форму
+    //             setForms((prevForms) =>
+    //                 prevForms.map((form, i) =>
+    //                     i === selectedIndex
+    //                         ? { ...form, start: updatedPoints[0], end: updatedPoints[1] }
+    //                         : form
+    //                 )
+    //             );
+    //         }
+
+    //         return updatedPoints;
+    //     });
+    //   //  generateGradient();
+    // };
+
+    // const generateGradient = () => {
+    //     const gradients = forms.map(({ start, end }) => {
+    //       const startPercentage = (start / duration) * 100;
+    //       const endPercentage = (end / duration) * 100;
+    //       return `#fff ${startPercentage}%, #fff ${endPercentage}%`;
+    //     });
+
+    //     // Добавляем чёрный цвет для неактивных областей
+    //     return `linear-gradient(to right, #000 0%, ${gradients.join(
+    //       ', '
+    //     )}, #000 100%)`;
+    //   };
+
+    const setTimeCode = () => {
+        setTimePoints((prevPoints) => {
+            const sortedPoints = [...prevPoints].sort((a, b) => a - b);
+            if (sortedPoints.length > 2) {
+
+                setForms((prevForms) =>
+                    prevForms.map((form, i) =>
+                        i === selectedIndex ? { ...form, start: sortedPoints[1], end: sortedPoints[2] } : form
+                    )
+                );
+                return [];
+            }
+            const updatedPoints = [...prevPoints, currentTime];
+            const sortedPoints2 = [...updatedPoints].sort((a, b) => a - b);
+
+            if (sortedPoints2.length === 1) {
+                setForms((prevForms) =>
+                    prevForms.map((form, i) =>
+                        i === selectedIndex
+                            ? { ...form, start: sortedPoints2[0] }
+                            : form
+                    )
+                );
+            }
+            if (sortedPoints2.length === 2) {
+                setForms((prevForms) =>
+                    prevForms.map((form, i) =>
+                        i === selectedIndex
+                            ? { ...form, start: sortedPoints2[0], end: sortedPoints2[1] }
+                            : form
+                    )
+                );
+            }
+
+            return sortedPoints2;
+        });
+        //  generateGradient();
+    };
+
+    const toggleDeleteMenu = (index: number, event: React.MouseEvent) => {
+        if (deleteMenuOpenIndex === index) {
+            setDeleteMenuOpenIndex(null); // Закрываем, если уже открыто
+        } else {
+            setDeleteMenuOpenIndex(index); // Открываем для конкретного элемента
+            setIsOpen(true);
+        }
+    };
+
+
+    const closeDelete = () => {
+        if (isOpen) {
+            setDeleteMenuOpenIndex(null);
+            setIsOpen(false);
+        }
+    };
+
+    const changeIndex = (index: number) => {
+        setSelectedIndex(index);
+        setTimePoints([]);
+    }
+
+    return (
+        <div className="subtitle-editor" onClick={closeDelete}>
+
+            <div style={{ display: 'flex', justifyContent: "space-around" }}>
+                <div style={{ width: "100%", backgroundColor: '#424242 ', color: "white" }}>
+                    <div style={{ padding: "10px", borderBottom: "0.5px solid #bdbdbd" }}>
+                        <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                            <button style={{ padding: "5px", borderRadius: "8px" }}
+                                onClick={handleLanguageChange}>
+                                <BiSolidKeyboard style={{ display: 'inline', marginRight: '5px' }} />
+                                <label>{languages[languageIndex]}</label></button>
+
+
+                            <div>
+                                <button className='modal-button'>Добавить в черновик</button>
+                                <button className='publish-button'
+                                    onClick={saveSubtitlesToBackend}>Опубликовать</button>
+                                <button className='modal-button ' onClick={downloadSubtitlesAsVTT}>
+                                    <BiArrowFromTop title='скачать' />
+                                </button>
+                                <button className='modal-button ' onClick={onClose}>
+                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Выйти' />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        {/* Форма добавления субтитров */}
+                        <div >
+                            <button onClick={addForm} style={{ margin: '20px', marginBottom: '12px', marginTop: '12px' }}
+                                className='modal-button'>
+                                + Добавить подпись</button>
+                            <div style={{
+                                padding: '5px', backgroundColor: '#424242 ', color: "white", width: '100%',
+                                maxHeight: "330px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "330px",
+
+                            }}
+                                className="custom-scroll" >
+                                {forms.map((form, index) => (
+                                    <div className="subtitle-form " style={{
+                                        padding: '5px',
+                                        backgroundColor: index == selectedIndex ? "black" : ""
+                                    }}
+                                        onClick={() => { changeIndex(index) }} >
+                                        <div style={{ display: 'flex', }}>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
+                                                <small>{index+1}</small>
+                                                <button  >
+                                                    <BiPlusCircle onClick={() => insertForm(index + 1)} title='Вставить подпись' />
+                                                </button>
+                                            </div>
+                                            <div style={{ marginRight: '3px' }}  >
+
+                                                <textarea
+                                                    className="custom-scroll"
+                                                    name="text"
+                                                    //value={currentSubtitle.text}
+                                                    //onChange={handleSubtitleChangeText}
+                                                    value={form.text}
+                                                    onChange={(e) => handleFormChangeValue(index, 'text', e.target.value)}
+                                                    placeholder={index.toString()}
+                                                    style={{
+                                                        border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
+                                                        backgroundColor: '#424242 ', color: "white", borderRadius: "12px", minWidth: '300px'
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
+                                                <div>
+                                                    <BiX onClick={() => clearText(index)} title='Очистить текс' />
+                                                </div>
+
+                                            </div>
+                                            <div style={{ marginRight: "10px", }}>
+                                                <div style={{ margin: '3px' }}>
+                                                    <input
+                                                        // type="number"
+                                                        type="text"
+                                                        name="start"
+                                                        // placeholder='00:00'
+                                                        // value={currentSubtitle.start}
+                                                        // onChange={handleSubtitleChange}
+                                                        // value={form.start}
+                                                        value={formatTime2(form.start)}
+                                                        onChange={(e) =>
+                                                            //handleFormChange(index, 'start', parseFloat(e.target.value))
+                                                            handleFormChangeNEW(index, 'start', e.target.value)
+                                                        }
+                                                        min={0}
+                                                        style={{
+                                                            border: '1px solid #bdbdbd', padding: '3px', width: '80px',
+                                                            backgroundColor: '#424242 ', color: "white", borderRadius: "12px"
+                                                        }}
+                                                    />
+                                                </div>
+                                                <div style={{ margin: '3px' }}>
+                                                    <input
+                                                        // type="number"
+                                                        type="text"
+                                                        name="end"
+                                                        // placeholder='00:00'
+                                                        // value={currentSubtitle.end}
+                                                        //onChange={handleSubtitleChange}
+                                                        // value={form.end}
+                                                        value={formatTime2(form.end)}
+                                                        onChange={(e) =>
+                                                            // handleFormChange(index, 'end', parseFloat(e.target.value))
+                                                            handleFormChangeNEW(index, 'end', e.target.value)
+                                                        }
+                                                        min={0}
+                                                        style={{
+                                                            border: '1px solid #bdbdbd', padding: '3px', width: '80px',
+                                                            backgroundColor: '#424242 ', color: "white", borderRadius: "12px"
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "end" }}  >
+
+                                                <div>
+                                                    <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
+                                                        style={{ margin: '5px', }}
+                                                        title='удалить' />
+                                                </div>
+                                                {deleteMenuOpenIndex === index ? (
+                                                    <div
+                                                        className="absolute bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[140px] subtitle-editor"
+                                                        style={{
+                                                            paddingTop: '4px',
+                                                            paddingBottom: '4px',
+                                                            position: 'absolute',
+                                                            border: '2px solid brown'
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
+                                                            style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
+                                                            onClick={() => removeForm(index)}>
+                                                            <span >Удалить</span></div>
+
+
+                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
+                                                            style={{ display: 'flex', justifyContent: 'center' }}
+                                                            onClick={closeDelete}>
+                                                            <span >Отмена</span></div>
+                                                    </div>
+                                                ) : (<></>)}
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                ))}
+                            </div>
+
+                        </div>
+
+                        <div style={{ padding: '20px', paddingLeft: '0' }}>
+                            {/* Видео */}
+                            {/* {videoUrl ? (
+        
+        <VideoPlayer src={videoUrl}  id={videoId}/>
+      {/* ) : (
+      <p>Загрузка видео...</p>
+      )} */}
+                            {videoUrl && (
+                                // <video
+                                //     ref={videoRef}
+                                //     controls
+                                //     style={{ width: '800px', marginLeft: '3px' }}
+                                // >
+                                //     <source src={videoUrl} type="video/mp4" />
+                                //     {urlSubtitles && <track src={urlSubtitles} kind="subtitles" srcLang="en" />}
+                                //     Ваш браузер не поддерживает видео.
+                                // </video>
+                                // <video ref={videoRef} controls style={{ width: '800px', marginLeft: '3px' }}>
+                                //     <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+
+                                //         {/* <track src="/subtitles" kind="subtitles"  /> */}
+
+                                //      {fileSubtitle && (
+                                //          <track src={URL.createObjectURL(fileSubtitle)} kind="subtitles" srcLang="ru"  />                                      
+                                //     )}
+                                // </video>
+
+                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
+                                    <source src={videoUrl} type="video/mp4" />
+                                    {fileSubtitle && (
+                                        <track
+                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                            kind="subtitles"
+                                            srcLang="ru"
+                                            label="Русский"
+                                            default
+                                        />
+                                    )}
+                                    Ваш браузер не поддерживает видео.
+                                </video>
+
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white' }}>
+                <span>{formatTime(currentTime)}</span>
+                <span >{formatTime(duration)}</span>
+            </div>
+            <div style={{ color: "white", backgroundColor: '#424242 ', }}   >
+                <div className="custom-scroll"
+                    ref={scrollContainerRef}
+                    style={{
+                        overflowX: "scroll",
+                        whiteSpace: "nowrap",
+                        width: "100%", 
+                        maxWidth: "100%", // Видимая область для 5 минут
+                        backgroundColor: "#424242",
+                        padding: "10px 0",
+                        borderRadius: "10px",
+
+                    }}
+                >
+                    <input
+                        type="range"
+                        min="0"
+                        max={duration}
+                        step="0.01" // Позволяет выбирать с точностью до 0.01 сек
+                        value={currentTime}
+                        onChange={handleTimeChangeNEW}
+                        onDoubleClick={setTimeCode}
+
+                        style={{
+                            // width: '100%',
+                            width: (duration / 300) >= 1 ? `${(duration / 300) * 100}%` : '100%',
+                            marginBottom: '10px',
+                            // marginTop: '2px',
+                            appearance: 'none',
+                            position: 'relative',
+                            height: '6px',
+                            background: `linear-gradient(
+                          to right,
+                          #000 0%,
+                          #000 ${startPercentage}%,
+                          #fff ${startPercentage}%,
+                          #fff ${endPercentage}%,
+                          #000 ${endPercentage}%,
+                          #000 100%
+                        )`,
+                            borderRadius: '3px',
+                            outline: 'none',
+                        }}
+                    />
+
+
+                </div>
+            </div>
+
+            <div style={{ marginTop: "10px" }}>
+                <label htmlFor="subtitle-upload" style={{ cursor: "pointer" }}>
+                    Загрузить файл субтитров (.vtt)
+                </label>
+                <input
+                    id="subtitle-upload"
+                    type="file"
+                    accept=".vtt"
+                    onChange={handleFileUpload}
+                    style={{ display: "block", marginTop: "10px" }}
+                />
+            </div>
+
+
+        </div>
+    );
+};
+
+export default VideoSubtitleEditor;
