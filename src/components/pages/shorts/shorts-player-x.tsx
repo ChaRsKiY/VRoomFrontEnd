@@ -9,6 +9,9 @@ import {IoEyeOutline} from "react-icons/io5";
 import {formatNumber} from "@/utils/format";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {traceSegment} from "@jridgewell/trace-mapping";
+import {IAnswerCommentVideo} from "@/types/answercommentvideo.interface";
+import {HistoryOfBrowsing} from "@/types/history-of-browsing";
+import {useUser} from "@clerk/nextjs";
 
 class WatchHistory {
     constructor(public videoId: number, public lastViewedPosition: number) {
@@ -17,17 +20,20 @@ class WatchHistory {
 
 interface IShortsPlayerXProps {
     src: string;
-    id: number;
+    videoId: number;
     viewCount: number;
     isActive: boolean;
 }
 
-const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isActive}) => {
+const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, videoId, viewCount, isActive}) => {
+    const {isSignedIn, user} = useUser();
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
     const volumeSliderRef = useRef<HTMLInputElement | null>(null);
     const videoContainerRef = useRef<HTMLDivElement | null>(null);
+    const [isHistoryUpdateInProgress, setIsHistoryUpdateInProgress] = useState(false);
+    const hasAddedToHistory = useRef(false); // Флаг с useRef
 
     // State
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -49,10 +55,49 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
     const [realWatchTime, setRealWatchTime] = useState(0);
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
+
+    const addVideoToViewHistory = async () => {
+        try {
+            if (!isSignedIn || isHistoryUpdateInProgress) return; // Проверяем авторизацию и статус запроса
+
+            // Проверяем, есть ли видео уже в истории
+            const existingHistory = watchHistory.find(history => history.videoId === videoId);
+            if (existingHistory) return;
+
+            setIsHistoryUpdateInProgress(true); // Устанавливаем флаг перед началом запроса
+
+            const request: HistoryOfBrowsing = {
+                id: 0, // ID задаётся сервером
+                userId: user.id,
+                videoId: videoId,
+                date: new Date(),
+                timeCode: Math.floor(currentTime),
+            };
+
+            const response = await api.post(`/HistoryOfBrowsing/add`, request, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.status === 200) {
+                setWatchHistory(prev => [...prev, new WatchHistory(videoId, Math.floor(currentTime))]);
+                console.log(`Видео ${videoId} успешно добавлено в историю просмотра.`);
+            } else {
+                console.error(`Ошибка при добавлении видео ${videoId} в историю просмотра.`);
+            }
+        } catch (error) {
+            console.error("Ошибка при добавлении видео в историю:", error);
+        } finally {
+            setIsHistoryUpdateInProgress(false); // Сбрасываем флаг после завершения запроса
+        }
+    };
+
+
     useEffect(() => {
         const fetchVideo = async () => {
             try {
-                const response = await fetch(`/api/Video/${id}`);
+                const response = await fetch(`/api/Video/${videoId}`);
 
                 if (!response.ok) {
                     throw new Error("Failed to fetch video data");
@@ -73,7 +118,7 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
         };
 
         fetchVideo();
-    }, [id]);
+    }, [videoId]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -113,13 +158,14 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
-            const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+            const percentagePlayed = ((videoRef.current.currentTime / videoRef.current.duration) * 100);
+            console.log('%=' + percentagePlayed);
 
-            //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-            //   if (percentagePlayed > 40 && !viewed) {
-            //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
-            //     increaseViewCount(); // Увеличиваем счётчик просмотров
-            //   }
+            if (percentagePlayed >= 5 && isSignedIn && !hasAddedToHistory.current) {
+                hasAddedToHistory.current = true; // Устанавливаем флаг (useRef)
+                console.log(`Видео добавляется в историю: ${videoId}`);
+                addVideoToViewHistory(); // Добавляем в историю просмотра
+            }
             if (percentagePlayed > 60 && !viewed) {
                 setViewed(true);
                 increaseViewCount(); // Увеличиваем счётчик просмотров
@@ -138,22 +184,22 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
 
             // Добавляем или обновляем историю просмотра
             setWatchHistory(prevHistory => {
-                const existingVideo = prevHistory.find(history => history.videoId === id);
+                const existingVideo = prevHistory.find(history => history.videoId === videoId);
 
                 if (existingVideo) {
                     // Обновляем время последнего просмотра
                     return prevHistory.map(history =>
-                        history.videoId === id
+                        history.videoId === videoId
                             ? {...history, lastViewedPosition}
                             : history
                     );
                 } else {
                     // Добавляем новое видео в историю
-                    return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+                    return [...prevHistory, new WatchHistory(videoId, lastViewedPosition)];
                 }
             });
 
-            console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
+            console.log(`Видео ${videoId} остановлено на ${lastViewedPosition} секундах`);
         }
     };
 
@@ -191,12 +237,12 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
 
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [id]);
+    }, [videoId]);
 
 
     const increaseViewCount = () => {
         // alert("Просмотр засчитан!");
-        Viewed(id);
+        Viewed(videoId);
     };
 
     const Viewed = async (id: number) => {
@@ -223,7 +269,7 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
                 videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
             };
         }
-    }, [viewed, id]);
+    }, [viewed, videoId]);
 
     // Effects
     useEffect(() => {
@@ -309,15 +355,15 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
                 alert("mo ist huso")
                 togglePlayPause();
                 break;
-            case "f":
-                toggleFullScreen();
-                break;
-            case "t":
-                toggleTheaterMode();
-                break;
-            case "i":
-                toggleMiniPlayerMode();
-                break;
+            /* case "f":
+                 toggleFullScreen();
+                 break;
+             case "t":
+                 toggleTheaterMode();
+                 break;
+             case "i":
+                 toggleMiniPlayerMode();
+                 break;*/
             case "m":
                 toggleMute();
                 break;
@@ -348,6 +394,18 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isAct
             setIsPlaying(!isPlaying);
         }
     };
+
+    useEffect(() => {
+        const video = videoRef.current;
+        if (video) {
+            if (isActive) {
+                video.play(); // Воспроизводим текущее видео
+            } else {
+                video.pause(); // Ставим остальные на паузу
+            }
+        }
+    }, [isActive]); // Перезапускаем эффект при изменении isActive
+
     const toggleFullScreen = () => {
         const videoContainer = videoContainerRef.current;
         if (videoContainer) {
