@@ -9,6 +9,7 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
+import {useUser} from "@clerk/nextjs";
 
 interface State {
     videos: IVideo[];
@@ -50,7 +51,9 @@ const reducer = (state: State, action: Action): State => {
 };
 
 const ShortsPage = ({params}: { params: { id?: string } }) => {
+
     const [state, dispatch] = useReducer(reducer, initialState);
+    
     const {videos, currentIndex, page, isLoading} = state;
     const observerRef = useRef<IntersectionObserver | null>(null);
     const videoRefs = useRef<(HTMLDivElement | null)[]>([]);
