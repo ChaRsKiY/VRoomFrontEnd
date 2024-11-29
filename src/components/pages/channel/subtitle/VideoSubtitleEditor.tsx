@@ -8,6 +8,7 @@ import { BiArrowFromTop, BiCircle, BiPen, BiPlus, BiPlusCircle, BiSolidKeyboard,
 import '@/styles/modalsubtitles.css';
 import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
+import { ISubtitle } from '@/types/subtitle.interface';
 
 
 interface IProps {
@@ -47,38 +48,10 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-
-    // const parseVTTFile = (file: File) => {
-    //     const reader = new FileReader();
-
-    //     reader.onload = (e) => {
-    //       const content = e.target?.result as string;
-
-    //       console.log("Raw content:", content);
-
-    //       // Убираем пустые строки и заголовок WEBVTT
-    //       const lines = content.split("\n").map((line) => line.trim()).filter((line) => line !== "" && line !== "WEBVTT");
-
-    //       const subtitles = [];
-    //       let i = 0;
-
-    //       while (i < lines.length) {
-    //         const index = parseInt(lines[i], 10); 
-    //         const [start, end] = lines[i + 1].split(" --> "); 
-    //         const text = lines[i + 2]; 
-    //         subtitles.push({
-    //           start: parseVTTTime(start),
-    //           end: parseVTTTime(end),
-    //           text,
-    //         });
-    //         i += 3; 
-    //       } 
-    //       console.log("Parsed subtitles:", subtitles);
-    //       setForms(subtitles);
-    //     };
-
-    //     reader.readAsText(file);
-    //   };
+   const SaveBeforeExit =()=>{
+    savePublishSubtitles(false);
+    onClose();
+   }
 
     const parseVTTFile = (file: File) => {
         const reader = new FileReader();
@@ -147,27 +120,20 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             alert("Пожалуйста, загрузите файл формата .vtt");
         }
     };
-    const uploadSubtitleToServer = async (file: File) => {
-        const formData = new FormData();
-        formData.append("file", file);
 
-        const response = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-        });
+    const changeFile =()=>{
+        const vttContent = [
+            'WEBVTT\n\n',
+            ...forms.map(
+                (subtitle, index) =>
+                    `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+            ),
+        ].join('');
 
-        if (response.ok) {
-            alert("Субтитры успешно загружены.");
-        } else {
-            alert("Ошибка при загрузке субтитров.");
-        }
-    };
-
-    useEffect(() => {
-        if (urlSubtitles) {
-            console.log("Updated urlSubtitles:", urlSubtitles);
-        }
-    }, [urlSubtitles]);
+        const blob = new Blob([vttContent], { type: 'text/vtt' });
+        const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+        setFileSubtitle(file);
+    }
 
     const handleLanguageChange = () => {
         setLanguageIndex(languageIndex + 1)
@@ -267,12 +233,27 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         }
     };
 
-    const uploadVTTToBackend = async (file: File) => {
+    const uploadVTTToBackend = async (file: File, topublish: boolean) => {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('fileVTT', file);
 
+        const sub: ISubtitle = {
+            id: 0,
+            languageCode: selectedLanguage.code,
+            languageName: selectedLanguage.name,
+            videoId: videoId,
+            isPublished: topublish,
+        };
+        console.log("sub", JSON.stringify(sub));
+        Object.entries(sub).forEach(([key, value]) => {
+            if (typeof value === 'string' || typeof value === 'number') {
+                formData.append(key, value.toString());
+            } else if (typeof value === 'boolean' || typeof value === 'number') {
+                formData.append(key, value.toString());
+            }
+        });
         try {
-            const response = await api.post('Video/uploadsubtitles', formData);
+            const response = await api.post('/Subtitle/add', formData);
 
             if (response.status === 200) {
                 alert('Файл успешно загружен на сервер!');
@@ -284,11 +265,11 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         }
     };
 
-    const saveSubtitlesToBackend = async () => {
+    const savePublishSubtitles = async (publish: boolean) => {
         validateSubtitles();
         if (isValid2) {
             const vttContent = [
-                'WEBVTT\n',
+                'WEBVTT\n\n',
                 ...forms.map(
                     (subtitle, index) =>
                         `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
@@ -298,7 +279,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             const blob = new Blob([vttContent], { type: 'text/vtt' });
             const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
 
-            await uploadVTTToBackend(file);
+            await uploadVTTToBackend(file, publish);
         }
     };
 
@@ -367,8 +348,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         }
     }, [videoUrl]);
 
-
-    // Обновляем видео при выборе времени на шкале
     const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newTime = parseFloat(e.target.value);
         setCurrentTime(newTime);
@@ -400,70 +379,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         });
     };
 
-    // const addSubtitle = () => {
-    //     if (currentSubtitle.start < currentSubtitle.end && currentSubtitle.text.trim()) {
-    //         setSubtitles([...subtitles, currentSubtitle]);
-    //         setCurrentSubtitle({ start: 0, end: 0, text: '' });
-    //     } else {
-    //         alert('Укажите корректные временные метки и текст субтитров.');
-    //     }
-    // };
-
-    // const removeSubtitle = (index: number) => {
-    //     setSubtitles(subtitles.filter((_, i) => i !== index));
-    // };
-
-    // const saveSubtitles = async () => {
-    //     try {
-    //         const res = await api.post(`/Video/subtitleadd/${videoId}`, subtitles);
-
-    //         if (res.status == 200) {
-    //             alert('Субтитры сохранены успешно!');
-    //         } else {
-    //             alert('Ошибка сохранения субтитров.');
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка сохранения:', error);
-    //     }
-    // };
-
-    // const setTimeCode = () => {
-    //     setForms((prevForms) =>
-    //         prevForms.map((form, i) =>
-    //             i === selectedIndex ? { ...form, ["start"]: currentTime } : form
-    //         )
-    //     );
-    // };
-
-    // const setTimeCode = () => {
-    //     setTimePoints((prevPoints) => {
-    //         // Если есть две точки времени — сброс
-    //         if (prevPoints.length === 2) {
-    //             // Обнуляем точки и форму
-    //             setForms((prevForms) =>
-    //                 prevForms.map((form, i) =>
-    //                     i === selectedIndex ? { ...form, start: 0, end: 0 } : form
-    //                 )
-    //             );
-    //             return [];
-    //         }
-    //         // Добавляем текущую точку
-    //         const updatedPoints = [...prevPoints, currentTime];
-    //         if (updatedPoints.length === 2) {
-    //             // Если уже выбраны start и end, обновляем форму
-    //             setForms((prevForms) =>
-    //                 prevForms.map((form, i) =>
-    //                     i === selectedIndex
-    //                         ? { ...form, start: updatedPoints[0], end: updatedPoints[1] }
-    //                         : form
-    //                 )
-    //             );
-    //         }
-
-    //         return updatedPoints;
-    //     });
-    //   //  generateGradient();
-    // };
 
     // const generateGradient = () => {
     //     const gradients = forms.map(({ start, end }) => {
@@ -578,6 +493,10 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         setSelectedLanguage(languages[languages.length - 1]);
     }, [languages]);
 
+    useEffect(() => {
+        changeFile();
+    }, [forms]);
+
     return (
         <div className="subtitle-editor" onClick={closeDelete}>
 
@@ -656,14 +575,15 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
                             <div>
                                 {isChoosen && (<>
-                                    <button className='modal-button'>Добавить в черновик</button>
+                                    <button className='modal-button'
+                                        onClick={() => { savePublishSubtitles(false) }}>Добавить в черновик</button>
                                     <button className='publish-button'
-                                        onClick={saveSubtitlesToBackend}>Опубликовать</button>
+                                        onClick={() => { savePublishSubtitles(true) }}>Опубликовать</button>
                                     <button className='modal-button ' onClick={downloadSubtitlesAsVTT}>
                                         <BiArrowFromTop title='скачать' />
                                     </button>
                                 </>)}
-                                <button className='modal-button ' onClick={onClose}>
+                                <button className='modal-button ' onClick={SaveBeforeExit}>
                                     <BiPlus style={{ transform: 'rotate(45deg)' }} title='Выйти' />
                                 </button>
                             </div>
