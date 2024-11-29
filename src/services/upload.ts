@@ -4,7 +4,7 @@ import path from "path";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
-    const file = req.body; // Здесь мы обрабатываем файл
+    const file = req.body; 
     const filePath = path.join(process.cwd(), "public/uploads", "subtitles.vtt");
     fs.writeFileSync(filePath, file);
 
