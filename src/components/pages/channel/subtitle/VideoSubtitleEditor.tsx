@@ -137,7 +137,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
     const handleLanguageChange = () => {
         setLanguageIndex(languageIndex + 1)
-        if (languageIndex === languages.length - 1)
+        if (languageIndex >= languages.length - 1)
             setLanguageIndex(0)
         setSelectedLanguage(languages[languageIndex]);
     };
@@ -609,7 +609,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     />
                                 </p>
                                 <p style={{ borderBottom: "1px solid #bdbdbd", padding: "10px" }}>
-                                    <button onClick={() => { setIsChoosen(true) }}> Ввести субтитры врчную
+                                    <button onClick={() => { setIsChoosen(true) }}> Ввести субтитры вручную
                                         <BiPen style={{ display: 'inline', marginLeft: '10px' }} />
                                     </button>
                                 </p>
