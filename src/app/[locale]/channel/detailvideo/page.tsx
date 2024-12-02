@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 import HeaderHome from "@/components/pages/home/header/header";
 import AsideHome from "@/components/pages/home/aside/aside";
 import initTranslations from "@/app/i18n";
@@ -10,11 +10,7 @@ interface IHomeProps {
     locale: string;
   };
 }
-interface IHomeProps {
-  params: {
-    locale: string;
-  };
-}
+
 const DetailVideoPage: React.FC = async ({params}: any) => {
 
   const {t} = await initTranslations(params.locale, ['common', 'categories'])

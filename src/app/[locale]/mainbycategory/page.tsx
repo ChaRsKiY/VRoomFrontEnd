@@ -4,6 +4,8 @@ import AsideHome from "@/components/pages/home/aside/aside";
 import initTranslations from "@/app/i18n";
 import HeaderHome from "@/components/pages/home/header/header";
 import MainByTagInfo from '@/components/pages/home/main/mainlistbytag';
+import ResultInfo from '@/components/pages/results/resultlist';
+import MainByCategoryInfo from '@/components/pages/home/main/mainlistbycategory';
 
 interface Props {
     params: {
@@ -24,7 +26,10 @@ const MainByCategoryPage: React.FC<Props> = async ({ params: { locale } }: Props
                 {t && <AsideHome t={t} />}
             </div>
             <main className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
-                <MainByTagInfo />
+                <div className='flex'>
+                    <MainByCategoryInfo />
+
+                </div>
 
             </main>
         </>

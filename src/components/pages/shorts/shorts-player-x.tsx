@@ -1,23 +1,28 @@
 "use client"
 
-import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
+import React, {useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent} from "react";
 import "@/styles/videojsplayer.css";
-import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
-import { TbLayersSubtract } from "react-icons/tb";
-import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
+import "@/styles/shortjsplayer.css";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
+import {IoEyeOutline} from "react-icons/io5";
+import {formatNumber} from "@/utils/format";
+import {BsThreeDotsVertical} from "react-icons/bs";
+import {traceSegment} from "@jridgewell/trace-mapping";
 
 class WatchHistory {
-    constructor(public videoId: number, public lastViewedPosition: number) { }
+    constructor(public videoId: number, public lastViewedPosition: number) {
+    }
 }
 
-interface IVideoPlayerProps {
+interface IShortsPlayerXProps {
     src: string;
     id: number;
+    viewCount: number;
+    isActive: boolean;
 }
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
+const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, id, viewCount, isActive}) => {
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -41,89 +46,91 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [watchHistory, setWatchHistory] = useState<WatchHistory[]>([]);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
-    const [realWatchTime, setRealWatchTime] = useState(0); 
+    const [realWatchTime, setRealWatchTime] = useState(0);
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
 
     useEffect(() => {
         const fetchVideo = async () => {
-          try {
-            const response = await fetch(`/api/Video/${id}`);
-            if (!response.ok) {
-              throw new Error("Failed to fetch video data");
+            try {
+                const response = await fetch(`/api/Video/${id}`);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch video data");
+                }
+                const videoData = await response.json();
+                alert(`res=${videoData}`);
+                if (videoData && videoData.VideoStream) {
+                    const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
+                        ? videoData.VideoStream
+                        : `${videoData.VideoStream}/720.m3u8`;
+                    setVideoSrc(videoUrl);
+                } else {
+                    setVideoError("Video stream not available");
+                }
+            } catch (error) {
+                setVideoError("Error fetching video");
             }
-            const videoData = await response.json();
-            if (videoData && videoData.VideoStream) {
-              const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
-                ? videoData.VideoStream
-                : `${videoData.VideoStream}/720.m3u8`;
-              setVideoSrc(videoUrl);
-            } else {
-              setVideoError("Video stream not available");
-            }
-          } catch (error) {
-            setVideoError("Error fetching video");
-          }
         };
-    
+
         fetchVideo();
-      }, [id]);
-    
-      useEffect(() => {
+    }, [id]);
+
+    useEffect(() => {
         const video = videoRef.current;
-    
+
         if (video && videoSrc && videoSrc.endsWith('.m3u8')) {
-          if (Hls.isSupported()) {
-            const hls = new Hls();
-            hls.loadSource(videoSrc);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
-              if (video) {
-                setDuration(video.duration);
-              }
-            });
-    
-            hls.on(Hls.Events.ERROR, (event, data) => {
-              console.error("HLS error:", data);
-              setVideoError("Error playing video");
-            });
-            return () => {
-              hls.destroy();
-            };
-          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    if (video) {
+                        setDuration(video.duration);
+                    }
+                });
+
+                hls.on(Hls.Events.ERROR, (event, data) => {
+                    console.error("HLS error:", data);
+                    setVideoError("Error playing video");
+                });
+                return () => {
+                    hls.destroy();
+                };
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = videoSrc;
+                video.addEventListener('loadedmetadata', () => {
+                    setDuration(video.duration);
+                });
+            }
+        } else if (video && videoSrc) {
             video.src = videoSrc;
             video.addEventListener('loadedmetadata', () => {
-              setDuration(video.duration);
+                setDuration(video.duration);
             });
-          }
-        } else if (video && videoSrc) {
-          video.src = videoSrc;
-          video.addEventListener('loadedmetadata', () => {
-            setDuration(video.duration);
-          });
         }
-      }, [videoSrc]);
-   
+    }, [videoSrc]);
+
     const handleTimeUpdate = () => {
         if (videoRef.current) {
-          setCurrentTime(videoRef.current.currentTime);
-          const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
-    
-        //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
-        //   if (percentagePlayed > 40 && !viewed) {
-        //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
-        //     increaseViewCount(); // Увеличиваем счётчик просмотров
-        //   }
-        if (percentagePlayed > 60 && !viewed) {
-            setViewed(true);
-            increaseViewCount(); // Увеличиваем счётчик просмотров
-          }
-          if (isPlaying) {
-            const delta = videoRef.current.currentTime - lastUpdateTime; 
-            setRealWatchTime((prevTime) => prevTime + delta); 
-          }
-          setLastUpdateTime(videoRef.current.currentTime);
+            setCurrentTime(videoRef.current.currentTime);
+            const percentagePlayed = (videoRef.current.currentTime / videoRef.current.duration) * 100;
+
+            //   // Если пользователь просмотрел более 40% и просмотр ещё не был засчитан
+            //   if (percentagePlayed > 40 && !viewed) {
+            //     setViewed(true); // Устанавливаем флаг, что просмотр был засчитан
+            //     increaseViewCount(); // Увеличиваем счётчик просмотров
+            //   }
+            if (percentagePlayed > 60 && !viewed) {
+                setViewed(true);
+                increaseViewCount(); // Увеличиваем счётчик просмотров
+            }
+            if (isPlaying) {
+                const delta = videoRef.current.currentTime - lastUpdateTime;
+                setRealWatchTime((prevTime) => prevTime + delta);
+            }
+            setLastUpdateTime(videoRef.current.currentTime);
         }
-      };
+    };
 
     const saveWatchHistory = () => {
         if (videoRef.current) {
@@ -137,7 +144,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                     // Обновляем время последнего просмотра
                     return prevHistory.map(history =>
                         history.videoId === id
-                            ? { ...history, lastViewedPosition }
+                            ? {...history, lastViewedPosition}
                             : history
                     );
                 } else {
@@ -250,7 +257,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, []);
 
-   
+
     useEffect(() => {
         const handleFullScreenChange = () => {
             setIsFullScreen(!!document.fullscreenElement);
@@ -425,7 +432,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     };
 
     const formatDuration = (time: number): string => {
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2});
         const seconds = Math.floor(time % 60);
         const minutes = Math.floor(time / 60) % 60;
         const hours = Math.floor(time / 3600);
@@ -435,11 +442,14 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`;
         }
     };
-
+    // Функция для начала воспроизведения видео
+    const handlePlay = () => {
+        setIsPlaying(true);
+    };
     // Render
     return (
         <div
-            ref={videoContainerRef}
+            ref={videoContainerRef} style={{overflowY: "auto", height: "90vh"}}
             className={`video-container ${isPlaying ? "playing" : "paused"} ${isTheaterMode ? "theater" : ""} ${isFullScreen ? "full-screen" : ""} ${isMiniPlayer ? "mini-player" : ""}`}
             data-volume-level={volume > 0.5 ? "high" : volume > 0 ? "low" : "muted"}
         >
@@ -452,50 +462,56 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                         max="100"
                         step="1"
                         value={(currentTime / duration) * 100}
-                        onMouseDown={() => { videoRef.current?.pause() }}
-                        onMouseUp={() => { isPlaying && videoRef.current?.play() }}
-                        onChange={(e) => { videoRef.current && (videoRef.current.currentTime = (parseFloat(e.target.value) / 100) * duration) }}
+                        onMouseDown={() => {
+                            videoRef.current?.pause()
+                        }}
+                        onMouseUp={() => {
+                            isPlaying && videoRef.current?.play()
+                        }}
+                        onChange={(e) => {
+                            videoRef.current && (videoRef.current.currentTime = (parseFloat(e.target.value) / 100) * duration)
+                        }}
                     />
                 </div>
-                <div className="controls">
+                <div className="controlsV2">
                     <button className="play-pause-btn" onClick={togglePlayPause}>
                         {isPlaying ? (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z" />
+                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z"/>
                             </svg>
                         ) : (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M8 5v14l11-7z" />
+                                <path fill="currentColor" d="M8 5v14l11-7z"/>
                             </svg>
                         )}
                     </button>
-                    <div className="volume-container">
+                    <div className="volume-containerV2">
                         <button className="mute-btn" onClick={toggleMute}>
                             {isMuted ? (
-                                <svg viewBox="0 0 24 24">
+                                <svg viewBox="0 0 15 15">
                                     <path fill="currentColor"
-                                        d="M16.5 12l4.5 4.5-1.41 1.41L15 13.41l-4.5 4.5-1.41-1.41L13.59 12l-4.5-4.5 1.41-1.41L15 10.59l4.5-4.5 1.41 1.41z" />
+                                          d="M6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06m7.137 2.096a.5.5 0 0 1 0 .708L12.207 8l1.647 1.646a.5.5 0 0 1-.708.708L11.5 8.707l-1.646 1.647a.5.5 0 0 1-.708-.708L10.793 8 9.146 6.354a.5.5 0 1 1 .708-.708L11.5 7.293l1.646-1.647a.5.5 0 0 1 .708 0"/>
                                 </svg>
                             ) : (
                                 <>
                                     <svg className="volume-high-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                                              d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>
                                     </svg>
                                     <svg className="volume-low-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+                                              d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>
                                     </svg>
                                     <svg className="volume-muted-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
+                                              d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"/>
                                     </svg>
                                 </>
                             )}
                         </button>
                         <input
                             ref={volumeSliderRef}
-                            className="volume-slider"
+                            className="volume-sliderV2"
                             type="range"
                             min="0"
                             max="1"
@@ -504,7 +520,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                             onChange={handleVolumeChange}
                         />
                     </div>
-                    <div className="duration-container">
+                    <div className="duration-container text-[12.5px]">
                         <span className="current-time">{formatDuration(currentTime)}</span>
                         <span> / </span>
                         <span className="total-time">{formatDuration(duration)}</span>
@@ -512,40 +528,27 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                     <div className="captions-btn" onClick={toggleCaptions}>
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor"
-                                d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
+                                  d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
                         </svg>
                     </div>
-                    <button className="cursor-pointer mr-2" onClick={handlePlaybackRateChange}>{playbackRate}x</button>
-                    <div className="theater-btn flex justify-center items-center cursor-pointer" onClick={toggleTheaterMode}>
-                        <TbLayersSubtract size={24} />
+
+                    <div className={'flex items-center gap-[0.3125rem]'}>
+                        <IoEyeOutline size={22}/>
+                        {formatNumber(viewCount)}
                     </div>
-                    <div className="mini-player-btn flex justify-center items-center cursor-pointer" onClick={toggleMiniPlayerMode}>
-                        <PiPictureInPicture size={26} />
-                    </div>
-                    <div className="mini-player-btn cursor-pointer">
-                        <PiScreencast size={25} />
-                    </div>
-                    <div className="full-screen-btn mr-2 cursor-pointer" onClick={toggleFullScreen}>
-                        {isFullScreen ? (
-                            <RxExitFullScreen size={23} />
-                        ) : (
-                            <RxEnterFullScreen size={23} />
-                        )}
-                    </div>
+                    <button className="play-pause-btn">
+                        <BsThreeDotsVertical/>
+                    </button>
                 </div>
             </div>
-            <video
-                ref={videoRef}
-                className="video"
-                onClick={togglePlayPause}
-                muted={isMuted}
-                controls={false}
-                preload="metadata"
-            >
-                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default />
+            <video ref={videoRef} className="videoV2 aspect-[9/16]"
+                   onClick={togglePlayPause} muted
+                   controls={false} preload="metadata" autoPlay loop={true}
+                   onPlay={handlePlay}>
+                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default/>
             </video>
         </div>
     );
 };
 
-export default VideoPlayer;
+export default ShortsPlayerX;

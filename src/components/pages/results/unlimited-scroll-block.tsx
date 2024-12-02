@@ -76,7 +76,7 @@ const UnlimitedScrollBlock: React.FC<IUnlimitedScrollBlockProps> = ({ data }: IU
 
 
     return (
-        <div  >
+        <div style={{ width: '100%' }}>
             <div className="pr-[2%] max-sm:pr-0 flex-1">
                 {data.map((el, key) => (
                     <div key={key} className="px-3 mb-8 space-y-2.5">

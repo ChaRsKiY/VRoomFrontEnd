@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+
     images: {
         remotePatterns: [
             {
@@ -29,7 +30,7 @@ const nextConfig = {
                 port: '10000',
                 pathname: '**',
             },
-             {
+            {
                 protocol: 'https',
                 hostname: 'myblobcont.blob.core.windows.net',
                 port: '',
@@ -37,6 +38,7 @@ const nextConfig = {
             }
         ],
     },
+   
 };
 
 export default nextConfig;
