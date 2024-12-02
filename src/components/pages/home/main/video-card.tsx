@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PlayCircle, MoreVertical, Plus, ListPlus, Share2, Clock, List, X, Lock, Globe, Users, Check } from 'lucide-react';
+import { IChannel } from '@/types/channelinfo.interface';
 
 interface IVideoCardProps {
   el: IVideo;
@@ -31,76 +32,102 @@ interface Playlist {
 }
 
 export default function VideoCard({ el }: IVideoCardProps) {
-  const [coverBase64, setCoverBase64] = useState<string | null>(null)
-  const [isOpen, setIsOpen] = useState(false)
-  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false)
-  const [existingPlaylists, setExistingPlaylists] = useState<Playlist[]>([])
-  const [loading, setLoading] = useState(false)
-  const [user, setUser] = useState<IUser | null>(null)
-  const { user: clerkUser, isLoaded: isUserLoaded } = useUser()
-
+  const [coverBase64, setCoverBase64] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
+  const [existingPlaylists, setExistingPlaylists] = useState<Playlist[]>([]);
+  const [userChannel, setUserChannel] = useState<IChannel | null>(null);
+  const [loading, setLoading] = useState(false);
+  
+  // Fetching clerk user info
+  const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
+  
+  // Base64 conversion for video cover image
   useEffect(() => {
     if (el.cover) {
-      const coverArray = new Uint8Array(atob(el.cover).split('').map(char => char.charCodeAt(0)))
-      const base64 = btoa(String.fromCharCode.apply(null, Array.from(coverArray)))
-      setCoverBase64(base64)
+      const coverArray = new Uint8Array(atob(el.cover).split('').map(char => char.charCodeAt(0)));
+      const chunkSize = 65536;
+      let result = '';
+      for (let i = 0; i < coverArray.length; i += chunkSize) {
+        const chunk = coverArray.subarray(i, i + chunkSize);
+        result += String.fromCharCode(...Array.from(chunk));
+      }
+      const base64 = btoa(result);
+      setCoverBase64(base64);
     }
-  }, [el.cover])
+  }, [el.cover]);
 
   useEffect(() => {
     if (isUserLoaded && clerkUser) {
-      fetchUserData()
-      fetchPlaylists()
+      fetchUserData();
+      fetchPlaylists();
     }
-  }, [isUserLoaded, clerkUser])
+  }, [isUserLoaded, clerkUser]);
 
+  // Fetching user data (channel settings)
   const fetchUserData = async () => {
     try {
-      const response = await api.get(`/ChannelSettings/getinfobychannelid/${clerkUser?.id}`)
+      const response = await api.get(`https://localhost:7154/api/ChannelSettings/getinfobychannelid/${clerkUser?.id}`);
       if (response.status === 200) {
-        setUser(response.data)
+        const channelSettingsId = response.data.id;
+        getUserChannel(channelSettingsId); // Fetch channel info
       }
     } catch (error) {
-      console.error('Error fetching user data:', error)
+      console.error('Error fetching user data:', error);
     }
-  }
+  };
 
-  const fetchPlaylists = async () => {
-    setLoading(true)
+  // Fetching user channel data by channel ID
+  const getUserChannel = async (channelId: number) => {
     try {
-      const response = await api.get(`/api/PlayList/${clerkUser?.id}`)
-      setExistingPlaylists(response.data)
+      const response = await api.get(`/ChannelSettings/getbyownerid/${channelId}`);
+      if (response.status === 200) {
+        setUserChannel(response.data); // Set channel data
+      }
     } catch (error) {
-      console.error('Error fetching playlists:', error)
-    } finally {
-      setLoading(false)
+      console.error('Error fetching user channel:', error);
     }
-  }
+  };
 
+  // Fetch playlists for the user
+  const fetchPlaylists = async () => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/PlayList/${clerkUser?.id}`);
+      setExistingPlaylists(response.data);
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add video to playlist
   const handleAddToPlaylist = async (playlistId: number) => {
     try {
-      await api.post(`/api/PlayList/add`, { videoId: el.id })
-      console.log('Video added to playlist:', playlistId)
+      await api.post(`/api/PlayList/add`, { videoId: el.id });
+      console.log('Video added to playlist:', playlistId);
     } catch (error) {
-      console.error('Error adding video to playlist:', error)
+      console.error('Error adding video to playlist:', error);
     }
-  }
+  };
 
+  // Create new playlist
   const handleCreateNewPlaylist = async (name: string, privacy: string) => {
     try {
-      const response = await api.post('/api/playlists', {
+      const response = await api.post('/api/PlayList/add', {
         userId: clerkUser?.id,
         name,
         privacy,
-      })
-      const newPlaylist = response.data
-      setExistingPlaylists(prev => [...prev, newPlaylist])
-      console.log('Created new playlist:', newPlaylist)
+        channelSettingsId: userChannel?.id,  // Using correct channelSettingsId
+      });
+      const newPlaylist = response.data;
+      setExistingPlaylists(prev => [...prev, newPlaylist]);
+      console.log('Created new playlist:', newPlaylist);
     } catch (error) {
-      console.error('Error creating playlist:', error)
+      console.error('Error creating playlist:', error);
     }
-  }
-
+  };
   return (
     <div className="space-y-2.5">
       <Link href={`/watch/${el.id}`} className="block">
