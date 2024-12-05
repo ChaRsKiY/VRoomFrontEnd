@@ -1,9 +1,8 @@
-
 import React, { useState } from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
-import AllVideolist from "@/components/pages/channel/subtitle/allvideos";
+import FoulCopySubtitlelist from "@/components/pages/channel/subtitle/foulcopy";
 import Link from "next/link";
 
 interface ISubtitlesProps {
@@ -30,11 +29,11 @@ const channelPage = async ({ params: { locale } }: ISubtitlesProps) => {
 
                     <div className="flex items-center space-x-9 text-sm">
                         <Link target={'_self'} href={"/channel/editing/subtitles"}
+                            className="text-gray-700 border-b-2 border-gray-900">All</Link >
+                        <Link target={'_self'} href={"/channel/editing/subtitles/foulcopy"}
                             className="text-gray-700 border-b-2 border-gray-900"
                             style={{backgroundColor:'black',color:'white',fontWeight:'bold',
-                                padding:'10px',borderRadius:"8px" }}>All</Link >
-                        <Link target={'_self'} href={"/channel/editing/subtitles/foulcopy"}
-                            className="text-gray-700 border-b-2 border-gray-900">Foul copy</Link >
+                                padding:'10px',borderRadius:"8px" }}>Foul copy</Link >
                         <Link target={'_self'} href={"/channel/editing/subtitles/published"}
                             className="text-gray-700 border-b-2 border-gray-900">Published</Link >
                     </div>
@@ -43,7 +42,7 @@ const channelPage = async ({ params: { locale } }: ISubtitlesProps) => {
 
 
                 </div>
-                <AllVideolist />
+                <FoulCopySubtitlelist />
 
             </div>
         </>
