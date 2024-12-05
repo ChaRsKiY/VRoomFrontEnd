@@ -17,7 +17,7 @@ const termsPage = () => {
             </Link></div>
             <div style={{
                 display: 'flex', width: '100%', justifyContent: 'space-around',
-                background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.3),  rgba(0, 128, 255, 0.3) )',
+                background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.1),  rgba(0, 128, 255, 0.2) )',
                 height: "100%"
             }}>
                 <div style={{
