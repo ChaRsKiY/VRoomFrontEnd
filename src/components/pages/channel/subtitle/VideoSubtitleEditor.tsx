@@ -42,17 +42,46 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const [languageIndex, setLanguageIndex] = useState<number>(0);
     const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
-    const [isValid1, setIsValid1] = useState<boolean>(true);
-    const [isValid2, setIsValid2] = useState<boolean>(true);
+    // const [isValid1, setIsValid1] = useState<boolean>(true);
+    // const [isValid2, setIsValid2] = useState<boolean>(true);
     const [isChoosen, setIsChoosen] = useState<boolean>(false);
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
     const SaveBeforeExit = () => {
         if (isChoosen) {
-            savePublishSubtitles(false);
+            validateSubtitles();
+          //  if(isValid2){ 
+
+                const userResponse = window.confirm("Save to drafts?");
+  
+                if (userResponse) {
+                    savePublishSubtitles(false);
+                  console.log("Черновик сохранён.");
+                } else {
+                  console.log("Выход без сохранения.");
+                }
+
+         //   savePublishSubtitles(false);
+         // }
         }
         onClose();
+    }
+
+    const PublishSubtitle = () => {
+       
+            validateSubtitles();
+
+                const userResponse = window.confirm("Publish?");
+  
+                if (userResponse) {
+                    savePublishSubtitles(true);
+                    onClose();
+                  console.log("Опубликовано.");
+                } else {
+                  console.log("Отмена.");
+                }
+
     }
 
     const parseVTTFile = (file: File) => {
@@ -119,7 +148,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             // console.log("!!////");
             parseVTTFile(file);
         } else {
-            alert("Пожалуйста, загрузите файл формата .vtt");
+            alert("Please upload the .vtt file");
         }
     };
 
@@ -197,42 +226,73 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
         forms.forEach((subtitle, index) => {
             if (subtitle.start >= subtitle.end || !subtitle.text.trim()) {
-                alert(`Ошибка в субтитре #${index + 1}: 
-              - Начало должно быть меньше конца.
-              - Текст не должен быть пустым.`);
-                setIsValid1(false);
+                alert(`Error in subtitle #${index + 1}: 
+              - The beginning must be smaller than the end.
+              - The text must not be empty.`);
+                // setIsValid1(false);
+                // console.log("check subtitles",isValid1);
             }
         });
 
-        if (isValid1) {
-            setIsValid2(true);
-        }
-        else {
-            setIsValid2(false);
-            setIsValid1(true);
-        }
+        // if (isValid1) {
+        //     setIsValid2(true);
+        //     console.log("good subtitles",isValid2)
+        // }
+        // else {
+        //     setIsValid2(false);
+        //     setIsValid1(true);
+        //     console.log("bad subtitles?? ",isValid2)
+        // }
     };
 
     const downloadSubtitlesAsVTT = () => {
         validateSubtitles();
-        if (isValid2) {
-            const vttContent = [
-                'WEBVTT\n\n',
-                ...forms.map(
-                    (subtitle, index) =>
-                        `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
-                ),
-            ].join('');
+      //  if(isValid2){ 
 
-            const blob = new Blob([vttContent], { type: 'text/vtt' });
+            const userResponse = window.confirm("Cкачать?");
 
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'subtitles.vtt';
-            link.click();
+            if (userResponse) {
+                const vttContent = [
+                    'WEBVTT\n\n',
+                    ...forms.map(
+                        (subtitle, index) =>
+                            `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+                    ),
+                ].join('');
+    
+                const blob = new Blob([vttContent], { type: 'text/vtt' });
+    
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'subtitles.vtt';
+                link.click();
+    
+                URL.revokeObjectURL(link.href);
+              console.log("Скачено");
+            } else {
+              console.log("не скачено");
+            }
 
-            URL.revokeObjectURL(link.href);
-        }
+      //  }
+
+        // if (isValid2) {
+        //     const vttContent = [
+        //         'WEBVTT\n\n',
+        //         ...forms.map(
+        //             (subtitle, index) =>
+        //                 `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+        //         ),
+        //     ].join('');
+
+        //     const blob = new Blob([vttContent], { type: 'text/vtt' });
+
+        //     const link = document.createElement('a');
+        //     link.href = URL.createObjectURL(blob);
+        //     link.download = 'subtitles.vtt';
+        //     link.click();
+
+        //     URL.revokeObjectURL(link.href);
+        // }
     };
 
     const uploadVTTToBackend = async (file: File, topublish: boolean) => {
@@ -268,8 +328,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     };
 
     const savePublishSubtitles = async (publish: boolean) => {
-        validateSubtitles();
-        if (isValid2) {
+        // validateSubtitles();
+      //  if (isValid2) {
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -282,7 +342,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
 
             await uploadVTTToBackend(file, publish);
-        }
+      //  }
     };
 
     const addForm = () => {
@@ -337,6 +397,18 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         getLanguages();
         getVideo();
     }, [videoId]);
+
+    // useEffect(() => {
+    //     if (isValid1) {
+    //         setIsValid2(true);
+    //         console.log("good subtitles",isValid2)
+    //     }
+    //     else {
+    //         setIsValid2(false);
+    //         setIsValid1(true);
+    //         console.log("bad subtitles?? ",isValid2)
+    //     }
+    // }, [isValid1]);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -509,7 +581,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
                                 <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}>
+                                    onClick={handleLanguageChange} 
+                                    title='Select language'>
                                       
                                     <BiSolidKeyboard style={{ display: 'inline', marginRight: '5px' ,
                                         boxShadow: ' rgba(0, 0, 0, 0.6) 0px 5px 5px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
@@ -519,12 +592,12 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                 <Accordion.Root type="single" collapsible style={{
                                     marginLeft: '10px',
                                     maxHeight: "30px", overflow: 'visible', zIndex: '10'
-                                }}>
+                                }}  title='Add language'>
 
                                     <Accordion.Item value="ru" className="border-b">
                                         <Accordion.Trigger className="w-full text-left py-2 font-bold "
                                             ref={triggerRef}>
-                                            <BiPlus size={20} title='Добавить язык' className='modal-button ' 
+                                            <BiPlus size={20} title='Add language' className='modal-button ' 
                                             style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}/>
                                         </Accordion.Trigger>
                                         <Accordion.Content className="p-4">
@@ -581,21 +654,22 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
                                 </Accordion.Root >
                             </div>
-
+                        
                             <div>
                                 {isChoosen && (<>
                                     <button className='modal-button' style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}
-                                        onClick={() => { savePublishSubtitles(false) }}>Добавить в черновик</button>
+                                        onClick={() => { savePublishSubtitles(false) }}>Save to draft</button>
                                     <button className='publish-button' style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}
-                                        onClick={() => { savePublishSubtitles(true) }}>Опубликовать</button>
+                                        // onClick={() => { savePublishSubtitles(true) }}>Опубликовать</button>
+                                        onClick={() => { PublishSubtitle}}>Publish</button>
                                     <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                     style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}>
-                                        <BiArrowFromTop title='скачать' />
+                                        <BiArrowFromTop title='Download' />
                                     </button>
                                 </>)}
                                 <button className='modal-button ' onClick={SaveBeforeExit}
                                 style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}>
-                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Выйти' />
+                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Exit' />
                                 </button>
                             </div>
                         </div>
@@ -610,7 +684,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     boxShadow: 'rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
                                 }}>
                                     <label htmlFor="subtitle-upload" style={{ cursor: "pointer", padding: "10px" }}>
-                                        Загрузить файл субтитров (.vtt)
+                                    Upload subtitle file (.vtt)
                                     </label>
                                     <input
                                         id="subtitle-upload"
@@ -628,7 +702,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     borderRadius: '8px', color: 'black', fontWeight: 'bold',
                                     boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
                                 }}>
-                                    <button onClick={() => { setIsChoosen(true) }}> Ввести субтитры вручную
+                                    <button onClick={() => { setIsChoosen(true) }}> Enter subtitles manually
                                         <BiPencil style={{ display: 'inline', marginLeft: '10px' }} />
                                     </button>
                                 </p>
@@ -641,7 +715,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     boxShadow: 'rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
                                 }}
                                     className='modal-button'>
-                                    + Добавить подпись</button>
+                                    + Add</button>
                                 <div style={{
                                     padding: '5px', backgroundColor: '#424242 ', color: "white", width: '100%',
                                     maxHeight: "330px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "330px",
@@ -658,7 +732,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                 <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
                                                     <small>{index + 1}</small>
                                                     <button  >
-                                                        <BiPlusCircle onClick={() => insertForm(index + 1)} title='Вставить подпись' />
+                                                        <BiPlusCircle onClick={() => insertForm(index + 1)} title='Insert' />
                                                     </button>
                                                 </div>
                                                 <div style={{ marginRight: '3px' }}  >
@@ -677,7 +751,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                 </div>
                                                 <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
                                                     <div>
-                                                        <BiX onClick={() => clearText(index)} title='Очистить текс' />
+                                                        <BiX onClick={() => clearText(index)} title='Clear text' />
                                                     </div>
 
                                                 </div>
@@ -718,7 +792,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                     <div>
                                                         <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
                                                             style={{ margin: '5px', }}
-                                                            title='удалить' />
+                                                            title='Delete' />
                                                     </div>
                                                     {deleteMenuOpenIndex === index ? (
                                                         <div
@@ -737,13 +811,13 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                             <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
                                                                 style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
                                                                 onClick={() => removeForm(index)}>
-                                                                <span >Удалить</span></div>
+                                                                <span >Delete</span></div>
 
 
                                                             <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
                                                                 style={{ display: 'flex', justifyContent: 'center' }}
                                                                 onClick={closeDelete}>
-                                                                <span >Отмена</span></div>
+                                                                <span >Cancel</span></div>
                                                         </div>
                                                     ) : (<></>)}
 
