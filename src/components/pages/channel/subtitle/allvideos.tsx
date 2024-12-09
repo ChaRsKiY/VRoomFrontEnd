@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { IContentVideo } from "@/types/videoDTO.interface";
 import VideoCard from "@/components/pages/channel/subtitle/videocard";
 import api from '@/services/axiosApi';
-import VideoSubtitleEditor from "@/components/pages/channel/subtitle/videosubtitleeditor";
+import VideoSubtitleEditor from "@/components/pages/channel/subtitle/VideoSubtitleEditor";
 import { useUser } from '@clerk/nextjs';
 import { IChannel } from '@/types/channelinfo.interface';
 import '@/styles/modalsubtitles.css';
@@ -124,9 +124,9 @@ const AllVideolist = () => {
                 <thead className="bg-gray-200 text-gray-600  text-sm leading-normal">
                     <tr className="text-left">
 
-                        <th className="py-3 px-3 ">Видео</th>
-                        <th className="py-3 px-3 ">Языки</th>
-                        <th className="py-3 px-3 ">Дата</th>
+                        <th className="py-3 px-3 ">Video</th>
+                        <th className="py-3 px-3 ">Language</th>
+                        <th className="py-3 px-3 ">Date</th>
                     </tr>
                 </thead>
                 <tbody className="text-gray-700 text-sm">

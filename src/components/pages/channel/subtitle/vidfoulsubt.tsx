@@ -43,49 +43,10 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-    // const SaveBeforeExit = () => {
-    //     savePublishSubtitles(false);
-    //     onClose();
-    // }
     const SaveBeforeExit = () => {
-        validateSubtitles();
-
-        const userResponse = window.confirm("Save to drafts?");
-
-        if (userResponse) {
-            SaveDrafts();
-            console.log("Черновик сохранён.");
-        } else {
-            const userResponse2 = window.confirm("Exit?");
-
-            if (userResponse2) {
-                onClose();
-            }
-        }
-
-    }
-
-    const SaveDrafts = () => {
         savePublishSubtitles(false);
         onClose();
     }
-
-    const PublishSubtitle = () => {
-
-        validateSubtitles();
-
-        const userResponse = window.confirm("Publish?");
-
-        if (userResponse) {
-            savePublishSubtitles(true);
-            onClose();
-            console.log("Опубликовано.");
-        } else {
-            console.log("Отмена.");
-        }
-
-    }
-
 
     const parseVTTFile = (file: File) => {
         const reader = new FileReader();
@@ -525,95 +486,60 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     }, [urlSubtitles]);
 
     return (
-        <div className="subtitle-editor" onClick={closeDelete} >
-
+        <div className="subtitle-editor" onClick={closeDelete}
+            style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}>
 
             <div style={{ display: 'flex', justifyContent: "space-around" }}>
-                <div style={{ width: "100%", backgroundColor: '#eeeeee ', }}>
+                <div style={{ width: "100%", backgroundColor: '#424242 ', color: "white" }}>
                     <div style={{ padding: "10px", borderBottom: "0.5px solid #bdbdbd" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
                                 <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                    onClick={handleLanguageChange}>
 
-                                    <BiSolidKeyboard size={25} style={{
+                                    <BiSolidKeyboard style={{
                                         display: 'inline', marginRight: '5px',
+                                        boxShadow: ' rgba(0, 0, 0, 0.6) 0px 5px 5px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
                                     }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
+                                    <label>{selectedLanguage.name}</label></button>
 
-                                <Accordion.Root
-                                    type="single"
-                                    collapsible
-                                    style={{
-                                        marginLeft: '10px',
-                                        maxHeight: '28px',
-                                        overflow: 'visible',
-                                        zIndex: '10',
-                                    }}
-                                    title="Add language"
-                                >
+                                <Accordion.Root type="single" collapsible style={{
+                                    marginLeft: '10px',
+                                    maxHeight: "30px", overflow: 'visible', zIndex: '10'
+                                }}>
 
-                                    <Accordion.Item
-                                        value="ru"
-                                        className="border-b"
-                                        style={{ borderBottom: 'none' }}
-                                    >
-                                        <Accordion.Trigger
-                                            className="w-full text-left py-2 font-bold"
-                                            ref={triggerRef}
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                padding: '0',
-                                                boxShadow: 'none',
-
-                                            }}
-                                        >
-                                            <BiPlus
-                                                size={25}
-                                                title="Add language"
-                                                style={{ marginTop: '8px', color: 'black' }}
-                                            />
+                                    <Accordion.Item value="ru" className="border-b">
+                                        <Accordion.Trigger className="w-full text-left py-2 font-bold "
+                                            ref={triggerRef}>
+                                            <BiPlus size={20} title='Добавить язык' className='modal-button '
+                                                style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }} />
                                         </Accordion.Trigger>
-                                        <Accordion.Content
-                                            className="p-4"
+                                        <Accordion.Content className="p-4">
 
-                                            style={{ marginTop: '-40px', marginLeft: '25px' }}
-                                        >
-                                            <div  >
-                                                <select
-                                                    value={selectedLanguage.code}
-                                                    onChange={changeSelectedLanguage}
-                                                    className="w-full border px-2 py-1"
-                                                    style={{ color: 'black', padding: '5px', borderRadius: '0' }}
-                                                >
-                                                    <option data-label="Русский" data-code="ru" value="ru" style={{ padding: '10px' }}>
-                                                        Русский{' '}
-                                                        {isLanguageSelected('ru') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="English" data-code="en" value="en">
-                                                        English{' '}
-                                                        {isLanguageSelected('en') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Deutsch" data-code="de" value="de">
-                                                        Deutsch{' '}
-                                                        {isLanguageSelected('de') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Espaniola" data-code="es" value="es">
-                                                        Espaniola{' '}
-                                                        {isLanguageSelected('es') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                </select>
-                                            </div>
+                                            {/* ****************** */}
+                                            <select
+                                                value={selectedLanguage.code}
+                                                onChange={changeSelectedLanguage}
+                                                className="w-full border px-2 py-1"
+                                                style={{ color: 'black' }}
+                                            >
+                                                <option data-label="Русский" data-code="ru" value="ru">
+                                                    Русский {isLanguageSelected("ru") && (
+                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
+                                                </option>
+                                                <option data-label="English" data-code="en" value="en">English
+                                                    {isLanguageSelected("en") && (
+                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
+                                                </option>
+                                                <option data-label="Deutsch" data-code="de" value="de">Deutsch
+                                                    {isLanguageSelected("de") && (
+                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
+                                                </option>
+                                                <option data-label="Espaniola" data-code="es" value="es">Espaniola
+                                                    {isLanguageSelected("es") && (
+                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
+                                                </option>
+                                            </select>
                                         </Accordion.Content>
                                     </Accordion.Item>
 
@@ -645,67 +571,50 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
                             <div>
 
-                                <button className='modal-button'
-                                    onClick={SaveDrafts}>Save to draft</button>
-                                <button className='publish-button'
-                                    onClick={() => { PublishSubtitle }}>Publish</button>
+                                <button className='modal-button' style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}
+                                    onClick={() => { savePublishSubtitles(false) }}>Добавить в черновик</button>
+                                <button className='publish-button' style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}
+                                    onClick={() => { savePublishSubtitles(true) }}>Опубликовать</button>
                                 <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
-                                >
-                                    <BiArrowFromTop title='Download' />
+                                    style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}>
+                                    <BiArrowFromTop title='скачать' />
                                 </button>
 
                                 <button className='modal-button ' onClick={SaveBeforeExit}
-                                >
-                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Exit' />
+                                    style={{ boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 10px, rgba(0, 0, 0, 0.8) 0px 6px 6px' }}>
+                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Выйти' />
                                 </button>
                             </div>
                         </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 
-                        <div style={{ padding: '20px', paddingLeft: '0' }}>
 
-                            {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
-
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src={videoUrl} type="video/mp4" />
-                                        {fileSubtitle && (
-                                            <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                                kind="subtitles"
-                                                srcLang="ru"
-                                                label="Русский"
-                                                default
-                                            />
-                                        )}
-                                        Ваш браузер не поддерживает видео.
-                                    </video>
-                                </div>
-                            )}
-                        </div>
                         {/* Форма добавления субтитров */}
                         <div >
-
+                            <button onClick={addForm} style={{
+                                margin: '20px', marginBottom: '12px', marginTop: '12px',
+                                boxShadow: 'rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
+                            }}
+                                className='modal-button'>
+                                + Добавить подпись</button>
                             <div style={{
-                                padding: '5px', width: '100%',
-                                maxHeight: "360px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "360px",
-                                marginTop: '35px'
+                                padding: '5px', backgroundColor: '#424242 ', color: "white", width: '100%',
+                                maxHeight: "330px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "330px",
 
                             }}
                                 className="custom-scroll" >
                                 {forms.map((form, index) => (
                                     <div className="subtitle-form " style={{
                                         padding: '5px',
-                                        backgroundColor: index == selectedIndex ? "lightgrey" : "", border: '1px solid #bdbdbd',
-                                        marginBottom: '2px'
+                                        backgroundColor: index == selectedIndex ? "black" : ""
                                     }}
                                         onClick={() => { changeIndex(index) }} >
                                         <div style={{ display: 'flex', }}>
                                             <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
                                                 <small>{index + 1}</small>
                                                 <button  >
-                                                    <BiPlusCircle onClick={() => insertForm(index + 1)} title='Insert' />
+                                                    <BiPlusCircle onClick={() => insertForm(index + 1)} title='Вставить подпись' />
                                                 </button>
                                             </div>
                                             <div style={{ marginRight: '3px' }}  >
@@ -718,14 +627,13 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                     placeholder="Text"
                                                     style={{
                                                         border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                        // background: 'transparent', color: "white",
-                                                        borderRadius: "6px", minWidth: '300px'
+                                                        backgroundColor: '#424242 ', color: "white", borderRadius: "12px", minWidth: '300px'
                                                     }}
                                                 />
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
                                                 <div>
-                                                    <BiX onClick={() => clearText(index)} title='Clear text' />
+                                                    <BiX onClick={() => clearText(index)} title='Очистить текс' />
                                                 </div>
 
                                             </div>
@@ -741,7 +649,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                         min={0}
                                                         style={{
                                                             border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                            borderRadius: "10px", paddingLeft: "10px"
+                                                            backgroundColor: '#424242 ', color: "white", borderRadius: "12px"
                                                         }}
                                                     />
                                                 </div>
@@ -756,7 +664,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                         min={0}
                                                         style={{
                                                             border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                            borderRadius: "10px", paddingLeft: "10px"
+                                                            backgroundColor: '#424242 ', color: "white", borderRadius: "12px"
                                                         }}
                                                     />
                                                 </div>
@@ -766,32 +674,32 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                 <div>
                                                     <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
                                                         style={{ margin: '5px', }}
-                                                        title='Delete' />
+                                                        title='удалить' />
                                                 </div>
                                                 {deleteMenuOpenIndex === index ? (
                                                     <div
-                                                        className=" bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[160px] subtitle-editor"
+                                                        className=" bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[140px] subtitle-editor"
                                                         style={{
                                                             marginTop: '-40px',
                                                             paddingBottom: '4px',
                                                             position: 'relative',
                                                             marginLeft: '-120px',
-                                                            borderRadius: '3px',
+                                                            // backgroundColor: '#34495e',
                                                             backgroundColor: 'lightgrey',
-                                                            border: '1px solid #212f3c',
-
+                                                            border: '2px solid #212f3c',
+                                                            boxShadow: ' rgba(0, 0, 0, 0.6) 0px 10px 20px, rgba(0, 0, 0, 0.8) 0px 6px 6px'
                                                         }}
                                                     >
                                                         <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
                                                             style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
                                                             onClick={() => removeForm(index)}>
-                                                            <span >Delete #{index + 1}</span></div>
+                                                            <span >Удалить</span></div>
 
 
                                                         <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
                                                             style={{ display: 'flex', justifyContent: 'center' }}
                                                             onClick={closeDelete}>
-                                                            <span >Cancel</span></div>
+                                                            <span >Отмена</span></div>
                                                     </div>
                                                 ) : (<></>)}
 
@@ -805,13 +713,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                 ))}
                             </div>
 
-                            <button onClick={addForm} style={{
-                                margin: '20px', marginTop: '12px',
-                                fontSize: '10px'
-                            }}
-                                className='modal-button'>
-                                + Add form</button>
-
                         </div>
 
 
@@ -819,15 +720,16 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
 
 
-                        {/* <div style={{ padding: '20px', paddingLeft: '0' }}> */}
 
-                        {/* {videoUrl ? (
+                        <div style={{ padding: '20px', paddingLeft: '0' }}>
+
+                            {/* {videoUrl ? (
                                 <VideoPlayer src={videoUrl} id={videoId} />
                             ) : (
                                 <p>Загрузка видео...</p>
                             )} */}
 
-                        {/* {videoUrl && (
+                            {videoUrl && (
 
                                 <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
                                     <source src={videoUrl} type="video/mp4" />
@@ -843,27 +745,28 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                     Ваш браузер не поддерживает видео.
                                 </video>
 
-                            )} */}
-                        {/* </div> */}
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white' }}>
                 <span>{formatTime(currentTime)}</span>
                 <span >{formatTime(duration)}</span>
             </div>
-            <div style={{ backgroundColor: 'lightgrey ', }}   >
-                <div className="custom-scroll2"
+            <div style={{ color: "white", backgroundColor: '#424242 ', }}   >
+                <div className="custom-scroll"
                     ref={scrollContainerRef}
                     style={{
                         overflowX: "scroll",
                         whiteSpace: "nowrap",
                         width: "100%",
-                        maxWidth: "100%", // Видимая область для 5 мину
+                        maxWidth: "100%", // Видимая область для 5 минут
+                        backgroundColor: "#424242",
                         padding: "10px 0",
                         borderRadius: "10px",
-                        border: '1px solid lightgrey'
+
                     }}
                 >
                     <input
@@ -876,7 +779,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         onDoubleClick={setTimeCode}
 
                         style={{
-
+                            // width: '100%',
                             width: (duration / 300) >= 1 ? `${(duration / 300) * 100}%` : '100%',
                             marginBottom: '20px',
 

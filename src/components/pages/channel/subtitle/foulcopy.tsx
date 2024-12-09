@@ -99,8 +99,8 @@ const FoulCopySubtitlelist = () => {
                 <thead className="bg-gray-200 text-gray-600  text-sm leading-normal">
                     <tr className="text-left">
 
-                        <th className="py-3 px-3 ">Видео</th>
-                        <th className="py-3 px-3 ">Черновики</th>
+                        <th className="py-3 px-3 ">Video</th>
+                        <th className="py-3 px-3 ">Subtitle drafts</th>
 
                     </tr>
                 </thead>
@@ -128,7 +128,7 @@ const FoulCopySubtitlelist = () => {
                                             <div className="flex" style={{ flexDirection: "column" }}>
                                                 <span>{el.subtitles ? el.subtitles.length : 0}</span>
                                                 {el.subtitles?.map((subtitle, key) => (
-                                                    <div
+                                                    <div  title='Edit subtitle'
                                                         key={key}
                                                         onClick={() => openSubtitlesEditor(
                                                             subtitle.id, subtitle.puthToFile ? subtitle.puthToFile : "")}
