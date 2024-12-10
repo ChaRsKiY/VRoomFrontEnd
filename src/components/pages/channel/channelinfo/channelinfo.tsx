@@ -14,6 +14,7 @@ import VideoCardLast from './video_card_last';
 import { FaPlay } from 'react-icons/fa';
 import Link from 'next/link';
 import api from '@/services/axiosApi';
+import CreatePost from '../../posts/createpost';
 
 
 interface IProps {
@@ -493,7 +494,8 @@ const ChannelInfoComponent: React.FC<IProps> = ({ channelid }) => {
               </div>
 
               <div onClick={showPosts} style={{ display: display5 }} >
-                <PostList channelId={channelid} />
+                {/* <PostList channelId={channelid} /> */}
+                <CreatePost id={channelid} />
               </div>
 
               <div onClick={showAll} style={{ display: display7, marginTop: '20px' }} >

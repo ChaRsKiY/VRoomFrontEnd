@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from "next/image";
-import { FaImage, FaVideo } from 'react-icons/fa';
+import { FaImage, FaVideo, FaVoteYea } from 'react-icons/fa';
 import { useEffect, useState, useRef } from 'react';
 import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,6 +15,7 @@ import { useUser } from '@clerk/nextjs';
 import { IVideo } from '@/types/videoinfo.interface';
 import { FaEye } from 'react-icons/fa';
 import api from '@/services/axiosApi';
+import '@/styles/modalsubtitles.css';
 
 interface ICreatePostProps {
   id: number;
@@ -275,13 +276,13 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
 
   return (
-    <div className="w-full " style={{ justifyItems: 'center', marginBottom: '20px',}}>
+    <div className="w-full " style={{ justifyItems: 'center', marginBottom: '20px',marginTop:'20px' }}>
       {user && user?.id === postOwner?.clerk_Id && (
-        <div className="w-full  "  style={{minWidth:'500px' }}>
-          <div className="w-3/4 px-8" style={{ border: '3px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px' }}>
+        <div className="w-full  " style={{ minWidth: '500px' }}>
+          <div className="w-3/4 px-8" style={{ border: '2px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px' }}>
 
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <small style={{ textAlign: 'center', color: '#00b4ff', fontWeight: 'bold' }}>Select post type:</small>
+              <small style={{ textAlign: 'center', color: 'grey', fontWeight: 'bold' }}>Select post type:</small>
               <select value={postType} onChange={(e) => setPostType(e.target.value as 'text' | 'poll' | 'vote')}
                 style={{
                   padding: '10px'
@@ -294,8 +295,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
             <textarea
               value={text}
-              // onChange={(e) => setText(e.target.value)}
-              onChange= {handleChange}
+              onChange={handleChange}
               placeholder="Enter the text"
               style={{
                 border: 'none',
@@ -312,7 +312,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
             {postType === 'vote' && (
               <div>
-                <small style={{ color: '#00b4ff', fontWeight: 'bold' }}>Add vote options:</small>
+                <small style={{ color: 'grey', fontWeight: 'bold' }}>Add vote options:</small>
                 {pollOptions.map((option, index) => (
                   <div key={index} style={{ display: 'flex', marginBottom: '5px' }}>
                     <input
@@ -338,7 +338,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                     <TooltipProvider>
                       <Tooltip >
                         <TooltipTrigger className="max-sm:hidden">
-                          <FaImage size={40} color="#00b4ff" style={{ opacity: 0.9 }} />
+                          {/* <FaImage size={40} color="#00b4ff" style={{ opacity: 0.9 }} /> */}
+                          <FaImage size={40} color="grey" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>add image</p>
@@ -346,6 +347,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                       </Tooltip>
                     </TooltipProvider>
                   </div>
+
+
                   <div style={{ border: '2px solid gray', padding: '10px', borderRadius: '10px', margin: '10px', display }}>
                     <label>Add image:</label>
                     {imagePreview != '' && (
@@ -354,13 +357,12 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                     <div>
                       <input type="file" ref={fileImageRef}
                         className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-        file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
+        file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
                         onChange={handleImageChange}
                       />
-                      <button onClick={handleCancelImg} style={isHovered2 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
-                        onMouseEnter={() => setIsHovered2(true)}
-                        onMouseLeave={() => setIsHovered2(false)}>Cancel</button>
+                      <button onClick={handleCancelImg}  className='modal-button'
+                     style={{borderRadius:'6px',paddingLeft:'25px',paddingRight:'30px',paddingBottom:'6px',marginLeft:"2px"}}>Cancel</button>
                     </div>
                   </div>
                   <div onClick={openVideoMenu} style={{ display: display3 }} >
@@ -368,7 +370,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                     <TooltipProvider>
                       <Tooltip >
                         <TooltipTrigger className="max-sm:hidden">
-                          <FaVideo size={40} color="green" style={{ opacity: 0.5 }} />
+                          {/* <FaVideo size={40} color="green" style={{ opacity: 0.5 }} /> */}
+                          <FaVideo size={40} color="grey" />
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>add video or video-link</p>
@@ -396,21 +399,20 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                           Ваш браузер не поддерживает просмотр видео.
                         </video>
 
+
+
                       </div>
                     ) : <></>}
                   </div>
                   <div style={{ display: displayVideoMenu }}>
                     <div style={{ display: 'flex' }}> <div>
-                      <div onClick={addVideoLink} style={isHovered5 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
-                        onMouseEnter={() => setIsHovered5(true)}
-                        onMouseLeave={() => setIsHovered5(false)} >
+                      <div onClick={addVideoLink} className='modal-button' >
                         <p>Add the video-link</p></div>
-                      <div onClick={addVideo} style={isHovered4 ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}
-                        onMouseEnter={() => setIsHovered4(true)}
-                        onMouseLeave={() => setIsHovered4(false)}>
+                      <div onClick={addVideo} className='modal-button'>
                         <p>Upload new video</p></div>
                     </div>
-                      <div> <button style={{ paddingRight: '10px', color: 'gray' }} onClick={closeMenuVideo}>
+                      <div> <button style={{ paddingRight: '10px', color: 'gray',fontWeight:"bold" }} onClick={closeMenuVideo}
+                      title='Close'>
                         X</button></div>
                     </div></div>
 
@@ -429,15 +431,20 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
                     <input type="file" ref={fileVideoRef}
                       className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-        file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:disabled:opacity-50 file:disabled:pointer-events-none
+        file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
+       
                       onChange={handleVideoChange}
                     />
 
-                    <button onClick={handleCancelVideo} style={isHovered3 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
+                    {/* <button onClick={handleCancelVideo} style={isHovered3 ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
                       onMouseEnter={() => setIsHovered3(true)}
-                      onMouseLeave={() => setIsHovered3(false)}>Cancel</button>
+                      onMouseLeave={() => setIsHovered3(false)}>Cancel</button> */}
+                    <button onClick={handleCancelVideo} className='modal-button'
+                     style={{borderRadius:'6px',paddingLeft:'25px',paddingRight:'30px',paddingBottom:'6px',marginLeft:"2px"}}>
+                      Cancel</button>
                   </div>
+
                 </div>
 
               </div>
@@ -445,11 +452,17 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
             )}
 
 
-            <button onClick={handleSubmit2} onMouseEnter={() => setIsHovered(true)}
+            {/* <button onClick={handleSubmit2} onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               style={isHovered ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}>
+              Publish </button> */}
+              <div style={{display:'flex',justifyContent:'end'}}>
+            <button onClick={handleSubmit2} className='modal-button'>
               Publish </button>
+              </div>
           </div>
+
+
         </div>
       )}
 
