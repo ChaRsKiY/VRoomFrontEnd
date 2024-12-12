@@ -239,7 +239,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
           // handleCancelImg ();
           // handleCancelVideo ();
           // setText('');
-          window.location.reload();
+        //  window.location.reload();
         } else {
           alert('Ошибка при сохранении данных');
           alert(res.statusText);
@@ -276,7 +276,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
 
 
   return (
-    <div className="w-full " style={{ justifyItems: 'center', marginBottom: '20px',marginTop:'20px' }}>
+    <div className="w-full " style={{ justifyItems: 'center', marginBottom: '20px', marginTop: '20px' }}>
       {user && user?.id === postOwner?.clerk_Id && (
         <div className="w-full  " style={{ minWidth: '500px' }}>
           <div className="w-3/4 px-8" style={{ border: '2px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px' }}>
@@ -361,8 +361,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
                         onChange={handleImageChange}
                       />
-                      <button onClick={handleCancelImg}  className='modal-button'
-                     style={{borderRadius:'6px',paddingLeft:'25px',paddingRight:'30px',paddingBottom:'6px',marginLeft:"2px"}}>Cancel</button>
+                      <button onClick={handleCancelImg} className='modal-button'
+                        style={{ borderRadius: '6px', paddingLeft: '25px', paddingRight: '30px', paddingBottom: '6px', marginLeft: "2px" }}>Cancel</button>
                     </div>
                   </div>
                   <div onClick={openVideoMenu} style={{ display: display3 }} >
@@ -411,8 +411,8 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                       <div onClick={addVideo} className='modal-button'>
                         <p>Upload new video</p></div>
                     </div>
-                      <div> <button style={{ paddingRight: '10px', color: 'gray',fontWeight:"bold" }} onClick={closeMenuVideo}
-                      title='Close'>
+                      <div> <button style={{ paddingRight: '10px', color: 'gray', fontWeight: "bold" }} onClick={closeMenuVideo}
+                        title='Close'>
                         X</button></div>
                     </div></div>
 
@@ -433,7 +433,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                       className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
-       
+
                       onChange={handleVideoChange}
                     />
 
@@ -441,7 +441,7 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
                       onMouseEnter={() => setIsHovered3(true)}
                       onMouseLeave={() => setIsHovered3(false)}>Cancel</button> */}
                     <button onClick={handleCancelVideo} className='modal-button'
-                     style={{borderRadius:'6px',paddingLeft:'25px',paddingRight:'30px',paddingBottom:'6px',marginLeft:"2px"}}>
+                      style={{ borderRadius: '6px', paddingLeft: '25px', paddingRight: '30px', paddingBottom: '6px', marginLeft: "2px" }}>
                       Cancel</button>
                   </div>
 
@@ -456,10 +456,10 @@ const CreatePost: React.FC<ICreatePostProps> = ({ id }) => {
               onMouseLeave={() => setIsHovered(false)}
               style={isHovered ? { ...buttonCancelStyles.baseplus, ...buttonCancelStyles.hover } : buttonCancelStyles.baseplus}>
               Publish </button> */}
-              <div style={{display:'flex',justifyContent:'end'}}>
-            <button onClick={handleSubmit2} className='modal-button'>
-              Publish </button>
-              </div>
+            <div style={{ display: 'flex', justifyContent: 'end' }}>
+              <button onClick={handleSubmit2} className='modal-button'>
+                Publish </button>
+            </div>
           </div>
 
 
