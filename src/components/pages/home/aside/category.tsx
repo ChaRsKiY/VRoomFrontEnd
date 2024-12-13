@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react'
 import Link from "next/link";
 import Image from "next/image";
@@ -27,5 +29,6 @@ const CategoryBlock: React.FC<ICategoryBlock> = ({ title, data }: ICategoryBlock
         </div>
     )
 }
+
 
 export default CategoryBlock

@@ -4,6 +4,7 @@ import CategoryBlock from "@/components/pages/home/aside/category";
 import {IoMdHome} from "react-icons/io";
 import {SiYoutubeshorts} from "react-icons/si";
 import {
+    MdBugReport,
     MdFeedback,
     MdSubscriptions,
     MdWatchLater
@@ -18,6 +19,21 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import MiniFooter from "@/components/pages/home/aside/mini-footer";
 import CategorySubscription from './category-subscription';
 import CategoryVideos from './categoryvideos';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import Link from "next/link";
+import Image from "next/image";
+import AddContentReportDialog from "@/components/pages/home/aside/add-content-report-dialog";
 
 
 interface IAsideHomeProps {
@@ -52,7 +68,6 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
     const mainPageOtherCategories = [
         { icon: <FaHandsHelping />, name: t("categories:help"), path: "/help" },
         { icon: <MdFeedback />, name: t("categories:feedback"), path: "/feedback" },
-        { icon: <FaFlag />, name: t("categories:report_history"), path: "/reporthistory" },
     ]
 
 
@@ -72,12 +87,12 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
-                     <CategorySubscription />
+                    <CategorySubscription/>
 
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
-                    <CategoryVideos />
+                    <CategoryVideos/>
 
                     {/* <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
@@ -91,17 +106,19 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
 
                     <CategoryBlock data={mainPageOtherCategories} title="Other"/>
 
+                    <AddContentReportDialog />
+
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
-                    <MiniFooter />
+                    <MiniFooter/>
                 </div>
             </div>
 
             <div
                 className="bg-white dark:bg-neutral-950 hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
-                <SmallCategoryBlock data={mainPageHomeCategories} />
+                <SmallCategoryBlock data={mainPageHomeCategories}/>
             </div>
         </div>
     )

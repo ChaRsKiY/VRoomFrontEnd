@@ -39,31 +39,29 @@ import {useEffect, useState} from "react";
 import ReportAnswerForm from "@/components/pages/admin/report-answer-modal";
 import api from "@/services/axiosApi";
 import {IoIosSearch} from "react-icons/io";
-import {useUser} from "@clerk/nextjs";
+import {useSession, useUser} from "@clerk/nextjs";
+import Image from "next/image";
 
-export type Report = {
+export type Ad = {
     id: string
-    senderUserId: number
-    status: "Open" | "Closed" | "Processing"
     title: string
     description: string
-    type: string
+    url: string
+    imageUrl: string
     createdAt: string
-    adminId: string
-    adminAnswer: string
 }
 
-const fetchReports = async (page: number, perPage: number, searchQuery: string = "") => {
+const fetchAds = async (page: number, perPage: number, searchQuery: string = "") => {
     try {
-        const res = await api.get("/ContentReport?page=" + page + "&perPage=" + perPage + "&searchQuery=" + searchQuery);
-        return { data: res.data.contentReports, total: res.data.count }
+        const res = await api.get("/Ad?page=" + page + "&perPage=" + perPage + "&searchQuery=" + searchQuery);
+        return { data: res.data.ads, total: res.data.count }
     } catch (e) {
         console.error(e)
         return { data: [], total: 0 }
     }
 }
 
-export default function ReportsTable() {
+export default function AdsTable() {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] =
@@ -71,7 +69,7 @@ export default function ReportsTable() {
             id: false,
             senderId: false,
         })
-    const [data, setData] = React.useState<Report[]>([])
+    const [data, setData] = React.useState<Ad[]>([])
     const [page, setPage] = React.useState(1)
     const [total, setTotal] = React.useState(0)
     const [isPending, setIsPending] = useState(false)
@@ -80,7 +78,7 @@ export default function ReportsTable() {
 
     const perPage = 5;
 
-    const columns: ColumnDef<Report>[] = [
+    const columns: ColumnDef<Ad>[] = [
         {
             accessorKey: "id",
             header: "ID",
@@ -89,58 +87,45 @@ export default function ReportsTable() {
             ),
         },
         {
-            accessorKey: "senderUserId",
-            header: "Sender ID",
-            cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("senderUserId")}</div>
-            ),
-        },
-        {
-            accessorKey: "status",
-            header: "Status",
-            cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("status")}</div>
-            ),
-        },
-        {
             accessorKey: "title",
             header: "Title",
-            cell: ({ row }) => <div className="capitalize">{row.getValue("title") ? row.getValue("title") : "-"}</div>,
+            cell: ({ row }) => (
+                <div className="capitalize">{row.getValue("title")}</div>
+            ),
         },
         {
-            accessorKey: "type",
-            header: "Type",
-            cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+            accessorKey: "description",
+            header: "Description",
+            cell: ({ row }) => (
+                <div className="capitalize">{row.getValue("description")}</div>
+            ),
+        },
+        {
+            accessorKey: "url",
+            header: "URL",
+            cell: ({ row }) => (
+                <div>{row.getValue("url")}</div>
+            ),
+        },
+        {
+            accessorKey: "imageUrl",
+            header: "Image URL",
+            cell: ({ row }) => (
+                <Image src={row.getValue("imageUrl")} alt={row.getValue("title")} width={55} height={55} />
+            ),
         },
         {
             accessorKey: "createdAt",
             header: "Created At",
-            cell: ({ row }) => <div className="lowercase">{new Date(row.getValue("createdAt")).toLocaleString()}</div>,
+            cell: ({ row }) => (
+                <div className="capitalize">{new Date(row.getValue("createdAt")).toLocaleString()}</div>
+            ),
         },
         {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
                 const report = row.original
-
-                const handleProcess = async () => {
-                    try {
-                        if (!user) return;
-                        await api.put("/ContentReport/" + report.id + "/" + user.id + "/process", {});
-                        await fetchReports(page, perPage, searchQuery);
-                    } catch (e) {
-                        console.error(e)
-                    }
-                }
-
-                const handleReOpen = async (e: React.MouseEvent) => {
-                    try {
-                        await api.put("/ContentReport/" + report.id + "/reopen", {});
-                        await fetchReports(page, perPage, searchQuery);
-                    } catch (e) {
-                        console.error(e)
-                    }
-                }
 
                 return (
                     <DropdownMenu>
@@ -155,17 +140,10 @@ export default function ReportsTable() {
                             <DropdownMenuItem
                                 onClick={() => navigator.clipboard.writeText(report.id)}
                             >
-                                Copy report ID
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(report.senderUserId.toString())}
-                            >
-                                Copy sender ID
+                                Copy ad ID
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {report.status === "Open" && <DropdownMenuItem onClick={handleProcess}>Process</DropdownMenuItem>}
-                            {report.status === "Processing" && report.adminId === user?.id && <DropdownMenuItem asChild><ReportAnswerForm report={report} /></DropdownMenuItem>}
-                            {report.status === "Closed" && <DropdownMenuItem onClick={handleReOpen}>Reopen</DropdownMenuItem>}
+                            <DropdownMenuItem>Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -176,7 +154,7 @@ export default function ReportsTable() {
     useEffect(() => {
         (async () => {
             setIsPending(true)
-            const { data, total } = await fetchReports(page, perPage, searchQuery);
+            const { data, total } = await fetchAds(page, perPage, searchQuery);
             setData(data)
             setTotal(total)
             setIsPending(false)
@@ -249,7 +227,7 @@ export default function ReportsTable() {
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
-                            {headerGroup.headers.map((header) => {
+                                {headerGroup.headers.map((header) => {
                                     return (
                                         <TableHead key={header.id}>
                                             {header.isPlaceholder
