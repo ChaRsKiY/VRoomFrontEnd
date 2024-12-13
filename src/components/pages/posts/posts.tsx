@@ -15,6 +15,8 @@ import { IVideo } from '@/types/videoinfo.interface';
 import { formatNumber } from "@/utils/format";
 import { FaCircle } from 'react-icons/fa';
 import api from '@/services/axiosApi';
+import CreatePost from './createpost';
+import '@/styles/modalsubtitles.css';
 
 interface IPropsPost {
   channelId: number,
@@ -484,8 +486,11 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div  >
+    <div  className='w-full'>
       <div style={{ display }}>
+       
+       
+    
         <div className=" w-3/4" >
 
           {posts.length === 0 ? (
@@ -714,16 +719,18 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                                 paddingTop: '4px',
                                 paddingBottom: '4px',
                                 position: 'absolute',
-                                border: '2px solid brown'
+                               // border: '1px solid grey'
                               }}
                             >
                               <div className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-red-300"
+                            
                                 style={{ display: 'flex', justifyContent: 'center' }}
                                 onClick={() => deletePost(post.id)}>
                                 <span style={{ fontSize: '18px' }}>Delete</span></div>
 
 
-                              <div className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                              {/* <div className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" */}
+                                <div className="modal-button"
                                 style={{ display: 'flex', justifyContent: 'center' }}
                                 onClick={closeReport}>
                                 <span style={{ fontSize: '18px' }}>Cancel</span></div>

@@ -1,47 +1,154 @@
-import { useState } from 'react'
-import { X, Lock, Globe, Users } from 'lucide-react'
-import internal from 'stream';
+"use client";
+
+import React, { useState, useRef, useEffect } from 'react'
+import { X, Lock, Globe, Users, List, Check, Plus } from 'lucide-react'
+
 interface PlayListInterfaceProps {
-    userId: number;
-  }
-export default function PlayListInterface({ userId }: PlayListInterfaceProps) {
+  userId: number
+}
+
+export default function PlaylistManagerWithDropdown({ userId }: PlayListInterfaceProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isAddingNew, setIsAddingNew] = useState(false)
   const [playlistName, setPlaylistName] = useState('')
   const [privacy, setPrivacy] = useState('private')
-  const [description, setDescription] = useState('')
+  const [selectedPlaylists, setSelectedPlaylists] = useState<string[]>([])
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  const modalRef = useRef<HTMLDivElement>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Here you would typically send this data to your backend
-    console.log({ playlistName, privacy, description })
-    // Reset form and close modal
-    setPlaylistName('')
-    setPrivacy('private')
-    setDescription('')
+  const existingPlaylists = [
+    { id: '1', name: 'Favorites', privacy: 'private' },
+    { id: '2', name: 'Music Videos', privacy: 'public' },
+    { id: '3', name: 'Watch Later', privacy: 'private' },
+    { id: '4', name: 'Coding Tutorials', privacy: 'unlisted' },
+  ]
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
+          buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        setIsAddingNew(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  const handleAddToPlaylist = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    console.log('Adding to playlists:', selectedPlaylists)
+    setSelectedPlaylists([])
     setIsOpen(false)
   }
 
+  const handleCreateNewPlaylist = (e: React.FormEvent) => {
+    e.preventDefault()
+    console.log('Creating new playlist:', { playlistName, privacy })
+    setPlaylistName('')
+    setPrivacy('private')
+    setIsAddingNew(false)
+  }
+
+  const togglePlaylistSelection = (e: React.MouseEvent, playlistId: string) => {
+    e.stopPropagation()
+    setSelectedPlaylists((prev) =>
+      prev.includes(playlistId)
+        ? prev.filter((id) => id !== playlistId)
+        : [...prev, playlistId]
+    )
+  }
+
+  const toggleDropdown = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setIsOpen((prev) => !prev)
+  }
+
   return (
-    <div className="p-4">
-      <button
-        onClick={() => setIsOpen(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-300"
-      >
-        Create new playlist
-      </button>
+    <div className="relative inline-block text-left">
+      <div>
+        <button
+          ref={buttonRef}
+          type="button"
+          className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500"
+          onClick={toggleDropdown}
+        >
+          <List className="mr-2 h-5 w-5" />
+          Save to playlist
+        </button>
+      </div>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-semibold">Create a new playlist</h2>
-              <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
+        <div
+          ref={dropdownRef}
+          className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+            {existingPlaylists.map((playlist) => (
+              <div
+                key={playlist.id}
+                className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                role="menuitem"
+                onClick={(e) => togglePlaylistSelection(e, playlist.id)}
+              >
+                <div className="flex items-center">
+                  <span className="mr-2">{playlist.name}</span>
+                  {playlist.privacy === 'private' && <Lock className="w-4 h-4 text-gray-500" />}
+                  {playlist.privacy === 'unlisted' && <Users className="w-4 h-4 text-gray-500" />}
+                  {playlist.privacy === 'public' && <Globe className="w-4 h-4 text-gray-500" />}
+                </div>
+                {selectedPlaylists.includes(playlist.id) ? (
+                  <Check className="w-5 h-5 text-green-500" />
+                ) : (
+                  <Plus className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+            ))}
+            <button
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem"
+              onClick={handleAddToPlaylist}
+            >
+              Add to playlist
+            </button>
+            <button
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              role="menuitem"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsAddingNew(true)
+                setIsOpen(false)
+              }}
+            >
+              <Plus className="inline-block w-5 h-5 mr-2" />
+              Create new playlist
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isAddingNew && (
+        <div className="fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex">
+          <div ref={modalRef} className="relative p-8 bg-white w-full max-w-md m-auto flex-col flex rounded-lg">
+            <div className="flex justify-between items-center pb-3">
+              <h2 className="text-xl font-bold">Create a new playlist</h2>
+              <button
+                onClick={() => setIsAddingNew(false)}
+                className="text-black close-modal"
+              >
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-4">
+            <form onSubmit={handleCreateNewPlaylist}>
               <div className="mb-4">
-                <label htmlFor="playlistName" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="playlistName" className="block text-sm font-medium text-gray-700">
                   Name
                 </label>
                 <input
@@ -49,75 +156,58 @@ export default function PlayListInterface({ userId }: PlayListInterfaceProps) {
                   id="playlistName"
                   value={playlistName}
                   onChange={(e) => setPlaylistName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Privacy
-                </label>
-                <div className="space-y-2">
-                  <label className="flex items-center">
+                <label className="block text-sm font-medium text-gray-700">Privacy</label>
+                <div className="mt-2 space-y-2">
+                  <label className="inline-flex items-center">
                     <input
                       type="radio"
                       value="private"
                       checked={privacy === 'private'}
                       onChange={(e) => setPrivacy(e.target.value)}
-                      className="mr-2"
+                      className="form-radio"
                     />
-                    <Lock className="w-4 h-4 mr-2" />
-                    <span>Private</span>
+                    <span className="ml-2">Private</span>
                   </label>
-                  <label className="flex items-center">
+                  <label className="inline-flex items-center">
                     <input
                       type="radio"
                       value="unlisted"
                       checked={privacy === 'unlisted'}
                       onChange={(e) => setPrivacy(e.target.value)}
-                      className="mr-2"
+                      className="form-radio"
                     />
-                    <Users className="w-4 h-4 mr-2" />
-                    <span>Unlisted</span>
+                    <span className="ml-2">Unlisted</span>
                   </label>
-                  <label className="flex items-center">
+                  <label className="inline-flex items-center">
                     <input
                       type="radio"
                       value="public"
                       checked={privacy === 'public'}
                       onChange={(e) => setPrivacy(e.target.value)}
-                      className="mr-2"
+                      className="form-radio"
                     />
-                    <Globe className="w-4 h-4 mr-2" />
-                    <span>Public</span>
+                    <span className="ml-2">Public</span>
                   </label>
                 </div>
               </div>
-              <div className="mb-4">
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-300"
-                >
-                  Cancel
-                </button>
+              <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm"
                 >
                   Create
+                </button>
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm"
+                  onClick={() => setIsAddingNew(false)}
+                >
+                  Cancel
                 </button>
               </div>
             </form>
