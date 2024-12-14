@@ -22,7 +22,6 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
         const fetchHistory = async () => {
             const response = await api.get(`/HistoryOfBrowsing/getallhistorybyclerkidgroupedbydate/` + userId);
             const hist = await response.data;
-            console.log(hist);
             setHistory(hist);
         };
 

@@ -1,4 +1,3 @@
-
 import React, {useState, ReactNode} from 'react'
 import CategoryBlock from "@/components/pages/home/aside/category";
 import {IoMdHome} from "react-icons/io";
@@ -24,35 +23,35 @@ interface IAsideHomeProps {
     t: ITranslationFunction
 }
 
-const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
+const AsideHome: React.FC<IAsideHomeProps> = ({t}: IAsideHomeProps) => {
 
     const mainPageHomeCategories = [
-        { icon: <IoMdHome />, name: t("categories:home"), path: "/" },
-        { icon: <SiYoutubeshorts />, name: t("categories:shorts"), path: "/shorts" },
-        { icon: <MdSubscriptions />, name: t("categories:subscriptions"), path: "/subscriptions" },
+        {icon: <IoMdHome/>, name: t("categories:home"), path: "/"},
+        {icon: <SiYoutubeshorts/>, name: t("categories:shorts"), path: "/shorts"},
+        {icon: <MdSubscriptions/>, name: t("categories:subscriptions"), path: "/subscriptions"},
     ]
 
     const mainPageAccountCategories = [
-        { icon: <IoVideocam />, name: t("categories:your_channel"), path: "/channel" },
-        { icon: <RiPlayList2Fill />, name: t("categories:playlists"), path: "/playlists" },
-        { icon: <MdWatchLater />, name: t("categories:watch_later"), path: "/playlist?list=WL" },
-        { icon: <BiSolidLike />, name: t("categories:liked_videos"), path: "/mylikedvideo" },
-        { icon: <FaHistory />, name: t("categories:history"), path: "/history" },
+        {icon: <IoVideocam/>, name: t("categories:your_channel"), path: "/gotochannel/0"},
+        {icon: <RiPlayList2Fill/>, name: t("categories:playlists"), path: "/playlists"},
+        {icon: <MdWatchLater/>, name: t("categories:watch_later"), path: "/playlist?list=WL"},
+        {icon: <BiSolidLike/>, name: t("categories:liked_videos"), path: "/mylikedvideo"},
+        {icon: <FaHistory/>, name: t("categories:history"), path: "/history"},
     ]
 
 
     const mainPageCategories = [
-        { iconPath: "/", name: t("categories:trending"), path: "/popular" },
-        { iconPath: "/", name: t("categories:sport"), path: "/shorts" },
-        { iconPath: "/", name: t("categories:games"), path: "/subscriptions" },
-        { iconPath: "/", name: t("categories:music"), path: "/shorts" },
-        { iconPath: "/", name: t("categories:news"), path: "/subscriptions" },
+        {iconPath: "/", name: t("categories:trending"), path: "/popular"},
+        {iconPath: "/", name: t("categories:sport"), path: "/shorts"},
+        {iconPath: "/", name: t("categories:games"), path: "/subscriptions"},
+        {iconPath: "/", name: t("categories:music"), path: "/shorts"},
+        {iconPath: "/", name: t("categories:news"), path: "/subscriptions"},
     ]
 
     const mainPageOtherCategories = [
-        { icon: <FaHandsHelping />, name: t("categories:help"), path: "/help" },
-        { icon: <MdFeedback />, name: t("categories:feedback"), path: "/feedback" },
-        { icon: <FaFlag />, name: t("categories:report_history"), path: "/reporthistory" },
+        {icon: <FaHandsHelping/>, name: t("categories:help"), path: "/help"},
+        {icon: <MdFeedback/>, name: t("categories:feedback"), path: "/feedback"},
+        {icon: <FaFlag/>, name: t("categories:report_history"), path: "/reporthistory"},
     ]
 
 
@@ -72,12 +71,12 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
-                     <CategorySubscription />
+                    <CategorySubscription/>
 
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
-                    <CategoryVideos />
+                    <CategoryVideos/>
 
                     {/* <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
@@ -95,13 +94,13 @@ const AsideHome: React.FC<IAsideHomeProps> = ({ t }: IAsideHomeProps) => {
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
                     </div>
 
-                    <MiniFooter />
+                    <MiniFooter/>
                 </div>
             </div>
 
             <div
                 className="bg-white dark:bg-neutral-950 hidden max-lg:block fixed bottom-0 top-20 w-[12%] overflow-scroll px-3 max-sm:right-0 max-sm:top-[auto] max-sm:left-0 max-sm:w-full">
-                <SmallCategoryBlock data={mainPageHomeCategories} />
+                <SmallCategoryBlock data={mainPageHomeCategories}/>
             </div>
         </div>
     )

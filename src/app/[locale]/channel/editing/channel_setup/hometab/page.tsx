@@ -1,16 +1,21 @@
+"use client"
+
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import Image from "next/image";
 import Link from "next/link";
 import HeaderHome from "@/components/pages/home/header/header";
+//import SectionsSettings from "@/components/pages/channel/channelSetup/sections";
+
+import SectionsSettings from "@/components/pages/channel/channelSetup/sectionsV2";
 
 interface IHomeTabProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:IHomeTabProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+const channelPage = async ({params: {locale}}: IHomeTabProps) => {
+    const {t} = await initTranslations(locale, ['common', 'categories']);
     return (
 
         <>
@@ -24,7 +29,7 @@ const channelPage = async ({params: {locale}}:IHomeTabProps) => {
                 <h1 className="text-2xl font-bold pl-3">Channel settings</h1>
                 <div className="flex-1  pt-0 pb-6 pl-6 pr-6">
 
-                    <div className="mb-6"><br/>
+                    {/*<div className="mb-6"><br/>
 
                         <div className="flex mt-2">
                             <Link target={'_self'} href={"/channel/editing/channel_setup/profile"}
@@ -32,72 +37,15 @@ const channelPage = async ({params: {locale}}:IHomeTabProps) => {
                             <a href="#" className="text-gray-500 border-b-2 border-gray-800 hover:text-gray-800 pb-2">Tab
                                 "main"</a>
                         </div>
-                    </div>
+                    </div>*/}
 
-                    <div className="bg-white shadow rounded-lg mb-6">
-                        <section className="bg-white rounded-lg shadow-md">
-                            <h2 className="text-xl font-semibold mb-4">Home Tab</h2>
-                            <p className="text-gray-600 mb-6">The Home tab allows you to recommend content for
-                                to your audience</p>
-                            <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-lg font-semibold">Layout</h3>
-                                <button className="text-blue-600 font-medium hover:underline">Add section</button>
-                            </div>
-                            <div className="space-y-4">
+                    {/*<div className="bg-white shadow rounded-lg mb-6">*/}
+                    {/*<section className="bg-white rounded-lg shadow-md">*/}
 
-                                <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
-                                    <div>
-                                        <h4 className="font-semibold">For you</h4>
-                                        <p className="text-sm text-gray-600">In this section, viewers will see
-                                            recommendations
-                                            based on their
-                                            interests.</p>
-                                        <a href="#" className="text-sm text-blue-600 hover:underline">More Settings</a>
-                                    </div>
-                                    <button className="text-gray-500"><i className="fas fa-bars"></i></button>
-                                </div>
+                    <SectionsSettings t={t}/>
+                    {/*<Sections/>*/}
 
-                                <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
-                                    <div>
-                                        <h4 className="font-semibold">Video (0)</h4>
-                                        <p className="text-sm text-gray-600">This section will appear if you download
-                                            video</p>
-                                    </div>
-                                    <button className="text-gray-500"><i className="fas fa-bars"></i></button>
-                                </div>
-
-                                <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
-                                    <div>
-                                        <h4 className="font-semibold">Short videos (0)</h4>
-                                        <p className="text-sm text-gray-600">This section will appear after you
-                                            upload short
-                                            video</p>
-                                    </div>
-                                    <button className="text-gray-500"><i className="fas fa-bars"></i></button>
-                                </div>
-
-                                <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
-                                    <div>
-                                        <h4 className="font-semibold">Completed broadcasts (0)</h4>
-                                        <p className="text-sm text-gray-600">This section will appear if you create
-                                            direct recording
-                                            broadcasts</p>
-                                    </div>
-                                    <button className="text-gray-500"><i className="fas fa-bars"></i></button>
-                                </div>
-
-                                <div className="p-4 bg-gray-100 rounded-lg flex justify-between items-center">
-                                    <div>
-                                        <h4 className="font-semibold">Created playlists (0)</h4>
-                                        <p className="text-sm text-gray-600">This section will appear if you create
-                                            public
-                                            playlist</p>
-                                    </div>
-                                    <button className="text-gray-500"><i className="fas fa-bars"></i></button>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
+                    {/*</div>*/}
 
 
                 </div>
