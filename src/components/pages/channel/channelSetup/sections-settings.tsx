@@ -1,7 +1,7 @@
 "use client"
 
 import {useUser} from "@clerk/nextjs";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import api from "@/services/axiosApi";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
@@ -11,6 +11,7 @@ import {IoTrashOutline} from "react-icons/io5";
 import {RxDragHandleDots2} from "react-icons/rx";
 import Link from "next/link";
 import {IUser} from "@/types/user.interface";
+import {DragDropContext, Droppable, Draggable} from '@hello-pangea/dnd';
 
 
 interface ISectionsSettingsProps {
@@ -43,7 +44,8 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
     const [showDialog, setShowDialog] = useState(false);
     const [channelInfo, setChannelInfo] = useState<IUser | null>(null);
     const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
-
+    const channelSectionsRef = useRef<ChannelSection[]>([]); // Хранит актуальное состояние
+    const [chsetid, setChsetid] = useState<number>(0);
 
     const fetchData = async (userId: string) => {
         setIsLoading(true);
@@ -57,8 +59,9 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
             ]);
             setChannelInfo(chInfo.data);
             setSections(sectionsRes.data);
-            setChannelSections(channelSectionsRes.data);
-
+            setChannelSections(channelSectionsRes.data.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order));
+            setChsetid(channelSections[0].channel_SettingsId);
+            channelSectionsRef.current = channelSectionsRes.data; // Сохраняем начальное состояние в ref
 
         } catch (err) {
             setError("Failed to load data");
@@ -75,20 +78,39 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
 
     const handleButtonClick = () => {
         if (user) {
+            // setChannelSections(channelSectionsRef.current);
             fetchData(user.id);
         }
     };
 
     const handleAddSection = (sectionId: number) => {
         setChannelSections((prevSections) => {
-            return prevSections.map((section) =>
-                section.chSectionId === sectionId
-                    ? {...section, isVisible: true, order: prevSections.filter((s) => s.isVisible).length}
-                    : section
-            );
+            // Проверяем, существует ли уже секция с таким id и она видимая
+            const sectionExists = prevSections.some((section) => section.chSectionId === sectionId && section.isVisible);
+
+            if (sectionExists) {
+                return prevSections; // Если секция уже добавлена, ничего не меняем
+            }
+
+            // Находим новый раздел
+            const newSection = {
+                id: 0, // Генерация уникального ID для новой секции, можно заменить на подходящий ID
+                channel_SettingsId: chsetid, // ID пользователя (если это необходимо)
+                title: sections.find(section => section.id === sectionId)?.title || 'New Section', // Заголовок секции
+                chSectionId: sectionId,
+                order: prevSections.filter((s) => s.isVisible).length + 1,
+                isVisible: true,
+            };
+
+            // Добавляем новый раздел в начало массива
+            const updatedSections = [...prevSections, newSection];
+
+            return updatedSections;
         });
+
         setShowDialog(false);
     };
+
 
     const handleRemoveSection = (id: number) => {
         setChannelSections((prevSections) => {
@@ -118,45 +140,23 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
         }
     };
 
-    const handleDragStart = (index: number) => {
-        setDraggingIndex(index);
-    };
+    const handleDragEnd = (result: any) => {
+        const {source, destination} = result;
 
-    const handleDragOver = (e: React.DragEvent<HTMLLIElement>, targetIndex: number) => {
-        e.preventDefault();
+        if (!destination) return; // Если элемент не перемещен
+        if (destination.index === source.index) return; // Если элемент остался на месте
 
-        if (draggingIndex === null || draggingIndex === targetIndex) return;
+        const reorderedSections = [...channelSections];
+        const [movedItem] = reorderedSections.splice(source.index, 1);
+        reorderedSections.splice(destination.index, 0, movedItem);
 
-        setChannelSections((prevSections) => {
-            // Извлекаем видимые секции
-            const visibleSections = prevSections.filter((s) => s.isVisible);
+        // Обновляем порядок в массиве
+        const updatedSections = reorderedSections.filter((cs) => cs.isVisible).map((section, index) => ({
+            ...section,
+            order: index + 1,
+        }));
 
-            // Элемент, который перетаскиваем
-            const draggedItem = visibleSections[draggingIndex];
-
-            // Перемещаем элемент
-            visibleSections.splice(draggingIndex, 1);
-            visibleSections.splice(targetIndex, 0, draggedItem);
-
-            // Пересчитываем `order` для видимых секций
-            visibleSections.forEach((section, index) => {
-                section.order = index + 1;
-            });
-
-            // Обновляем состояние, объединяя измененные и неизмененные секции
-            return prevSections.map((section) => {
-                const updatedSection = visibleSections.find((s) => s.id === section.id);
-                return updatedSection || section;
-            });
-        });
-
-        // Обновляем индекс перетаскиваемого элемента
-        setDraggingIndex(targetIndex);
-    };
-
-
-    const handleDragEnd = () => {
-        setDraggingIndex(null);
+        setChannelSections(updatedSections); // Обновляем состояние
     };
 
     return (
@@ -218,44 +218,58 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
             </div>
             <div className="pt-6 pb-6 pr-6 bg-gray-100 min-h-screen">
                 <div className="mb-6">
-                    <ul className="space-y-2 w-10/12">
-                        {channelSections.filter((cs) => cs.isVisible)
-                            .sort((a, b) => a.order - b.order)
-                            .map((section, index) => (
-                                <li
-                                    key={section.id}
-                                    draggable
-                                    onDragStart={() => handleDragStart(index)}
-                                    onDragOver={(e) => handleDragOver(e, index)}
-                                    onDragEnd={handleDragEnd}
-                                    className={`flex flex-row h-[5.6875rem] w-full items-center gap-5 p-4 border-b ${draggingIndex === index ? "border-blue-500" : "border-gray-300"} bg-white shadow`}
-                                >
-                                    <RxDragHandleDots2 size={30}/>
-                                    <div>
-                                        <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{section.title}</h2>
-                                        <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                            VRoom recommends fresh content based on your viewers' interests. This is
-                                            only visible to your viewers when you have enough content. More Settings
-                                        </p>
-                                    </div>
-                                    <div className="space-x-2">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="mm" className="ml-auto">
-                                                    <MoreVertical className="h-6 w-6"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                    onClick={() => handleRemoveSection(section.id)}>
-                                                    <IoTrashOutline className="mr-2 h-4 w-4"/> Delete
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                </li>
-                            ))}
-                    </ul>
+                    <DragDropContext onDragEnd={handleDragEnd}>
+                        <Droppable droppableId="droppable">
+                            {(provided) => (
+                                <ul ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 w-10/12">
+
+                                    {channelSections.filter((cs) => cs.isVisible)
+                                        .map((section, index) => (
+                                            <Draggable key={section.id} draggableId={section.id.toString()}
+                                                       index={index}>
+                                                {(provided) => (
+                                                    <li ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        className={`flex flex-row h-[5.6875rem] w-full items-center gap-5 p-4 border-b ${draggingIndex === index ? "border-blue-500" : "border-gray-300"} bg-white shadow`}
+                                                    >
+                                                        <RxDragHandleDots2 size={30}/>
+                                                        <div>
+                                                            <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{section.title}</h2>
+                                                            <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
+                                                                VRoom recommends fresh content based on your viewers'
+                                                                interests.
+                                                                This is
+                                                                only visible to your viewers when you have enough
+                                                                content. More
+                                                                Settings
+                                                            </p>
+                                                        </div>
+                                                        <div className="space-x-2">
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button variant="ghost" size="mm"
+                                                                            className="ml-auto">
+                                                                        <MoreVertical className="h-6 w-6"/>
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleRemoveSection(section.id)}>
+                                                                        <IoTrashOutline
+                                                                            className="mr-2 h-4 w-4"/> Delete
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </div>
+                                                    </li>
+                                                )}
+                                            </Draggable>
+                                        ))}{provided.placeholder}
+                                </ul>)}
+
+                        </Droppable>
+                    </DragDropContext>
                 </div>
             </div>
         </>

@@ -11,6 +11,7 @@
   "dependencies": {
     "@clerk/localizations": "^2.7.1",
     "@clerk/nextjs": "^5.2.8",
+    "@hello-pangea/dnd": "^17.0.0",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.9.1",
     "@microsoft/signalr": "^8.0.7",
