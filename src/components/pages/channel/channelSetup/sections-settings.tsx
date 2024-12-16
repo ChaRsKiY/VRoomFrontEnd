@@ -163,9 +163,9 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
         <>
             <div className=" flex justify-between sticky  border pb-4 pt-4 bg-white">
                 <div className="flex mr-14 justify-start">
-                    <p className="mr-4 text-gray-800 border-b-2 border-gray-800 pb-2">Profile</p>
-                    <Link target={'_self'} href={"/channel/editing/channel_setup/hometab"}
-                          className="text-gray-500 hover:text-gray-800 pb-2">Tab "main"</Link>
+                    <Link target={'_self'} href={"/channel/editing/channel_setup/profile"}
+                          className="text-gray-500 hover:text-gray-800 pb-2">Profile</Link>
+                    <p className="ml-4 text-gray-800 border-b-2 border-gray-800 pb-2">Tab "main"</p>
                 </div>
                 <div className="flex space-x-4">
                     {channelInfo &&
