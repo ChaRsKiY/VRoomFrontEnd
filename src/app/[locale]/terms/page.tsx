@@ -1,6 +1,8 @@
 
 
 import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 const termsPage = () => {
 
@@ -10,9 +12,12 @@ const termsPage = () => {
             width: '100%', backgroundImage: `url(/logo.svg)`,
             height: "100%", 
         }}>
+            <div style={{paddingLeft:'20px'}}> <Link href="/">
+                <Image src="/logo.svg" alt="logo" width={125} height={125} />
+            </Link></div>
             <div style={{
                 display: 'flex', width: '100%', justifyContent: 'space-around',
-                background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.5),  rgba(0, 128, 255, 0.5) )',
+                background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.1),  rgba(0, 128, 255, 0.2) )',
                 height: "100%"
             }}>
                 <div style={{
@@ -75,6 +80,11 @@ const termsPage = () => {
                     <p> &nbsp;&nbsp;&nbsp;&nbsp;Email: vroomteamit@gmail.com</p>
 
                     <p> &nbsp;&nbsp;&nbsp;&nbsp;+38 (097) 123-45-67</p><br />
+                    <br /><br />
+                    <h2 style={{ fontSize: '20px', }}>8. Применимое право</h2>
+                    <br />
+                    <p>Настоящие условия регулируются законодательством вашей страны проживания.</p>
+                    <br />
                 </div>
             </div>
 

@@ -3,7 +3,7 @@ import React from 'react'
 import HeaderHome from "@/components/pages/home/header/header";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
-import ChannelInfoComponent from "@/components/pages/channel/channelinfo/channelinfo"
+import ChannelVideosComponent from "@/components/pages/channel/channelinfo/channelvideos"
 
 const ChannelPage: React.FC = async ({ params }: any) => {
     
@@ -19,7 +19,7 @@ const ChannelPage: React.FC = async ({ params }: any) => {
             </div>
             <div className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
                 
-                <ChannelInfoComponent channelid={id} />
+                <ChannelVideosComponent channelid={id} />
             </div>
             <div>
 

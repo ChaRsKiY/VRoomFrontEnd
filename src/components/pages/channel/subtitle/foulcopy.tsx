@@ -4,24 +4,27 @@ import React, { useEffect, useState } from 'react'
 import { IContentVideo } from "@/types/videoDTO.interface";
 import VideoCard from "@/components/pages/channel/subtitle/videocard";
 import api from '@/services/axiosApi';
-import VideoSubtitleEditor from "@/components/pages/channel/subtitle/VideoSubtitleEditor";
+import FoulCopySubtitleEditor from "@/components/pages/channel/subtitle/foulsubtitleeditor";
 import { useUser } from '@clerk/nextjs';
 import { IChannel } from '@/types/channelinfo.interface';
 import '@/styles/modalsubtitles.css';
 import { ISubtitle } from "@/types/subtitle.interface";
 import Image from "next/image";
 import { base64ToUint8Array, byteArrayToBase64 } from "@/utils/base64Functions";
+import { BiFile, BiPencil } from 'react-icons/bi';
 import { formatDate } from "@/utils/dateformat";
 
 
-const AllVideolist = () => {
+const FoulCopySubtitlelist = () => {
 
     const [open, setOpen] = useState(false);
     const [channel, setChannel] = useState<IChannel>();
     const [videoId, setVideoId] = useState(0);
     const { user } = useUser();
+    const [urlSubtitle, setUrlSubtitle] = useState<string>("");
 
-    const openSubtitlesEditor = (id: number) => {
+    const openSubtitlesEditor = (id: number, url: string) => {
+        setUrlSubtitle(url);
         setVideoId(id);
         setOpen(!open);
     }
@@ -58,7 +61,7 @@ const AllVideolist = () => {
                     const mydata: IContentVideo[] = await response.data;
                     const videosWithSubtitles: IContentVideo[] = await Promise.all(
                         mydata.map(async (video) => {
-                            const subtitles = await api.get<ISubtitle[]>(`/Subtitle/getpublishsubtitles/${video.id}`);
+                            const subtitles = await api.get<ISubtitle[]>(`/Subtitle/getnotpublishsubtitles/${video.id}`);
                             return { ...video, subtitles: subtitles.data };
                         })
                     );
@@ -81,42 +84,14 @@ const AllVideolist = () => {
     }, [user]);
 
 
-    //     return (
-    //         <div>
-    //             <div onClick={() => openSubtitlesEditor(1)}>
-    //                 TestSubtitlesEditor
-    //             </div>
-    //             {open && (
-    //                 <div className="modal-overlay">
-    //                     <div className="modal-content">
-    //                        <VideoSubtitleEditor videoId={videoId}  onClose ={closeSubtitlesEditor}/>
-    //                     </div>
-    //                 </div>
-    //             )}
-    //             <div style={{ marginTop: '100px', }}>
-    //                 {moreVideos.map((el, key) => (
-    //                     <div key={key} onClick={() => openSubtitlesEditor(el.id)}>
-    //                         <VideoCard el={el} />
-    //                     </div>
-    //                 ))}
-    //                 {moreVideos.length == 0 ? (<div   >
-    //                     You do not have the playlist yet...
-    //                 </div>) : <></>}
-    //             </div>
-
-    //         </div>
-    //     )
-    // }
-
-    // export default AllVideolist
-
     return (
         <div style={{ margin: '20px' }}>
 
             {open && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <VideoSubtitleEditor videoId={videoId} onClose={closeSubtitlesEditor} />
+                        <FoulCopySubtitleEditor videoId={videoId} onClose={closeSubtitlesEditor}
+                            subtitleUrl={urlSubtitle} />
                     </div>
                 </div>
             )}
@@ -125,44 +100,57 @@ const AllVideolist = () => {
                     <tr className="text-left">
 
                         <th className="py-3 px-3 ">Video</th>
-                        <th className="py-3 px-3 ">Language</th>
-                        <th className="py-3 px-3 ">Date</th>
+                        <th className="py-3 px-3 ">Subtitle drafts</th>
+
                     </tr>
                 </thead>
                 <tbody className="text-gray-700 text-sm">
 
                     {moreVideos.length > 0 ? (moreVideos.map((el, key) => (
-                        <tr key={el.id} data-index={key} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
-                            onClick={() => openSubtitlesEditor(el.id)} style={{ cursor: 'pointer' }}
-                            >
+                        <>
+                            {el.subtitles ? (<>
+                                {el.subtitles.length > 0 ? (<>
+                                    <tr key={el.id} data-index={key} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
+                                    >
+                                        <td className="py-3 px-3  flex ">
+                                            <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
+                                                width={115} height={100}
+                                                alt="Video Thumbnail"
+                                                className="mr-1.5 rounded-lg" />
+                                            <div key={el.id} className="relative w-full">
+                                                <div className="w-full h-full p-1 flex flex-col">
+                                                    <span>{el.tittle}</span>
+                                                </div>
 
-                            <td className="py-3 px-3  flex ">
-                                <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
-                                    width={115} height={100}
-                                    alt="Video Thumbnail"
-                                    className="mr-1.5 rounded-lg" />
+                                            </div>
+                                        </td>
+                                        <td className="py-3 px-3 ">
+                                            <div className="flex" style={{ flexDirection: "column" }}>
+                                                <span>{el.subtitles ? el.subtitles.length : 0}</span>
+                                                {el.subtitles?.map((subtitle, key) => (
+                                                    <div  title='Edit subtitle'
+                                                        key={key}
+                                                        onClick={() => openSubtitlesEditor(
+                                                            subtitle.id, subtitle.puthToFile ? subtitle.puthToFile : "")}
+                                                        style={{ cursor: "pointer", padding: "10px" }}
+                                                    >
+                                                        <BiFile />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </td>
 
-                                <div key={el.id} className="relative w-full">
-                                    <div className="w-full h-full p-1 flex flex-col">
-                                        <span>{el.tittle}</span>
-                                    </div>
-
-                                </div>
-                                {/* <div className="flex">
-                                    <BiPencil className="w-[1.8rem] h-[1.8rem] cursor-pointer" key={el.id}
-                                        title='редактировать субтитры' onClick={() => openSubtitlesEditor(el.id)} />
-                                </div> */}
-                            </td>
-
-                            <td className="py-3 px-3 ">{el.subtitles ? el.subtitles.length : 0}</td>
-
-                            <td className="py-3 px-3 ">{formatDate(new Date(el.uploadDate))}</td>
-                        </tr>
+                                    </tr>
+                                </>) : <></>}
+                            </>) : <><tr>
+                                <td colSpan={2} className="text-center py-4" > </td>
+                            </tr></>}
+                        </>
                     ))) : (
-                        <tr onClick={() => openSubtitlesEditor(1)} style={{cursor:'pointer'}}>
-                            <td colSpan={3} className="text-center py-4">
-                                <div >
-                                    TestAllSubtitlesEditor
+                        <tr>
+                            <td colSpan={2} className="text-center py-4" style={{ cursor: 'pointer' }}>
+                                <div onClick={() => openSubtitlesEditor(1, "")}>
+                                    TestFoulCopySubtitlesEditor
                                 </div>
                             </td>
                         </tr>
@@ -176,5 +164,4 @@ const AllVideolist = () => {
     )
 }
 
-export default AllVideolist
-
+export default FoulCopySubtitlelist
