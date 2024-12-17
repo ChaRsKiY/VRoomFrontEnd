@@ -1,16 +1,16 @@
 "use client"
 
 import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
-import "@/styles/videojsplayer.css";
+import "@/styles/videoplayerforsubtitles.css";
 import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
 import { TbLayersSubtract } from "react-icons/tb";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
 import { HistoryOfBrowsing } from "@/types/history-of-browsing";
+//import {useUser} from "@clerk/nextjs";
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from "next/navigation";
-import { ISubtitle } from "@/types/subtitle.interface";
 
 
 class WatchHistory {
@@ -21,10 +21,11 @@ class WatchHistory {
 interface IVideoPlayerProps {
     src: string;
     id: number;
+    fileSubtitle: File | undefined;
 }
 
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => {
     const { isSignedIn, user } = useUser();
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -56,9 +57,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
     const pathname = usePathname();
     const [previousPath, setPreviousPath] = useState("");
-    const [filesSubtitles, setFilesSubtitles] = useState<File[]>([]);
-    const [subtitles, setSubtitles] = useState<ISubtitle[]>([]);
-    const [encodedUrl, setEncodedUrl] = useState("");
 
     const addVideoToViewHistory = async () => {
         try {
@@ -96,32 +94,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setIsHistoryUpdateInProgress(false); // Сбрасываем флаг после завершения запроса
         }
     };
-
-    const fetchSubtitleFiles = async (subtitles: ISubtitle[]): Promise<File[]> => {
-        console.log("Загрузка файлов:");
-        const filePromises = subtitles.map(async (subtitle) => {
-            if (subtitle.puthToFile != undefined) {
-                setEncodedUrl(encodeURIComponent(subtitle.puthToFile));
-            }
-            else setEncodedUrl("");
-            const response = await api.get('/Subtitle/getsubtitlefile/' + encodedUrl, {
-                responseType: "blob", 
-            });
-
-            if (response.status !== 200) {
-                throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
-            }
-            console.log("Ответ на загрузку файла:", response);
-            const blob = response.data;
-            console.log("blob", blob);
-            return new File([blob], `${subtitle.videoId}_${subtitle.languageCode}_subtitle.vtt`, { type: blob.type });
-
-        });
-
-        return await Promise.all(filePromises);
-
-    };
-
     useEffect(() => {
         const fetchVideo = async () => {
             try {
@@ -131,9 +103,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 }
                 const videoData = await response.data;
                 console.log("vide0000**", videoData);
-                videoData.subtitles = await api.get<ISubtitle[]>(`/Subtitle/getpublishsubtitles/${id}`);
-                setSubtitles(videoData.subtitles.data);
-                console.log("*/*/!!", videoData.subtitles.data);
                 if (videoData && videoData.VideoStream) {
                     const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
                         ? videoData.VideoStream
@@ -149,22 +118,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
         fetchVideo();
     }, [id]);
-
-    useEffect(() => {
-        const loadSubtitleFiles = async () => {
-            try {
-                if (subtitles.length > 0) {
-                    const files = await fetchSubtitleFiles(subtitles);
-                    setFilesSubtitles(files);
-                    console.log("*/*/!!files", files);
-                }
-            } catch (error) {
-                console.error("Ошибка загрузки файлов субтитров:", error);
-            }
-        };
-
-        loadSubtitleFiles();
-    }, [subtitles]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -204,23 +157,25 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
+
             const delta = currentTime - lastUpdateTime;
             if (isPlaying && delta > 0 && delta < 5) { // Исключаем большие скачки ( перемотку)
                 setRealWatchTime((prevTime) => prevTime + delta);
             }
+
             if (realWatchTime / duration > 0.6 && !viewed) {
                 setViewed(true);
-                increaseViewCount();
+               // increaseViewCount();
             }
             setLastUpdateTime(videoRef.current.currentTime);
         }
     };
-
     const handlePauseOrSeek = () => {
         if (videoRef.current) {
             const currentTime = videoRef.current.currentTime;
             const delta = currentTime - lastUpdateTime;
 
+            // Учитываем реальное время только для небольших изменений
             if (delta > 0 && delta < 5) {
                 setRealWatchTime((prevTime) => prevTime + delta);
             }
@@ -229,34 +184,34 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
-    const saveWatchHistory = () => {
-        if (videoRef.current) {
-            const lastViewedPosition = videoRef.current.currentTime;
+    // const saveWatchHistory = () => {
+    //     if (videoRef.current) {
+    //         const lastViewedPosition = videoRef.current.currentTime;
 
-            // Добавляем или обновляем историю просмотра
-            setWatchHistory(prevHistory => {
-                const existingVideo = prevHistory.find(history => history.videoId === id);
+    //         // Добавляем или обновляем историю просмотра
+    //         setWatchHistory(prevHistory => {
+    //             const existingVideo = prevHistory.find(history => history.videoId === id);
 
-                if (existingVideo) {
-                    // Обновляем время последнего просмотра
-                    return prevHistory.map(history =>
-                        history.videoId === id
-                            ? { ...history, lastViewedPosition }
-                            : history
-                    );
-                } else {
-                    // Добавляем новое видео в историю
-                    return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
-                }
-            });
+    //             if (existingVideo) {
+    //                 // Обновляем время последнего просмотра
+    //                 return prevHistory.map(history =>
+    //                     history.videoId === id
+    //                         ? { ...history, lastViewedPosition }
+    //                         : history
+    //                 );
+    //             } else {
+    //                 // Добавляем новое видео в историю
+    //                 return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
+    //             }
+    //         });
 
-            console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
-        }
-    };
+    //         console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
+    //     }
+    // };
 
-    const handleVideoPauseOrEnd = () => {
-        saveWatchHistory();
-    };
+    // const handleVideoPauseOrEnd = () => {
+    //     saveWatchHistory();
+    // };
 
     const SaveViewDuration = async () => {
         if (realWatchTime > 0) {
@@ -277,96 +232,95 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }
 
-    useEffect(() => {
-        if (previousPath) {
-            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
+    // useEffect(() => {
+    //     if (previousPath) {
+    //         console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
 
-            SaveViewDuration();
-            saveWatchHistory();
-        }
+    //         SaveViewDuration();
+    //        // saveWatchHistory();
+    //     }
 
-        setPreviousPath(pathname);
-    }, [pathname]);
+    //     setPreviousPath(pathname);
+    // }, [pathname]);
 
     // Обработка закрытия вкладки или перезагрузки страницы
     useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+        // const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
 
-            await SaveViewDuration();
-            saveWatchHistory();
-            event.preventDefault();
-        };
+        //     await SaveViewDuration();
+        //    // saveWatchHistory();
+        //     event.preventDefault();
+        // };
 
         if (videoRef.current) {
             const video = videoRef.current;
 
             // Подписка на события видео
             video.addEventListener('timeupdate', handleTimeUpdate);
-            video.addEventListener('pause', handleVideoPauseOrEnd);
-            video.addEventListener('ended', handleVideoPauseOrEnd);
+          //  video.addEventListener('pause', handleVideoPauseOrEnd);
+           // video.addEventListener('ended', handleVideoPauseOrEnd);
             video.addEventListener("pause", handlePauseOrSeek);
             video.addEventListener("seeked", handlePauseOrSeek);
         }
 
-        window.addEventListener('beforeunload', handleBeforeUnload);
+       // window.addEventListener('beforeunload', handleBeforeUnload);
 
         // Очистка событий при размонтировании
         return () => {
             if (videoRef.current) {
                 const video = videoRef.current;
                 video.removeEventListener('timeupdate', handleTimeUpdate);
-                video.removeEventListener('pause', handleVideoPauseOrEnd);
-                video.removeEventListener('ended', handleVideoPauseOrEnd);
+               // video.removeEventListener('pause', handleVideoPauseOrEnd);
+              //  video.removeEventListener('ended', handleVideoPauseOrEnd);
                 video.removeEventListener("pause", handlePauseOrSeek);
                 video.removeEventListener("seeked", handlePauseOrSeek);
             }
 
-            window.removeEventListener('beforeunload', handleBeforeUnload);
+           // window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [id, user, realWatchTime]);
 
 
-    const increaseViewCount = () => {
-         alert("Просмотр засчитан!");
-        Viewed(id);
-    };
+    // const increaseViewCount = () => {
+    //     // alert("Просмотр засчитан!");
+    //     Viewed(id);
+    // };
 
-    const Viewed = async (id: number) => {
-        try {
-            const response = await api.put('/Video/view/' + id);
+    // const Viewed = async (id: number) => {
+    //     try {
+    //         const response = await api.put('/Video/view/' + id);
 
-            if (response.status === 200) {
-                console.log('просмотр добавлен к счетчику');
-            } else {
-                console.error('Ошибка при view:', response.statusText);
-            }
+    //         if (response.status === 200) {
+    //             console.log('просмотр добавлен к счетчику');
+    //         } else {
+    //             console.error('Ошибка при view:', response.statusText);
+    //         }
 
-        } catch (error) {
-            console.error('Ошибка при подключении к серверу:', error);
-        }
-    };
-
-    // useEffect(() => {
-    //     if (videoRef.current) {
-    //         videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-
-    //         // Убираем обработчик при размонтировании компонента
-    //         return () => {
-    //             videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
-    //         };
+    //     } catch (error) {
+    //         console.error('Ошибка при подключении к серверу:', error);
     //     }
-    // }, [viewed, id]);
+    // };
 
     useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
 
-        return () => {
-            if (duration > 0)
-                SaveViewDuration();
-            saveWatchHistory();
-            addVideoToViewHistory();
-            console.log("Компонент размонтирован");
-        };
-    }, []);
+            // Убираем обработчик при размонтировании компонента
+            return () => {
+                videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
+            };
+        }
+    }, [ id]);
+
+    // useEffect(() => {
+
+    //     return () => {
+    //         if (duration > 0)
+    //             SaveViewDuration();
+    //         saveWatchHistory();
+    //         console.log("Компонент размонтирован");
+    //     };
+    // }, []);
 
     // Effects
     useEffect(() => {
@@ -428,104 +382,57 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
         }
 
-        document.addEventListener("keydown", handleKeyDown as EventListener);
+        // document.addEventListener("keydown", handleKeyDown as EventListener);
 
         return () => {
             if (video) {
                 video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
                 video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
             }
-            document.removeEventListener("keydown", handleKeyDown as EventListener);
+            // document.removeEventListener("keydown", handleKeyDown as EventListener);
         };
     }, []);
 
-    useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-
-            SaveViewDuration();
-            saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
-            event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)          
-        };
-
-        if (videoRef.current) {
-            const video = videoRef.current;
-
-            // Подписка на события видео
-            video.addEventListener('timeupdate', handleTimeUpdate);
-            video.addEventListener('pause', handleVideoPauseOrEnd);
-            video.addEventListener('ended', handleVideoPauseOrEnd);
-            video.addEventListener("pause", handlePauseOrSeek);
-            video.addEventListener("seeked", handlePauseOrSeek);
-        }
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        // Очистка событий при размонтировании
-        return () => {
-            if (videoRef.current) {
-                const video = videoRef.current;
-                video.removeEventListener('timeupdate', handleTimeUpdate);
-                video.removeEventListener('pause', handleVideoPauseOrEnd);
-                video.removeEventListener('ended', handleVideoPauseOrEnd);
-                video.removeEventListener("pause", handlePauseOrSeek);
-                video.removeEventListener("seeked", handlePauseOrSeek);
-            }
-
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [id, user, realWatchTime]);
-
-
-    useEffect(() => {
-        if (previousPath) {
-            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
-
-            SaveViewDuration();
-           addVideoToViewHistory();
-        }
-        setPreviousPath(pathname);
-    }, [pathname]);
-
     // Event Handlers
-    const handleKeyDown: any = (e: KeyboardEvent) => {
-        const tagName = document.activeElement?.tagName.toLowerCase();
-        if (tagName === "input" || tagName === "button") return;
+    // const handleKeyDown: any = (e: KeyboardEvent) => {
+    //     const tagName = document.activeElement?.tagName.toLowerCase();
+    //     if (tagName === "input" || tagName === "button") return;
 
-        e.preventDefault();
+    //     e.preventDefault();
 
-        switch (e.key.toLowerCase()) {
-            case " ":
-            case "k":
-                alert("mo ist huso")
-                togglePlayPause();
-                break;
-            case "f":
-                toggleFullScreen();
-                break;
-            case "t":
-                toggleTheaterMode();
-                break;
-            case "i":
-                toggleMiniPlayerMode();
-                break;
-            case "m":
-                toggleMute();
-                break;
-            case "arrowleft":
-            case "j":
-                skip(-5);
-                break;
-            case "arrowright":
-            case "l":
-                skip(5);
-                break;
-            case "c":
-                toggleCaptions();
-                break;
-            default:
-                break;
-        }
-    };
+    //     switch (e.key.toLowerCase()) {
+    //         case " ":
+    //         case "k":
+    //             alert("mo ist huso")
+    //             togglePlayPause();
+    //             break;
+    //         case "f":
+    //             toggleFullScreen();
+    //             break;
+    //         case "t":
+    //             toggleTheaterMode();
+    //             break;
+    //         case "i":
+    //             toggleMiniPlayerMode();
+    //             break;
+    //         case "m":
+    //             toggleMute();
+    //             break;
+    //         case "arrowleft":
+    //         case "j":
+    //             skip(-5);
+    //             break;
+    //         case "arrowright":
+    //         case "l":
+    //             skip(5);
+    //             break;
+    //         case "c":
+    //             toggleCaptions();
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // };
 
     const togglePlayPause = () => {
         const video = videoRef.current;
@@ -633,6 +540,32 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
+    useEffect(() => {
+        const video = videoRef.current;
+
+        const handleEnterPictureInPicture = () => setIsMiniPlayer(true);
+        const handleLeavePictureInPicture = () => setIsMiniPlayer(false);
+
+        if (video) {
+            const hls = new Hls();
+            hls.loadSource(src);
+            hls.attachMedia(video);
+
+            video.addEventListener("enterpictureinpicture", handleEnterPictureInPicture);
+            video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+        }
+
+        // document.addEventListener("keydown", handleKeyDown as EventListener);
+
+        return () => {
+            if (video) {
+                video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
+                video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
+            }
+            // document.removeEventListener("keydown", handleKeyDown as EventListener);
+        };
+    }, []);
+
     // Render
     return (
         <div
@@ -738,7 +671,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                         )}
                     </div>
                 </div>
-             
             </div>
             <video
                 ref={videoRef}
@@ -748,11 +680,16 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 controls={false}
                 preload="metadata"
             >
-                {filesSubtitles.length>0 &&(subtitles?.map((subtitle, key) => (
-                    <track kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])} 
-                    label={subtitle.languageName} default={key === 0} />
-                )) )}
-               
+                {fileSubtitle && (
+                    <track
+                        src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                        kind="subtitles"
+                        srcLang="ru"
+                        label="Русский"
+                        default
+                       
+                    />
+                )}
             </video>
         </div>
     );

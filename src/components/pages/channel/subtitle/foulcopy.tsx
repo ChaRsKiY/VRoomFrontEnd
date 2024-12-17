@@ -11,8 +11,9 @@ import '@/styles/modalsubtitles.css';
 import { ISubtitle } from "@/types/subtitle.interface";
 import Image from "next/image";
 import { base64ToUint8Array, byteArrayToBase64 } from "@/utils/base64Functions";
-import { BiFile, BiPencil } from 'react-icons/bi';
+import { BiFile, BiPencil, BiTrash } from 'react-icons/bi';
 import { formatDate } from "@/utils/dateformat";
+
 
 
 const FoulCopySubtitlelist = () => {
@@ -22,6 +23,9 @@ const FoulCopySubtitlelist = () => {
     const [videoId, setVideoId] = useState(0);
     const { user } = useUser();
     const [urlSubtitle, setUrlSubtitle] = useState<string>("");
+    const [deleteMenuOpenIndex, setDeleteMenuOpenIndex] = useState<number | null>(null);
+    const [deleteMenuOpenKey, setDeleteMenuOpenKey] = useState<number | null>(null);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const openSubtitlesEditor = (id: number, url: string) => {
         setUrlSubtitle(url);
@@ -32,6 +36,25 @@ const FoulCopySubtitlelist = () => {
         setVideoId(0);
         setOpen(false);
     }
+    const toggleDeleteMenu = (index: number, key: number, event: React.MouseEvent) => {
+        if (deleteMenuOpenIndex === index && deleteMenuOpenKey === key) {
+            setDeleteMenuOpenIndex(null);
+            setDeleteMenuOpenKey(null);
+        } else {
+            setDeleteMenuOpenIndex(index);
+            setDeleteMenuOpenKey(key);
+            setIsOpen(true);
+        }
+    };
+
+
+    const closeDelete = () => {
+        if (isOpen) {
+            setDeleteMenuOpenIndex(null);
+            setDeleteMenuOpenKey(null);
+            setIsOpen(false);
+        }
+    };
 
     const getUser = async () => {
         try {
@@ -44,6 +67,31 @@ const FoulCopySubtitlelist = () => {
                 } else {
                     console.error('Ошибка при получении пользователя:', response.statusText);
                 }
+            }
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
+
+    const deleteSubtitle = async (id: number) => {
+        try {
+            if (user) {
+                const response = await api.delete('/Subtitle/delete/' + id);
+
+                if (response.status === 200) {
+                    console.log("subtitle deleted");
+                } else {
+                    console.error('Ошибка при получении пользователя:', response.statusText);
+                }
+
+                setMoreVideos((prevVideos) =>
+                    prevVideos.map((video) => ({
+                        ...video,
+                        subtitles: video.subtitles?.filter(
+                            (subtitle) => subtitle.id !== id
+                        ),
+                    }))
+                );
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -81,7 +129,7 @@ const FoulCopySubtitlelist = () => {
 
     useEffect(() => {
         getVideos();
-    }, [user]);
+    }, [channel]);
 
 
     return (
@@ -106,11 +154,11 @@ const FoulCopySubtitlelist = () => {
                 </thead>
                 <tbody className="text-gray-700 text-sm">
 
-                    {moreVideos.length > 0 ? (moreVideos.map((el, key) => (
+                    {moreVideos.length > 0 ? (moreVideos.map((el, index) => (
                         <>
                             {el.subtitles ? (<>
                                 {el.subtitles.length > 0 ? (<>
-                                    <tr key={el.id} data-index={key} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
+                                    <tr key={el.id} data-index={index} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
                                     >
                                         <td className="py-3 px-3  flex ">
                                             <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
@@ -126,16 +174,58 @@ const FoulCopySubtitlelist = () => {
                                         </td>
                                         <td className="py-3 px-3 ">
                                             <div className="flex" style={{ flexDirection: "column" }}>
-                                                <span>{el.subtitles ? el.subtitles.length : 0}</span>
+
                                                 {el.subtitles?.map((subtitle, key) => (
-                                                    <div  title='Edit subtitle'
-                                                        key={key}
-                                                        onClick={() => openSubtitlesEditor(
-                                                            subtitle.id, subtitle.puthToFile ? subtitle.puthToFile : "")}
-                                                        style={{ cursor: "pointer", padding: "10px" }}
-                                                    >
-                                                        <BiFile />
-                                                    </div>
+                                                    <div className="flex" style={{ padding: '5px', paddingLeft: "20px" }}>
+                                                        <div className="flex" style={{ flexDirection: "column", justifyContent: 'space-around' }}>
+                                                            <span>{key + 1}</span> </div>
+                                                        <div className="flex" style={{ flexDirection: "column", justifyContent: 'space-around' }}>
+                                                            <div title='Edit subtitle'
+                                                                key={key}
+                                                                onClick={() => openSubtitlesEditor(
+                                                                    el.id, subtitle.puthToFile ? subtitle.puthToFile : "")}
+                                                                style={{ cursor: "pointer", padding: "10px" }}
+                                                            >
+                                                                <BiFile size={20} />
+                                                            </div>
+
+                                                        </div>
+                                                        <div className="flex" style={{ flexDirection: "column", justifyContent: 'space-around' }}>
+                                                            <div  >
+                                                              {subtitle.languageCode}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex" style={{ flexDirection: "column", justifyContent: 'space-around' }}>
+                                                            <div style={{ padding: '5px', marginLeft: "50px", cursor: 'pointer' }}
+                                                                onClick={(event) => toggleDeleteMenu(index, key, event)} title='Delete'>
+                                                                <BiTrash />
+                                                                {deleteMenuOpenIndex === index && deleteMenuOpenKey === key ? (
+                                                                    <div
+                                                                        className=" bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[160px] subtitle-editor"
+                                                                        style={{
+                                                                            marginTop: '-30px',
+                                                                            paddingBottom: '4px',
+                                                                            position: 'relative',
+                                                                            borderRadius: '3px',
+                                                                            backgroundColor: 'lightgrey',
+                                                                            border: '1px solid #212f3c',
+
+                                                                        }}
+                                                                    >
+                                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
+                                                                            style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
+                                                                            onClick={() => deleteSubtitle(subtitle.id)}>
+                                                                            <span >Delete #{index + 1}</span></div>
+
+
+                                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
+                                                                            style={{ display: 'flex', justifyContent: 'center' }}
+                                                                            onClick={closeDelete}>
+                                                                            <span >Cancel</span></div>
+                                                                    </div>
+                                                                ) : (<></>)}
+                                                            </div>
+                                                        </div> </div>
                                                 ))}
                                             </div>
                                         </td>
@@ -150,7 +240,7 @@ const FoulCopySubtitlelist = () => {
                         <tr>
                             <td colSpan={2} className="text-center py-4" style={{ cursor: 'pointer' }}>
                                 <div onClick={() => openSubtitlesEditor(1, "")}>
-                                    TestFoulCopySubtitlesEditor
+                                    {/* TestFoulCopySubtitlesEditor */}
                                 </div>
                             </td>
                         </tr>

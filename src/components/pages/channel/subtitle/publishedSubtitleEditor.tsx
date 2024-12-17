@@ -8,26 +8,23 @@ import '@/styles/modalsubtitles.css';
 import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ISubtitle } from '@/types/subtitle.interface';
-import fetchVideos from '../content/fetch-filtered-videos-by-type';
 import Hls from 'hls.js';
 
 interface IProps {
     videoId: number;
     onClose: () => void;
+    subtitleUrl: string,
 }
 
-const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
+const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl }) => {
 
     const [duration, setDuration] = useState(0); // Общая длина видео
+    const [subtitleId, setSubtitleId] = useState(0);
     const [currentTime, setCurrentTime] = useState(0); // Текущее время на шкале
     const [videoUrl, setVideoUrl] = useState<string | null>(null); // URL видео
-    // const [subtitles, setSubtitles] = useState<{ start: number; end: number; text: string }[]>([]);
-    // const [currentSubtitle, setCurrentSubtitle] = useState({ start: 0, end: 0, text: '', });
     const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    // const [currentStart, setCurrentSratr] = useState(0);
-    // const [currentEnd, setCurrentEnd] = useState(0);
     const [timePoints, setTimePoints] = useState<number[]>([]);
     const [deleteMenuOpenIndex, setDeleteMenuOpenIndex] = useState<number | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -42,33 +39,28 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const [languageIndex, setLanguageIndex] = useState<number>(0);
     const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
-    // const [isValid1, setIsValid1] = useState<boolean>(true);
-    // const [isValid2, setIsValid2] = useState<boolean>(true);
-    const [isChoosen, setIsChoosen] = useState<boolean>(false);
+    const [isValid1, setIsValid1] = useState<boolean>(true);
+    const [isValid2, setIsValid2] = useState<boolean>(true);
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
 
+
     const SaveBeforeExit = () => {
-        if (isChoosen) {
-            validateSubtitles();
+        validateSubtitles();
 
-            const userResponse = window.confirm("Save to drafts?");
+        const userResponse = window.confirm("Save to drafts?");
 
-            if (userResponse) {
-                SaveDrafts();
-                console.log("Черновик сохранён.");
-            } else {
-                const userResponse2 = window.confirm("Exit?");
+        if (userResponse) {
+            SaveDrafts();
+            console.log("Черновик сохранён.");
+        } else {
+            const userResponse2 = window.confirm("Exit?");
 
-                if (userResponse2) {
-                    onClose();
-                }
+            if (userResponse2) {
+                onClose();
             }
-        }
-        else {
-            onClose();
         }
 
     }
@@ -93,6 +85,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         }
 
     }
+
 
     const parseVTTFile = (file: File) => {
         const reader = new FileReader();
@@ -127,7 +120,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
             console.log("Parsed subtitles:", subtitles);
             setForms(subtitles);
-            setIsChoosen(true);
+            // setIsChoosen(true);
         };
 
         reader.readAsText(file);
@@ -145,20 +138,28 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     };
 
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        setFileSubtitle(file);
-        console.log("File:", file);
-        console.log("url", fileSubtitle?.name)
-        if (file && file.type === "text/vtt") {
-            const fileURL = URL.createObjectURL(file);
-            setUrlSubtitles(fileURL);
-            console.log("Generated fileURL:", fileURL);
+    const fetchSubtitleFile = async (url: string) => {
+        try {
+            const response = await api.get('/Subtitle/getsubtitlefile/' + url
+                , {
+                    responseType: 'blob', // Указываем, что сервер возвращает Blob
+                });
+
+
+            if (response.status != 200) {
+                throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
+            }
+            const blob = await response.data;
+            console.log('blob:' + blob);
+            const file = new File([blob], videoId + selectedLanguage.code + "subtitle.vtt", { type: blob.type });
+
+            setFileSubtitle(file);
             parseVTTFile(file);
-        } else {
-            alert("Please upload the .vtt file");
+        } catch (error) {
+            console.error("Ошибка при загрузке файла:", error);
         }
     };
+
 
     const changeFile = () => {
         const vttContent = [
@@ -234,21 +235,25 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
         forms.forEach((subtitle, index) => {
             if (subtitle.start >= subtitle.end || !subtitle.text.trim()) {
-                alert(`Error in subtitle #${index + 1}: 
-              - The beginning must be smaller than the end.
-              - The text must not be empty.`);
+                alert(`Ошибка в субтитре #${index + 1}: 
+              - Начало должно быть меньше конца.
+              - Текст не должен быть пустым.`);
+                setIsValid1(false);
             }
         });
 
+        if (isValid1) {
+            setIsValid2(true);
+        }
+        else {
+            setIsValid2(false);
+            setIsValid1(true);
+        }
     };
 
     const downloadSubtitlesAsVTT = () => {
         validateSubtitles();
-        //  if(isValid2){ 
-
-        const userResponse = window.confirm("Cкачать?");
-
-        if (userResponse) {
+        if (isValid2) {
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -265,9 +270,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             link.click();
 
             URL.revokeObjectURL(link.href);
-            console.log("Скачено");
-        } else {
-            console.log("не скачено");
         }
     };
 
@@ -281,6 +283,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             languageName: selectedLanguage.name,
             videoId: videoId,
             isPublished: topublish,
+            puthToFile: subtitleUrl
         };
         console.log("sub", JSON.stringify(sub));
         Object.entries(sub).forEach(([key, value]) => {
@@ -304,20 +307,21 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     };
 
     const savePublishSubtitles = async (publish: boolean) => {
+        validateSubtitles();
+        if (isValid2) {
+            const vttContent = [
+                'WEBVTT\n\n',
+                ...forms.map(
+                    (subtitle, index) =>
+                        `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+                ),
+            ].join('');
 
-        const vttContent = [
-            'WEBVTT\n\n',
-            ...forms.map(
-                (subtitle, index) =>
-                    `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
-            ),
-        ].join('');
+            const blob = new Blob([vttContent], { type: 'text/vtt' });
+            const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
 
-        const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
-
-        await uploadVTTToBackend(file, publish);
-
+            await uploadVTTToBackend(file, publish);
+        }
     };
 
     const addForm = () => {
@@ -342,12 +346,13 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     // const getVideo = async () => {
     //     try {
     //         const res = await api.get(`/Video/${videoId}`);
-    //         if (res.status === 200) {
-    //             const data = await res.data;
-    //             setVideoUrl(data.videoUrl);
-    //         } else {
+    //         if (res.status != 200) {
     //             console.error('Ошибка загрузки видео');
-    //             setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
+    //             setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
+    //         } else {
+    //             const data = await res.data;
+    //             console.log(data);
+    //             setVideoUrl(data.videoUrl);
     //         }
     //     } catch (error) {
     //         console.error('Ошибка запроса:', error);
@@ -391,9 +396,13 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
     useEffect(() => {
         getLanguages();
-        // getVideo();
+       // getVideo();
     }, [videoId]);
 
+    // useEffect(() => {
+    //     if (fileSubtitle)
+    //         parseVTTFile(fileSubtitle);
+    // }, [fileSubtitle]);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -438,6 +447,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         });
     };
 
+
     const setTimeCode = () => {
         setTimePoints((prevPoints) => {
             const sortedPoints = [...prevPoints].sort((a, b) => a - b);
@@ -474,6 +484,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
             return sortedPoints2;
         });
+
     };
 
     const toggleDeleteMenu = (index: number, event: React.MouseEvent) => {
@@ -542,6 +553,13 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }, [forms]);
 
     useEffect(() => {
+        if (subtitleUrl) {
+            const encodedUrl = encodeURIComponent(subtitleUrl);
+            fetchSubtitleFile(encodedUrl);
+        }
+    }, [subtitleUrl]);
+
+    useEffect(() => {
         if (videoSrc && videoRef.current) {
             if (Hls.isSupported()) {
                 const hls = new Hls();
@@ -559,7 +577,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }, [videoSrc]);
 
     return (
-        <div className="subtitle-editor" onClick={closeDelete}  >
+        <div className="subtitle-editor" onClick={closeDelete} >
+
 
             <div style={{ display: 'flex', justifyContent: "space-around" }}>
                 <div style={{ width: "100%", backgroundColor: '#eeeeee ', }}>
@@ -586,6 +605,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     }}
                                     title="Add language"
                                 >
+
                                     <Accordion.Item
                                         value="ru"
                                         className="border-b"
@@ -648,12 +668,10 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                             </div>
                                         </Accordion.Content>
                                     </Accordion.Item>
-                                </Accordion.Root>
 
 
 
-
-                                {/* <Accordion.Item value={selectedLanguage.code} className="border-b">
+                                    {/* <Accordion.Item value={selectedLanguage.code} className="border-b">
                                    <Accordion.Trigger className="w-full text-left py-2 font-bold" ref={triggerRef}>
                                    <BiPlus size={20} title='Добавить язык' />
                                    </Accordion.Trigger >
@@ -674,20 +692,20 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                </Accordion.Item> */}
 
 
-                                {/* </Accordion.Root > */}
+                                </Accordion.Root >
                             </div>
 
                             <div>
-                                {isChoosen && (<>
-                                    <button className='modal-button'
-                                        onClick={SaveDrafts}>Save to draft</button>
-                                    <button className='publish-button'
-                                        onClick={() => { PublishSubtitle }}>Publish</button>
-                                    <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
-                                    >
-                                        <BiArrowFromTop title='Download' />
-                                    </button>
-                                </>)}
+
+                                <button className='modal-button'
+                                    onClick={SaveDrafts}>Save to draft</button>
+                                <button className='publish-button'
+                                    onClick={PublishSubtitle}>Publish</button>
+                                <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
+                                >
+                                    <BiArrowFromTop title='Download' />
+                                </button>
+
                                 <button className='modal-button ' onClick={SaveBeforeExit}
                                 >
                                     <BiPlus style={{ transform: 'rotate(45deg)' }} title='Exit' />
@@ -696,15 +714,41 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        {/* *********************************************** */}
-                        {/* 
+
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
 
-                            {videoUrl && (
+                            {/* {videoUrl && (
                                 <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
 
                                     <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+                                        <source src={videoUrl} type="video/mp4" />
+                                        {fileSubtitle && (
+                                            <track
+                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                                kind="subtitles"
+                                                srcLang="ru"
+                                                label="Русский"
+                                                default
+                                            />
+                                         )}
+                                        Ваш браузер не поддерживает видео.
+                                    </video>
+                                </div>
+                            )} */}
+
+                            {/* {videoUrl ? (
+
+                                <VideoPlayer src={videoUrl} id={videoId} fileSubtitle={fileSubtitle} />
+
+                            ) : (
+                                <p>Загрузка видео...</p>
+                            )} */}
+
+                            <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px' }}>
+
+
+                                <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
+                                    <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                         {fileSubtitle && (
                                             <track
                                                 src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
@@ -717,18 +761,14 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                         Ваш браузер не поддерживает видео.
                                     </video>
                                 </div>
-                            )}
-                        </div> */}
 
-                        {/* *********************************************** */}
+                            </div>
 
-                        {/* *********************************************** */}
+                            {/* 
+                            {videoUrl && (
 
-                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px' }}>
-
-
-                            <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey"}}>
-                                <video ref={videoRef} controls style={{maxHeight:'450px' }} >
+                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
+                                    <source src={videoUrl} type="video/mp4" />
                                     {fileSubtitle && (
                                         <track
                                             src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
@@ -740,221 +780,210 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     )}
                                     Ваш браузер не поддерживает видео.
                                 </video>
-                            </div>
+
+                            )} */}
 
                         </div>
+                        {/* Форма добавления субтитров */}
+                        <div >
 
-                        {/* *********************************************** */}
+                            <div style={{
+                                padding: '5px', width: '100%',
+                                maxHeight: "360px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "360px",
+                                marginTop: '35px'
 
-                        {!isChoosen ? (<>
-                            <div style={{ padding: "20px", display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
-                                <p style={{
-                                    borderBottom: "1px solid #bdbdbd", padding: '10px',
-                                    borderRadius: '0px', color: 'black', fontWeight: 'bold',
+                            }}
+                                className="custom-scroll" >
+                                {forms.map((form, index) => (
+                                    <div className="subtitle-form " style={{
+                                        padding: '5px',
+                                        backgroundColor: index == selectedIndex ? "lightgrey" : "", border: '1px solid #bdbdbd',
+                                        marginBottom: '2px'
+                                    }}
+                                        onClick={() => { changeIndex(index) }} >
+                                        <div style={{ display: 'flex', }}>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
+                                                <small>{index + 1}</small>
+                                                <button  >
+                                                    <BiPlusCircle onClick={() => insertForm(index + 1)} title='Insert' />
+                                                </button>
+                                            </div>
+                                            <div style={{ marginRight: '3px' }}  >
 
-                                }}>
-                                    <label htmlFor="subtitle-upload" style={{ cursor: "pointer", padding: "10px" }}>
-                                        Upload subtitle file (.vtt)
-                                    </label>
-                                    <input
-                                        id="subtitle-upload"
-                                        type="file"
-                                        accept=".vtt"
-                                        onChange={handleFileUpload}
-                                        style={{
-                                            display: "block", marginTop: "10px",
-                                            marginBottom: '10px',
-                                        }}
-                                    />
-                                </p>
-                                <p style={{
-                                    borderBottom: "1px solid #bdbdbd", padding: "10px",
-                                    borderRadius: '0px', color: 'black', fontWeight: 'bold',
-
-                                }}>
-                                    <button onClick={() => { setIsChoosen(true) }}> Enter subtitles manually
-                                        <BiPencil style={{ display: 'inline', marginLeft: '10px' }} />
-                                    </button>
-                                </p>
-                                <div></div>
-                            </div>
-                        </>) : <>
-                            {/* Форма добавления субтитров */}
-                            <div >
-
-                                <div style={{
-                                    padding: '5px', width: '100%',
-                                    maxHeight: "360px", overflowX: 'hidden', overflowY: 'scroll', minHeight: "360px",
-                                    marginTop: '35px'
-
-                                }}
-                                    className="custom-scroll" >
-                                    {forms.map((form, index) => (
-                                        <div className="subtitle-form " style={{
-                                            padding: '5px',
-                                            backgroundColor: index == selectedIndex ? "lightgrey" : "", border: '1px solid #bdbdbd',
-                                            marginBottom: '2px'
-                                        }}
-                                            onClick={() => { changeIndex(index) }} >
-                                            <div style={{ display: 'flex', }}>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
-                                                    <small>{index + 1}</small>
-                                                    <button  >
-                                                        <BiPlusCircle onClick={() => insertForm(index + 1)} title='Insert' />
-                                                    </button>
+                                                <textarea
+                                                    className="custom-scroll"
+                                                    name="text"
+                                                    value={form.text}
+                                                    onChange={(e) => handleFormChangeValue(index, 'text', e.target.value)}
+                                                    placeholder="Text"
+                                                    style={{
+                                                        border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
+                                                        // background: 'transparent', color: "white",
+                                                        borderRadius: "6px", minWidth: '300px'
+                                                    }}
+                                                />
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
+                                                <div>
+                                                    <BiX onClick={() => clearText(index)} title='Clear text' />
                                                 </div>
-                                                <div style={{ marginRight: '3px' }}  >
 
-                                                    <textarea
-                                                        className="custom-scroll"
-                                                        name="text"
-                                                        value={form.text}
-                                                        onChange={(e) => handleFormChangeValue(index, 'text', e.target.value)}
-                                                        placeholder="Text"
+                                            </div>
+                                            <div style={{ marginRight: "10px", }}>
+                                                <div style={{ margin: '3px' }}>
+                                                    <input
+                                                        type="text"
+                                                        name="start"
+                                                        value={formatTime2(form.start)}
+                                                        onChange={(e) =>
+                                                            handleFormChangeNEW(index, 'start', e.target.value)
+                                                        }
+                                                        min={0}
                                                         style={{
-                                                            border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                            // background: 'transparent', color: "white",
-                                                            borderRadius: "6px", minWidth: '300px'
+                                                            border: '1px solid #bdbdbd', padding: '3px', width: '80px',
+                                                            borderRadius: "10px", paddingLeft: "10px"
                                                         }}
                                                     />
                                                 </div>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
-                                                    <div>
-                                                        <BiX onClick={() => clearText(index)} title='Clear text' />
-                                                    </div>
-
+                                                <div style={{ margin: '3px' }}>
+                                                    <input
+                                                        type="text"
+                                                        name="end"
+                                                        value={formatTime2(form.end)}
+                                                        onChange={(e) =>
+                                                            handleFormChangeNEW(index, 'end', e.target.value)
+                                                        }
+                                                        min={0}
+                                                        style={{
+                                                            border: '1px solid #bdbdbd', padding: '3px', width: '80px',
+                                                            borderRadius: "10px", paddingLeft: "10px"
+                                                        }}
+                                                    />
                                                 </div>
-                                                <div style={{ marginRight: "10px", }}>
-                                                    <div style={{ margin: '3px' }}>
-                                                        <input
-                                                            type="text"
-                                                            name="start"
-                                                            value={formatTime2(form.start)}
-                                                            onChange={(e) =>
-                                                                handleFormChangeNEW(index, 'start', e.target.value)
-                                                            }
-                                                            min={0}
-                                                            style={{
-                                                                border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                                borderRadius: "10px", paddingLeft: "10px"
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <div style={{ margin: '3px' }}>
-                                                        <input
-                                                            type="text"
-                                                            name="end"
-                                                            value={formatTime2(form.end)}
-                                                            onChange={(e) =>
-                                                                handleFormChangeNEW(index, 'end', e.target.value)
-                                                            }
-                                                            min={0}
-                                                            style={{
-                                                                border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                                borderRadius: "10px", paddingLeft: "10px"
-                                                            }}
-                                                        />
-                                                    </div>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: "column", justifyContent: "end" }}  >
+
+                                                <div>
+                                                    <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
+                                                        style={{ margin: '5px', }}
+                                                        title='Delete' />
                                                 </div>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "end" }}  >
+                                                {deleteMenuOpenIndex === index ? (
+                                                    <div
+                                                        className=" bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[160px] subtitle-editor"
+                                                        style={{
+                                                            marginTop: '-40px',
+                                                            paddingBottom: '4px',
+                                                            position: 'relative',
+                                                            marginLeft: '-120px',
+                                                            borderRadius: '3px',
+                                                            backgroundColor: 'lightgrey',
+                                                            border: '1px solid #212f3c',
 
-                                                    <div>
-                                                        <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
-                                                            style={{ margin: '5px', }}
-                                                            title='Delete' />
+                                                        }}
+                                                    >
+                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
+                                                            style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
+                                                            onClick={() => removeForm(index)}>
+                                                            <span >Delete #{index + 1}</span></div>
+
+
+                                                        <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
+                                                            style={{ display: 'flex', justifyContent: 'center' }}
+                                                            onClick={closeDelete}>
+                                                            <span >Cancel</span></div>
                                                     </div>
-                                                    {deleteMenuOpenIndex === index ? (
-                                                        <div
-                                                            className=" bg-white border border-gray-300 rounded-md shadow-lg z-10 w-[160px] subtitle-editor"
-                                                            style={{
-                                                                marginTop: '-40px',
-                                                                paddingBottom: '4px',
-                                                                position: 'relative',
-                                                                marginLeft: '-120px',
-                                                                borderRadius: '3px',
-                                                                backgroundColor: 'lightgrey',
-                                                                border: '1px solid #212f3c',
-
-                                                            }}
-                                                        >
-                                                            <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
-                                                                style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
-                                                                onClick={() => removeForm(index)}>
-                                                                <span >Delete #{index + 1}</span></div>
-
-
-                                                            <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
-                                                                style={{ display: 'flex', justifyContent: 'center' }}
-                                                                onClick={closeDelete}>
-                                                                <span >Cancel</span></div>
-                                                        </div>
-                                                    ) : (<></>)}
-
-                                                </div>
-
-
+                                                ) : (<></>)}
 
                                             </div>
 
+
+
                                         </div>
-                                    ))}
-                                </div>
 
-                                <button onClick={addForm} style={{
-                                    margin: '20px', marginTop: '12px',
-                                    fontSize: '10px'
-                                }}
-                                    className='modal-button'>
-                                    + Add form</button>
-
+                                    </div>
+                                ))}
                             </div>
 
-                        </>}
+                            <button onClick={addForm} style={{
+                                margin: '20px', marginTop: '12px',
+                                fontSize: '10px'
+                            }}
+                                className='modal-button'>
+                                + Add form</button>
+
+                        </div>
 
 
 
 
 
+
+
+
+                        {/* {videoUrl ? (
+                                <VideoPlayer src={videoUrl} id={videoId} />
+                            ) : (
+                                <p>Загрузка видео...</p>
+                            )}
+
+                        {videoUrl && (
+
+                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
+                                    <source src={videoUrl} type="video/mp4" />
+                                    {fileSubtitle && (
+                                        <track
+                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                            kind="subtitles"
+                                            srcLang="ru"
+                                            label="Русский"
+                                            default
+                                        />
+                                    )}
+                                    Ваш браузер не поддерживает видео.
+                                </video>
+
+                            )} */}
 
                     </div>
                 </div>
             </div>
-            {isChoosen && (<>
-                <div style={{ display: 'flex', justifyContent: 'space-between', }}>
-                    <span>{formatTime(currentTime)}</span>
-                    <span >{formatTime(duration)}</span>
-                </div>
-                <div style={{ backgroundColor: 'lightgrey ', }}   >
-                    <div className="custom-scroll2"
-                        ref={scrollContainerRef}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', }}>
+                <span>{formatTime(currentTime)}</span>
+                <span >{formatTime(duration)}</span>
+            </div>
+            <div style={{ backgroundColor: 'lightgrey ', }}   >
+                <div className="custom-scroll2"
+                    ref={scrollContainerRef}
+                    style={{
+                        overflowX: "scroll",
+                        whiteSpace: "nowrap",
+                        width: "100%",
+                        maxWidth: "100%", // Видимая область для 5 мину
+                        padding: "10px 0",
+                        borderRadius: "10px",
+                        border: '1px solid lightgrey'
+                    }}
+                >
+                    <input
+                        type="range"
+                        min="0"
+                        max={duration}
+                        step="0.01" // Позволяет выбирать с точностью до 0.01 сек
+                        value={currentTime}
+                        onChange={handleTimeChangeNEW}
+                        onDoubleClick={setTimeCode}
+
                         style={{
-                            overflowX: "scroll",
-                            whiteSpace: "nowrap",
-                            width: "100%",
-                            maxWidth: "100%", // Видимая область для 5 мину
-                            padding: "10px 0",
-                            borderRadius: "10px",
-                            border: '1px solid lightgrey'
-                        }}
-                    >
-                        <input
-                            type="range"
-                            min="0"
-                            max={duration}
-                            step="0.01" // Позволяет выбирать с точностью до 0.01 сек
-                            value={currentTime}
-                            onChange={handleTimeChangeNEW}
-                            onDoubleClick={setTimeCode}
 
-                            style={{
+                            width: (duration / 300) >= 1 ? `${(duration / 300) * 100}%` : '100%',
+                            marginBottom: '20px',
 
-                                width: (duration / 300) >= 1 ? `${(duration / 300) * 100}%` : '100%',
-                                marginBottom: '20px',
-
-                                appearance: 'none',
-                                position: 'relative',
-                                height: '6px',
-                                background: `linear-gradient(
+                            appearance: 'none',
+                            position: 'relative',
+                            height: '6px',
+                            background: `linear-gradient(
                           to right,
                           #000 0%,
                           #000 ${startPercentage}%,
@@ -963,20 +992,18 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                           #000 ${endPercentage}%,
                           #000 100%
                         )`,
-                                borderRadius: '3px',
-                                outline: 'none',
-                            }}
-                        />
+                            borderRadius: '3px',
+                            outline: 'none',
+                        }}
+                    />
 
 
-                    </div>
                 </div>
-            </>)}
-
+            </div>
 
 
         </div>
     );
 };
 
-export default VideoSubtitleEditor;
+export default PublishSubtitleEditor;
