@@ -2,7 +2,7 @@ import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
-import Post from "@/components/pages/posts/onepost";
+import Post from "@/components/pages/posts/postonchannel";
 import CommentsPostBlock from "@/components/pages/posts/commentsblock";
 
 
@@ -19,8 +19,8 @@ const channelPage = async ({ params }: any) => {
             <div className="w-52 bg-white border-r border-gray-200 h-screen overflow-hidden ">
                 <AsideHome t={t} />
             </div>
-            <div className="pl-[20%] w-3/4   max-lg:pl-[12%] max-sm:pl-0">
-            <div  style={{border:'1px solid lightgray', padding:'15px',borderRadius:'20px',marginTop:'50px'}}>
+            <div className="pl-[10%] w-3/4   max-lg:pl-[12%] max-sm:pl-0">
+            <div  style={{border:'1px solid lightgray', padding:'15px',borderRadius:'20px',marginTop:'80px'}}>
                 <Post postid={id} />
                 <div style={{paddingLeft:'50px',paddingRight:'50px'}}>
                 <CommentsPostBlock  postid={id} />

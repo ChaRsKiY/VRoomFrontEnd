@@ -11,6 +11,7 @@ import { HistoryOfBrowsing } from "@/types/history-of-browsing";
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from "next/navigation";
 import { ISubtitle } from "@/types/subtitle.interface";
+import { useRouter } from "next/navigation";
 
 
 class WatchHistory {
@@ -59,6 +60,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [filesSubtitles, setFilesSubtitles] = useState<File[]>([]);
     const [subtitles, setSubtitles] = useState<ISubtitle[]>([]);
     const [encodedUrl, setEncodedUrl] = useState("");
+    const router = useRouter();
 
     const addVideoToViewHistory = async () => {
         try {
@@ -105,7 +107,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             }
             else setEncodedUrl("");
             const response = await api.get('/Subtitle/getsubtitlefile/' + encodedUrl, {
-                responseType: "blob", 
+                responseType: "blob",
             });
 
             if (response.status !== 200) {
@@ -201,20 +203,29 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, [videoSrc]);
 
+
+    useEffect(() => {
+        if (videoRef.current) {
+            setDuration(videoRef.current.duration);
+        }
+    }, []);
+
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
-            const delta = currentTime - lastUpdateTime;
-            if (isPlaying && delta > 0 && delta < 5) { // Исключаем большие скачки ( перемотку)
-                setRealWatchTime((prevTime) => prevTime + delta);
-            }
-            if (realWatchTime / duration > 0.6 && !viewed) {
-                setViewed(true);
-                increaseViewCount();
-            }
-            setLastUpdateTime(videoRef.current.currentTime);
+
         }
     };
+    useEffect(() => {
+
+        if (duration > 0 && currentTime / duration > 0.75 && !viewed) {
+
+            setViewed(true);
+            increaseViewCount();
+        }
+
+    }, [currentTime]);
+
 
     const handlePauseOrSeek = () => {
         if (videoRef.current) {
@@ -259,7 +270,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     };
 
     const SaveViewDuration = async () => {
-        if (realWatchTime > 0) {
+        if (videoRef.current && videoRef.current.currentTime > 1) {
             const formData = new FormData();
             const language = navigator.language;
             language.split('-')[0];
@@ -270,31 +281,22 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 formData.append('clerkId', "***");
             formData.append('videoId', id + '');
             formData.append('location', language);
-            formData.append('duration', realWatchTime + "");
-            formData.append('date', new Date().toString());
+            formData.append('duration', videoRef.current.currentTime + "");
+            formData.append('date', new Date().toISOString());
+
+            console.log("saveDurationVew", formData);
 
             await api.post("/Video/viewingduration", formData);
         }
     }
 
-    useEffect(() => {
-        if (previousPath) {
-            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
-
-            SaveViewDuration();
-            saveWatchHistory();
-        }
-
-        setPreviousPath(pathname);
-    }, [pathname]);
 
     // Обработка закрытия вкладки или перезагрузки страницы
     useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-
-            await SaveViewDuration();
-            saveWatchHistory();
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
             event.preventDefault();
+            SaveViewDuration();
+            addVideoToViewHistory();
         };
 
         if (videoRef.current) {
@@ -323,11 +325,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [id, user, realWatchTime]);
+    }, []);
 
 
     const increaseViewCount = () => {
-         alert("Просмотр засчитан!");
+
         Viewed(id);
     };
 
@@ -346,28 +348,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
-    // useEffect(() => {
-    //     if (videoRef.current) {
-    //         videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-
-    //         // Убираем обработчик при размонтировании компонента
-    //         return () => {
-    //             videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
-    //         };
-    //     }
-    // }, [viewed, id]);
-
-    useEffect(() => {
-
-        return () => {
-            if (duration > 0)
-                SaveViewDuration();
-            saveWatchHistory();
-            addVideoToViewHistory();
-            console.log("Компонент размонтирован");
-        };
-    }, []);
-
     // Effects
     useEffect(() => {
         const video = videoRef.current;
@@ -377,9 +357,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
-            const handleTimeUpdate = () => {
-                setCurrentTime(video.currentTime);
-            };
             const handleVolumeChange = () => {
                 setVolume(video.volume);
                 setIsMuted(video.muted);
@@ -387,13 +364,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
             video.addEventListener("loadedmetadata", handleLoadedMetadata);
             handleLoadedMetadata();
-            video.addEventListener("timeupdate", handleTimeUpdate);
             video.addEventListener("volumechange", handleVolumeChange);
 
             return () => {
                 if (video) {
                     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-                    video.removeEventListener("timeupdate", handleTimeUpdate);
                     video.removeEventListener("volumechange", handleVolumeChange);
                 }
             };
@@ -439,52 +414,32 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         };
     }, []);
 
+    // useEffect(() => {
+    //     setPreviousPath(pathname);
+    // }, []);
+
+    // useEffect(() => {
+
+    //     if (previousPath && previousPath !== pathname) {
+    //         console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
+    //         SaveViewDuration();
+    //         addVideoToViewHistory();
+    //     }
+
+    //     setPreviousPath(pathname);
+
+    // }, [pathname]);
+
     useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
+        console.log("Компонент смонтирован");
 
-            SaveViewDuration();
-            saveWatchHistory(); // Сохраняем историю перед закрытием вкладки
-            event.preventDefault(); // Браузер может показать предупреждение перед закрытием (в зависимости от настроек)          
-        };
-
-        if (videoRef.current) {
-            const video = videoRef.current;
-
-            // Подписка на события видео
-            video.addEventListener('timeupdate', handleTimeUpdate);
-            video.addEventListener('pause', handleVideoPauseOrEnd);
-            video.addEventListener('ended', handleVideoPauseOrEnd);
-            video.addEventListener("pause", handlePauseOrSeek);
-            video.addEventListener("seeked", handlePauseOrSeek);
-        }
-
-        window.addEventListener('beforeunload', handleBeforeUnload);
-
-        // Очистка событий при размонтировании
         return () => {
-            if (videoRef.current) {
-                const video = videoRef.current;
-                video.removeEventListener('timeupdate', handleTimeUpdate);
-                video.removeEventListener('pause', handleVideoPauseOrEnd);
-                video.removeEventListener('ended', handleVideoPauseOrEnd);
-                video.removeEventListener("pause", handlePauseOrSeek);
-                video.removeEventListener("seeked", handlePauseOrSeek);
-            }
-
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [id, user, realWatchTime]);
-
-
-    useEffect(() => {
-        if (previousPath) {
-            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
-
+            console.log(`Смена маршрута `);
             SaveViewDuration();
-           addVideoToViewHistory();
-        }
-        setPreviousPath(pathname);
-    }, [pathname]);
+            addVideoToViewHistory();
+        };
+    }, []);
+
 
     // Event Handlers
     const handleKeyDown: any = (e: KeyboardEvent) => {
@@ -738,7 +693,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                         )}
                     </div>
                 </div>
-             
+
             </div>
             <video
                 ref={videoRef}
@@ -748,11 +703,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 controls={false}
                 preload="metadata"
             >
-                {filesSubtitles.length>0 &&(subtitles?.map((subtitle, key) => (
-                    <track kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])} 
-                    label={subtitle.languageName} default={key === 0} />
-                )) )}
-               
+                {filesSubtitles.length > 0 && (subtitles?.map((subtitle, key) => (
+                    <track kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])}
+                        label={subtitle.languageName} default={key === 0} />
+                )))}
+
             </video>
         </div>
     );

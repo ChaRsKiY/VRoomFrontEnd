@@ -18,16 +18,12 @@ interface IProps {
 
 const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
-    const [duration, setDuration] = useState(0); // Общая длина видео
-    const [currentTime, setCurrentTime] = useState(0); // Текущее время на шкале
-    const [videoUrl, setVideoUrl] = useState<string | null>(null); // URL видео
-    // const [subtitles, setSubtitles] = useState<{ start: number; end: number; text: string }[]>([]);
-    // const [currentSubtitle, setCurrentSubtitle] = useState({ start: 0, end: 0, text: '', });
+    const [duration, setDuration] = useState(0); 
+    const [currentTime, setCurrentTime] = useState(0); 
+    const [videoUrl, setVideoUrl] = useState<string | null>(null); 
     const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    // const [currentStart, setCurrentSratr] = useState(0);
-    // const [currentEnd, setCurrentEnd] = useState(0);
     const [timePoints, setTimePoints] = useState<number[]>([]);
     const [deleteMenuOpenIndex, setDeleteMenuOpenIndex] = useState<number | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -42,8 +38,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const [languageIndex, setLanguageIndex] = useState<number>(0);
     const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
-    // const [isValid1, setIsValid1] = useState<boolean>(true);
-    // const [isValid2, setIsValid2] = useState<boolean>(true);
     const [isChoosen, setIsChoosen] = useState<boolean>(false);
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -244,7 +238,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
     const downloadSubtitlesAsVTT = () => {
         validateSubtitles();
-        //  if(isValid2){ 
 
         const userResponse = window.confirm("Cкачать?");
 
@@ -338,22 +331,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const clearText = (index: number) => {
         handleFormChange(index, "text", "");
     };
-
-    // const getVideo = async () => {
-    //     try {
-    //         const res = await api.get(`/Video/${videoId}`);
-    //         if (res.status === 200) {
-    //             const data = await res.data;
-    //             setVideoUrl(data.videoUrl);
-    //         } else {
-    //             console.error('Ошибка загрузки видео');
-    //             setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка запроса:', error);
-    //         setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-    //     }
-    // }
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -697,34 +674,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         {/* *********************************************** */}
-                        {/* 
-                        <div style={{ padding: '20px', paddingLeft: '0' }}>
-
-                            {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
-
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-                                        {fileSubtitle && (
-                                            <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                                kind="subtitles"
-                                                srcLang="ru"
-                                                label="Русский"
-                                                default
-                                            />
-                                        )}
-                                        Ваш браузер не поддерживает видео.
-                                    </video>
-                                </div>
-                            )}
-                        </div> */}
-
-                        {/* *********************************************** */}
-
-                        {/* *********************************************** */}
-
-                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px' }}>
+                      
+                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
 
 
                             <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey"}}>

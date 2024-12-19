@@ -343,23 +343,6 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
         handleFormChange(index, "text", "");
     };
 
-    // const getVideo = async () => {
-    //     try {
-    //         const res = await api.get(`/Video/${videoId}`);
-    //         if (res.status != 200) {
-    //             console.error('Ошибка загрузки видео');
-    //             setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-    //         } else {
-    //             const data = await res.data;
-    //             console.log(data);
-    //             setVideoUrl(data.videoUrl);
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка запроса:', error);
-    //         setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-    //     }
-    // }
-
     useEffect(() => {
         const fetchVideo = async () => {
             try {
@@ -396,13 +379,9 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
     useEffect(() => {
         getLanguages();
-       // getVideo();
+
     }, [videoId]);
 
-    // useEffect(() => {
-    //     if (fileSubtitle)
-    //         parseVTTFile(fileSubtitle);
-    // }, [fileSubtitle]);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -717,34 +696,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
 
-                            {/* {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
-
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src={videoUrl} type="video/mp4" />
-                                        {fileSubtitle && (
-                                            <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                                kind="subtitles"
-                                                srcLang="ru"
-                                                label="Русский"
-                                                default
-                                            />
-                                         )}
-                                        Ваш браузер не поддерживает видео.
-                                    </video>
-                                </div>
-                            )} */}
-
-                            {/* {videoUrl ? (
-
-                                <VideoPlayer src={videoUrl} id={videoId} fileSubtitle={fileSubtitle} />
-
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )} */}
-
-                            <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px' }}>
+                            <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
 
 
                                 <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
@@ -764,27 +716,8 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
                             </div>
 
-                            {/* 
-                            {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
-
                         </div>
-                        {/* Форма добавления субтитров */}
+
                         <div >
 
                             <div style={{
@@ -817,8 +750,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
                                                     onChange={(e) => handleFormChangeValue(index, 'text', e.target.value)}
                                                     placeholder="Text"
                                                     style={{
-                                                        border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                        // background: 'transparent', color: "white",
+                                                        border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",                                                      
                                                         borderRadius: "6px", minWidth: '300px'
                                                     }}
                                                 />
@@ -913,37 +845,6 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
                                 + Add form</button>
 
                         </div>
-
-
-
-
-
-
-
-
-                        {/* {videoUrl ? (
-                                <VideoPlayer src={videoUrl} id={videoId} />
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )}
-
-                        {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
 
                     </div>
                 </div>

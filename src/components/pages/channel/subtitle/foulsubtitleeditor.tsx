@@ -46,10 +46,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
 
-    // const SaveBeforeExit = () => {
-    //     savePublishSubtitles(false);
-    //     onClose();
-    // }
     const SaveBeforeExit = () => {
         validateSubtitles();
 
@@ -346,23 +342,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         handleFormChange(index, "text", "");
     };
 
-    // const getVideo = async () => {
-    //     try {
-    //         const res = await api.get(`/Video/${videoId}`);
-    //         if (res.status != 200) {
-    //             console.error('Ошибка загрузки видео');
-    //             setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-    //         } else {
-    //             const data = await res.data;
-    //             console.log(data);
-    //             setVideoUrl(data.videoUrl);
-    //         }
-    //     } catch (error) {
-    //         console.error('Ошибка запроса:', error);
-    //         setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-    //     }
-    // }
-
     useEffect(() => {
         const fetchVideo = async () => {
             try {
@@ -402,10 +381,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
       //  getVideo();
     }, [videoId]);
 
-    // useEffect(() => {
-    //     if (fileSubtitle)
-    //         parseVTTFile(fileSubtitle);
-    // }, [fileSubtitle]);
 
     useEffect(() => {
         if (videoRef.current) {
@@ -719,41 +694,15 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
-
-                            {/* {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
-
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src={videoUrl} type="video/mp4" />
-                                        {fileSubtitle && (
-                                            <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                                kind="subtitles"
-                                                srcLang="ru"
-                                                label="Русский"
-                                                default
-                                            />
-                                         )}
-                                        Ваш браузер не поддерживает видео.
-                                    </video>
-                                </div>
-                            )} */}
-
-                            {/* {videoUrl ? (
-
-                                <VideoPlayer src={videoUrl} id={videoId} fileSubtitle={fileSubtitle} />
-
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )} */}
-                            <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px' }}>
+                          
+                            <div style={{ padding: '5px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
 
 
                                 <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
                                     <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                         {fileSubtitle && (
                                             <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                                src={URL.createObjectURL(fileSubtitle)} 
                                                 kind="subtitles"
                                                 srcLang="ru"
                                                 label="Русский"
@@ -765,27 +714,9 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                 </div>
 
                             </div>
-                            {/* 
-                            {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
 
                         </div>
-                        {/* Форма добавления субтитров */}
+
                         <div >
 
                             <div style={{
@@ -819,7 +750,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                     placeholder="Text"
                                                     style={{
                                                         border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                        // background: 'transparent', color: "white",
                                                         borderRadius: "6px", minWidth: '300px'
                                                     }}
                                                 />
@@ -916,36 +846,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         </div>
 
 
-
-
-
-
-
-
-                        {/* {videoUrl ? (
-                                <VideoPlayer src={videoUrl} id={videoId} />
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )}
-
-                        {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
-
                     </div>
                 </div>
             </div>
@@ -961,7 +861,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         overflowX: "scroll",
                         whiteSpace: "nowrap",
                         width: "100%",
-                        maxWidth: "100%", // Видимая область для 5 мину
+                        maxWidth: "100%", 
                         padding: "10px 0",
                         borderRadius: "10px",
                         border: '1px solid lightgrey'
@@ -971,7 +871,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         type="range"
                         min="0"
                         max={duration}
-                        step="0.01" // Позволяет выбирать с точностью до 0.01 сек
+                        step="0.01" 
                         value={currentTime}
                         onChange={handleTimeChangeNEW}
                         onDoubleClick={setTimeCode}
