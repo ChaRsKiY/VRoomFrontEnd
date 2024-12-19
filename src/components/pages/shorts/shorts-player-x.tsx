@@ -72,6 +72,7 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, videoId, viewCount, 
                 videoId: videoId,
                 date: new Date(),
                 timeCode: Math.floor(currentTime),
+                channelSettingsId: 0,// задаётся сервером
             };
 
             const response = await api.post(`/HistoryOfBrowsing/add`, request, {
@@ -159,7 +160,7 @@ const ShortsPlayerX: React.FC<IShortsPlayerXProps> = ({src, videoId, viewCount, 
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
             const percentagePlayed = ((videoRef.current.currentTime / videoRef.current.duration) * 100);
-            console.log('%=' + percentagePlayed);
+
 
             if (percentagePlayed >= 5 && isSignedIn && !hasAddedToHistory.current) {
                 hasAddedToHistory.current = true; // Устанавливаем флаг (useRef)

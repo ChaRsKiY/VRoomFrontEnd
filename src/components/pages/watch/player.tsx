@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
+import React, {useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent} from "react";
 import "@/styles/videojsplayer.css";
-import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
-import { TbLayersSubtract } from "react-icons/tb";
-import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
+import {PiPictureInPicture, PiScreencast} from "react-icons/pi";
+import {TbLayersSubtract} from "react-icons/tb";
+import {RxEnterFullScreen, RxExitFullScreen} from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
 import { HistoryOfBrowsing } from "@/types/history-of-browsing";
@@ -25,8 +25,8 @@ interface IVideoPlayerProps {
 }
 
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
-    const { isSignedIn, user } = useUser();
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
+    const {isSignedIn, user} = useUser();
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +78,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 videoId: id,
                 date: new Date(),
                 timeCode: Math.floor(currentTime),
+                channelSettingsId: 0, // задаётся сервером
             };
 
             const response = await api.post(`/HistoryOfBrowsing/add`, request, {
@@ -210,12 +211,36 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, []);
 
+    // const handleTimeUpdate = () => {
+    //     if (videoRef.current) {
+    //         setCurrentTime(videoRef.current.currentTime);
+
+    //     }
+    // };
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
+            const percentagePlayed = ((videoRef.current.currentTime / videoRef.current.duration) * 100);
 
+            if (percentagePlayed >= 5 && isSignedIn && !hasAddedToHistory.current) {
+                hasAddedToHistory.current = true; // Устанавливаем флаг (useRef)
+                console.log(`Видео добавляется в историю: ${id}`);
+                addVideoToViewHistory(); // Добавляем в историю просмотра
+            }
+
+            const delta = currentTime - lastUpdateTime;
+            if (isPlaying && delta > 0 && delta < 5) { // Исключаем большие скачки ( перемотку)
+                setRealWatchTime((prevTime) => prevTime + delta);
+            }
+
+            if (realWatchTime / duration > 0.6 && !viewed) {
+                setViewed(true);
+                increaseViewCount();
+            }
+            setLastUpdateTime(videoRef.current.currentTime);
         }
     };
+
     useEffect(() => {
 
         if (duration > 0 && currentTime / duration > 0.75 && !viewed) {
@@ -252,7 +277,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                     // Обновляем время последнего просмотра
                     return prevHistory.map(history =>
                         history.videoId === id
-                            ? { ...history, lastViewedPosition }
+                            ? {...history, lastViewedPosition}
                             : history
                     );
                 } else {
@@ -577,7 +602,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     };
 
     const formatDuration = (time: number): string => {
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
+        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2});
         const seconds = Math.floor(time % 60);
         const minutes = Math.floor(time / 60) % 60;
         const hours = Math.floor(time / 3600);
@@ -619,11 +644,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                     <button className="play-pause-btn" onClick={togglePlayPause}>
                         {isPlaying ? (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z" />
+                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z"/>
                             </svg>
                         ) : (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M8 5v14l11-7z" />
+                                <path fill="currentColor" d="M8 5v14l11-7z"/>
                             </svg>
                         )}
                     </button>
@@ -632,21 +657,21 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                             {isMuted ? (
                                 <svg viewBox="0 0 24 24">
                                     <path fill="currentColor"
-                                        d="M16.5 12l4.5 4.5-1.41 1.41L15 13.41l-4.5 4.5-1.41-1.41L13.59 12l-4.5-4.5 1.41-1.41L15 10.59l4.5-4.5 1.41 1.41z" />
+                                          d="M16.5 12l4.5 4.5-1.41 1.41L15 13.41l-4.5 4.5-1.41-1.41L13.59 12l-4.5-4.5 1.41-1.41L15 10.59l4.5-4.5 1.41 1.41z"/>
                                 </svg>
                             ) : (
                                 <>
                                     <svg className="volume-high-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
+                                              d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>
                                     </svg>
                                     <svg className="volume-low-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
+                                              d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>
                                     </svg>
                                     <svg className="volume-muted-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                            d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
+                                              d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"/>
                                     </svg>
                                 </>
                             )}
@@ -670,26 +695,26 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                     <div className="captions-btn" onClick={toggleCaptions}>
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor"
-                                d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
+                                  d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
                         </svg>
                     </div>
                     <button className="cursor-pointer mr-2" onClick={handlePlaybackRateChange}>{playbackRate}x</button>
                     <div className="theater-btn flex justify-center items-center cursor-pointer"
-                        onClick={toggleTheaterMode}>
-                        <TbLayersSubtract size={24} />
+                         onClick={toggleTheaterMode}>
+                        <TbLayersSubtract size={24}/>
                     </div>
                     <div className="mini-player-btn flex justify-center items-center cursor-pointer"
-                        onClick={toggleMiniPlayerMode}>
-                        <PiPictureInPicture size={26} />
+                         onClick={toggleMiniPlayerMode}>
+                        <PiPictureInPicture size={26}/>
                     </div>
                     <div className="mini-player-btn cursor-pointer">
-                        <PiScreencast size={25} />
+                        <PiScreencast size={25}/>
                     </div>
                     <div className="full-screen-btn mr-2 cursor-pointer" onClick={toggleFullScreen}>
                         {isFullScreen ? (
-                            <RxExitFullScreen size={23} />
+                            <RxExitFullScreen size={23}/>
                         ) : (
-                            <RxEnterFullScreen size={23} />
+                            <RxEnterFullScreen size={23}/>
                         )}
                     </div>
                 </div>
