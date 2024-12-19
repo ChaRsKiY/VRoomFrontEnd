@@ -8,7 +8,7 @@
     background-color: black;
     border-radius: 10px;
     overflow: hidden;
-    padding-bottom: 60px;
+    /* padding-bottom: 60px; */
 }
 
 .video-container.theater,

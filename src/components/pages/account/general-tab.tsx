@@ -2,6 +2,7 @@ import React from 'react'
 import {currentUser, User} from "@clerk/nextjs/server";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import Link from "next/link";
+import RandomAdBlock from "@/components/reusable/ad-block";
 
 const GeneralTab: React.FC = async () => {
     const user: User | null = await currentUser()
@@ -40,7 +41,7 @@ const GeneralTab: React.FC = async () => {
 
             <div className="h-[1px] bg-neutral-300 my-8"/>
 
-
+            <RandomAdBlock />
 
         </div>
     )

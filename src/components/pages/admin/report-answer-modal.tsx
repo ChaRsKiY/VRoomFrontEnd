@@ -15,27 +15,43 @@ import {Report} from "@/components/pages/admin/reports-table";
 import {Label} from "@/components/ui/label";
 import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
+import api from "@/services/axiosApi";
+import {toast} from "@/hooks/use-toast";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 const ReportAnswerForm = ({ report }: { report: Report }) => {
-    const [reportType, setReportType] = useState("");
-    const [response, setResponse] = useState("");
-    const [details, setDetails] = useState("");
+    const [response, setResponse] = useState(report.adminAnswer);
     const [isPending, setIsPending] = useState(false);
+    const [open, setOpen] = useState(false);
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (!response) {
+            return;
+        }
+
         setIsPending(true);
-        console.log({ reportType, response, details });
-        alert("Response submitted successfully!");
+
+        try {
+            await api.post(`/ContentReport/${report.id}/answer`, { answer: response });
+            toast({
+                title: "Report answered",
+                description: "The report has been successfully answered.",
+            });
+            setOpen(false);
+            setIsPending(false);
+        } catch (e) {
+            console.error(e);
+            setIsPending(false);
+        }
     };
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger className="w-full relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-neutral-100 transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
                 Answer to report
             </DialogTrigger>
-            <DialogContent className="max-h-screen">
+            <DialogContent className="max-h-screen overflow-scroll">
                 <DialogHeader>
                     <DialogTitle>Respond info</DialogTitle>
                     <DialogDescription>
@@ -46,13 +62,13 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
                 <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                     <div>
                         <Label className="block mb-3">
-                            Report Type: {report.subject}
+                            Report Type: {report.type}
                         </Label>
 
                         <Label>Report Content</Label>
                         <Textarea
                             placeholder="Write the report type here..."
-                            value={report.content}
+                            value={report.description}
                             className="w-full h-auto resize-none"
                         />
 

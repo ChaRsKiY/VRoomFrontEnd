@@ -1,4 +1,4 @@
-import { Calendar, Inbox, Search, Settings, Users } from "lucide-react"
+import {Calendar, Inbox, Search, Settings, Users, RectangleEllipsis} from "lucide-react"
 
 import {
     Sidebar,
@@ -8,10 +8,10 @@ import {
     SidebarGroupLabel, SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarMenuItem, SidebarMenuSub, SidebarMenuSubItem,
+    SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import {Collapsible, CollapsibleContent, CollapsibleTrigger} from "@radix-ui/react-collapsible";
 import Link from "next/link";
+import {CiMemoPad} from "react-icons/ci";
 
 // Menu items.
 const items = [
@@ -27,9 +27,9 @@ const items = [
         subContent: null
     },
     {
-        title: "Calendar",
-        url: "#",
-        icon: Calendar,
+        title: "Ad",
+        url: "/ad-management",
+        icon: RectangleEllipsis,
         subContent: null
     },
     {
