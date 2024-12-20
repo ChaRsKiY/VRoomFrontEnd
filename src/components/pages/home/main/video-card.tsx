@@ -40,7 +40,7 @@ export default function VideoCard({ el }: IVideoCardProps) {
   const [loading, setLoading] = useState(false);
   
   // Fetching clerk user info
-  const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
+  const { user: clerkUser} = useUser();
   
   // Base64 conversion for video cover image
   useEffect(() => {
@@ -57,43 +57,23 @@ export default function VideoCard({ el }: IVideoCardProps) {
     }
   }, [el.cover]);
 
-  useEffect(() => {
-    if (isUserLoaded && clerkUser) {
-      fetchUserData();
-      fetchPlaylists();
-    }
-  }, [isUserLoaded, clerkUser]);
-
-  // Fetching user data (channel settings)
   const fetchUserData = async () => {
     try {
-      const response = await api.get(`https://localhost:7154/api/ChannelSettings/getinfobychannelid/${clerkUser?.id}`);
+      const response = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
       if (response.status === 200) {
-        const channelSettingsId = response.data.id;
-        getUserChannel(channelSettingsId); // Fetch channel info
+        const channelData: IChannel = response.data;
+        setUserChannel(channelData);
+        console.log('Fetched channel data:', channelData);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
+      console.error('Error fetching channel data:', error);
     }
   };
 
-  // Fetching user channel data by channel ID
-  const getUserChannel = async (channelId: number) => {
-    try {
-      const response = await api.get(`/ChannelSettings/getbyownerid/${channelId}`);
-      if (response.status === 200) {
-        setUserChannel(response.data); // Set channel data
-      }
-    } catch (error) {
-      console.error('Error fetching user channel:', error);
-    }
-  };
-
-  // Fetch playlists for the user
   const fetchPlaylists = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/api/PlayList/${clerkUser?.id}`);
+      const response = await api.get(`/PlayList/getbyuserid/${clerkUser?.id}`);
       setExistingPlaylists(response.data);
     } catch (error) {
       console.error('Error fetching playlists:', error);
@@ -102,32 +82,80 @@ export default function VideoCard({ el }: IVideoCardProps) {
     }
   };
 
-  // Add video to playlist
   const handleAddToPlaylist = async (playlistId: number) => {
     try {
-      await api.post(`/api/PlayList/add`, { videoId: el.id });
-      console.log('Video added to playlist:', playlistId);
+      fetchUserData();
+      fetchPlaylists();
+      const selectedPlaylist = existingPlaylists.find(
+        (playlist) => playlist.id === playlistId
+      );
+  
+      if (!selectedPlaylist) {
+        console.error('Playlist not found');
+        return;
+      }
+
+      const updatedVideosId = [...selectedPlaylist.videosId, el.id];
+  
+      // Оновлена структура плейлиста
+      const updatedPlaylist = {
+        ...selectedPlaylist,
+        videosId: updatedVideosId,
+        date: new Date().toISOString(), // Оновлюємо дату
+      };
+
+      await api.put(`/PlayList/update`, updatedPlaylist);
+      setExistingPlaylists((prev) =>
+        prev.map((playlist) =>
+          playlist.id === playlistId
+            ? { ...playlist, videosId: updatedVideosId }
+            : playlist
+        )
+      );
+  
+      console.log('Video successfully added to playlist:', playlistId);
     } catch (error) {
       console.error('Error adding video to playlist:', error);
     }
   };
 
-  // Create new playlist
   const handleCreateNewPlaylist = async (name: string, privacy: string) => {
     try {
-      const response = await api.post('/api/PlayList/add', {
-        userId: clerkUser?.id,
-        name,
-        privacy,
-        channelSettingsId: userChannel?.id,  // Using correct channelSettingsId
-      });
-      const newPlaylist = response.data;
-      setExistingPlaylists(prev => [...prev, newPlaylist]);
-      console.log('Created new playlist:', newPlaylist);
+      await fetchUserData();
+      await fetchPlaylists();
+      if (!userChannel?.id) {
+        console.error('User channel ID is missing');
+        return;
+      }
+  
+      const newPlaylist = {
+        id: 0,
+        userId: userChannel.id,
+        title: name,
+        access: privacy === 'public', // Булеве значення
+        date: new Date().toISOString(),
+        videosId: [], // Порожній масив
+      };
+  
+      console.log('Data being sent to the server:', newPlaylist);
+  
+      const response = await api.post('/PlayList/add', newPlaylist);
+  
+      if (response.status === 200 || response.status === 201) {
+        console.log('Created new playlist:', response.data);
+        setExistingPlaylists((prev) => [...prev, response.data]);
+      } else {
+        console.error('Unexpected response status:', response.status, response.data);
+      }
     } catch (error) {
-      console.error('Error creating playlist:', error);
+       if (error instanceof Error) {
+        console.error('General error:', error.message);
+      } else {
+        console.error('Unknown error:', error);
+      }
     }
   };
+  
   return (
     <div className="space-y-2.5">
       <Link href={`/watch/${el.id}`} className="block">
