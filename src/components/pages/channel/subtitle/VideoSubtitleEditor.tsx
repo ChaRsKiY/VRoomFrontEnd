@@ -73,7 +73,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }
 
     const PublishSubtitle = () => {
-
+        console.log("publish")
         validateSubtitles();
 
         const userResponse = window.confirm("Publish?");
@@ -659,7 +659,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     <button className='modal-button'
                                         onClick={SaveDrafts}>Save to draft</button>
                                     <button className='publish-button'
-                                        onClick={() => { PublishSubtitle }}>Publish</button>
+                                        onClick={PublishSubtitle }>Publish</button>
                                     <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                     >
                                         <BiArrowFromTop title='Download' />

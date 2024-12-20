@@ -1,10 +1,10 @@
 "use client"
 
-import React, {useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent} from "react";
+import React, { useState, useRef, useEffect, MouseEvent, ChangeEvent, KeyboardEvent } from "react";
 import "@/styles/videojsplayer.css";
-import {PiPictureInPicture, PiScreencast} from "react-icons/pi";
-import {TbLayersSubtract} from "react-icons/tb";
-import {RxEnterFullScreen, RxExitFullScreen} from "react-icons/rx";
+import { PiPictureInPicture, PiScreencast } from "react-icons/pi";
+import { TbLayersSubtract } from "react-icons/tb";
+import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
 import { HistoryOfBrowsing } from "@/types/history-of-browsing";
@@ -12,6 +12,8 @@ import { useUser } from '@clerk/nextjs';
 import { usePathname } from "next/navigation";
 import { ISubtitle } from "@/types/subtitle.interface";
 import { useRouter } from "next/navigation";
+import { BiMove, BiSupport } from "react-icons/bi";
+import { Switch } from "@/components/ui/switchsubtitle";
 
 
 class WatchHistory {
@@ -25,8 +27,8 @@ interface IVideoPlayerProps {
 }
 
 
-const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
-    const {isSignedIn, user} = useUser();
+const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
+    const { isSignedIn, user } = useUser();
     // Refs
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -61,6 +63,10 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
     const [subtitles, setSubtitles] = useState<ISubtitle[]>([]);
     const [encodedUrl, setEncodedUrl] = useState("");
     const router = useRouter();
+    const [selectedLang, setSelectedLang] = useState(0);
+    const [display, setDisplay] = useState("none");
+    const [checked, setChecked] = useState(false);
+    const [fileSub, setFileSub] = useState<File>();
 
     const addVideoToViewHistory = async () => {
         try {
@@ -152,6 +158,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
 
         fetchVideo();
     }, [id]);
+    
 
     useEffect(() => {
         const loadSubtitleFiles = async () => {
@@ -168,6 +175,12 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
 
         loadSubtitleFiles();
     }, [subtitles]);
+
+    useEffect(() => {
+        
+        console.log("*/*/!!filesAfterSet", filesSubtitles);
+              
+    }, [filesSubtitles]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -277,7 +290,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
                     // Обновляем время последнего просмотра
                     return prevHistory.map(history =>
                         history.videoId === id
-                            ? {...history, lastViewedPosition}
+                            ? { ...history, lastViewedPosition }
                             : history
                     );
                 } else {
@@ -602,7 +615,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
     };
 
     const formatDuration = (time: number): string => {
-        const leadingZeroFormatter = new Intl.NumberFormat(undefined, {minimumIntegerDigits: 2});
+        const leadingZeroFormatter = new Intl.NumberFormat(undefined, { minimumIntegerDigits: 2 });
         const seconds = Math.floor(time % 60);
         const minutes = Math.floor(time / 60) % 60;
         const hours = Math.floor(time / 3600);
@@ -611,6 +624,64 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
         } else {
             return `${hours}:${leadingZeroFormatter.format(minutes)}:${leadingZeroFormatter.format(seconds)}`;
         }
+    };
+
+    // const handleSubtitleChange = (key: number) => {
+    //     const video = videoRef.current;
+
+    //     if (video) {
+    //         setSelectedLang(key);
+    //         handleSubtitleOpen();
+    //     }
+    // };
+
+    const handleSubtitleChange = (selectedKey: number) => {
+        const video = videoRef.current;
+        setSelectedLang(selectedKey);
+        if (video) {
+            // for (let i = 0; i < video.textTracks.length; i++) {
+            //     video.textTracks[i].mode = "disabled";
+            // }
+
+            // if (selectedKey >= 0 && selectedKey < video.textTracks.length) {
+            //     video.textTracks[selectedKey].mode = "showing";
+            // }
+           
+            handleSubtitleOpen();
+        }
+    };
+
+     useEffect(() => {
+        const video = videoRef.current;
+        if (video) {
+            for (let i = 0; i < video.textTracks.length; i++) {
+                video.textTracks[i].mode = "disabled";
+            }
+            if (selectedLang >= 0 && selectedLang < video.textTracks.length) {
+                video.textTracks[selectedLang].mode = "showing";
+                console.log("key", selectedLang);
+            }
+          // setFileSub(filesSubtitles[selectedLang]);
+        }
+    }, [selectedLang, checked]);
+    
+    useEffect(() => {
+        
+        setFileSub(filesSubtitles[selectedLang]);
+    }, [checked]);
+
+    const handleSubtitleOpen = () => {
+        if (display == "none")
+            setDisplay("block");
+        else
+            setDisplay('none');
+    };
+
+    const CheckedSubtitles = () => {
+        setChecked(!checked);
+        setTimeout(() => {
+            handleSubtitleOpen();
+        }, 500);
     };
 
     // Render
@@ -644,11 +715,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
                     <button className="play-pause-btn" onClick={togglePlayPause}>
                         {isPlaying ? (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z"/>
+                                <path fill="currentColor" d="M6 19h4V5H6v14zM14 5v14h4V5h-4z" />
                             </svg>
                         ) : (
                             <svg viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M8 5v14l11-7z"/>
+                                <path fill="currentColor" d="M8 5v14l11-7z" />
                             </svg>
                         )}
                     </button>
@@ -657,21 +728,21 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
                             {isMuted ? (
                                 <svg viewBox="0 0 24 24">
                                     <path fill="currentColor"
-                                          d="M16.5 12l4.5 4.5-1.41 1.41L15 13.41l-4.5 4.5-1.41-1.41L13.59 12l-4.5-4.5 1.41-1.41L15 10.59l4.5-4.5 1.41 1.41z"/>
+                                        d="M16.5 12l4.5 4.5-1.41 1.41L15 13.41l-4.5 4.5-1.41-1.41L13.59 12l-4.5-4.5 1.41-1.41L15 10.59l4.5-4.5 1.41 1.41z" />
                                 </svg>
                             ) : (
                                 <>
                                     <svg className="volume-high-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                              d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"/>
+                                            d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z" />
                                     </svg>
                                     <svg className="volume-low-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                              d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z"/>
+                                            d="M5,9V15H9L14,20V4L9,9M18.5,12C18.5,10.23 17.5,8.71 16,7.97V16C17.5,15.29 18.5,13.76 18.5,12Z" />
                                     </svg>
                                     <svg className="volume-muted-icon" viewBox="0 0 24 24">
                                         <path fill="currentColor"
-                                              d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"/>
+                                            d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z" />
                                     </svg>
                                 </>
                             )}
@@ -695,27 +766,47 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
                     <div className="captions-btn" onClick={toggleCaptions}>
                         <svg viewBox="0 0 24 24">
                             <path fill="currentColor"
-                                  d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"/>
+                                d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z" />
                         </svg>
                     </div>
                     <button className="cursor-pointer mr-2" onClick={handlePlaybackRateChange}>{playbackRate}x</button>
                     <div className="theater-btn flex justify-center items-center cursor-pointer"
-                         onClick={toggleTheaterMode}>
-                        <TbLayersSubtract size={24}/>
+                        onClick={toggleTheaterMode}>
+                        <TbLayersSubtract size={24} />
                     </div>
                     <div className="mini-player-btn flex justify-center items-center cursor-pointer"
-                         onClick={toggleMiniPlayerMode}>
-                        <PiPictureInPicture size={26}/>
+                        onClick={toggleMiniPlayerMode}>
+                        <PiPictureInPicture size={26} />
                     </div>
                     <div className="mini-player-btn cursor-pointer">
-                        <PiScreencast size={25}/>
+                        <PiScreencast size={25} />
                     </div>
                     <div className="full-screen-btn mr-2 cursor-pointer" onClick={toggleFullScreen}>
                         {isFullScreen ? (
-                            <RxExitFullScreen size={23}/>
+                            <RxExitFullScreen size={23} />
                         ) : (
-                            <RxEnterFullScreen size={23}/>
+                            <RxEnterFullScreen size={23} />
                         )}
+                    </div>
+                    <div>
+                        <BiMove onClick={handleSubtitleOpen} />
+                    </div>
+                    <div style={{
+                        padding: '20px', border: '1px solid white', borderRadius: "8px",
+                        marginTop: "-100px", marginLeft: '85%', display: display, paddingTop: '10px', paddingBottom: '5px',
+                        backgroundColor: 'black', zIndex: '2000', position: 'absolute',
+                    }}>
+                        <div className="flex " style={{ height: '10px', justifyContent: 'end' }}>
+                            <Switch defaultChecked={checked} onCheckedChange={CheckedSubtitles} />
+
+                        </div>
+                        <div><small>Subtitles:&nbsp;</small>{!checked && (<small>off</small>)}</div>
+                        {filesSubtitles.length > 0 && checked && (subtitles?.map((subtitle, key) => (
+                            <div>
+                            <button  key={key} onClick={() => handleSubtitleChange(key)}
+                                style={{ color: selectedLang === key ? "lightgreen" : "white" }}>{subtitle.languageName}</button>
+                                </div>
+                        )))}
                     </div>
                 </div>
 
@@ -728,12 +819,20 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({src, id}) => {
                 controls={false}
                 preload="metadata"
             >
-                {filesSubtitles.length > 0 && (subtitles?.map((subtitle, key) => (
-                    <track kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])}
-                        label={subtitle.languageName} default={key === 0} />
+                {filesSubtitles.length > 0 && checked &&  (subtitles?.map((subtitle, key) => (
+                  
+                    <track  key={key} kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])}
+                        label={subtitle.languageName}  default={selectedLang==key}/>
+                  
                 )))}
+                
+                  {/* {fileSub&&  (
+                    <track   kind="subtitles" srcLang={subtitles[selectedLang].languageCode} src={URL.createObjectURL(fileSub)}
+                        label={subtitles[selectedLang].languageName} default />
+                )} */}
 
             </video>
+
         </div>
     );
 };

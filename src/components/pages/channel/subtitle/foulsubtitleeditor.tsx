@@ -14,9 +14,11 @@ interface IProps {
     videoId: number;
     onClose: () => void;
     subtitleUrl: string,
+    langCode : string,
+    langName : string,
 }
 
-const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl }) => {
+const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl,langCode, langName }) => {
 
     const [duration, setDuration] = useState(0); // Общая длина видео
     const [subtitleId, setSubtitleId] = useState(0);
@@ -137,8 +139,10 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     };
 
 
+
     const fetchSubtitleFile = async (url: string) => {
         try {
+            console.log("langname:",langName+ langCode);
             const response = await api.get('/Subtitle/getsubtitlefile/' + url
                 , {
                     responseType: 'blob', // Указываем, что сервер возвращает Blob
@@ -150,7 +154,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
             }
             const blob = await response.data;
             console.log('blob:' + blob);
-            const file = new File([blob], videoId + selectedLanguage.code + "subtitle.vtt", { type: blob.type });
+            const file = new File([blob], videoId + langCode + "subtitle.vtt", { type: blob.type });
 
             setFileSubtitle(file);
             parseVTTFile(file);
@@ -170,16 +174,16 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         ].join('');
 
         const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
         setFileSubtitle(file);
     }
 
-    const handleLanguageChange = () => {
-        setLanguageIndex(languageIndex + 1)
-        if (languageIndex >= languages.length - 1)
-            setLanguageIndex(0)
-        setSelectedLanguage(languages[languageIndex]);
-    };
+    // const handleLanguageChange = () => {
+    //     setLanguageIndex(languageIndex + 1)
+    //     if (languageIndex >= languages.length - 1)
+    //         setLanguageIndex(0)
+    //     setSelectedLanguage(languages[languageIndex]);
+    // };
 
     const formatTime = (time: number) => {
         const hours = Math.floor(time / 3600);
@@ -265,7 +269,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'subtitle.vtt';
+            link.download = videoId + langCode + 'subtitle.vtt';
             link.click();
 
             URL.revokeObjectURL(link.href);
@@ -278,8 +282,8 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
         const sub: ISubtitle = {
             id: 0,
-            languageCode: selectedLanguage.code,
-            languageName: selectedLanguage.name,
+            languageCode: langCode,
+            languageName: langName,
             videoId: videoId,
             isPublished: topublish,
             puthToFile: subtitleUrl
@@ -362,24 +366,24 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         fetchVideo();
     }, [videoId]);
 
-    const getLanguages = async () => {
-        try {
-            const res = await api.get(`/Language`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setLanguage(data);
-            } else {
-                console.error('Ошибка загрузки lang');
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-        }
-    }
+    // const getLanguages = async () => {
+    //     try {
+    //         const res = await api.get(`/Language`);
+    //         if (res.status === 200) {
+    //             const data = await res.data;
+    //             setLanguage(data);
+    //         } else {
+    //             console.error('Ошибка загрузки lang');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка запроса:', error);
+    //     }
+    // }
 
-    useEffect(() => {
-        getLanguages();
-      //  getVideo();
-    }, [videoId]);
+    // useEffect(() => {
+    //     getLanguages();
+    //     //  getVideo();
+    // }, [videoId]);
 
 
     useEffect(() => {
@@ -486,45 +490,45 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         setSelectedIndex(index);
         setTimePoints([]);
     }
-    const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOption = e.target.selectedOptions[0];
-        const name = selectedOption.getAttribute("data-label");
-        const code = selectedOption.getAttribute("data-code");
-        if (name && code) {
-            console.log("name:" + name);
-            console.log("code:" + code)
-            if (!isLanguageSelected(code)) {
-                addLanguage({ name, code });
-                triggerRef.current?.click();
-            } else {
-                removeLanguage(code);
-                triggerRef.current?.click();
-            }
+    // const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const selectedOption = e.target.selectedOptions[0];
+    //     const name = selectedOption.getAttribute("data-label");
+    //     const code = selectedOption.getAttribute("data-code");
+    //     if (name && code) {
+    //         console.log("name:" + name);
+    //         console.log("code:" + code)
+    //         if (!isLanguageSelected(code)) {
+    //             addLanguage({ name, code });
+    //             triggerRef.current?.click();
+    //         } else {
+    //             removeLanguage(code);
+    //             triggerRef.current?.click();
+    //         }
 
-        } else {
-            console.error("Не удалось извлечь данные языка");
-        }
-    };
+    //     } else {
+    //         console.error("Не удалось извлечь данные языка");
+    //     }
+    // };
 
-    const addLanguage = (newLanguage: { name: string; code: string }) => {
-        setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
+    // const addLanguage = (newLanguage: { name: string; code: string }) => {
+    //     setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
 
-    };
+    // };
 
-    const removeLanguage = (code: string) => {
-        if (languages.length > 1)
-            setLanguages((prevLanguages) =>
-                prevLanguages.filter((lang) => lang.code !== code)
-            );
-    }
+    // const removeLanguage = (code: string) => {
+    //     if (languages.length > 1)
+    //         setLanguages((prevLanguages) =>
+    //             prevLanguages.filter((lang) => lang.code !== code)
+    //         );
+    // }
 
-    const isLanguageSelected = (code: string) => {
-        return languages.some((language) => language.code === code);
-    };
+    // const isLanguageSelected = (code: string) => {
+    //     return languages.some((language) => language.code === code);
+    // };
 
-    useEffect(() => {
-        setSelectedLanguage(languages[languages.length - 1]);
-    }, [languages]);
+    // useEffect(() => {
+    //     setSelectedLanguage(languages[languages.length - 1]);
+    // }, [languages]);
 
     useEffect(() => {
         changeFile();
@@ -541,8 +545,8 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         if (videoSrc && videoRef.current) {
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                hls.loadSource(videoSrc); 
-                hls.attachMedia(videoRef.current); 
+                hls.loadSource(videoSrc);
+                hls.attachMedia(videoRef.current);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log("HLS: Манифест загружен, воспроизведение готово");
                 });
@@ -564,15 +568,15 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
                                 <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                    //onClick={handleLanguageChange}
+                                    title='Language'>
 
                                     <BiSolidKeyboard size={25} style={{
                                         display: 'inline', marginRight: '5px',
                                     }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
+                                    <label style={{ fontWeight: 'bold' }}>{langName} **</label></button>
 
-                                <Accordion.Root
+                                {/* <Accordion.Root
                                     type="single"
                                     collapsible
                                     style={{
@@ -645,7 +649,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                 </select>
                                             </div>
                                         </Accordion.Content>
-                                    </Accordion.Item>
+                                    </Accordion.Item> */}
 
 
 
@@ -670,7 +674,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                </Accordion.Item> */}
 
 
-                                </Accordion.Root >
+                                {/* </Accordion.Root > */}
                             </div>
 
                             <div>
@@ -694,15 +698,15 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
 
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
-                          
-                            <div style={{ padding: '5px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
+
+                            <div style={{ padding: '5px', paddingLeft: '0', minWidth: '500px', justifyContent: 'center', display: 'flex' }}>
 
 
                                 <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
                                     <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                         {fileSubtitle && (
                                             <track
-                                                src={URL.createObjectURL(fileSubtitle)} 
+                                                src={URL.createObjectURL(fileSubtitle)}
                                                 kind="subtitles"
                                                 srcLang="ru"
                                                 label="Русский"
@@ -861,7 +865,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         overflowX: "scroll",
                         whiteSpace: "nowrap",
                         width: "100%",
-                        maxWidth: "100%", 
+                        maxWidth: "100%",
                         padding: "10px 0",
                         borderRadius: "10px",
                         border: '1px solid lightgrey'
@@ -871,7 +875,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         type="range"
                         min="0"
                         max={duration}
-                        step="0.01" 
+                        step="0.01"
                         value={currentTime}
                         onChange={handleTimeChangeNEW}
                         onDoubleClick={setTimeCode}

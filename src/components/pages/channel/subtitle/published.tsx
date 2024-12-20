@@ -195,12 +195,16 @@ const PublishedSubtitleslist = () => {
     const [deleteMenuOpenIndex, setDeleteMenuOpenIndex] = useState<number | null>(null);
     const [deleteMenuOpenKey, setDeleteMenuOpenKey] = useState<number | null>(null);
     const [isOpen, setIsOpen] = useState<boolean>(false);
+      const [langCode, setLangCode] = useState<string>("");
+        const [langName, setLangName] = useState<string>("");
 
-    const openSubtitlesEditor = (id: number, url: string) => {
-        setUrlSubtitle(url);
-        setVideoId(id);
-        setOpen(!open);
-    }
+        const openSubtitlesEditor = (id: number, url: string, lc: string, ln: string) => {
+            setUrlSubtitle(url);
+            setVideoId(id);
+            setLangCode(lc);
+            setLangName(ln);
+            setOpen(!open);
+        }
     const closeSubtitlesEditor = () => {
         setVideoId(0);
         setOpen(false);
@@ -308,7 +312,7 @@ const PublishedSubtitleslist = () => {
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <FoulCopySubtitleEditor videoId={videoId} onClose={closeSubtitlesEditor}
-                            subtitleUrl={urlSubtitle} />
+                            subtitleUrl={urlSubtitle} langCode={langCode} langName={langName} />
                     </div>
                 </div>
             )}
@@ -352,7 +356,8 @@ const PublishedSubtitleslist = () => {
                                                             <div title='Edit subtitle'
                                                                 key={key}
                                                                 onClick={() => openSubtitlesEditor(
-                                                                    el.id, subtitle.puthToFile ? subtitle.puthToFile : "")}
+                                                                    el.id, subtitle.puthToFile ? subtitle.puthToFile : "",
+                                                                subtitle.languageCode, subtitle.languageName)}
                                                                 style={{ cursor: "pointer", padding: "10px" }}
                                                             >
                                                                 <BiFile size={20} />
@@ -407,7 +412,7 @@ const PublishedSubtitleslist = () => {
                     ))) : (
                         <tr>
                             <td colSpan={2} className="text-center py-4" style={{ cursor: 'pointer' }}>
-                                <div onClick={() => openSubtitlesEditor(1, "")}>
+                                <div onClick={() => openSubtitlesEditor(1, "","","")}>
                                     {/* TestPublishSubtitlesEditor */}
                                 </div>
                             </td>
