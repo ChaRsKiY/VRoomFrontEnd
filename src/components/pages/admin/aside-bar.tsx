@@ -59,7 +59,7 @@ const AsideBar: React.FC = () => {
                     </Link>
                     <Link href="/admin/statistic">
                         <div
-                            className={`flex items-center space-x-2.5 min-w-32 p-3 rounded-[0.5rem] cursor-pointer ${isActive('/admin/statistic')}`}>
+                            className={`flex items-center space-x-2.5 min-w-32 p-3 rounded-[0.5rem] cursor-pointer ${isActive('/admin/analytics')}`}>
                             <TbReportAnalytics/>
                             <div>Analytics and Statistics</div>
                         </div>

@@ -121,6 +121,7 @@ const BurgerMenu: React.FC = () => {
 
                     <HeaderMenuButton icon={<TbSettings size={23}/>} text="Settings" action={() => push("/account")}/>
 
+
                     <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
 
                     <HeaderMenuButton icon={<RxQuestionMarkCircled size={23} />} text="Help" action={() => push("/help")} />

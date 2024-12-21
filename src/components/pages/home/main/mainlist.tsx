@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect, Suspense} from 'react'
 import UnlimitedScrollBlock from "@/components/pages/home/main/unlimited-scroll-block";
 import { IVideo } from "@/types/videoinfo.interface";
 import api from '@/services/axiosApi';
 import TagNavigation from './tag-navigation';
+import LocalLoader from "@/components/reusable/local-loader";
 
 const MainInfo: React.FC = () => {
 
@@ -33,12 +34,14 @@ const MainInfo: React.FC = () => {
 
 
   return (
-        <div style={{ marginTop: '80px', width: '98%' }}>
-      <div>
-        <TagNavigation tagName='All' />
-        <UnlimitedScrollBlock data={moreVideos} />
+      <div style={{ marginTop: '80px', width: '98%' }}>
+        <div>
+          <TagNavigation tagName='All' />
+          <Suspense fallback={<LocalLoader />}>
+            <UnlimitedScrollBlock data={moreVideos} />
+          </Suspense>
+        </div>
       </div>
-    </div>
   )
 }
 

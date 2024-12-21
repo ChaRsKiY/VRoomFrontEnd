@@ -4,6 +4,9 @@ import quotes from "@/testdata/quotes.json"
 
 const font = Nunito({ subsets: ['latin'], weight: ["600"] })
 
+//каждые 20 секунд менять цитату
+export const revalidate = 20;
+
 const MainLoading: React.FC = async () => {
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
