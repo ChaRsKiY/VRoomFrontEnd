@@ -2,23 +2,26 @@
 
 import { useState, useRef, useEffect } from 'react';
 import api from '@/services/axiosApi';
-import VideoPlayer from '../../watch/player';
+import VideoPlayer from './player';
 import { BiArrowFromTop, BiCircle, BiPen, BiPencil, BiPlus, BiPlusCircle, BiSolidKeyboard, BiTrash, BiX } from 'react-icons/bi';
 import '@/styles/modalsubtitles.css';
 import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ISubtitle } from '@/types/subtitle.interface';
-
+import Hls from 'hls.js';
 
 interface IProps {
     videoId: number;
     onClose: () => void;
     subtitleUrl: string,
+    langCode : string,
+    langName : string,
 }
 
-const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl }) => {
+const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl,langCode, langName }) => {
 
     const [duration, setDuration] = useState(0); // Общая длина видео
+    const [subtitleId, setSubtitleId] = useState(0);
     const [currentTime, setCurrentTime] = useState(0); // Текущее время на шкале
     const [videoUrl, setVideoUrl] = useState<string | null>(null); // URL видео
     const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
@@ -42,11 +45,9 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     const [isValid2, setIsValid2] = useState<boolean>(true);
     const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const [videoSrc, setVideoSrc] = useState<string | null>(null);
+    const [videoError, setVideoError] = useState<string | null>(null);
 
-    // const SaveBeforeExit = () => {
-    //     savePublishSubtitles(false);
-    //     onClose();
-    // }
     const SaveBeforeExit = () => {
         validateSubtitles();
 
@@ -138,18 +139,25 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     };
 
 
+
     const fetchSubtitleFile = async (url: string) => {
         try {
-            const response = await api.get('/getsubtitlefile/' + url);
+            console.log("langname:",langName+ langCode);
+            const response = await api.get('/Subtitle/getsubtitlefile/' + url
+                , {
+                    responseType: 'blob', // Указываем, что сервер возвращает Blob
+                });
+
 
             if (response.status != 200) {
                 throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
             }
-            const blob = await response.data.blob();
-
-            const file = new File([blob], "subtitle.vtt", { type: blob.type });
+            const blob = await response.data;
+            console.log('blob:' + blob);
+            const file = new File([blob], videoId + langCode + "subtitle.vtt", { type: blob.type });
 
             setFileSubtitle(file);
+            parseVTTFile(file);
         } catch (error) {
             console.error("Ошибка при загрузке файла:", error);
         }
@@ -166,16 +174,16 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         ].join('');
 
         const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
         setFileSubtitle(file);
     }
 
-    const handleLanguageChange = () => {
-        setLanguageIndex(languageIndex + 1)
-        if (languageIndex >= languages.length - 1)
-            setLanguageIndex(0)
-        setSelectedLanguage(languages[languageIndex]);
-    };
+    // const handleLanguageChange = () => {
+    //     setLanguageIndex(languageIndex + 1)
+    //     if (languageIndex >= languages.length - 1)
+    //         setLanguageIndex(0)
+    //     setSelectedLanguage(languages[languageIndex]);
+    // };
 
     const formatTime = (time: number) => {
         const hours = Math.floor(time / 3600);
@@ -261,7 +269,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'subtitles.vtt';
+            link.download = videoId + langCode + 'subtitle.vtt';
             link.click();
 
             URL.revokeObjectURL(link.href);
@@ -274,10 +282,11 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
         const sub: ISubtitle = {
             id: 0,
-            languageCode: selectedLanguage.code,
-            languageName: selectedLanguage.name,
+            languageCode: langCode,
+            languageName: langName,
             videoId: videoId,
             isPublished: topublish,
+            puthToFile: subtitleUrl
         };
         console.log("sub", JSON.stringify(sub));
         Object.entries(sub).forEach(([key, value]) => {
@@ -312,7 +321,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
             ].join('');
 
             const blob = new Blob([vttContent], { type: 'text/vtt' });
-            const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+            const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
 
             await uploadVTTToBackend(file, publish);
         }
@@ -337,39 +346,45 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         handleFormChange(index, "text", "");
     };
 
-    const getVideo = async () => {
-        try {
-            const res = await api.get(`/Video/${videoId}`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setVideoUrl(data.videoUrl);
-            } else {
-                console.error('Ошибка загрузки видео');
-                setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-            setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-        }
-    }
-    const getLanguages = async () => {
-        try {
-            const res = await api.get(`/Language`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setLanguage(data);
-            } else {
-                console.error('Ошибка загрузки lang');
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-        }
-    }
-
     useEffect(() => {
-        getLanguages();
-        getVideo();
+        const fetchVideo = async () => {
+            try {
+                const response = await api.get(`/Video/${videoId}`); // Запрос к серверу
+                if (response.status !== 200) {
+                    throw new Error("Failed to fetch video data");
+                }
+                const videoData = await response.data;
+
+                setVideoSrc(videoData.videoUrl);
+
+            } catch (error) {
+                console.error("Ошибка при загрузке видео:", error);
+                setVideoError("Error fetching video");
+            }
+        };
+
+        fetchVideo();
     }, [videoId]);
+
+    // const getLanguages = async () => {
+    //     try {
+    //         const res = await api.get(`/Language`);
+    //         if (res.status === 200) {
+    //             const data = await res.data;
+    //             setLanguage(data);
+    //         } else {
+    //             console.error('Ошибка загрузки lang');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка запроса:', error);
+    //     }
+    // }
+
+    // useEffect(() => {
+    //     getLanguages();
+    //     //  getVideo();
+    // }, [videoId]);
+
 
     useEffect(() => {
         if (videoRef.current) {
@@ -475,54 +490,73 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         setSelectedIndex(index);
         setTimePoints([]);
     }
-    const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOption = e.target.selectedOptions[0];
-        const name = selectedOption.getAttribute("data-label");
-        const code = selectedOption.getAttribute("data-code");
-        if (name && code) {
-            console.log("name:" + name);
-            console.log("code:" + code)
-            if (!isLanguageSelected(code)) {
-                addLanguage({ name, code });
-                triggerRef.current?.click();
-            } else {
-                removeLanguage(code);
-                triggerRef.current?.click();
-            }
+    // const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const selectedOption = e.target.selectedOptions[0];
+    //     const name = selectedOption.getAttribute("data-label");
+    //     const code = selectedOption.getAttribute("data-code");
+    //     if (name && code) {
+    //         console.log("name:" + name);
+    //         console.log("code:" + code)
+    //         if (!isLanguageSelected(code)) {
+    //             addLanguage({ name, code });
+    //             triggerRef.current?.click();
+    //         } else {
+    //             removeLanguage(code);
+    //             triggerRef.current?.click();
+    //         }
 
-        } else {
-            console.error("Не удалось извлечь данные языка");
-        }
-    };
+    //     } else {
+    //         console.error("Не удалось извлечь данные языка");
+    //     }
+    // };
 
-    const addLanguage = (newLanguage: { name: string; code: string }) => {
-        setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
+    // const addLanguage = (newLanguage: { name: string; code: string }) => {
+    //     setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
 
-    };
+    // };
 
-    const removeLanguage = (code: string) => {
-        if (languages.length > 1)
-            setLanguages((prevLanguages) =>
-                prevLanguages.filter((lang) => lang.code !== code)
-            );
-    }
+    // const removeLanguage = (code: string) => {
+    //     if (languages.length > 1)
+    //         setLanguages((prevLanguages) =>
+    //             prevLanguages.filter((lang) => lang.code !== code)
+    //         );
+    // }
 
-    const isLanguageSelected = (code: string) => {
-        return languages.some((language) => language.code === code);
-    };
+    // const isLanguageSelected = (code: string) => {
+    //     return languages.some((language) => language.code === code);
+    // };
 
-    useEffect(() => {
-        setSelectedLanguage(languages[languages.length - 1]);
-    }, [languages]);
+    // useEffect(() => {
+    //     setSelectedLanguage(languages[languages.length - 1]);
+    // }, [languages]);
 
     useEffect(() => {
         changeFile();
     }, [forms]);
 
     useEffect(() => {
-        if (urlSubtitles)
-            fetchSubtitleFile(urlSubtitles);
-    }, [urlSubtitles]);
+        if (subtitleUrl) {
+            const encodedUrl = encodeURIComponent(subtitleUrl);
+            fetchSubtitleFile(encodedUrl);
+        }
+    }, [subtitleUrl]);
+
+    useEffect(() => {
+        if (videoSrc && videoRef.current) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(videoRef.current);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log("HLS: Манифест загружен, воспроизведение готово");
+                });
+            } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+                videoRef.current.src = videoSrc;
+            } else {
+                console.error("HLS не поддерживается в этом браузере.");
+            }
+        }
+    }, [videoSrc]);
 
     return (
         <div className="subtitle-editor" onClick={closeDelete} >
@@ -534,15 +568,15 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
                                 <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                    //onClick={handleLanguageChange}
+                                    title='Language'>
 
                                     <BiSolidKeyboard size={25} style={{
                                         display: 'inline', marginRight: '5px',
                                     }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
+                                    <label style={{ fontWeight: 'bold' }}>{langName} **</label></button>
 
-                                <Accordion.Root
+                                {/* <Accordion.Root
                                     type="single"
                                     collapsible
                                     style={{
@@ -615,7 +649,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                 </select>
                                             </div>
                                         </Accordion.Content>
-                                    </Accordion.Item>
+                                    </Accordion.Item> */}
 
 
 
@@ -640,7 +674,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                </Accordion.Item> */}
 
 
-                                </Accordion.Root >
+                                {/* </Accordion.Root > */}
                             </div>
 
                             <div>
@@ -648,7 +682,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                 <button className='modal-button'
                                     onClick={SaveDrafts}>Save to draft</button>
                                 <button className='publish-button'
-                                    onClick={() => { PublishSubtitle }}>Publish</button>
+                                    onClick={PublishSubtitle}>Publish</button>
                                 <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                 >
                                     <BiArrowFromTop title='Download' />
@@ -665,14 +699,14 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
 
-                            {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
+                            <div style={{ padding: '5px', paddingLeft: '0', minWidth: '500px', justifyContent: 'center', display: 'flex' }}>
 
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src={videoUrl} type="video/mp4" />
+
+                                <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
+                                    <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                         {fileSubtitle && (
                                             <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                                src={URL.createObjectURL(fileSubtitle)}
                                                 kind="subtitles"
                                                 srcLang="ru"
                                                 label="Русский"
@@ -682,9 +716,11 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                         Ваш браузер не поддерживает видео.
                                     </video>
                                 </div>
-                            )}
+
+                            </div>
+
                         </div>
-                        {/* Форма добавления субтитров */}
+
                         <div >
 
                             <div style={{
@@ -718,7 +754,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                     placeholder="Text"
                                                     style={{
                                                         border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                        // background: 'transparent', color: "white",
                                                         borderRadius: "6px", minWidth: '300px'
                                                     }}
                                                 />
@@ -815,36 +850,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         </div>
 
 
-
-
-
-
-                        {/* <div style={{ padding: '20px', paddingLeft: '0' }}> */}
-
-                        {/* {videoUrl ? (
-                                <VideoPlayer src={videoUrl} id={videoId} />
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )} */}
-
-                        {/* {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
-                        {/* </div> */}
                     </div>
                 </div>
             </div>
@@ -860,7 +865,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         overflowX: "scroll",
                         whiteSpace: "nowrap",
                         width: "100%",
-                        maxWidth: "100%", // Видимая область для 5 мину
+                        maxWidth: "100%",
                         padding: "10px 0",
                         borderRadius: "10px",
                         border: '1px solid lightgrey'
@@ -870,7 +875,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         type="range"
                         min="0"
                         max={duration}
-                        step="0.01" // Позволяет выбирать с точностью до 0.01 сек
+                        step="0.01"
                         value={currentTime}
                         onChange={handleTimeChangeNEW}
                         onDoubleClick={setTimeCode}

@@ -35,6 +35,12 @@ const nextConfig = {
                 hostname: 'myblobcont.blob.core.windows.net',
                 port: '',
                 pathname: '**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'www.alpbachtal.at',
+                port: '',
+                pathname: '**',
             }
         ],
     },

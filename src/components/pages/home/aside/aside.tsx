@@ -3,6 +3,7 @@ import CategoryBlock from "@/components/pages/home/aside/category";
 import {IoMdHome} from "react-icons/io";
 import {SiYoutubeshorts} from "react-icons/si";
 import {
+    MdBugReport,
     MdFeedback,
     MdSubscriptions,
     MdWatchLater
@@ -17,6 +18,21 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import MiniFooter from "@/components/pages/home/aside/mini-footer";
 import CategorySubscription from './category-subscription';
 import CategoryVideos from './categoryvideos';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import {Input} from "@/components/ui/input";
+import Link from "next/link";
+import Image from "next/image";
+import AddContentReportDialog from "@/components/pages/home/aside/add-content-report-dialog";
 
 
 interface IAsideHomeProps {
@@ -89,6 +105,8 @@ const AsideHome: React.FC<IAsideHomeProps> = ({t}: IAsideHomeProps) => {
                     </div>
 
                     <CategoryBlock data={mainPageOtherCategories} title="Other"/>
+
+                    <AddContentReportDialog />
 
                     <div className="px-3 my-3">
                         <div className="h-[1px] bg-neutral-300 rounded-full"/>
