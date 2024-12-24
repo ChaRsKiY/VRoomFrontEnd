@@ -12,25 +12,11 @@ import {RxDragHandleDots2} from "react-icons/rx";
 import Link from "next/link";
 import {IUser} from "@/types/user.interface";
 import {DragDropContext, Droppable, Draggable} from '@hello-pangea/dnd';
+import {ChannelSection, ChSection} from "@/types/channelsections.interfaces";
 
 
 interface ISectionsSettingsProps {
     t: ITranslationFunction
-}
-
-
-export interface ChSection {
-    id: number;
-    title: string;
-}
-
-export interface ChannelSection {
-    id: number;
-    channel_SettingsId: number;
-    title: string;
-    chSectionId: number;
-    order: number;
-    isVisible: boolean;
 }
 
 const MAX_SECTIONS = 8;
@@ -63,8 +49,8 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
             setChsetid(channelSections[0].channel_SettingsId);
             channelSectionsRef.current = channelSectionsRes.data; // Сохраняем начальное состояние в ref
 
-        } catch (err) {
-            setError("Failed to load data");
+        } catch (error) {
+            console.error("Failed to load data", error);
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +72,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
     const handleAddSection = (sectionId: number) => {
         setChannelSections((prevSections) => {
             // Проверяем, существует ли уже секция с таким id и она видимая
-            const sectionExists = prevSections.some((section) => section.chSectionId === sectionId && section.isVisible);
+            const sectionExists = prevSections.some((section) => section.sectionId === sectionId && section.isVisible);
 
             if (sectionExists) {
                 return prevSections; // Если секция уже добавлена, ничего не меняем
@@ -97,7 +83,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                 id: 0, // Генерация уникального ID для новой секции, можно заменить на подходящий ID
                 channel_SettingsId: chsetid, // ID пользователя (если это необходимо)
                 title: sections.find(section => section.id === sectionId)?.title || 'New Section', // Заголовок секции
-                chSectionId: sectionId,
+                sectionId: sectionId,
                 order: prevSections.filter((s) => s.isVisible).length + 1,
                 isVisible: true,
             };
@@ -202,7 +188,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                         <DropdownMenuContent align="end" style={{maxHeight: '16rem'}}
                                              className={'shadow-md shadow-black overflow-y-scroll min-h-[12rem] border-t-[1px] border-t-slate-500'}>
                             {sections.map((section) => {
-                                const isAdded = channelSections.some((cs) => cs.chSectionId === section.id && cs.isVisible);
+                                const isAdded = channelSections.some((cs) => cs.sectionId === section.id && cs.isVisible);
                                 return (
                                     <DropdownMenuItem
                                         className={'disabled:text-gray-500 font-semibold enabled:text-black'}
