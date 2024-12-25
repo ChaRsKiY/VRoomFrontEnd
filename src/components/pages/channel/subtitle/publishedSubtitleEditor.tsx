@@ -9,6 +9,8 @@ import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ISubtitle } from '@/types/subtitle.interface';
 import Hls from 'hls.js';
+import MDialog from "@/components/pages/channel/subtitle/menuwindow";
+import { toast } from "@/hooks/use-toast";
 
 interface IProps {
     videoId: number;
@@ -45,46 +47,22 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
+    const [draftsDialog, setDraftsDiaolg] = useState<boolean>(false);
+    const [publishDialog, setPublishDiaolg] = useState<boolean>(false);
+    const [validMessage, setValidMessage] = useState<string>("");
 
-
-    const SaveBeforeExit = () => {
-        validateSubtitles();
-
-        const userResponse = window.confirm("Save to drafts?");
-
-        if (userResponse) {
-            SaveDrafts();
-            console.log("Черновик сохранён.");
-        } else {
-            const userResponse2 = window.confirm("Exit?");
-
-            if (userResponse2) {
-                onClose();
-            }
-        }
-
-    }
 
     const SaveDrafts = () => {
         savePublishSubtitles(false);
-        onClose();
+        // onClose();
     }
 
     const PublishSubtitle = () => {
 
-        validateSubtitles();
+        savePublishSubtitles(true);
+        // onClose();
 
-        const userResponse = window.confirm("Publish?");
-
-        if (userResponse) {
-            savePublishSubtitles(true);
-            onClose();
-            console.log("Опубликовано.");
-        } else {
-            console.log("Отмена.");
-        }
-
-    }
+}
 
 
     const parseVTTFile = (file: File) => {
@@ -233,26 +211,31 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
     const validateSubtitles = () => {
 
+        let errorMessages = "";
+        let isV = true;
+
         forms.forEach((subtitle, index) => {
+
             if (subtitle.start >= subtitle.end || !subtitle.text.trim()) {
-                alert(`Ошибка в субтитре #${index + 1}: 
-              - Начало должно быть меньше конца.
-              - Текст не должен быть пустым.`);
-                setIsValid1(false);
+                errorMessages += `Error in subtitle #${index + 1}:\n`;
+                if (subtitle.start >= subtitle.end) {
+                    errorMessages += "- The beginning must be less than the end.\n";
+                }
+                if (!subtitle.text.trim()) {
+                    errorMessages += "- The text must not be empty.\n";
+                }
+                errorMessages += "\n";
+                isV = false;
             }
         });
 
-        if (isValid1) {
-            setIsValid2(true);
-        }
-        else {
-            setIsValid2(false);
-            setIsValid1(true);
-        }
-    };
+        setIsValid2(isV);
+        setValidMessage(errorMessages);
+        if (isV)
+           PublishSubtitle();
 
+    };
     const downloadSubtitlesAsVTT = () => {
-        validateSubtitles();
         if (isValid2) {
             const vttContent = [
                 'WEBVTT\n\n',
@@ -297,9 +280,26 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
             const response = await api.post('/Subtitle/add', formData);
 
             if (response.status === 200) {
-                alert('Файл успешно загружен на сервер!');
+                let str = "";
+                if (topublish)
+                    str = "published";
+                else
+                    str = "saved to drafts";
+                toast({
+                    title: "Subtitles added",
+                    description: "Your subtitles have been "+ str,
+                    className: "text-green-600 bg-green-100",
+                    duration: 3000,
+                });
+                onClose();
             } else {
-                alert('Ошибка загрузки файла.');
+                toast({
+                    title: "Error subtitles adding",
+                    description: "Error while adding subtitles",
+                    className: "text-green-600 bg-red-100",
+                    duration: 3000,
+                });
+
             }
         } catch (error) {
             console.error('Ошибка при загрузке файла:', error);
@@ -307,8 +307,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
     };
 
     const savePublishSubtitles = async (publish: boolean) => {
-        validateSubtitles();
-        if (isValid2) {
+
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -321,7 +320,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
             const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
 
             await uploadVTTToBackend(file, publish);
-        }
+
     };
 
     const addForm = () => {
@@ -679,16 +678,32 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
                                 <button className='modal-button'
                                     onClick={SaveDrafts}>Save to draft</button>
                                 <button className='publish-button'
-                                    onClick={PublishSubtitle}>Publish</button>
+                                    onClick={validateSubtitles}>Publish</button>
                                 <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                 >
                                     <BiArrowFromTop title='Download' />
                                 </button>
 
-                                <button className='modal-button ' onClick={SaveBeforeExit}
+                                <button className='modal-button ' onClick={onClose}
                                 >
                                     <BiPlus style={{ transform: 'rotate(45deg)' }} title='Exit' />
                                 </button>
+                                {!isValid2 && (
+                                    <div style={{
+                                        border: '1px solid darkgray', padding: '10px', position: 'fixed', marginTop:"-40px",
+                                        backgroundColor: "lightgray", color: 'red', borderRadius: "8px", marginRight:'100px'
+                                    }}>
+                                        <div>
+                                            <div style={{paddingLeft:'10px', fontWeight:'bold'}}>Warning! </div>
+                                            <div>{validMessage}</div><br/>
+                                            <div className='flex' style={{justifyContent:'space-around'}}>
+                                                <button className='modal-button ' onClick={() => { setIsValid2(true) }}>Cancel</button>
+                                                <button className='modal-button ' onClick={PublishSubtitle}>Publish subtitles</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                
                             </div>
                         </div>
                     </div>
