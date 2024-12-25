@@ -1,4 +1,4 @@
-import {Calendar, Inbox, Search, Settings, Users, RectangleEllipsis} from "lucide-react"
+import {Inbox, ChartNoAxesCombined, Settings, Users, RectangleEllipsis} from "lucide-react"
 
 import {
     Sidebar,
@@ -11,7 +11,6 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link";
-import {CiMemoPad} from "react-icons/ci";
 
 // Menu items.
 const items = [
@@ -33,9 +32,9 @@ const items = [
         subContent: null
     },
     {
-        title: "Search",
-        url: "#",
-        icon: Search,
+        title: "Analytics",
+        url: "/analytics",
+        icon: ChartNoAxesCombined,
         subContent: null
     },
     {
