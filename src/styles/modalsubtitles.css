@@ -1,0 +1,102 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 80%;
+    position: relative;
+}
+
+.publish-button {
+    padding: 3px;
+    padding-left: 25px;
+    padding-right: 25px;
+    background: #0ea2de;
+    margin: 10px;
+    color: black;
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+.modal-button {
+    background: #6c6c6c;
+    padding: 3px;
+    margin: 3px;
+    border-radius: 3px;
+    padding-left: 25px;
+    padding-right: 25px;
+    color: white;
+}
+
+.publish-button:hover {
+
+    color: white;
+}
+
+.subtitle-form:hover {
+    background: #c0bebe;
+    width: '100%';
+}
+
+.modal-button:hover {
+    background: #0ea2de;
+    color: white;
+}
+
+.custom-scroll::-webkit-scrollbar {
+    width: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background: #6e6e6e;
+    border-radius: 4px;
+
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: #c0bebe;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background: #333333;
+}
+
+.subtitle-editor {
+    padding: 10px;
+    border-radius: 10px;
+    background: #eeeeee;
+}
+
+.remove-button:hover {
+    color: red;
+}
+
+.custom-scroll2::-webkit-scrollbar {
+    height: 8px;
+}
+
+.custom-scroll2::-webkit-scrollbar-thumb {
+    background: #6e6e6e;
+    border-radius: 4px;
+
+}
+
+.custom-scroll2::-webkit-scrollbar-thumb:hover {
+    background: #c0bebe;
+}
+
+.custom-scroll2::-webkit-scrollbar-track {
+    background: #333333;
+}

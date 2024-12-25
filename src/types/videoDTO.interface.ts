@@ -1,3 +1,5 @@
+import { ISubtitle } from "@/types/subtitle.interface";
+
 export interface IContentVideo {
     id: number,
     objectID: string,
@@ -23,4 +25,5 @@ export interface IContentVideo {
     commentVideoIds?: [],
     playLists?: [],
     lastViewedPosition: string,
+    subtitles?:ISubtitle[],
 }

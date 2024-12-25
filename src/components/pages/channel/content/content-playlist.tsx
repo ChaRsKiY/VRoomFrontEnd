@@ -69,8 +69,8 @@ const ContentPlaylists = () => {
                             <td className="py-3 px-3"><input type="checkbox" className="w-5 h-5"/></td>
                             <td className="py-3 px-3  flex items-center">
                                 <div className="relative w-max">
-                                    <img src="https://placehold.co/125x70" alt="Playlist thumbnail"
-                                         className="w-full h-auto object-cover rounded-lg"/>
+                                    <Image src="https://placehold.co/125x70" alt="Playlist thumbnail"
+                                           className="w-full h-auto object-cover rounded-lg"/>
                                     <div
                                         className="absolute top-0 right-0 h-full w-1/2 bg-black bg-opacity-50 flex-col items-center justify-center rounded-r-lg">
                                         <p className="text-white text-lg mt-3 font-normal w-full text-center">10</p>
