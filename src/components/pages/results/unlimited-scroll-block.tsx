@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { IPresentedVideo } from "@/types/video.interface";
+import React, {useState, useEffect} from 'react';
+import {IPresentedVideo} from "@/types/historyofbrowsing-groupdate.interface";
 import VideoCard from "@/components/pages/results/video-card";
 import ClientScrollBlock from "@/components/pages/results/client-scroll-block";
-import { IVideo } from "@/types/videoinfo.interface";
-import { HiOutlineChevronDown } from 'react-icons/hi';
-import { FaFilter } from 'react-icons/fa';
+import {IVideo} from "@/types/videoinfo.interface";
+import {HiOutlineChevronDown} from 'react-icons/hi';
+import {FaFilter} from 'react-icons/fa';
 
 
 // interface IUnlimitedScrollBlockProps {
@@ -28,7 +28,6 @@ import { FaFilter } from 'react-icons/fa';
 // }
 
 // export default UnlimitedScrollBlock
-
 
 
 // interface IUnlimitedScrollBlockProps {
@@ -71,19 +70,18 @@ interface IUnlimitedScrollBlockProps {
     data: IVideo[]
 }
 
-const UnlimitedScrollBlock: React.FC<IUnlimitedScrollBlockProps> = ({ data }: IUnlimitedScrollBlockProps) => {
-
+const UnlimitedScrollBlock: React.FC<IUnlimitedScrollBlockProps> = ({data}: IUnlimitedScrollBlockProps) => {
 
 
     return (
-        <div style={{ width: '100%' }}>
+        <div style={{width: '100%'}}>
             <div className="pr-[2%] max-sm:pr-0 flex-1">
                 {data.map((el, key) => (
                     <div key={key} className="px-3 mb-8 space-y-2.5">
-                        <VideoCard el={el} />
+                        <VideoCard el={el}/>
                     </div>
                 ))}
-                {data.length == 0 ? (<div className="px-3 mb-8 space-y-2.5"  >
+                {data.length == 0 ? (<div className="px-3 mb-8 space-y-2.5">
                     No results were found...
                 </div>) : <></>}
 

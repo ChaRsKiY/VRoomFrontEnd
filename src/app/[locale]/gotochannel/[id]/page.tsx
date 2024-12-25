@@ -1,5 +1,5 @@
 import React from 'react'
-// import CreatePost from "@/components/pages/posts/createpost";
+ import CreatePost from "@/components/pages/posts/createpost";
 import HeaderHome from "@/components/pages/home/header/header";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";

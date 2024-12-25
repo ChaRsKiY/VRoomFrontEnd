@@ -8,10 +8,9 @@ import FilterComponent from './filtersearch';
 import api from '@/services/axiosApi';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  PlayCircle,
-} from "lucide-react";
+import {PlayCircle, } from "lucide-react";
 import { IUser } from '@/types/user.interface';
+
 const LikedVideo: React.FC = () => {
   const { user } = useUser();
   const [moreVideos, setMoreVideos] = useState<IVideo[]>([]);
@@ -23,31 +22,32 @@ const LikedVideo: React.FC = () => {
   const [nameFilt, setNameFillt] = useState('last liked video first');
   const [channelName, setChannelName] = useState("");
   const [totalVideos, setTotalVideos] = useState(0);
+  
   const getUser = async (user: any, setUser: (prev: IUser) => void) => {
     try {
-        if (user) {
-            const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
+      if (user) {
+        const response = await api.get('/ChannelSettings/getinfochannel/' + user?.id);
 
-            if (response.status === 200) {
-                const data: IUser = await response.data;
-                setUser(data);
-            } else {
-                console.error('Ошибка при получении пользователя:', response.statusText);
-            }
+        if (response.status === 200) {
+          const data: IUser = await response.data;
+          setUser(data);
+        } else {
+          console.error('Ошибка при получении пользователя:', response.statusText);
         }
+      }
     } catch (error) {
-        console.error('Ошибка при подключении к серверу:', error);
+      console.error('Ошибка при подключении к серверу:', error);
     }
-};
+  };
   const getVideos = async () => {
     try {
       if (user) {
         const response = await api.get('/Video/getlikedvideo/' + user.id);
 
         if (response.status === 200) {
-          const mydata:  IVideo[] = await response.data;
+          const mydata: IVideo[] = await response.data;
           console.log('успешный list of likedvideo', mydata);
-          
+
           setMoreVideos(mydata);
           setMoreVideos(prevVideos => applyFiltersAndSorting(prevVideos));
         } else {
@@ -114,13 +114,13 @@ const LikedVideo: React.FC = () => {
     const binaryString = window.atob(base64);
     const length = binaryString.length;
     const bytes = new Uint8Array(length);
-  
+
     for (let i = 0; i < length; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
     return bytes;
   };
-  
+
   const byteArrayToBase64 = (byteArray: Uint8Array) => {
     let binary = '';
     byteArray.forEach((byte) => {
@@ -180,7 +180,7 @@ const LikedVideo: React.FC = () => {
       </div>
     </div>
   );
-  
+
 }
 
 export default LikedVideo

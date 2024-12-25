@@ -71,7 +71,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         <div className="flex" style={{padding:'2px'}}>
                             <div className="flex " style={{flexDirection:'column',justifyContent:'center'}}>
                         <a href={hrefFB} target="_blank" rel="noopener noreferrer">
-                            <FaInstagram size={18} className="text-black-600 cursor-pointer" title='Instagram'/>
+                            <FaInstagram size={18} className="text-black-600 cursor-pointer" title='Instagram' />
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>instagram //only for the cats</div>

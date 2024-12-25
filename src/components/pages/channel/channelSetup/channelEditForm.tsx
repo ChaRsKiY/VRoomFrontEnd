@@ -217,7 +217,7 @@ const ChannelEditBlock = () => {
     return (
         <>
             <form onSubmit={handleSubmit}>
-                <div className="top-7 right-0 flex justify-between sticky  border pb-4 pt-4 bg-white">
+                <div className="top-7 right-0 flex justify-between  border pb-4 pt-4 bg-white">
                     <div className="flex mr-14 justify-start">
                         <p className="mr-4 text-gray-800 border-b-2 border-gray-800 pb-2">Profile</p>
                         <Link target={'_self'} href={"/channel/editing/channel_setup/hometab"}

@@ -1,8 +1,9 @@
-import React from 'react'
+import React, {Suspense} from 'react'
 import MyPreferences from "@/components/pages/account/my-preferences";
 import {currentUser} from "@clerk/nextjs/server";
 import PermissionEmailPreference from "@/components/pages/account/perminssion-email-preference";
 import MyEmailPreferences from "@/components/pages/account/my-email-preferences";
+import LocalLoader from "@/components/reusable/local-loader";
 
 const NotificationsTab: React.FC = async () => {
     const user = await currentUser()
@@ -21,7 +22,9 @@ const NotificationsTab: React.FC = async () => {
 
             <div className="flex space-x-3 mt-7 flex-1">
                 <div className="w-[15%]">Your preferences</div>
-                <MyPreferences/>
+                <Suspense fallback={<LocalLoader />}>
+                    <MyPreferences/>
+                </Suspense>
             </div>
 
             <div className="h-[1px] bg-neutral-300 my-8"/>
@@ -33,12 +36,16 @@ const NotificationsTab: React.FC = async () => {
 
             <div className="flex space-x-3 mt-7 flex-1 mb-6">
                 <div className="w-[25%]">Permission</div>
-                <PermissionEmailPreference/>
+                <Suspense fallback={<LocalLoader />}>
+                    <PermissionEmailPreference/>
+                </Suspense>
             </div>
 
             <div className="flex space-x-3 mt-7 flex-1">
                 <div className="w-[25%]">Your preferences</div>
-                <MyEmailPreferences/>
+                <Suspense fallback={<LocalLoader />}>
+                    <MyEmailPreferences/>
+                </Suspense>
             </div>
         </div>
     )

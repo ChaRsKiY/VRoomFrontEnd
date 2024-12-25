@@ -1,4 +1,4 @@
-import {IPresentedVideo} from "@/types/video.interface";
+import {IPresentedVideo} from "@/types/historyofbrowsing-groupdate.interface";
 
 export const data: IPresentedVideo[] = [
     {

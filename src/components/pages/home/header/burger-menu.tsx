@@ -121,10 +121,11 @@ const BurgerMenu: React.FC = () => {
 
                     <HeaderMenuButton icon={<TbSettings size={23}/>} text="Settings" action={() => push("/account")}/>
 
+
                     <div className="bg-neutral-300 rounded-full h-[1.5px] my-1.5"/>
 
-                    <HeaderMenuButton icon={<RxQuestionMarkCircled size={23} />} text="Help" action={() => {}} />
-                    <HeaderMenuButton icon={<MdOutlineFeedback size={23} />} text="Feedback" action={() => {}} />
+                    <HeaderMenuButton icon={<RxQuestionMarkCircled size={23} />} text="Help" action={() => push("/help")} />
+                    <HeaderMenuButton icon={<MdOutlineFeedback size={23} />} text="Feedback" action={() => push("/feedback")} />
                 </div>
             )}
         </div>

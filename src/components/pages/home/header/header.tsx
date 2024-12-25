@@ -1,6 +1,5 @@
 import React from 'react'
 import Search from "@/components/pages/home/header/search";
-import AlgoliaSearch from "@/components/pages/algsearch/algoliasearch"
 import HeaderBlock from "@/components/pages/home/header/header-block";
 import { ITranslationFunction } from "@/types/translation.interface";
 import Image from "next/image";
@@ -8,7 +7,7 @@ import Link from "next/link";
 
 interface IHeaderHomeProps {
     t: ITranslationFunction
-};
+}
 
 const HeaderHome: React.FC<IHeaderHomeProps> = ({ t }: IHeaderHomeProps) => {
     return (
