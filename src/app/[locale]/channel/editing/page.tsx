@@ -47,8 +47,28 @@ const channelPage = async ({params: {locale}}: IChannelEditProps) => {
                                   }} className={'block '}
                                   target={'_self'}
                             >Add video
-                            </Link>
+                            </Link><br/>
+    <Link 
+        href="/channel/updatevideo" // Замінив на реальну сторінку для редагування відео
+        role="button"
+        style={{
+            display: 'block',
+            borderRadius: '20px',
+            background: 'black',
+            color: 'white',
+            padding: '5px 15px', // Більше відступів для кращого вигляду
+            margin: '10px auto',
+            textAlign: 'center',
+            zIndex: 10,
+            transition: 'background-color 0.3s ease', // Додав анімацію для змінення фону
+        }}
+        className="block hover:bg-gray-800" // Додав hover ефект
+        target="_self"
+    >
+        Edit video
+    </Link>
                         </div>
+                        
                         <div className="ml-16">
                             <h1 className="text-[1.3rem]"><strong>Channel analytics</strong></h1>
                             <h5 className="text-[1.0rem]">Subscriptions</h5>
