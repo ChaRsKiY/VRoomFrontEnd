@@ -38,7 +38,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     const startPercentage = (start / duration) * 100;
     const endPercentage = (end / duration) * 100;
     const percentage = (currentTime / duration) * 100;
-    const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
+    // const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
     const [isValid1, setIsValid1] = useState<boolean>(true);
     const [isValid2, setIsValid2] = useState<boolean>(true);
@@ -274,23 +274,25 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
             if (response.status === 200) {
                 let str = "";
-                if (topublish)
+                if (topublish){ 
                     str = "published";
+                }
                 else
                     str = "saved to drafts";
                 toast({
                     title: "Subtitles added",
                     description: "Your subtitles have been "+ str,
                     className: "text-green-600 bg-green-100",
-                    duration: 3000,
+                    duration: 5000,
                 });
                 onClose();
+                window.location.reload();
             } else {
                 toast({
                     title: "Error subtitles adding",
                     description: "Error while adding subtitles",
                     className: "text-green-600 bg-red-100",
-                    duration: 3000,
+                    duration: 5000,
                 });
 
             }
@@ -310,7 +312,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         ].join('');
 
         const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
 
         await uploadVTTToBackend(file, publish);
 

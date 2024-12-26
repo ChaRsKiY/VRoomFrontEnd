@@ -16,9 +16,11 @@ interface IProps {
     videoId: number;
     onClose: () => void;
     subtitleUrl: string,
+    langCode: string,
+    langName: string,
 }
 
-const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl }) => {
+const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl, langCode, langName  }) => {
 
     const [duration, setDuration] = useState(0); // Общая длина видео
     const [subtitleId, setSubtitleId] = useState(0);
@@ -36,14 +38,14 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
     const startPercentage = (start / duration) * 100;
     const endPercentage = (end / duration) * 100;
     const percentage = (currentTime / duration) * 100;
-    const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
-    const [languages, setLanguages] = useState([{ name: "Русский", code: "ru" }, { name: "English", code: "en" }]);
-    const [languageIndex, setLanguageIndex] = useState<number>(0);
-    const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
+  //  const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
+    // const [languages, setLanguages] = useState([{ name: "Русский", code: "ru" }, { name: "English", code: "en" }]);
+    // const [languageIndex, setLanguageIndex] = useState<number>(0);
+    // const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
     const [isValid1, setIsValid1] = useState<boolean>(true);
     const [isValid2, setIsValid2] = useState<boolean>(true);
-    const [language, setLanguage] = useState<[{ name: string, code: string }]>();
+   // const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const [videoSrc, setVideoSrc] = useState<string | null>(null);
     const [videoError, setVideoError] = useState<string | null>(null);
@@ -129,7 +131,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
             }
             const blob = await response.data;
             console.log('blob:' + blob);
-            const file = new File([blob], videoId + selectedLanguage.code + "subtitle.vtt", { type: blob.type });
+            const file = new File([blob], videoId + langCode + "subtitle.vtt", { type: blob.type });
 
             setFileSubtitle(file);
             parseVTTFile(file);
@@ -149,16 +151,16 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
         ].join('');
 
         const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
         setFileSubtitle(file);
     }
 
-    const handleLanguageChange = () => {
-        setLanguageIndex(languageIndex + 1)
-        if (languageIndex >= languages.length - 1)
-            setLanguageIndex(0)
-        setSelectedLanguage(languages[languageIndex]);
-    };
+    // const handleLanguageChange = () => {
+    //     setLanguageIndex(languageIndex + 1)
+    //     if (languageIndex >= languages.length - 1)
+    //         setLanguageIndex(0)
+    //     setSelectedLanguage(languages[languageIndex]);
+    // };
 
     const formatTime = (time: number) => {
         const hours = Math.floor(time / 3600);
@@ -262,8 +264,8 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
         const sub: ISubtitle = {
             id: 0,
-            languageCode: selectedLanguage.code,
-            languageName: selectedLanguage.name,
+            languageCode: langCode,
+            languageName: langName,
             videoId: videoId,
             isPublished: topublish,
             puthToFile: subtitleUrl
@@ -292,6 +294,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
                     duration: 3000,
                 });
                 onClose();
+                window.location.reload();
             } else {
                 toast({
                     title: "Error subtitles adding",
@@ -317,7 +320,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
             ].join('');
 
             const blob = new Blob([vttContent], { type: 'text/vtt' });
-            const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+            const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
 
             await uploadVTTToBackend(file, publish);
 
@@ -362,24 +365,24 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
         fetchVideo();
     }, [videoId]);
 
-    const getLanguages = async () => {
-        try {
-            const res = await api.get(`/Language`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setLanguage(data);
-            } else {
-                console.error('Ошибка загрузки lang');
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-        }
-    }
+    // const getLanguages = async () => {
+    //     try {
+    //         const res = await api.get(`/Language`);
+    //         if (res.status === 200) {
+    //             const data = await res.data;
+    //             setLanguage(data);
+    //         } else {
+    //             console.error('Ошибка загрузки lang');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка запроса:', error);
+    //     }
+    // }
 
-    useEffect(() => {
-        getLanguages();
+    // useEffect(() => {
+    //     getLanguages();
 
-    }, [videoId]);
+    // }, [videoId]);
 
 
     useEffect(() => {
@@ -486,45 +489,41 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
         setSelectedIndex(index);
         setTimePoints([]);
     }
-    const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOption = e.target.selectedOptions[0];
-        const name = selectedOption.getAttribute("data-label");
-        const code = selectedOption.getAttribute("data-code");
-        if (name && code) {
-            console.log("name:" + name);
-            console.log("code:" + code)
-            if (!isLanguageSelected(code)) {
-                addLanguage({ name, code });
-                triggerRef.current?.click();
-            } else {
-                removeLanguage(code);
-                triggerRef.current?.click();
-            }
+    // const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //     const selectedOption = e.target.selectedOptions[0];
+    //     const name = selectedOption.getAttribute("data-label");
+    //     const code = selectedOption.getAttribute("data-code");
+    //     if (name && code) {
+    //         console.log("name:" + name);
+    //         console.log("code:" + code)
+    //         if (!isLanguageSelected(code)) {
+    //             addLanguage({ name, code });
+    //             triggerRef.current?.click();
+    //         } else {
+    //             removeLanguage(code);
+    //             triggerRef.current?.click();
+    //         }
 
-        } else {
-            console.error("Не удалось извлечь данные языка");
-        }
-    };
+    //     } else {
+    //         console.error("Не удалось извлечь данные языка");
+    //     }
+    // };
 
-    const addLanguage = (newLanguage: { name: string; code: string }) => {
-        setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
+    // const addLanguage = (newLanguage: { name: string; code: string }) => {
+    //     setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
 
-    };
+    // };
 
-    const removeLanguage = (code: string) => {
-        if (languages.length > 1)
-            setLanguages((prevLanguages) =>
-                prevLanguages.filter((lang) => lang.code !== code)
-            );
-    }
+    // const removeLanguage = (code: string) => {
+    //     if (languages.length > 1)
+    //         setLanguages((prevLanguages) =>
+    //             prevLanguages.filter((lang) => lang.code !== code)
+    //         );
+    // }
 
-    const isLanguageSelected = (code: string) => {
-        return languages.some((language) => language.code === code);
-    };
-
-    useEffect(() => {
-        setSelectedLanguage(languages[languages.length - 1]);
-    }, [languages]);
+    // const isLanguageSelected = (code: string) => {
+    //     return languages.some((language) => language.code === code);
+    // };
 
     useEffect(() => {
         changeFile();
@@ -563,114 +562,15 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
                     <div style={{ padding: "10px", borderBottom: "0.5px solid #bdbdbd" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
-                                <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                <div style={{ padding: "5px", borderRadius: "8px" }}
+                                  
+                                    title='Language'>
 
                                     <BiSolidKeyboard size={25} style={{
                                         display: 'inline', marginRight: '5px',
                                     }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
+                                    <label style={{ fontWeight: 'bold' }}>{langName}</label></div>
 
-                                <Accordion.Root
-                                    type="single"
-                                    collapsible
-                                    style={{
-                                        marginLeft: '10px',
-                                        maxHeight: '28px',
-                                        overflow: 'visible',
-                                        zIndex: '10',
-                                    }}
-                                    title="Add language"
-                                >
-
-                                    <Accordion.Item
-                                        value="ru"
-                                        className="border-b"
-                                        style={{ borderBottom: 'none' }}
-                                    >
-                                        <Accordion.Trigger
-                                            className="w-full text-left py-2 font-bold"
-                                            ref={triggerRef}
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                padding: '0',
-                                                boxShadow: 'none',
-
-                                            }}
-                                        >
-                                            <BiPlus
-                                                size={25}
-                                                title="Add language"
-                                                style={{ marginTop: '8px', color: 'black' }}
-                                            />
-                                        </Accordion.Trigger>
-                                        <Accordion.Content
-                                            className="p-4"
-
-                                            style={{ marginTop: '-40px', marginLeft: '25px' }}
-                                        >
-                                            <div  >
-                                                <select
-                                                    value={selectedLanguage.code}
-                                                    onChange={changeSelectedLanguage}
-                                                    className="w-full border px-2 py-1"
-                                                    style={{ color: 'black', padding: '5px', borderRadius: '0' }}
-                                                >
-                                                    <option data-label="Русский" data-code="ru" value="ru" style={{ padding: '10px' }}>
-                                                        Русский{' '}
-                                                        {isLanguageSelected('ru') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="English" data-code="en" value="en">
-                                                        English{' '}
-                                                        {isLanguageSelected('en') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Deutsch" data-code="de" value="de">
-                                                        Deutsch{' '}
-                                                        {isLanguageSelected('de') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Espaniola" data-code="es" value="es">
-                                                        Espaniola{' '}
-                                                        {isLanguageSelected('es') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </Accordion.Content>
-                                    </Accordion.Item>
-
-
-
-                                    {/* <Accordion.Item value={selectedLanguage.code} className="border-b">
-                                   <Accordion.Trigger className="w-full text-left py-2 font-bold" ref={triggerRef}>
-                                   <BiPlus size={20} title='Добавить язык' />
-                                   </Accordion.Trigger >
-                                   <Accordion.Content className="p-4">
-                                   <select
-                                            value={selectedLanguage.code}
-                                             onChange={changeSelectedLanguage}
-                                            className="w-full border px-2 py-1"
-                                        >
-                                               {language?.map((el, key) => (
-                                            <option data-label={el.name} data-code={el.code} value={el.code}>{el.name}
-                                             {isLanguageSelected(el.code) && (
-                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
-                                            </option>
-                                        ))}
-                                        </select>
-                                   </Accordion.Content>
-                               </Accordion.Item> */}
-
-
-                                </Accordion.Root >
                             </div>
 
                             <div>
