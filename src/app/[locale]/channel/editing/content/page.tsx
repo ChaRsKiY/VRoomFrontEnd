@@ -3,7 +3,7 @@ import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
 import Link from "next/link";
-import ContentVideo from "@/components/pages/channel/content/content-videos";
+import ContentVideo from "@/components/pages/channel/content/content-videosV2";
 
 interface IContentProps {
     params: { locale: string; }
@@ -37,8 +37,8 @@ const channelPage = async ({params: {locale}}: IContentProps) => {
 
                         <Link target={'_self'} href={"/channel/editing/content/postsonchannel"}
                               className="text-gray-500 hover:text-gray-800 pb-2">Posts</Link>
-                        <Link target={'_self'} href={"/channel/editing/content/advertising_campaigns"}
-                              className="text-gray-500 hover:text-gray-800 pb-2">Advertising campaigns</Link>
+                        {/*<Link target={'_self'} href={"/channel/editing/content/advertising_campaigns"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Advertising campaigns</Link>*/}
                     </div>
 
                     <ContentVideo isShort={false}/>

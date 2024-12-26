@@ -15,6 +15,8 @@ import api from '@/services/axiosApi';
 
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
+import {IUser} from "@/types/user.interface";
+import {PiPencilSimple, PiPencilSimpleLight} from "react-icons/pi";
 
 
 interface IProps {
@@ -45,8 +47,9 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
     const [display4a, setDisplay4a] = useState('none');
 
 
-    const [isFolowed, setIsFolowed] = useState(false);
+    const [isFollowed, setIsFollowed] = useState(false);
     const {user} = useUser();
+    const [owner, setOwner] = useState<IUser | null>(null);
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
 
     const checkIsFolowed = async () => {
@@ -57,7 +60,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
                 if (response.status === 200) {
                     //setIsFolowed(true);
-                    setIsFolowed(response.data != null ? response.data : false);
+                    setIsFollowed(response.data != null ? response.data : false);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
                 }
@@ -74,7 +77,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
 
                 if (response.status === 200) {
-                    setIsFolowed(true);
+                    setIsFollowed(true);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
                 }
@@ -92,7 +95,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
 
                 if (response.status === 200) {
-                    setIsFolowed(false);
+                    setIsFollowed(false);
                 } else {
                     console.error('Ошибка при isfolowed:', response.statusText);
                 }
@@ -102,7 +105,22 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
             }
         }
     };
+    const findOwner = async (id: number) => {
+        try {
 
+            const response = await api.get('/ChannelSettings/getinfobychannelid/' + id);
+
+            if (response.status === 200) {
+                const data: IUser = await response.data;
+                setOwner(data);
+            } else {
+                console.error('Ошибка при получении пользователя:', response.statusText);
+            }
+
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getChannel = async () => {
         try {
@@ -236,6 +254,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
 
     useEffect(() => {
+        findOwner(channelid);
         getChannel();
         getChannelSections();
         getChannelVideos();
@@ -291,8 +310,14 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
                                             borderRight: '1px solid lightgray',
                                             paddingRight: '20px'
                                         }}>
-                                            <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription}
-                                                            onAdd={addSubscription}/>
+                                            {user && user?.id === owner?.clerk_Id ? (
+                                                <div className={'flex flex-row gap-1 items-center justify-center'}>
+                                                    <PiPencilSimpleLight size={21}/>
+                                                    <Link target={'_blank'} href={"/channel/editing"}
+                                                          className="block pl-0 pr-0.5 py-2 rounded-full">Edit
+                                                        channel</Link></div>) : (
+                                                <FolowComponent isfolowed={isFollowed} onDelete={deleteSubscription}
+                                                                onAdd={addSubscription}/>)}
                                         </div>
                                         <LinkBlock ch={channel}/>
                                     </div>

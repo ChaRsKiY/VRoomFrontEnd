@@ -12,6 +12,8 @@ import Link from 'next/link';
 import api from '@/services/axiosApi';
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
+import {PiPencilSimpleLight} from "react-icons/pi";
+import {IUser} from "@/types/user.interface";
 
 
 interface IProps {
@@ -27,8 +29,25 @@ const ChannelInfoAboutComponent: React.FC<IProps> = ({channelid}) => {
     const [videos, setVideos] = useState<IVideo[]>([]);
     const {user} = useUser();
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
+    const [owner, setOwner] = useState<IUser | null>(null);
 
 
+    const findOwner = async (id: number) => {
+        try {
+
+            const response = await api.get('/ChannelSettings/getinfobychannelid/' + id);
+
+            if (response.status === 200) {
+                const data: IUser = await response.data;
+                setOwner(data);
+            } else {
+                console.error('Ошибка при получении пользователя:', response.statusText);
+            }
+
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
     const getChannelSections = async () => {
         try {
             if (user) {
@@ -148,6 +167,7 @@ const ChannelInfoAboutComponent: React.FC<IProps> = ({channelid}) => {
 
 
     useEffect(() => {
+        findOwner(channelid);
         getChannel();
         getChannelSections();
         getChannelVideos();
@@ -194,8 +214,14 @@ const ChannelInfoAboutComponent: React.FC<IProps> = ({channelid}) => {
                                             borderRight: '1px solid lightgray',
                                             paddingRight: '20px'
                                         }}>
-                                            <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription}
-                                                            onAdd={addSubscription}/>
+                                            {user && user?.id === owner?.clerk_Id ? (
+                                                <div className={'flex flex-row gap-1 items-center justify-center'}>
+                                                    <PiPencilSimpleLight size={21}/>
+                                                    <Link target={'_blank'} href={"/channel/editing"}
+                                                          className="block pl-0 pr-0.5 py-2 rounded-full">Edit
+                                                        channel</Link></div>) : (
+                                                <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription}
+                                                                onAdd={addSubscription}/>)}
                                         </div>
                                         <LinkBlock ch={channel}/>
                                     </div>

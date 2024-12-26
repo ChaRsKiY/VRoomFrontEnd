@@ -101,7 +101,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
     const handleRemoveSection = (id: number) => {
         setChannelSections((prevSections) => {
             return prevSections.map((section) =>
-                section.id === id ? {...section, isVisible: false, order: 0} : section
+                section.id === id && section.title !== 'home' ? {...section, isVisible: false, order: 0} : section
             );
         });
     };
