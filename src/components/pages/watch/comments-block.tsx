@@ -199,7 +199,7 @@ const CommentsBlock: React.FC<MyProps> = ({ videoid }) => {
     }, [comments]);
 
     return (
-        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }} style={{ marginBottom: "100px" }}>
+        <div onClick={() => { if (isSortMenuOpen) { setSortMenuOpen(false); } }} style={{ marginBottom: "400px" }}>
             <div className="flex items-center space-x-8">
                 <div className="font-[500]">{allComments} Comments</div>
                 <div

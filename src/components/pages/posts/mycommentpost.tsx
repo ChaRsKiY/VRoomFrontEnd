@@ -9,6 +9,7 @@ import { IUser } from '@/types/user.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
 import api from '@/services/axiosApi';
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface MyCommentProps {
   postId: number;
@@ -31,6 +32,7 @@ const MyCommentPost: React.FC<MyCommentProps> = ({ postId, amuser }) => {
   const [postid, setPostId] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const textAreaRef2 = useRef<HTMLTextAreaElement | null>(null);
+      const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 
   const handleFocus = () => {
@@ -53,10 +55,12 @@ const MyCommentPost: React.FC<MyCommentProps> = ({ postId, amuser }) => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
-    if (inputValue == '' || event.target.value == '')
-      setDisabled(true);
-    else
-      setDisabled(false);
+    setDisabled(event.target.value.trim() === "");
+  };
+
+  const handleEmojiClick = (emoji: EmojiClickData) => {
+    setInputValue((prev) => prev + emoji.emoji);
+    setDisabled(false); // Активируем кнопку, если добавлен смайлик
   };
 
   const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -214,8 +218,16 @@ const MyCommentPost: React.FC<MyCommentProps> = ({ postId, amuser }) => {
         </div>
         <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex' }}>
-            <div style={{ margin: '5px', marginLeft: '50px' }}>
-              <FaSmile size={25} color="lightgray" />
+            <div style={{ margin: '5px', marginLeft: '50px', position: "relative" }}>
+              <button
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}  >
+                <FaSmile size={25} color="lightgray" />
+              </button>
+              {showEmojiPicker && (
+                <div style={{ position: "absolute", top: "5px", left: "50px", zIndex: 10 }}>
+                  <EmojiPicker onEmojiClick={handleEmojiClick} />
+                </div>
+              )}
             </div>
             <div style={{ marginLeft: '20px' }}>
               <div style={{ fontSize: '11px', paddingTop: '5px', marginBottom: '-5px' }}>By sending a comment, you agree to</div>
