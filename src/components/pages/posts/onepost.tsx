@@ -302,7 +302,7 @@ transparent ${checksPosts?.options[index]?.rate}%)` : 'initial',
   })}
 </ul>)}
 <div className='flex' style={{justifyContent:'center'}}> 
-{ !checksPosts?.isVoted && (
+{ !checksPosts?.isVoted && post?.type === "vote" && (
   <button
     onClick={ handleVoteSubmit}
     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
@@ -313,7 +313,7 @@ transparent ${checksPosts?.options[index]?.rate}%)` : 'initial',
   </button>
 ) }
 
-{checksPosts?.isVoted || user?.id === iAmUser?.clerk_Id ? (
+{(checksPosts?.isVoted || user?.id === iAmUser?.clerk_Id) && post?.type === "vote" ? (
   <div className='flex' style={{justifyContent:'center',flexDirection:'column'}}>
     <div>
     <small >&nbsp;&nbsp;&nbsp;

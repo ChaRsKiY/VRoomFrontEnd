@@ -27,9 +27,10 @@ const YouChannelP = () => {
         if (user) {
             const fetchHistory = async () => {
                 const response = await api.get(`/HistoryOfBrowsing/getlatestvideohistorybyuseridpaginated/1/4/${user.id}`);
-
+                if(response.status=== 200){ 
                 const hist = await response.data;
                 setShortHistory(hist);
+                }
             };
 
             fetchHistory();

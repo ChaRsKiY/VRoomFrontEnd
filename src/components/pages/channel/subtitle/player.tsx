@@ -58,42 +58,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
     const pathname = usePathname();
     const [previousPath, setPreviousPath] = useState("");
 
-    const addVideoToViewHistory = async () => {
-        try {
-            if (!isSignedIn || isHistoryUpdateInProgress) return; // Проверяем авторизацию и статус запроса
-
-            // Проверяем, есть ли видео уже в истории
-            const existingHistory = watchHistory.find(history => history.videoId === id);
-            if (existingHistory) return;
-
-            setIsHistoryUpdateInProgress(true); // Устанавливаем флаг перед началом запроса
-
-            const request: HistoryOfBrowsing = {
-                id: 0, // ID задаётся сервером
-                userId: user.id,
-                videoId: id,
-                date: new Date(),
-                timeCode: Math.floor(currentTime),
-            };
-
-            const response = await api.post(`/HistoryOfBrowsing/add`, request, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (response.status === 200) {
-                setWatchHistory(prev => [...prev, new WatchHistory(id, Math.floor(currentTime))]);
-                console.log(`Видео ${id} успешно добавлено в историю просмотра.`);
-            } else {
-                console.error(`Ошибка при добавлении видео ${id} в историю просмотра.`);
-            }
-        } catch (error) {
-            console.error("Ошибка при добавлении видео в историю:", error);
-        } finally {
-            setIsHistoryUpdateInProgress(false); // Сбрасываем флаг после завершения запроса
-        }
-    };
     useEffect(() => {
         const fetchVideo = async () => {
             try {
@@ -165,7 +129,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
 
             if (realWatchTime / duration > 0.6 && !viewed) {
                 setViewed(true);
-               // increaseViewCount();
+                // increaseViewCount();
             }
             setLastUpdateTime(videoRef.current.currentTime);
         }
@@ -184,34 +148,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
         }
     };
 
-    // const saveWatchHistory = () => {
-    //     if (videoRef.current) {
-    //         const lastViewedPosition = videoRef.current.currentTime;
-
-    //         // Добавляем или обновляем историю просмотра
-    //         setWatchHistory(prevHistory => {
-    //             const existingVideo = prevHistory.find(history => history.videoId === id);
-
-    //             if (existingVideo) {
-    //                 // Обновляем время последнего просмотра
-    //                 return prevHistory.map(history =>
-    //                     history.videoId === id
-    //                         ? { ...history, lastViewedPosition }
-    //                         : history
-    //                 );
-    //             } else {
-    //                 // Добавляем новое видео в историю
-    //                 return [...prevHistory, new WatchHistory(id, lastViewedPosition)];
-    //             }
-    //         });
-
-    //         console.log(`Видео ${id} остановлено на ${lastViewedPosition} секундах`);
-    //     }
-    // };
-
-    // const handleVideoPauseOrEnd = () => {
-    //     saveWatchHistory();
-    // };
 
     const SaveViewDuration = async () => {
         if (realWatchTime > 0) {
@@ -232,97 +168,38 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
         }
     }
 
-    // useEffect(() => {
-    //     if (previousPath) {
-    //         console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
-
-    //         SaveViewDuration();
-    //        // saveWatchHistory();
-    //     }
-
-    //     setPreviousPath(pathname);
-    // }, [pathname]);
-
-    // Обработка закрытия вкладки или перезагрузки страницы
     useEffect(() => {
-        // const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-
-        //     await SaveViewDuration();
-        //    // saveWatchHistory();
-        //     event.preventDefault();
-        // };
 
         if (videoRef.current) {
             const video = videoRef.current;
-
-            // Подписка на события видео
             video.addEventListener('timeupdate', handleTimeUpdate);
-          //  video.addEventListener('pause', handleVideoPauseOrEnd);
-           // video.addEventListener('ended', handleVideoPauseOrEnd);
             video.addEventListener("pause", handlePauseOrSeek);
             video.addEventListener("seeked", handlePauseOrSeek);
         }
 
-       // window.addEventListener('beforeunload', handleBeforeUnload);
-
-        // Очистка событий при размонтировании
         return () => {
             if (videoRef.current) {
                 const video = videoRef.current;
                 video.removeEventListener('timeupdate', handleTimeUpdate);
-               // video.removeEventListener('pause', handleVideoPauseOrEnd);
-              //  video.removeEventListener('ended', handleVideoPauseOrEnd);
                 video.removeEventListener("pause", handlePauseOrSeek);
                 video.removeEventListener("seeked", handlePauseOrSeek);
             }
 
-           // window.removeEventListener('beforeunload', handleBeforeUnload);
         };
     }, [id, user, realWatchTime]);
 
-
-    // const increaseViewCount = () => {
-    //     // alert("Просмотр засчитан!");
-    //     Viewed(id);
-    // };
-
-    // const Viewed = async (id: number) => {
-    //     try {
-    //         const response = await api.put('/Video/view/' + id);
-
-    //         if (response.status === 200) {
-    //             console.log('просмотр добавлен к счетчику');
-    //         } else {
-    //             console.error('Ошибка при view:', response.statusText);
-    //         }
-
-    //     } catch (error) {
-    //         console.error('Ошибка при подключении к серверу:', error);
-    //     }
-    // };
 
     useEffect(() => {
         if (videoRef.current) {
             videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
 
-            // Убираем обработчик при размонтировании компонента
             return () => {
                 videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
             };
         }
-    }, [ id]);
+    }, [id]);
 
-    // useEffect(() => {
 
-    //     return () => {
-    //         if (duration > 0)
-    //             SaveViewDuration();
-    //         saveWatchHistory();
-    //         console.log("Компонент размонтирован");
-    //     };
-    // }, []);
-
-    // Effects
     useEffect(() => {
         const video = videoRef.current;
 
@@ -382,57 +259,13 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
             video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
         }
 
-        // document.addEventListener("keydown", handleKeyDown as EventListener);
-
         return () => {
             if (video) {
                 video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
                 video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
             }
-            // document.removeEventListener("keydown", handleKeyDown as EventListener);
         };
     }, []);
-
-    // Event Handlers
-    // const handleKeyDown: any = (e: KeyboardEvent) => {
-    //     const tagName = document.activeElement?.tagName.toLowerCase();
-    //     if (tagName === "input" || tagName === "button") return;
-
-    //     e.preventDefault();
-
-    //     switch (e.key.toLowerCase()) {
-    //         case " ":
-    //         case "k":
-    //             alert("mo ist huso")
-    //             togglePlayPause();
-    //             break;
-    //         case "f":
-    //             toggleFullScreen();
-    //             break;
-    //         case "t":
-    //             toggleTheaterMode();
-    //             break;
-    //         case "i":
-    //             toggleMiniPlayerMode();
-    //             break;
-    //         case "m":
-    //             toggleMute();
-    //             break;
-    //         case "arrowleft":
-    //         case "j":
-    //             skip(-5);
-    //             break;
-    //         case "arrowright":
-    //         case "l":
-    //             skip(5);
-    //             break;
-    //         case "c":
-    //             toggleCaptions();
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // };
 
     const togglePlayPause = () => {
         const video = videoRef.current;
@@ -555,14 +388,12 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
             video.addEventListener("leavepictureinpicture", handleLeavePictureInPicture);
         }
 
-        // document.addEventListener("keydown", handleKeyDown as EventListener);
 
         return () => {
             if (video) {
                 video.removeEventListener("enterpictureinpicture", handleEnterPictureInPicture);
                 video.removeEventListener("leavepictureinpicture", handleLeavePictureInPicture);
             }
-            // document.removeEventListener("keydown", handleKeyDown as EventListener);
         };
     }, []);
 
@@ -687,7 +518,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id, fileSubtitle }) => 
                         srcLang="ru"
                         label="Русский"
                         default
-                       
+
                     />
                 )}
             </video>

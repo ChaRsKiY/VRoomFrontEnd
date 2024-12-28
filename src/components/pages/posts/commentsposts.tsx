@@ -221,7 +221,7 @@ const CommentsPost: React.FC<CommentsProps> = ({ comments, answers, id }) => {
 
   return (
 
-    <div style={{ width: '100%' }} >
+    <div style={{ width: '100%', marginBottom:'400px' }} >
       {comments.length > 0 ? (
         comments.map((comment, index) => (
           <div style={{ display: 'flex' }}>

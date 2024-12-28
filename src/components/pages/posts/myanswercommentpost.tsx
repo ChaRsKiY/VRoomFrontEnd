@@ -7,6 +7,8 @@ import { IUser } from '@/types/user.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
 import api from '@/services/axiosApi';
+import { FaSmile } from 'react-icons/fa';
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface AnsCommentProps {
   commentId: number;
@@ -29,6 +31,7 @@ const MyAnswerCommentPost: React.FC<AnsCommentProps> = ({ commentId, onCancel })
   const inputRef2 = useRef<HTMLInputElement>(null);
   const [iAmUser, setUser] = useState<IUser | null>(null);
   const { user } = useUser();
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const getUser = async () => {
 
@@ -60,21 +63,15 @@ const MyAnswerCommentPost: React.FC<AnsCommentProps> = ({ commentId, onCancel })
     setLineColor('lightgray');
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    if (inputValue == '' || event.target.value == '')
-      setDisabled(true);
-    else
-      setDisabled(false);
-  };
-
-  // const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-  //   setInputValue(event.target.value);
-  //   if(inputValue==''||event.target.value=='')
-  //     setDisabled(true);
-  //   else
-  //     setDisabled(false);
-  // };
+   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+         setInputValue(event.target.value);
+         setDisabled(event.target.value.trim() === "");
+     };
+ 
+     const handleEmojiClick = (emoji: EmojiClickData) => {
+         setInputValue((prev) => prev + emoji.emoji);
+         setDisabled(false); // Активируем кнопку, если добавлен смайлик
+     };
 
   const handleSubmit = async () => {
 
@@ -169,6 +166,17 @@ const MyAnswerCommentPost: React.FC<AnsCommentProps> = ({ commentId, onCancel })
           </div></div>
 
         <div style={{ display: 'flex', width: '100%', fontSize: '12px', marginLeft: '100px' }}>
+          <div style={{ margin: '5px', marginLeft: '50px', position: "relative" }}>
+            <button
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}  >
+              <FaSmile size={25} color="lightgray" />
+            </button>
+            {showEmojiPicker && (
+              <div style={{ position: "absolute", top: "5px", left: "50px", zIndex: 10 }}>
+                <EmojiPicker onEmojiClick={handleEmojiClick} />
+              </div>
+            )}
+          </div>
           <button onClick={handleSubmit} disabled={disabled} style={!disabled ? { ...buttonSubmitStyles.base } : buttonSubmitStyles.disab}>Answer</button>
           <button onClick={handleCancel} style={isHovered ? { ...buttonCancelStyles.base, ...buttonCancelStyles.hover } : buttonCancelStyles.base}
             onMouseEnter={() => setIsHovered(true)}

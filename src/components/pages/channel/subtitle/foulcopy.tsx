@@ -244,9 +244,7 @@ const FoulCopySubtitlelist = () => {
                     ))) : (
                         <tr>
                             <td colSpan={2} className="text-center py-4" style={{ cursor: 'pointer' }}>
-                                <div onClick={() => openSubtitlesEditor(1, "","","")}>
-                                    {/* TestFoulCopySubtitlesEditor */}
-                                </div>
+                                
                             </td>
                         </tr>
                     )}
