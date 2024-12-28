@@ -14,6 +14,7 @@ import {DotsHorizontalIcon} from "@radix-ui/react-icons";
 import DeleteUserModal from "@/components/pages/admin/delete-user-modal";
 import {useUser} from "@clerk/nextjs";
 import {toggleBanUser} from "@/lib/admin-user";
+import {useTranslation} from "next-i18next";
 
 interface Props {
     user: ITableUser,
@@ -30,6 +31,8 @@ const UserDropdownMenu: React.FC<Props> = ({ user, fetchUsers, currentUserAdminL
     const [isPending, setIsPending] = useState<boolean>(false)
 
     const { user: currentUser } = useUser();
+
+    const { t } = useTranslation()
 
     const onOpenSheetChange = useCallback((open: boolean) => {
         setIsUserMenuOpen(open)
@@ -63,21 +66,21 @@ const UserDropdownMenu: React.FC<Props> = ({ user, fetchUsers, currentUserAdminL
             <DropdownMenu open={isDropDownMenuOpen} onOpenChange={onOpenDropDownMenuChanged}>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
+                        <span className="sr-only">{t("admin-main:open-menu")}</span>
                         <DotsHorizontalIcon className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t("admin-main:actions")}</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
-                        Copy user ID
+                        {t("admin-main:copy-id")}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={openSheet}>
-                        View profile
+                        {t("admin-main:view-profile")}
                     </DropdownMenuItem>
-                    {canBan && <DropdownMenuItem onClick={() => toggleBanUser(user.id, user.banned ? "unban" : "ban", setIsPending, fetchUsers)}>{user.banned ? "Unban" : "Ban"}</DropdownMenuItem>}
-                    {canDelete && <DropdownMenuItem onClick={openDeleteUser}>Delete user</DropdownMenuItem>}
+                    {canBan && <DropdownMenuItem onClick={() => toggleBanUser(user.id, user.banned ? "unban" : "ban", setIsPending, fetchUsers)}>{user.banned ? t("admin-main:unban") : t("admin-main:ban")}</DropdownMenuItem>}
+                    {canDelete && <DropdownMenuItem onClick={openDeleteUser}>{t("admin-main:delete-user")}</DropdownMenuItem>}
                 </DropdownMenuContent>
             </DropdownMenu>
 

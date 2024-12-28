@@ -1,0 +1,17 @@
+{"actions":"Actions","admin":"Admin","backup-code-enabled":"Backup Code Enabled:","ban":"Ban","banned":"Banned","columns":"Columns","content-manager":"Content Manager","copy-id":"Copy user ID","created":"Created at:","created-at":"Created At","delete":"Delete","delete-user":"Delete user","delete-user-description":"Are you sure you want to delete this user? This action cannot be undone.","deleting":"Deleting...","email":"Email","export":"Export","first-name":"First Name","id":"ID","last-active":"Last active:","last-name":"Last Name","last-sign-in":"Last Sign In:","loading":"Loading.","logs":"Logs","manage-users-roles":"Manage users, roles, and permissions","moderator":"Moderator","next":"Next","no-results":"No results.","of":"of","open-menu":"Open menu","previous":"Previous","rows-selected":"row(s) selected.","search-by-data":"Search by data","two-factor-enabled":"Two Factor Enabled:","unban":"Unban","updated-at":"Updated at:","user-management":"User Management","username":"Username","view-profile":"View profile","yes":"Yes","yes-delete":"Yes, delete","you":"You",
+    "no": "No",
+    "emails": "Emails",
+  "primary": "Primary",
+  "phone-numbers": "Phone numbers",
+  "no-phone-numbers": "No phone numbers",
+  "external-accounts": "External accounts",
+  "no-external-accounts": "No external accounts",
+  "edit": "Edit",
+  "edit-profile": "Edit the profile information of",
+  "save-changes": "Save changes",
+  "user-data": "User data",
+  "not-verified": "Not verified",
+  "remove": "Remove",
+  "adding-new-email": "Adding new email",
+  "add-new": "Add new"
+}

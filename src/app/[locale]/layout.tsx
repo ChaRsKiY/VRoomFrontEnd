@@ -23,7 +23,7 @@ export function generateStaticParams() {
   return i18nConfig.locales.map(locale => ({ locale }));
 }
 
-const i18nNamespaces = ['common', 'categories','tagname']
+const i18nNamespaces = ['common', 'categories','tagname','admin-main'];
 
 interface IRootLayoutProps {
   children: ReactNode,

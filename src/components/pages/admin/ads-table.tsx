@@ -41,6 +41,8 @@ import api from "@/services/axiosApi";
 import {IoIosSearch} from "react-icons/io";
 import {useSession, useUser} from "@clerk/nextjs";
 import Image from "next/image";
+import AdAddDialog from "@/components/pages/admin/ad-add-dialog";
+import {adminCanDo} from "@/actions/admin";
 
 export type Ad = {
     id: string
@@ -74,7 +76,14 @@ export default function AdsTable() {
     const [total, setTotal] = React.useState(0)
     const [isPending, setIsPending] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
-    const { user } = useUser()
+    const [adminCanAddDelete, setAdminCanAddDelete] = useState(false)
+
+    useEffect(() => {
+        (async () => {
+            const canAdd = await adminCanDo(3);
+            setAdminCanAddDelete(canAdd);
+        })()
+    }, []);
 
     const perPage = 5;
 
@@ -104,7 +113,7 @@ export default function AdsTable() {
             accessorKey: "url",
             header: "URL",
             cell: ({ row }) => (
-                <div>{row.getValue("url")}</div>
+                <div className="max-w-[400px] overflow-scroll no-scrollbar">{row.getValue("url")}</div>
             ),
         },
         {
@@ -127,6 +136,15 @@ export default function AdsTable() {
             cell: ({ row }) => {
                 const report = row.original
 
+                const handleDeleteAd = async () => {
+                    try {
+                        await api.delete('/Ad/' + report.id);
+                        await fetchAds(1, 10, '');
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -142,8 +160,12 @@ export default function AdsTable() {
                             >
                                 Copy ad ID
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            {adminCanAddDelete && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <Button variant="ghost" className="w-full relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50" onClick={handleDeleteAd}>Delete</Button>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -292,6 +314,7 @@ export default function AdsTable() {
                     </Button>
                 </div>
             </div>
+            {adminCanAddDelete && <AdAddDialog fetchAds={fetchAds} />}
         </div>
     )
 }

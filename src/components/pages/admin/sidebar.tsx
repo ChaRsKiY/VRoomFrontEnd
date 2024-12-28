@@ -1,4 +1,4 @@
-import {Inbox, ChartNoAxesCombined, Settings, Users, RectangleEllipsis} from "lucide-react"
+import {Inbox, ChartNoAxesCombined, Video, Users, RectangleEllipsis} from "lucide-react"
 
 import {
     Sidebar,
@@ -11,13 +11,39 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link";
+import {currentUser} from "@clerk/nextjs/server";
 
-// Menu items.
-const items = [
+const firstLevel = [
     {
         title: "Users",
         url: "/",
         icon: Users,
+    },
+    {
+        title: "Content Reports",
+        url: "/content-reports",
+        icon: Inbox,
+        subContent: null
+    },
+    {
+        title: "Analytics",
+        url: "/analytics",
+        icon: ChartNoAxesCombined,
+        subContent: null
+    },
+]
+
+const secondThirdLevel = [
+    {
+        title: "Users",
+        url: "/",
+        icon: Users,
+    },
+    {
+        title: "Video",
+        url: "/video-management",
+        icon: Video,
+        subContent: null
     },
     {
         title: "Content Reports",
@@ -37,15 +63,17 @@ const items = [
         icon: ChartNoAxesCombined,
         subContent: null
     },
-    {
-        title: "Settings",
-        url: "#",
-        icon: Settings,
-        subContent: null
-    },
 ]
 
-export function AppSidebar() {
+export async function AppSidebar() {
+    const adminLevel = (await currentUser())?.privateMetadata?.adminLevel
+
+    if (!adminLevel) {
+        return null
+    }
+
+    const items = adminLevel === 1 ? firstLevel : secondThirdLevel
+
     return (
         <Sidebar>
             <SidebarHeader>

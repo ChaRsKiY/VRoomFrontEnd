@@ -21,6 +21,7 @@ import {
 import EditUserDataForm from "@/components/pages/admin/edit-userdata-form";
 import {updateUserBaseData} from "@/actions/admin";
 import EditUserEmailsForm from "@/components/pages/admin/edit-user-emails-form";
+import {useTranslation} from "next-i18next";
 
 
 interface Props {
@@ -47,6 +48,8 @@ const AdminUserEditModal = ({ user, fetchUser }: Props) => {
     const [isPending, setIsPending] = useState<boolean>(false)
     const [open, setOpen] = useState<boolean>(false)
     const [stateChanged, setStateChanged] = useState<boolean>(false)
+
+    const { t } = useTranslation();
 
     const saveChanges = async () => {
         setIsPending(true)
@@ -86,24 +89,24 @@ const AdminUserEditModal = ({ user, fetchUser }: Props) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="mr-2 mb-2" variant="outline">Edit</Button>
+                <Button className="mr-2 mb-2" variant="outline">{t("admin-main:edit")}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Edit {user.username}</DialogTitle>
+                    <DialogTitle>{t("admin-main:edit")} {user.username}</DialogTitle>
                     <DialogDescription>
-                        Edit the profile information of {user.username}
+                        {t("admin-main:edit-profile")} {user.username}
                     </DialogDescription>
                 </DialogHeader>
                 <Accordion type="multiple">
                     <AccordionItem value="user-data">
-                        <AccordionTrigger>User Data</AccordionTrigger>
+                        <AccordionTrigger>{t("admin-main:user-data")}</AccordionTrigger>
                         <AccordionContent>
                             <EditUserDataForm setData={setData} data={data} userHasImage={user.hasImage} baseAvatarUrl={user.imageUrl} />
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="emails">
-                        <AccordionTrigger>Emails</AccordionTrigger>
+                        <AccordionTrigger>{t("admin-main:emails")}</AccordionTrigger>
                         <AccordionContent>
                             <EditUserEmailsForm user={user} fetchUser={fetchUser} />
                         </AccordionContent>
@@ -111,7 +114,7 @@ const AdminUserEditModal = ({ user, fetchUser }: Props) => {
                 </Accordion>
 
                 <DialogFooter>
-                    <Button onClick={saveChanges} disabled={!stateChanged || isPending} type="submit">Save changes</Button>
+                    <Button onClick={saveChanges} disabled={!stateChanged || isPending} type="submit">{t("admin-main:save-changes")}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

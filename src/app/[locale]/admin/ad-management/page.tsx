@@ -13,7 +13,6 @@ const AdManagementPage: React.FC = async () => {
 
             <main className="mt-5">
                 <AdsTable />
-                <Button>Add</Button>
             </main>
         </div>
     )

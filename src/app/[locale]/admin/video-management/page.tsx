@@ -8,6 +8,7 @@ const VideoManagementPage = async () => {
     return (
         <div className="px-[3.5%] flex-1">
             <Header user={user} data={{title: 'Video Management', description: 'Manage videos, categories, and tags'}} />
+
         </div>
     );
 }
