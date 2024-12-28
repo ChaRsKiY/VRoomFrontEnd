@@ -7,8 +7,8 @@ interface IMonetizationProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:IMonetizationProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+const channelPage = async ({params: {locale}}: IMonetizationProps) => {
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>

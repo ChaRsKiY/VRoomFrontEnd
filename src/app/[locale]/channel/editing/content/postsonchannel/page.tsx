@@ -12,7 +12,7 @@ interface IContentProps {
 }
 
 const channelPage = async ({params: {locale}}: IContentProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>

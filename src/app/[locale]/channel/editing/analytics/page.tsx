@@ -8,7 +8,7 @@ interface IAnalyticProps {
 }
 
 const channelPage = async ({params: {locale}}: IAnalyticProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>
@@ -22,7 +22,7 @@ const channelPage = async ({params: {locale}}: IAnalyticProps) => {
 
                 <div>
                     <h1 style={{'float': 'left'}} className="text-[1.4rem]"><strong>Channel analytics</strong>
-                </h1><br/><br/><br/>
+                    </h1><br/><br/><br/>
                     <div className="grid pr-[-3%] grid-cols-2 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
 
                     </div>

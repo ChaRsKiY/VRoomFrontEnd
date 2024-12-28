@@ -14,6 +14,8 @@ import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.int
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
 import {PiPencilSimpleLight} from "react-icons/pi";
 import {IUser} from "@/types/user.interface";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
 
 
 interface IProps {
@@ -24,7 +26,7 @@ interface IProps {
 
 
 const ChannelVideosComponent: React.FC<IProps> = ({channelid}) => {
-
+    const {t}: { t: ITranslationFunction } = useTranslation();
     const [channel, setChannel] = useState<IChannel | null>(null);
     const [videos, setVideos] = useState<IVideo[]>([]);
     const [videosAll, setVideosAll] = useState<IVideo[]>([]);
@@ -293,7 +295,7 @@ const ChannelVideosComponent: React.FC<IProps> = ({channelid}) => {
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
                                         <Link
                                             className={el.title === 'Video' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
-                                            href={el.url} key={key}>{el.title}</Link>
+                                            href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>
                                 {/*<Link href={"/gotochannel/" + channelid} style={{

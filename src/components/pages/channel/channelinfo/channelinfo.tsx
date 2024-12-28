@@ -17,14 +17,16 @@ import {linksArray} from "@/components/pages/channel/channelinfo/channel-section
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
 import {IUser} from "@/types/user.interface";
 import {PiPencilSimple, PiPencilSimpleLight} from "react-icons/pi";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
 
 
-interface IProps {
+interface IChannelProps {
     channelid: number;
 }
 
-
-const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
+const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
+    const {t}: { t: ITranslationFunction } = useTranslation();
 
     const [channel, setChannel] = useState<IChannel | null>(null);
     const [mentors, setMentors] = useState<IChannel[]>([]);
@@ -254,6 +256,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
 
     useEffect(() => {
+        // console.log(t('сhsections:home'));
         findOwner(channelid);
         getChannel();
         getChannelSections();
@@ -328,41 +331,9 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
 
                                         <Link
                                             className={el.title === 'home' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
-                                            href={el.url} key={key}>{el.title}</Link>
+                                            href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>
-                                {/*<Link href={"/gotochannel/" + channelid} style={{
-                                    padding: '5px',
-                                    fontWeight: 'bold',
-                                    paddingBottom: '0',
-                                    marginLeft: '20px',
-                                    margin: '2px',
-                                    fontSize: "16px",
-                                    borderBottom: '3px solid black',
-                                    marginBottom: '0',
-                                }}>Main
-                                </Link>
-                                <Link href={"/channelvideos/" + channelid} style={{
-                                    padding: '5px',
-                                    marginLeft: '20px', margin: '2px', fontSize: "16px", marginBottom: '0'
-                                }}>Video</Link>
-                                <Link href={"/channellives/" + channelid} style={{
-                                    padding: '5px',
-                                    marginLeft: '20px', margin: '2px', fontSize: "16px", marginBottom: '0'
-                                }}>Lives</Link>
-                                {isFolowed ? (
-                                    <Link href={"/channelposts/" + channelid} style={{
-                                        padding: '5px',
-                                        marginLeft: '20px', margin: '2px', fontSize: "16px", marginBottom: '0',
-                                    }}>Posts</Link>) : <></>}
-                                <Link href={"/channelplaylist/" + channelid} style={{
-                                    padding: '5px',
-                                    marginLeft: '20px', margin: '2px', fontSize: "16px", marginBottom: '0'
-                                }}>Playlists</Link>
-                                <Link href={"/channelinfoabout/" + channelid} style={{
-                                    padding: '5px',
-                                    marginLeft: '20px', margin: '2px', fontSize: "16px", marginBottom: '0'
-                                }}>About</Link>*/}
                                 <hr/>
                                 <div>
                                     <div>
@@ -475,54 +446,12 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
                                                 ))}
                                             </div>
                                         </>)}
-
                                 </div>
-
-                                {/* <div onClick={showAll} style={{ display: display7, marginTop: '20px' }} > */}
-                                {/* <div>
-                  <button onClick={showAlls} style={{
-                    padding: '5px', borderRadius: '5px',
-                    marginLeft: '20px', margin: '2px', fontSize: "16px",
-                    backgroundColor: color7, color: color8
-                  }}>All
-                  </button>
-                  <button onClick={showLatest} style={{
-                    padding: '5px', borderRadius: '5px',
-                    marginLeft: '20px', margin: '2px', fontSize: "16px",
-                    backgroundColor: color1, color: color2
-                  }}>Latest
-                  </button>
-                  <button onClick={showOldest} style={{
-                    padding: '5px', borderRadius: '5px',
-                    marginLeft: '20px', margin: '2px', fontSize: "16px",
-                    backgroundColor: color3, color: color4
-                  }}>Oldest</button>
-                  <button onClick={showPop} style={{
-                    padding: '5px', borderRadius: '5px',
-                    marginLeft: '20px', margin: '2px', fontSize: "16px",
-                    backgroundColor: color5, color: color6
-                  }}>Popular</button>
-
-                </div> */}
-                                {/* <br />
-                <div className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                  {videosAll.map((el, key) => (
-                    <div key={key} className="px-3 mb-8 space-y-2.5" >
-                      <VideoCard el={el} />
-                    </div>
-                  ))}
-                </div>
-              </div> */}
-
-
                             </div>
-
-
                         </div>
                     </div>
                 </>
             ) : <></>}
-
         </>
     );
 };

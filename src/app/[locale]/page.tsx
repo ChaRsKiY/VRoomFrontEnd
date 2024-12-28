@@ -1,4 +1,3 @@
-
 import React from 'react'
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/home/aside/aside";
@@ -12,21 +11,21 @@ interface Props {
     }
 }
 
-const Home: React.FC<Props> = async ({ params: { locale } }: Props) => {
+const Home: React.FC<Props> = async ({params: {locale}}: Props) => {
 
-    const { t } = await initTranslations(locale, ['common', 'categories','tagname']);
+    const {t} = await initTranslations(locale, ['common', 'categories', 'tagname', 'channel']);
 
 
     return (
         <>
             <div className="flex pt-20 overflow-hidden">
-                {t && <HeaderHome t={t} />}
+                {t && <HeaderHome t={t}/>}
             </div>
             <div className="flex pt-20 overflow-hidden">
-                {t && <AsideHome t={t} />}
+                {t && <AsideHome t={t}/>}
             </div>
             <main className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0">
-                <MainInfo />
+                <MainInfo/>
             </main>
         </>
     );

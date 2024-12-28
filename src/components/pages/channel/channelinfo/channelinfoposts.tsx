@@ -13,6 +13,8 @@ import CreatePost from '../../posts/createpost';
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
 import {redirect} from "next/navigation";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
 
 
 interface IProps {
@@ -27,7 +29,7 @@ const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
     const [isFolowed, setIsFolowed] = useState(false);
     const {user} = useUser();
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
-
+    const {t}: { t: ITranslationFunction } = useTranslation();
 
     const getChannelSections = async () => {
         try {
@@ -191,7 +193,7 @@ const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
                                         <Link
                                             className={el.title === 'posts' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
-                                            href={el.url} key={key}>{el.title}</Link>
+                                            href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>
                                 {/*<Link href={"/gotochannel/" + channelid} style={{

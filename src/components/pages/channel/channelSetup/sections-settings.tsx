@@ -1,7 +1,7 @@
 "use client"
 
 import {useUser} from "@clerk/nextjs";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import api from "@/services/axiosApi";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
@@ -13,6 +13,7 @@ import Link from "next/link";
 import {IUser} from "@/types/user.interface";
 import {DragDropContext, Droppable, Draggable} from '@hello-pangea/dnd';
 import {ChannelSection, ChSection} from "@/types/channelsections.interfaces";
+import VideosSection from "@/components/pages/channel/channelSetup/videos-section";
 
 
 interface ISectionsSettingsProps {
@@ -44,9 +45,10 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
 
             ]);
             setChannelInfo(chInfo.data);
+            setChsetid(chInfo.data.channel_Id);
             setSections(sectionsRes.data);
             setChannelSections(channelSectionsRes.data.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order));
-            setChsetid(channelSections[0].channel_SettingsId);
+
             channelSectionsRef.current = channelSectionsRes.data; // Сохраняем начальное состояние в ref
 
         } catch (error) {
@@ -144,6 +146,9 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
 
         setChannelSections(updatedSections); // Обновляем состояние
     };
+    const visibleSections = useMemo(() => {
+        return channelSections.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order);
+    }, [channelSections]);
 
     return (
         <>
@@ -194,7 +199,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                                         className={'disabled:text-gray-500 font-semibold enabled:text-black'}
                                         key={section.id} disabled={isAdded}
                                         onClick={() => !isAdded && handleAddSection(section.id)}>
-                                        {t(section.title)}
+                                        {t(`сhannel:${section.title}`)}
                                     </DropdownMenuItem>
                                 );
                             })}
@@ -209,49 +214,54 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                             {(provided) => (
                                 <ul ref={provided.innerRef} {...provided.droppableProps} className="space-y-2 w-10/12">
 
-                                    {channelSections.filter((cs) => cs.isVisible)
-                                        .map((section, index) => (
-                                            <Draggable key={section.id} draggableId={section.id.toString()}
-                                                       index={index}>
-                                                {(provided) => (
-                                                    <li ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className={`flex flex-row h-[5.6875rem] w-full items-center gap-5 p-4 border-b ${draggingIndex === index ? "border-blue-500" : "border-gray-300"} bg-white shadow`}
-                                                    >
+                                    {visibleSections.map((section, index) => (
+                                        <Draggable key={section.id} draggableId={section.id.toString()}
+                                                   index={index}>
+                                            {(provided) => (
+                                                <li ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    className={`flex flex-row h-[5.6975rem] w-full items-center gap-5 p-4 border-b ${draggingIndex === index ? "border-blue-500" : "border-gray-300"} bg-white shadow`}
+                                                >
+                                                    <div className="flex-shrink-0 p-2">
                                                         <RxDragHandleDots2 size={30}/>
-                                                        <div>
-                                                            <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{section.title}</h2>
+                                                    </div>
+                                                    {section.title === "Video" && (
+                                                        <div className="flex-1 px-4">
+                                                            <h2>{section.title}</h2>
+                                                            <VideosSection channelId={chsetid}/>
+                                                        </div>
+                                                    )}
+                                                    {section.title !== "Video" && (
+                                                        <div className="flex-1 px-4">
+                                                            <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                VRoom recommends fresh content based on your viewers'
-                                                                interests.
-                                                                This is
-                                                                only visible to your viewers when you have enough
-                                                                content. More
-                                                                Settings
+                                                                VRoom recommends fresh content based on your
+                                                                viewers' interests. This is only visible to your
+                                                                viewers when you have enough content. More Settings
                                                             </p>
-                                                        </div>
-                                                        <div className="space-x-2">
-                                                            <DropdownMenu>
-                                                                <DropdownMenuTrigger asChild>
-                                                                    <Button variant="ghost" size="mm"
-                                                                            className="ml-auto">
-                                                                        <MoreVertical className="h-6 w-6"/>
-                                                                    </Button>
-                                                                </DropdownMenuTrigger>
-                                                                <DropdownMenuContent align="end">
-                                                                    <DropdownMenuItem
-                                                                        onClick={() => handleRemoveSection(section.id)}>
-                                                                        <IoTrashOutline
-                                                                            className="mr-2 h-4 w-4"/> Delete
-                                                                    </DropdownMenuItem>
-                                                                </DropdownMenuContent>
-                                                            </DropdownMenu>
-                                                        </div>
-                                                    </li>
-                                                )}
-                                            </Draggable>
-                                        ))}{provided.placeholder}
+                                                        </div>)}
+                                                    <div className="flex-shrink-0.5 p-2 space-x-2">
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="ghost" size="mm"
+                                                                        className="ml-auto">
+                                                                    <MoreVertical className="h-6 w-6"/>
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent align="end">
+                                                                <DropdownMenuItem
+                                                                    onClick={() => handleRemoveSection(section.id)}>
+                                                                    <IoTrashOutline
+                                                                        className="mr-2 h-4 w-4"/> Delete
+                                                                </DropdownMenuItem>
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
+                                                    </div>
+                                                </li>
+                                            )}
+                                        </Draggable>
+                                    ))}{provided.placeholder}
                                 </ul>)}
 
                         </Droppable>
