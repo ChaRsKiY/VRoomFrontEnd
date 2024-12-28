@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import {CurveType} from "recharts/types/shape/Curve";
 import {ChartType} from "@/components/pages/admin/chart";
+import {useTranslation} from "next-i18next";
 
 interface Props {
     currentChart: ChartType;
@@ -26,76 +27,76 @@ interface Props {
 
 const areaCharts = [
     {
-        label: "Bump",
+        label: "bump",
         value: "bump",
     },
     {
-        label: "Linear",
+        label: "linear",
         value: "linear",
     },
     {
-        label: "Monotone",
+        label: "monotone",
         value: "monotone",
     },
     {
-        label: "Natural",
+        label: "natural",
         value: "natural",
     },
     {
-        label: "Step",
+        label: "step",
         value: "step",
     },
 ] as { label: string; value: CurveType }[];
 
 const barCharts = [
     {
-        label: "Vertical",
+        label: "vertical",
         value: "vertical",
     },
     {
-        label: "Horizontal",
+        label: "horizontal",
         value: "horizontal",
     },
     {
-        label: "Label",
+        label: "label",
         value: "label",
     },
 ]
 
 const lineCharts = [
     {
-        label: "Basis",
+        label: "basis",
         value: "basis",
     },
     {
-        label: "Linear",
+        label: "linear",
         value: "linear",
     },
     {
-        label: "Monotone",
+        label: "monotone",
         value: "monotone",
     },
     {
-        label: "Natural",
+        label: "natural",
         value: "natural",
     },
     {
-        label: "Step",
+        label: "step",
         value: "step",
     },
 ] as { label: string; value: CurveType }[];
 
 const pieCharts = [
     {
-        label: "Pie",
+        label: "pie",
         value: "pie",
     },
     {
-        label: "Donut",
+        label: "donut",
         value: "donut",
     },
     {
-        label: "Label",
+        label: "label",
         value: "label",
     }
 ]
@@ -151,6 +152,8 @@ const chartDataPie = [
 ]
 
 const ChartSelectDropdown = ({ currentChart, setCurrentChart }: Props) => {
+    const { t } = useTranslation();
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -158,13 +161,13 @@ const ChartSelectDropdown = ({ currentChart, setCurrentChart }: Props) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[350px] h-[300px] mr-5 overflow-scroll no-scrollbar p-2.5">
                 <div>
-                    <h2 className="text-center pt-1.5 pb-2 text-neutral-700 font-bold">Area Charts</h2>
+                    <h2 className="text-center pt-1.5 pb-2 text-neutral-700 font-bold">{t("admin-main:area-charts")}</h2>
                     <div className='grid grid-cols-2 gap-2'>
                         {areaCharts.map((chart, key) => (
                             <div
                                 key={key}
                                 onClick={() => setCurrentChart({value: chart.value as string, type: "area"})}
-                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "area") ? "bg-gray-100" : ""}`}
+                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "area") ? "bg-gray-100 dark:bg-neutral-800" : ""}`}
                             >
                                 <ChartContainer config={chartConfig}>
                                     <AreaChart
@@ -192,18 +195,18 @@ const ChartSelectDropdown = ({ currentChart, setCurrentChart }: Props) => {
                                         />
                                     </AreaChart>
                                 </ChartContainer>
-                                <div className="text-center pt-1.5 text-neutral-600">{chart.label}</div>
+                                <div className="text-center pt-1.5 text-neutral-600">{t("admin-main:" + chart.label)}</div>
                             </div>
                         ))}
                     </div>
 
-                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">Bar Charts</h2>
+                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">{t("admin-main:bar-charts")}</h2>
                     <div className='grid grid-cols-2 gap-2'>
                         {barCharts.map((chart, key) => (
                             <div
                                 key={key}
                                 onClick={() => setCurrentChart({value: chart.value, type: "bar"})}
-                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "bar") ? "bg-gray-100" : ""}`}
+                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "bar") ? "bg-gray-100 dark:bg-neutral-800" : ""}`}
                             >
                                 <ChartContainer config={chartConfig}>
                                     <BarChart
@@ -244,18 +247,18 @@ const ChartSelectDropdown = ({ currentChart, setCurrentChart }: Props) => {
                                         </Bar>
                                     </BarChart>
                                 </ChartContainer>
-                                <div className="text-center pt-1.5 text-neutral-600">{chart.label}</div>
+                                <div className="text-center pt-1.5 text-neutral-600">{t("admin-main:" + chart.label)}</div>
                             </div>
                         ))}
                     </div>
 
-                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">Line Charts</h2>
+                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">{t("admin-main:line-charts")}</h2>
                     <div className='grid grid-cols-2 gap-2'>
                         {lineCharts.map((chart, key) => (
                             <div
                                 key={key}
                                 onClick={() => setCurrentChart({value: chart.value as string, type: "line"})}
-                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "line") ? "bg-gray-100" : ""}`}
+                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "line") ? "bg-gray-100 dark:bg-neutral-800" : ""}`}
                             >
                                 <ChartContainer config={chartConfig}>
                                     <LineChart
@@ -283,25 +286,25 @@ const ChartSelectDropdown = ({ currentChart, setCurrentChart }: Props) => {
                                         />
                                     </LineChart>
                                 </ChartContainer>
-                                <div className="text-center pt-1.5 text-neutral-600">{chart.label}</div>
+                                <div className="text-center pt-1.5 text-neutral-600">{t("admin-main:" + chart.label)}</div>
                             </div>
                         ))}
                     </div>
 
-                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">Pie Charts</h2>
+                    <h2 className="text-center pt-4 pb-2 text-neutral-700 font-bold">{t("admin-main:pie-charts")}</h2>
                     <div className='grid grid-cols-2 gap-2'>
                         {pieCharts.map((chart, key) => (
                             <div
                                 key={key}
                                 onClick={() => setCurrentChart({value: chart.value as string, type: "pie"})}
-                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "pie") ? "bg-gray-100" : ""}`}
+                                className={`cursor-pointer w-full text-left border rounded-[0.5rem] p-2 ${(currentChart.value === chart.value && currentChart.type === "pie") ? "bg-gray-100 dark:bg-neutral-800" : ""}`}
                             >
                                 <ChartContainer config={chartConfigPie} className="mx-auto aspect-square">
                                     <PieChart>
                                         <Pie data={chartDataPie} label={chart.value === "label" ? { fontSize: 9 } : false} dataKey="visitors" nameKey="browser" innerRadius={chart.value === "donut" ? 30 : 0} />
                                     </PieChart>
                                 </ChartContainer>
-                                <div className="text-center pt-1.5 text-neutral-600">{chart.label}</div>
+                                <div className="text-center pt-1.5 text-neutral-600">{t("admin-main:" + chart.label)}</div>
                             </div>
                         ))}
                     </div>

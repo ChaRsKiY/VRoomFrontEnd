@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label"
 import {useState} from "react";
 import api from "@/services/axiosApi";
 import {toast} from "@/hooks/use-toast";
+import {useTranslation} from "next-i18next";
 
 export default function AdAddDialog({ fetchAds }: { fetchAds: (page: number, perPage: number, searchQuery: string) =>  Promise<{data: any;total: any;}> }) {
     const [open, setOpen] = useState(false)
@@ -24,6 +25,8 @@ export default function AdAddDialog({ fetchAds }: { fetchAds: (page: number, per
         url: '',
         imageURL: ''
     })
+
+    const { t } = useTranslation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setData({
@@ -37,8 +40,8 @@ export default function AdAddDialog({ fetchAds }: { fetchAds: (page: number, per
 
         if (data.title.length < 2 || data.description.length < 2 || data.url.length < 2 || data.imageURL.length < 2) {
             toast({
-                title: 'Error',
-                description: 'All fields are required.',
+                title: t("admin-main:error"),
+                description: t("admin-main:all-fields-required-error"),
                 className: 'bg-red-200 text-red-800'
             })
             return;
@@ -50,8 +53,8 @@ export default function AdAddDialog({ fetchAds }: { fetchAds: (page: number, per
             setOpen(false);
         } catch (e) {
             toast({
-                title: 'Error',
-                description: 'An error occurred. Please try again later.',
+                title: t("admin-main:error"),
+                description: t("admin-main:something-went-wrong"),
             })
             console.error(e)
         }
@@ -60,46 +63,46 @@ export default function AdAddDialog({ fetchAds }: { fetchAds: (page: number, per
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>Add</Button>
+                <Button>{t("admin-main:add")}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <form onSubmit={handleSubmit}>
                 <DialogHeader>
-                    <DialogTitle>Add new ad</DialogTitle>
+                    <DialogTitle>{t("admin-main:add-new-ad")}</DialogTitle>
                     <DialogDescription>
-                        Fill in the form below to add a new ad.
+                        {t("admin-main:fill-in-all-fields")}
                     </DialogDescription>
                 </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="title" className="text-right">
-                                Title
+                                {t("admin-main:title")}
                             </Label>
                             <Input id="title" value={data.title} className="col-span-3" onChange={handleChange}/>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="description" className="text-right">
-                                Description
+                                {t("admin-main:description")}
                             </Label>
                             <Input id="description" value={data.description} className="col-span-3"
                                    onChange={handleChange}/>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="url" className="text-right">
-                                Url
+                                {t("admin-main:url")}
                             </Label>
                             <Input id="url" value={data.url} className="col-span-3"
                                    onChange={handleChange}/>
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
                             <Label htmlFor="imageURL" className="text-right">
-                                Image URL
+                                {t("admin-main:image-url")}
                             </Label>
                             <Input id="imageURL" value={data.imageURL} className="col-span-3" onChange={handleChange}/>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button type="submit">Add</Button>
+                        <Button type="submit">{t("admin-main:add")}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>

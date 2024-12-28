@@ -3,6 +3,7 @@
 import React, {useEffect, useState} from 'react'
 import ChartAnalytics, {AnalyticData, dateToMonth, dateToWeek} from "@/components/pages/admin/chart";
 import api from "@/services/axiosApi";
+import {useTranslation} from "next-i18next";
 
 export interface RangeDate {
     start: Date | null;
@@ -16,6 +17,8 @@ const RegistrationSummaryChart: React.FC = () => {
         end: null
     });
     const [range, setRange] = useState("year");
+
+    const { t } = useTranslation();
 
     const fetchData = async () => {
         try {
@@ -54,7 +57,7 @@ const RegistrationSummaryChart: React.FC = () => {
     }, [rangeDate]);
 
     return (
-        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle="Registrations" chartDescription="A summary of the registrations" data={data} dataKey="count" range={range} setRange={setRange} />
+        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:registrations")} chartDescription={t("admin-main:summary-registrations")} data={data} dataKey="count" range={range} setRange={setRange} />
     )
 }
 

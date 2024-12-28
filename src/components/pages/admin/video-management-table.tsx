@@ -22,7 +22,6 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -34,37 +33,34 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import axios from "axios";
 import {useEffect, useState} from "react";
-import ReportAnswerForm from "@/components/pages/admin/report-answer-modal";
 import api from "@/services/axiosApi";
 import {IoIosSearch} from "react-icons/io";
-import {useSession, useUser} from "@clerk/nextjs";
-import Image from "next/image";
-import AdAddDialog from "@/components/pages/admin/ad-add-dialog";
-import {adminCanDo} from "@/actions/admin";
+import {useUser} from "@clerk/nextjs";
 import {useTranslation} from "next-i18next";
 
-export type Ad = {
+export type Video = {
     id: string
-    title: string
+    tittle: string
     description: string
-    url: string
-    imageUrl: string
-    createdAt: string
+    duration: string
+    videoUrl: string
+    viewCount: string
+    isShort: string
+    uploadDate: Date
 }
 
-const fetchAds = async (page: number, perPage: number, searchQuery: string = "") => {
+const fetchVideos = async (page: number, perPage: number, searchQuery: string = "") => {
     try {
-        const res = await api.get("/Ad?page=" + page + "&perPage=" + perPage + "&searchQuery=" + searchQuery);
-        return { data: res.data.ads, total: res.data.count }
+        const res = await api.get("/AdminVideos?page=" + page + "&perPage=" + perPage + "&searchQuery=" + searchQuery);
+        return { data: res.data.videos, total: res.data.count }
     } catch (e) {
         console.error(e)
         return { data: [], total: 0 }
     }
 }
 
-export default function AdsTable() {
+export default function VideoManagementTable() {
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
     const [columnVisibility, setColumnVisibility] =
@@ -72,25 +68,18 @@ export default function AdsTable() {
             id: false,
             senderId: false,
         })
-    const [data, setData] = React.useState<Ad[]>([])
+    const [data, setData] = React.useState<Video[]>([])
     const [page, setPage] = React.useState(1)
     const [total, setTotal] = React.useState(0)
     const [isPending, setIsPending] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
-    const [adminCanAddDelete, setAdminCanAddDelete] = useState(false)
+    const { user } = useUser()
 
-    const { t } = useTranslation();
-
-    useEffect(() => {
-        (async () => {
-            const canAdd = await adminCanDo(3);
-            setAdminCanAddDelete(canAdd);
-        })()
-    }, []);
+    const { t } = useTranslation()
 
     const perPage = 5;
 
-    const columns: ColumnDef<Ad>[] = [
+    const columns: ColumnDef<Video>[] = [
         {
             accessorKey: "id",
             header: t("admin-main:id"),
@@ -99,10 +88,10 @@ export default function AdsTable() {
             ),
         },
         {
-            accessorKey: "title",
+            accessorKey: "tittle",
             header: t("admin-main:title"),
             cell: ({ row }) => (
-                <div className="capitalize">{row.getValue("title")}</div>
+                <div className="capitalize">{row.getValue("tittle")}</div>
             ),
         },
         {
@@ -113,38 +102,26 @@ export default function AdsTable() {
             ),
         },
         {
-            accessorKey: "url",
-            header: t("admin-main:url"),
-            cell: ({ row }) => (
-                <div className="max-w-[400px] overflow-scroll no-scrollbar">{row.getValue("url")}</div>
-            ),
+            accessorKey: "duration",
+            header: t("admin-main:duration"),
+            cell: ({ row }) => <div className="capitalize">{row.getValue("duration")}</div>,
         },
         {
-            accessorKey: "imageUrl",
-            header: t("admin-main:image-url"),
-            cell: ({ row }) => (
-                <Image src={row.getValue("imageUrl")} alt={row.getValue("title")} width={55} height={55} />
-            ),
-        },
-        {
-            accessorKey: "createdAt",
-            header: t("admin-main:created-at"),
-            cell: ({ row }) => (
-                <div className="capitalize">{new Date(row.getValue("createdAt")).toLocaleString()}</div>
-            ),
+            accessorKey: "videoUrl",
+            header: t("admin-main:video-url"),
+            cell: ({ row }) => <div className="lowercase">{new Date(row.getValue("videoUrl")).toLocaleString()}</div>,
         },
         {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
-                const report = row.original
+                const video = row.original
 
-                const handleDeleteAd = async () => {
+                const handleDelete = async () => {
                     try {
-                        await api.delete('/Ad/' + report.id);
-                        await fetchAds(1, 10, '');
+                        await api.delete("/AdminVideos/" + video.id)
                     } catch (e) {
-                        console.error(e)
+                        alert(t("admin-main:delete-error"))
                     }
                 }
 
@@ -158,17 +135,8 @@ export default function AdsTable() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>{t("admin-main:actions")}</DropdownMenuLabel>
-                            <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(report.id)}
-                            >
-                                {t("admin-main:copy-ad-id")}
-                            </DropdownMenuItem>
-                            {adminCanAddDelete && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <Button variant="ghost" className="w-full relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50" onClick={handleDeleteAd}>{t("admin-main:delete")}</Button>
-                                </>
-                            )}
+                            <DropdownMenuItem>{t("admin-main:go-to")}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleDelete}>{t("admin-main:delete")}</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -179,7 +147,7 @@ export default function AdsTable() {
     useEffect(() => {
         (async () => {
             setIsPending(true)
-            const { data, total } = await fetchAds(page, perPage, searchQuery);
+            const { data, total } = await fetchVideos(page, perPage, searchQuery);
             setData(data)
             setTotal(total)
             setIsPending(false)
@@ -231,6 +199,7 @@ export default function AdsTable() {
                             .getAllColumns()
                             .filter((column) => column.getCanHide())
                             .map((column) => {
+                                const title = column.columnDef.header
                                 return (
                                     <DropdownMenuCheckboxItem
                                         key={column.id}
@@ -240,7 +209,7 @@ export default function AdsTable() {
                                             column.toggleVisibility(!!value)
                                         }
                                     >
-                                        {column.columnDef?.header?.toString()}
+                                        {title?.toString()}
                                     </DropdownMenuCheckboxItem>
                                 )
                             })}
@@ -317,7 +286,6 @@ export default function AdsTable() {
                     </Button>
                 </div>
             </div>
-            {adminCanAddDelete && <AdAddDialog fetchAds={fetchAds} />}
         </div>
     )
 }

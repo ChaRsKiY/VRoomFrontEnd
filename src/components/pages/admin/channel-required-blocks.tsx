@@ -6,10 +6,13 @@ import {Label} from "@/components/ui/label";
 import VideoViewDuration from "@/components/pages/admin/video-duration-view";
 import {Button} from "@/components/ui/button";
 import {toast} from "@/hooks/use-toast";
+import {useTranslation} from "next-i18next";
 
 const ChannelRequiredBlocks: React.FC = () => {
     const [channelId, setChannelId] = useState<number | null>(null)
     const ref = React.useRef<HTMLInputElement>(null)
+
+    const { t } = useTranslation()
 
     const handleSearch = () => {
         if (ref.current) {
@@ -29,11 +32,11 @@ const ChannelRequiredBlocks: React.FC = () => {
     return (
         <div className="">
             <h1 className="text-2xl mb-3"
-            >Channel Required Blocks</h1>
-            <Label>Enter Channel Id:</Label>
+            >{t("admin-main:channel-required-blocks")}</h1>
+            <Label>{t("admin-main:enter-channel-id")}</Label>
             <div className="flex space-x-1.5 mb-6">
-                <Input ref={ref} type="number" placeholder="Channel Id" className="max-w-64" />
-                <Button onClick={handleSearch}>Search</Button>
+                <Input ref={ref} type="number" placeholder={t("admin-main:channel-id")} className="max-w-64" />
+                <Button onClick={handleSearch}>{t("admin-main:search")}</Button>
             </div>
 
             {channelId != null && <VideoViewDuration channelId={channelId} />}

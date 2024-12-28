@@ -13,6 +13,7 @@ import api from "@/services/axiosApi";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {IoIosSearch} from "react-icons/io";
+import {useTranslation} from "next-i18next";
 
 interface UserLog {
     id: number;
@@ -27,6 +28,8 @@ export default function UsersLogsTable() {
     const [totalCount, setTotalCount] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [page, setPage] = useState(1);
+
+    const { t } = useTranslation()
 
     const perPage = 6;
 
@@ -54,17 +57,17 @@ export default function UsersLogsTable() {
     return (
         <>
             <form className="flex my-5 space-x-2" onSubmit={handleSearch}>
-                <Input placeholder="Search..." className="w-[200px]" />
+                <Input placeholder={t("search")} className="w-[200px]" />
                 <Button variant="outline" type="submit"><IoIosSearch size={23} /></Button>
             </form>
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[100px]">Log ID</TableHead>
-                        <TableHead>User Id</TableHead>
-                        <TableHead>Action</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead className="text-right">Timestamp</TableHead>
+                        <TableHead className="w-[100px]">{t("admin-main:log-id")}</TableHead>
+                        <TableHead>{t("admin-main:user-id")}</TableHead>
+                        <TableHead>{t("admin-main:action")}</TableHead>
+                        <TableHead>{t("admin-main:description")}</TableHead>
+                        <TableHead className="text-right">{t("admin-main:timestamp")}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -81,8 +84,8 @@ export default function UsersLogsTable() {
             </Table>
 
             <div className="flex justify-end space-x-2 mt-4">
-                <Button variant="outline" onClick={() => setPage(page - 1)} disabled={page === 1}>Previous</Button>
-                <Button variant="outline" onClick={() => setPage(page + 1)} disabled={totalCount <= page * perPage}>Next</Button>
+                <Button variant="outline" onClick={() => setPage(page - 1)} disabled={page === 1}>{t("admin-main:previous")}</Button>
+                <Button variant="outline" onClick={() => setPage(page + 1)} disabled={totalCount <= page * perPage}>{t("admin-main:next")}</Button>
             </div>
         </>
 
