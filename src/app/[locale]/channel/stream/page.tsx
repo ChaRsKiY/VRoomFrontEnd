@@ -1,32 +1,27 @@
-'use client'  
+'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Camera, Mic, MicOff, Video, VideoOff, Monitor, Settings, Users, MessageSquare } from 'lucide-react'
-import { useTimer } from 'react-timer-hook'
 import { format } from 'date-fns'
-import Cookies from 'universal-cookie'
-import { gapi } from 'gapi-script'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { HubConnectionBuilder } from "@microsoft/signalr";
 
-const CAPTURE_OPTIONS = {
-  audio: true,
-  video: true,
-}
-const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube'
+const connection = new HubConnectionBuilder()
+    .withUrl("https://your-server.com/webrtc")
+    .build();
 
-const clientId = '22'
-const apiKey = 'AIzaSyDvXp8Wi0-Y6BPC55SDA953CFIid2g6TtY'
+const ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  // Add your TURN server here if needed
+]
 
-export default function Broadcast() {
+export default function WebRTCBroadcast() {
   const [isVideoOn, setIsVideoOn] = useState(true)
   const [isMuted, setIsMuted] = useState(false)
   const [seconds, setSeconds] = useState(0)
@@ -34,148 +29,169 @@ export default function Broadcast() {
   const [userFacing, setUserFacing] = useState(true)
   const [streamTitle, setStreamTitle] = useState('')
   const [streamDescription, setStreamDescription] = useState('')
-  const [privacy, setPrivacy] = useState('public')
-  const [youtubeIngestionUrl, setYoutubeIngestionUrl] = useState('')
-  const [youtubeStreamName, setYoutubeStreamName] = useState('')
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
-  const [streamId, setStreamId] = useState('')
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const ws = useRef<WebSocket | null>(null)
-  const productionWsUrl = 'wss://your-production-url.com'
-  const developmentWsUrl = 'https://localhost:3000'
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [broadcastId, setBroadcastId] = useState('')
-  const [category, setCategory] = useState('')
-  const [isKidFriendly, setIsKidFriendly] = useState(false)
+  const [peerConnections, setPeerConnections] = useState<Record<string, RTCPeerConnection>>({})
   const [viewerCount, setViewerCount] = useState(0)
   const [chatMessages, setChatMessages] = useState<string[]>([])
   const [newChatMessage, setNewChatMessage] = useState('')
-
-  // Ініціалізація Google API та автентифікація
+  
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const ws = useRef<WebSocket | null>(null)
   useEffect(() => {
-    gapi.load('client:auth2', () => {
-      gapi.client.init({
-        apiKey: apiKey,
-        clientId: clientId,
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'],
-        scope: YOUTUBE_SCOPE,
-      }).then(() => {
-        const authInstance = gapi.auth2.getAuthInstance()
-        setIsAuthenticated(authInstance.isSignedIn.get())
-        authInstance.isSignedIn.listen(setIsAuthenticated)
-      })
-    })
-  }, [])
-
-  // Функції для автентифікації
-  const authenticate = () => {
-    gapi.auth2.getAuthInstance().signIn()
-  }
-
-  const signOut = () => {
-    gapi.auth2.getAuthInstance().signOut()
-  }
-
-  // Функція створення трансляції
-  const createBroadcast = async () => {
-    try {
-      const broadcastResponse = await gapi.client.youtube.liveBroadcasts.insert({
-        part: 'snippet,status',
-        resource: {
-          snippet: {
-            title: streamTitle || 'My Live Stream',
-            description: streamDescription || 'Live streaming via API',
-            scheduledStartTime: new Date().toISOString(),
-            categoryId: category,
-          },
-          status: {
-            privacyStatus: privacy,
-            madeForKids: isKidFriendly,
-          },
-        },
-      })
-
-      const newBroadcastId = broadcastResponse.result.id
-      setBroadcastId(newBroadcastId)
-
-      const streamResponse = await gapi.client.youtube.liveStreams.insert({
-        part: 'snippet,cdn',
-        resource: {
-          snippet: {
-            title: `${streamTitle} Stream Key`,
-          },
-          cdn: {
-            format: '1080p',
-            ingestionType: 'rtmp',
-          },
-        },
-      })
-
-      const streamId = streamResponse.result.id
-      setStreamId(streamId)
-      setYoutubeIngestionUrl(streamResponse.result.cdn.ingestionInfo.ingestionAddress)
-      setYoutubeStreamName(streamResponse.result.cdn.ingestionInfo.streamName)
-
-      await gapi.client.youtube.liveBroadcasts.bind({
-        part: 'id,contentDetails',
-        id: newBroadcastId,
-        streamId: streamId,
-      })
-
-      console.log('Broadcast created and bound to stream:', newBroadcastId)
-    } catch (error) {
-      console.error('Error creating broadcast:', error)
+    connection.on("ReceiveOffer", handleOffer);
+    connection.on("ReceiveAnswer", handleAnswer);
+    connection.on("ReceiveIceCandidate", handleNewICECandidate);
+  
+    return () => {
+      connection.off("ReceiveOffer", handleOffer);
+      connection.off("ReceiveAnswer", handleAnswer);
+      connection.off("ReceiveIceCandidate", handleNewICECandidate);
+    };
+  }, []);
+  useEffect(() => {
+    if (isActive) {
+      const interval = setInterval(() => {
+        setSeconds(seconds => seconds + 1)
+      }, 1000)
+      return () => clearInterval(interval)
     }
-  }
+  }, [isActive])
 
-  // Підключення до WebSocket та RTMP сервера
   useEffect(() => {
-    const youtubeUrl = `${youtubeIngestionUrl}/${youtubeStreamName}`
-    const streamUrlParams = `?youtubeUrl=${youtubeUrl}`
-    
-    ws.current = new WebSocket(
-      (process.env.NODE_ENV === 'production' ? productionWsUrl : developmentWsUrl) + streamUrlParams
-    )
+    if (isActive) {
+      setupWebSocket()
+    }
+    return () => {
+      ws.current?.close()
+    }
+  }, [isActive])
 
+  const setupWebSocket = () => {
+    ws.current = new WebSocket('wss://localhost:5024')
+    
     ws.current.onopen = () => console.log('WebSocket Open')
     
     ws.current.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      if (data.type === 'viewerCount') {
-        setViewerCount(data.count)
-      } else if (data.type === 'chatMessage') {
-        setChatMessages(prev => [...prev, data.message])
+      switch(data.type) {
+        case 'viewer-connected':
+          handleNewViewer(data.viewerId)
+          break
+        case 'viewer-disconnected':
+          handleViewerDisconnect(data.viewerId)
+          break
+        case 'offer':
+          handleOffer(data.offer, data.viewerId)
+          break
+        case 'answer':
+          handleAnswer(data.answer, data.viewerId)
+          break
+        case 'ice-candidate':
+          handleNewICECandidate(data.candidate, data.viewerId)
+          break
+        case 'chat-message':
+          setChatMessages(prev => [...prev, data.message])
+          break
+      }
+    }
+  }
+
+  const handleNewViewer = (viewerId: string) => {
+    const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS })
+    
+    peerConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        ws.current?.send(JSON.stringify({
+          type: 'ice-candidate',
+          candidate: event.candidate,
+          viewerId: viewerId
+        }))
       }
     }
 
-    return () => ws.current?.close()
-  }, [youtubeStreamName, youtubeIngestionUrl])
-
-  // Старт потоку
-  const startStream = async () => {
-    if (!youtubeStreamName) {
-      alert('Please add at least one streaming destination')
-      return
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, mediaStream)
+      })
     }
+
+    setPeerConnections(prev => ({ ...prev, [viewerId]: peerConnection }))
+    setViewerCount(count => count + 1)
+
+    peerConnection.createOffer()
+      .then(offer => peerConnection.setLocalDescription(offer))
+      .then(() => {
+        ws.current?.send(JSON.stringify({
+          type: 'offer',
+          offer: peerConnection.localDescription,
+          viewerId: viewerId
+        }))
+      })
+  }
+
+  const handleViewerDisconnect = (viewerId: string) => {
+    const peerConnection = peerConnections[viewerId]
+    if (peerConnection) {
+      peerConnection.close()
+      setPeerConnections(prev => {
+        const newConnections = { ...prev }
+        delete newConnections[viewerId]
+        return newConnections
+      })
+      setViewerCount(count => count - 1)
+    }
+  }
+
+  const handleOffer = (offer: RTCSessionDescriptionInit, viewerId: string) => {
+    const peerConnection = peerConnections[viewerId]
+    if (peerConnection) {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+        .then(() => peerConnection.createAnswer())
+        .then(answer => peerConnection.setLocalDescription(answer))
+        .then(() => {
+          ws.current?.send(JSON.stringify({
+            type: 'answer',
+            answer: peerConnection.localDescription,
+            viewerId: viewerId
+          }))
+        })
+    }
+  }
+
+  const handleAnswer = (answer: RTCSessionDescriptionInit, viewerId: string) => {
+    const peerConnection = peerConnections[viewerId]
+    if (peerConnection) {
+      peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+    }
+  }
+
+  const handleNewICECandidate = (candidate: RTCIceCandidateInit, viewerId: string) => {
+    const peerConnection = peerConnections[viewerId]
+    if (peerConnection) {
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+    }
+  }
+
+  const startStream = async () => {
     setIsActive(true)
     try {
-      if (!gapi.auth2.getAuthInstance().isSignedIn.get()) {
-        await authenticate()
-      }
-      await createBroadcast()
+      await enableStream()
     } catch (error) {
       console.error('Error starting stream:', error)
       setIsActive(false)
     }
   }
 
-  // Зупинка потоку
   const stopStream = () => {
     setIsActive(false)
+    mediaStream?.getTracks().forEach(track => track.stop())
+    setMediaStream(null)
+    Object.values(peerConnections).forEach(pc => pc.close())
+    setPeerConnections({})
+    setViewerCount(0)
     ws.current?.close()
   }
 
-  // Увімкнення медіа потоку
   const enableStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -221,15 +237,28 @@ export default function Broadcast() {
     try {
       let stream
       if (!userFacing) {
-        stream = await navigator.mediaDevices.getDisplayMedia(CAPTURE_OPTIONS)
+        stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
       } else {
-        stream = await navigator.mediaDevices.getUserMedia(CAPTURE_OPTIONS)
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
       }
       setMediaStream(stream)
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
       setUserFacing(!userFacing)
+
+      // Update all peer connections with the new stream
+      Object.values(peerConnections).forEach(pc => {
+        const senders = pc.getSenders()
+        senders.forEach(sender => {
+          if (sender.track?.kind === 'video') {
+            sender.replaceTrack(stream.getVideoTracks()[0])
+          }
+          if (sender.track?.kind === 'audio') {
+            sender.replaceTrack(stream.getAudioTracks()[0])
+          }
+        })
+      })
     } catch (err) {
       console.log(err)
     }
@@ -247,7 +276,7 @@ export default function Broadcast() {
 
   const sendChatMessage = () => {
     if (newChatMessage.trim() && ws.current) {
-      ws.current.send(JSON.stringify({ type: 'chatMessage', message: newChatMessage }))
+      ws.current.send(JSON.stringify({ type: 'chat-message', message: newChatMessage }))
       setNewChatMessage('')
     }
   }
@@ -256,7 +285,7 @@ export default function Broadcast() {
     <div className="container mx-auto p-4">
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Start a New Stream</CardTitle>
+          <CardTitle className="text-2xl font-bold">Start a New WebRTC Stream</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="setup">
@@ -286,7 +315,6 @@ export default function Broadcast() {
                   rows={4} 
                 />
               </div>
-
             </TabsContent>
             <TabsContent value="preview">
               <div className="aspect-video bg-muted">
