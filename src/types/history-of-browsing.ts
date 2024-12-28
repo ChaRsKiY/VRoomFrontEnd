@@ -4,4 +4,5 @@ export interface HistoryOfBrowsing {
     videoId: number,
     date: Date,
     timeCode: number;
+    channelSettingsId: number;
 }

@@ -1,9 +1,6 @@
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
-import Image from "next/image";
-import Link from "next/link";
-import ProfilePhotoBlock from "@/components/pages/channel/channelSetup/profilePhoto";
 import ChannelEditBlock from "@/components/pages/channel/channelSetup/channelEditForm";
 import HeaderHome from "@/components/pages/home/header/header";
 
@@ -11,7 +8,7 @@ interface IProfileTabProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:IProfileTabProps) => {
+const channelPage = async ({params: {locale}}: IProfileTabProps) => {
     const {t} = await initTranslations(locale, ['common', 'categories'])
     return (
 

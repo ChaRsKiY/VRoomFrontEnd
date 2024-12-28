@@ -21,9 +21,10 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
     useEffect(() => {
         const fetchHistory = async () => {
             const response = await api.get(`/HistoryOfBrowsing/getallhistorybyclerkidgroupedbydate/` + userId);
+            if(response.status===200){ 
             const hist = await response.data;
-            console.log(hist);
             setHistory(hist);
+            }
         };
 
         fetchHistory();
@@ -183,14 +184,14 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
                         <IoIosPause size={24}/>
                         <p>Не сохранять историю просмотра</p>
                     </div>
-                    <div className="flex flex-row items-center space-x-2">
+                    {/* <div className="flex flex-row items-center space-x-2">
                         <IoTrashOutline size={24}/>
                         <p>Очистить историю поиска</p>
                     </div>
                     <div className="flex flex-row items-center space-x-2">
                         <IoIosPause size={24}/>
                         <p>Не сохранять историю поиска</p>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

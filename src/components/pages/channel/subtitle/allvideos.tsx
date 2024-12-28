@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -38,6 +39,7 @@ const AllVideolist = () => {
                 if (response.status === 200) {
                     const data: IChannel = await response.data;
                     setChannel(data);
+
                 } else {
                     console.error('Ошибка при получении пользователя:', response.statusText);
                 }
@@ -78,7 +80,7 @@ const AllVideolist = () => {
 
     useEffect(() => {
         getVideos();
-    }, [user]);
+    }, [channel]);
 
 
     //     return (
@@ -133,7 +135,7 @@ const AllVideolist = () => {
 
                     {moreVideos.length > 0 ? (moreVideos.map((el, key) => (
                         <tr key={el.id} data-index={key} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
-                            onClick={() => openSubtitlesEditor(el.id)} style={{ cursor: 'pointer' }}
+                            onClick={() => openSubtitlesEditor(el.id)} style={{ cursor: 'pointer' }} title='Add subtitles'
                             >
 
                             <td className="py-3 px-3  flex ">
@@ -148,22 +150,17 @@ const AllVideolist = () => {
                                     </div>
 
                                 </div>
-                                {/* <div className="flex">
-                                    <BiPencil className="w-[1.8rem] h-[1.8rem] cursor-pointer" key={el.id}
-                                        title='редактировать субтитры' onClick={() => openSubtitlesEditor(el.id)} />
-                                </div> */}
+
                             </td>
 
-                            <td className="py-3 px-3 ">{el.subtitles ? el.subtitles.length : 0}</td>
+                            <td className="py-3 px-3 " style={{paddingLeft:'40px'}}>{el.subtitles ? el.subtitles.length : 0}</td>
 
                             <td className="py-3 px-3 ">{formatDate(new Date(el.uploadDate))}</td>
                         </tr>
                     ))) : (
                         <tr onClick={() => openSubtitlesEditor(1)} style={{cursor:'pointer'}}>
                             <td colSpan={3} className="text-center py-4">
-                                <div >
-                                    TestAllSubtitlesEditor
-                                </div>
+                               
                             </td>
                         </tr>
                     )}

@@ -25,9 +25,8 @@
     padding-right: 25px;
     background: #0ea2de;
     margin: 10px;
-    color: black;
-    font-weight: bold;
     border-radius: 6px;
+    color: white;
 }
 
 .modal-button {
@@ -41,8 +40,7 @@
 }
 
 .publish-button:hover {
-
-    color: white;
+    font-weight: bold;
 }
 
 .subtitle-form:hover {

@@ -2,23 +2,28 @@
 
 import { useState, useRef, useEffect } from 'react';
 import api from '@/services/axiosApi';
-import VideoPlayer from '../../watch/player';
+import VideoPlayer from './player';
 import { BiArrowFromTop, BiCircle, BiPen, BiPencil, BiPlus, BiPlusCircle, BiSolidKeyboard, BiTrash, BiX } from 'react-icons/bi';
 import '@/styles/modalsubtitles.css';
 import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
 import { ISubtitle } from '@/types/subtitle.interface';
-
+import Hls from 'hls.js';
+import MDialog from "@/components/pages/channel/subtitle/menuwindow";
+import { toast } from "@/hooks/use-toast";
 
 interface IProps {
     videoId: number;
     onClose: () => void;
     subtitleUrl: string,
+    langCode: string,
+    langName: string,
 }
 
-const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl }) => {
+const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl, langCode, langName }) => {
 
     const [duration, setDuration] = useState(0); // Общая длина видео
+    const [subtitleId, setSubtitleId] = useState(0);
     const [currentTime, setCurrentTime] = useState(0); // Текущее время на шкале
     const [videoUrl, setVideoUrl] = useState<string | null>(null); // URL видео
     const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
@@ -33,56 +38,26 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     const startPercentage = (start / duration) * 100;
     const endPercentage = (end / duration) * 100;
     const percentage = (currentTime / duration) * 100;
-    const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
-    const [languages, setLanguages] = useState([{ name: "Русский", code: "ru" }, { name: "English", code: "en" }]);
-    const [languageIndex, setLanguageIndex] = useState<number>(0);
-    const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
+    // const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
     const [isValid1, setIsValid1] = useState<boolean>(true);
     const [isValid2, setIsValid2] = useState<boolean>(true);
-    const [language, setLanguage] = useState<[{ name: string, code: string }]>();
     const triggerRef = useRef<HTMLButtonElement | null>(null);
+    const [videoSrc, setVideoSrc] = useState<string | null>(null);
+    const [videoError, setVideoError] = useState<string | null>(null);
+    const [draftsDialog, setDraftsDiaolg] = useState<boolean>(false);
+    const [publishDialog, setPublishDiaolg] = useState<boolean>(false);
+    const [validMessage, setValidMessage] = useState<string>("");
 
-    // const SaveBeforeExit = () => {
-    //     savePublishSubtitles(false);
-    //     onClose();
-    // }
-    const SaveBeforeExit = () => {
-        validateSubtitles();
-
-        const userResponse = window.confirm("Save to drafts?");
-
-        if (userResponse) {
-            SaveDrafts();
-            console.log("Черновик сохранён.");
-        } else {
-            const userResponse2 = window.confirm("Exit?");
-
-            if (userResponse2) {
-                onClose();
-            }
-        }
-
-    }
 
     const SaveDrafts = () => {
         savePublishSubtitles(false);
-        onClose();
+      
     }
 
     const PublishSubtitle = () => {
 
-        validateSubtitles();
-
-        const userResponse = window.confirm("Publish?");
-
-        if (userResponse) {
-            savePublishSubtitles(true);
-            onClose();
-            console.log("Опубликовано.");
-        } else {
-            console.log("Отмена.");
-        }
+        savePublishSubtitles(true);
 
     }
 
@@ -120,7 +95,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
             console.log("Parsed subtitles:", subtitles);
             setForms(subtitles);
-            // setIsChoosen(true);
         };
 
         reader.readAsText(file);
@@ -138,18 +112,25 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     };
 
 
+
     const fetchSubtitleFile = async (url: string) => {
         try {
-            const response = await api.get('/getsubtitlefile/' + url);
+            console.log("langname:", langName + langCode);
+            const response = await api.get('/Subtitle/getsubtitlefile/' + url
+                , {
+                    responseType: 'blob',
+                });
+
 
             if (response.status != 200) {
                 throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
             }
-            const blob = await response.data.blob();
-
-            const file = new File([blob], "subtitle.vtt", { type: blob.type });
+            const blob = await response.data;
+            console.log('blob:' + blob);
+            const file = new File([blob], videoId + langCode + "subtitle.vtt", { type: blob.type });
 
             setFileSubtitle(file);
+            parseVTTFile(file);
         } catch (error) {
             console.error("Ошибка при загрузке файла:", error);
         }
@@ -166,16 +147,10 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         ].join('');
 
         const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
         setFileSubtitle(file);
     }
 
-    const handleLanguageChange = () => {
-        setLanguageIndex(languageIndex + 1)
-        if (languageIndex >= languages.length - 1)
-            setLanguageIndex(0)
-        setSelectedLanguage(languages[languageIndex]);
-    };
 
     const formatTime = (time: number) => {
         const hours = Math.floor(time / 3600);
@@ -228,26 +203,32 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
     const validateSubtitles = () => {
 
+        let errorMessages = "";
+        let isV = true;
+
         forms.forEach((subtitle, index) => {
+
             if (subtitle.start >= subtitle.end || !subtitle.text.trim()) {
-                alert(`Ошибка в субтитре #${index + 1}: 
-              - Начало должно быть меньше конца.
-              - Текст не должен быть пустым.`);
-                setIsValid1(false);
+                errorMessages += `Error in subtitle #${index + 1}:\n`;
+                if (subtitle.start >= subtitle.end) {
+                    errorMessages += "- The beginning must be less than the end.\n";
+                }
+                if (!subtitle.text.trim()) {
+                    errorMessages += "- The text must not be empty.\n";
+                }
+                errorMessages += "\n";
+                isV = false;
             }
         });
 
-        if (isValid1) {
-            setIsValid2(true);
-        }
-        else {
-            setIsValid2(false);
-            setIsValid1(true);
-        }
+        setIsValid2(isV);
+        setValidMessage(errorMessages);
+        if (isV)
+            PublishSubtitle();;
+
     };
 
     const downloadSubtitlesAsVTT = () => {
-        validateSubtitles();
         if (isValid2) {
             const vttContent = [
                 'WEBVTT\n\n',
@@ -261,7 +242,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'subtitles.vtt';
+            link.download = videoId + langCode + 'subtitle.vtt';
             link.click();
 
             URL.revokeObjectURL(link.href);
@@ -274,10 +255,11 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
         const sub: ISubtitle = {
             id: 0,
-            languageCode: selectedLanguage.code,
-            languageName: selectedLanguage.name,
+            languageCode: langCode,
+            languageName: langName,
             videoId: videoId,
             isPublished: topublish,
+            puthToFile: subtitleUrl
         };
         console.log("sub", JSON.stringify(sub));
         Object.entries(sub).forEach(([key, value]) => {
@@ -291,9 +273,28 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
             const response = await api.post('/Subtitle/add', formData);
 
             if (response.status === 200) {
-                alert('Файл успешно загружен на сервер!');
+                let str = "";
+                if (topublish){ 
+                    str = "published";
+                }
+                else
+                    str = "saved to drafts";
+                toast({
+                    title: "Subtitles added",
+                    description: "Your subtitles have been "+ str,
+                    className: "text-green-600 bg-green-100",
+                    duration: 5000,
+                });
+                onClose();
+                window.location.reload();
             } else {
-                alert('Ошибка загрузки файла.');
+                toast({
+                    title: "Error subtitles adding",
+                    description: "Error while adding subtitles",
+                    className: "text-green-600 bg-red-100",
+                    duration: 5000,
+                });
+
             }
         } catch (error) {
             console.error('Ошибка при загрузке файла:', error);
@@ -301,21 +302,20 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     };
 
     const savePublishSubtitles = async (publish: boolean) => {
-        validateSubtitles();
-        if (isValid2) {
-            const vttContent = [
-                'WEBVTT\n\n',
-                ...forms.map(
-                    (subtitle, index) =>
-                        `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
-                ),
-            ].join('');
 
-            const blob = new Blob([vttContent], { type: 'text/vtt' });
-            const file = new File([blob], 'subtitles.vtt', { type: 'text/vtt' });
+        const vttContent = [
+            'WEBVTT\n\n',
+            ...forms.map(
+                (subtitle, index) =>
+                    `${index + 1}\n${formatTime(subtitle.start)} --> ${formatTime(subtitle.end)}\n${subtitle.text}\n\n`
+            ),
+        ].join('');
 
-            await uploadVTTToBackend(file, publish);
-        }
+        const blob = new Blob([vttContent], { type: 'text/vtt' });
+        const file = new File([blob], videoId + langCode + 'subtitle.vtt', { type: 'text/vtt' });
+
+        await uploadVTTToBackend(file, publish);
+
     };
 
     const addForm = () => {
@@ -337,38 +337,24 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         handleFormChange(index, "text", "");
     };
 
-    const getVideo = async () => {
-        try {
-            const res = await api.get(`/Video/${videoId}`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setVideoUrl(data.videoUrl);
-            } else {
-                console.error('Ошибка загрузки видео');
-                setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4")
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-            setVideoUrl("https://www.w3schools.com/html/mov_bbb.mp4");
-        }
-    }
-    const getLanguages = async () => {
-        try {
-            const res = await api.get(`/Language`);
-            if (res.status === 200) {
-                const data = await res.data;
-                setLanguage(data);
-            } else {
-                console.error('Ошибка загрузки lang');
-            }
-        } catch (error) {
-            console.error('Ошибка запроса:', error);
-        }
-    }
-
     useEffect(() => {
-        getLanguages();
-        getVideo();
+        const fetchVideo = async () => {
+            try {
+                const response = await api.get(`/Video/${videoId}`); // Запрос к серверу
+                if (response.status !== 200) {
+                    throw new Error("Failed to fetch video data");
+                }
+                const videoData = await response.data;
+
+                setVideoSrc(videoData.videoUrl);
+
+            } catch (error) {
+                console.error("Ошибка при загрузке видео:", error);
+                setVideoError("Error fetching video");
+            }
+        };
+
+        fetchVideo();
     }, [videoId]);
 
     useEffect(() => {
@@ -475,54 +461,35 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
         setSelectedIndex(index);
         setTimePoints([]);
     }
-    const changeSelectedLanguage = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedOption = e.target.selectedOptions[0];
-        const name = selectedOption.getAttribute("data-label");
-        const code = selectedOption.getAttribute("data-code");
-        if (name && code) {
-            console.log("name:" + name);
-            console.log("code:" + code)
-            if (!isLanguageSelected(code)) {
-                addLanguage({ name, code });
-                triggerRef.current?.click();
-            } else {
-                removeLanguage(code);
-                triggerRef.current?.click();
-            }
 
-        } else {
-            console.error("Не удалось извлечь данные языка");
-        }
-    };
-
-    const addLanguage = (newLanguage: { name: string; code: string }) => {
-        setLanguages((prevLanguages) => [...prevLanguages, newLanguage]);
-
-    };
-
-    const removeLanguage = (code: string) => {
-        if (languages.length > 1)
-            setLanguages((prevLanguages) =>
-                prevLanguages.filter((lang) => lang.code !== code)
-            );
-    }
-
-    const isLanguageSelected = (code: string) => {
-        return languages.some((language) => language.code === code);
-    };
-
-    useEffect(() => {
-        setSelectedLanguage(languages[languages.length - 1]);
-    }, [languages]);
 
     useEffect(() => {
         changeFile();
     }, [forms]);
 
     useEffect(() => {
-        if (urlSubtitles)
-            fetchSubtitleFile(urlSubtitles);
-    }, [urlSubtitles]);
+        if (subtitleUrl) {
+            const encodedUrl = encodeURIComponent(subtitleUrl);
+            fetchSubtitleFile(encodedUrl);
+        }
+    }, [subtitleUrl]);
+
+    useEffect(() => {
+        if (videoSrc && videoRef.current) {
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoSrc);
+                hls.attachMedia(videoRef.current);
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    console.log("HLS: Манифест загружен, воспроизведение готово");
+                });
+            } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+                videoRef.current.src = videoSrc;
+            } else {
+                console.error("HLS не поддерживается в этом браузере.");
+            }
+        }
+    }, [videoSrc]);
 
     return (
         <div className="subtitle-editor" onClick={closeDelete} >
@@ -533,131 +500,49 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                     <div style={{ padding: "10px", borderBottom: "0.5px solid #bdbdbd" }}>
                         <div style={{ display: 'flex', justifyContent: "space-between" }}>
                             <div className='flex'>
-                                <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                <div style={{ padding: "5px", borderRadius: "8px" }}>
+
 
                                     <BiSolidKeyboard size={25} style={{
                                         display: 'inline', marginRight: '5px',
                                     }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
-
-                                <Accordion.Root
-                                    type="single"
-                                    collapsible
-                                    style={{
-                                        marginLeft: '10px',
-                                        maxHeight: '28px',
-                                        overflow: 'visible',
-                                        zIndex: '10',
-                                    }}
-                                    title="Add language"
-                                >
-
-                                    <Accordion.Item
-                                        value="ru"
-                                        className="border-b"
-                                        style={{ borderBottom: 'none' }}
-                                    >
-                                        <Accordion.Trigger
-                                            className="w-full text-left py-2 font-bold"
-                                            ref={triggerRef}
-                                            style={{
-                                                background: 'transparent',
-                                                border: 'none',
-                                                padding: '0',
-                                                boxShadow: 'none',
-
-                                            }}
-                                        >
-                                            <BiPlus
-                                                size={25}
-                                                title="Add language"
-                                                style={{ marginTop: '8px', color: 'black' }}
-                                            />
-                                        </Accordion.Trigger>
-                                        <Accordion.Content
-                                            className="p-4"
-
-                                            style={{ marginTop: '-40px', marginLeft: '25px' }}
-                                        >
-                                            <div  >
-                                                <select
-                                                    value={selectedLanguage.code}
-                                                    onChange={changeSelectedLanguage}
-                                                    className="w-full border px-2 py-1"
-                                                    style={{ color: 'black', padding: '5px', borderRadius: '0' }}
-                                                >
-                                                    <option data-label="Русский" data-code="ru" value="ru" style={{ padding: '10px' }}>
-                                                        Русский{' '}
-                                                        {isLanguageSelected('ru') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="English" data-code="en" value="en">
-                                                        English{' '}
-                                                        {isLanguageSelected('en') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Deutsch" data-code="de" value="de">
-                                                        Deutsch{' '}
-                                                        {isLanguageSelected('de') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                    <option data-label="Espaniola" data-code="es" value="es">
-                                                        Espaniola{' '}
-                                                        {isLanguageSelected('es') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
-                                                        )}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </Accordion.Content>
-                                    </Accordion.Item>
+                                    <label style={{ fontWeight: 'bold' }}>{langName} **</label></div>
 
 
-
-                                    {/* <Accordion.Item value={selectedLanguage.code} className="border-b">
-                                   <Accordion.Trigger className="w-full text-left py-2 font-bold" ref={triggerRef}>
-                                   <BiPlus size={20} title='Добавить язык' />
-                                   </Accordion.Trigger >
-                                   <Accordion.Content className="p-4">
-                                   <select
-                                            value={selectedLanguage.code}
-                                             onChange={changeSelectedLanguage}
-                                            className="w-full border px-2 py-1"
-                                        >
-                                               {language?.map((el, key) => (
-                                            <option data-label={el.name} data-code={el.code} value={el.code}>{el.name}
-                                             {isLanguageSelected(el.code) && (
-                                                        <span style={{ color: "green", marginLeft: "10px" }}>●</span>)}
-                                            </option>
-                                        ))}
-                                        </select>
-                                   </Accordion.Content>
-                               </Accordion.Item> */}
-
-
-                                </Accordion.Root >
                             </div>
 
                             <div>
 
                                 <button className='modal-button'
                                     onClick={SaveDrafts}>Save to draft</button>
+
                                 <button className='publish-button'
-                                    onClick={() => { PublishSubtitle }}>Publish</button>
-                                <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
-                                >
-                                    <BiArrowFromTop title='Download' />
+                                    onClick={validateSubtitles}>Publish</button>
+
+                                <button className='modal-button ' onClick={downloadSubtitlesAsVTT} title='Download' >
+                                    <BiArrowFromTop />
                                 </button>
 
-                                <button className='modal-button ' onClick={SaveBeforeExit}
-                                >
-                                    <BiPlus style={{ transform: 'rotate(45deg)' }} title='Exit' />
+                                <button className='modal-button ' onClick={() => { setDraftsDiaolg(true) }}
+                                    title='Exit' >
+                                    <BiPlus style={{ transform: 'rotate(45deg)' }} />
                                 </button>
+                                <MDialog isOpen={draftsDialog} onClose={onClose} onAcsept={SaveDrafts} toDo="Save to draft" />
+                                {!isValid2 && (
+                                    <div style={{
+                                        border: '1px solid darkgray', padding: '10px', position: 'fixed', marginTop: "-40px",
+                                        backgroundColor: "lightgray", color: 'red', borderRadius: "8px", marginRight: '100px'
+                                    }}>
+                                        <div>
+                                            <div style={{ paddingLeft: '10px', fontWeight: 'bold' }}>Warning! </div>
+                                            <div>{validMessage}</div><br />
+                                            <div className='flex' style={{ justifyContent: 'space-around' }}>
+                                                <button className='modal-button ' onClick={() => { setIsValid2(true) }}>Cancel</button>
+                                                <button className='modal-button ' onClick={PublishSubtitle}>Publish subtitles</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -665,14 +550,14 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
 
                         <div style={{ padding: '20px', paddingLeft: '0' }}>
 
-                            {videoUrl && (
-                                <div style={{ padding: "5px", borderRadius: '3px', backgroundColor: 'lightgrey', marginTop: '20px' }}>
+                            <div style={{ padding: '5px', paddingLeft: '0', minWidth: '500px', justifyContent: 'center', display: 'flex' }}>
 
-                                    <video ref={videoRef} controls style={{ width: '860px' }}>
-                                        <source src={videoUrl} type="video/mp4" />
+
+                                <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
+                                    <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                         {fileSubtitle && (
                                             <track
-                                                src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
+                                                src={URL.createObjectURL(fileSubtitle)}
                                                 kind="subtitles"
                                                 srcLang="ru"
                                                 label="Русский"
@@ -682,9 +567,11 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                         Ваш браузер не поддерживает видео.
                                     </video>
                                 </div>
-                            )}
+
+                            </div>
+
                         </div>
-                        {/* Форма добавления субтитров */}
+
                         <div >
 
                             <div style={{
@@ -718,7 +605,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                                                     placeholder="Text"
                                                     style={{
                                                         border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
-                                                        // background: 'transparent', color: "white",
                                                         borderRadius: "6px", minWidth: '300px'
                                                     }}
                                                 />
@@ -815,36 +701,6 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         </div>
 
 
-
-
-
-
-                        {/* <div style={{ padding: '20px', paddingLeft: '0' }}> */}
-
-                        {/* {videoUrl ? (
-                                <VideoPlayer src={videoUrl} id={videoId} />
-                            ) : (
-                                <p>Загрузка видео...</p>
-                            )} */}
-
-                        {/* {videoUrl && (
-
-                                <video ref={videoRef} controls style={{ width: '800px', marginTop: '20px' }}>
-                                    <source src={videoUrl} type="video/mp4" />
-                                    {fileSubtitle && (
-                                        <track
-                                            src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
-                                            kind="subtitles"
-                                            srcLang="ru"
-                                            label="Русский"
-                                            default
-                                        />
-                                    )}
-                                    Ваш браузер не поддерживает видео.
-                                </video>
-
-                            )} */}
-                        {/* </div> */}
                     </div>
                 </div>
             </div>
@@ -860,7 +716,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         overflowX: "scroll",
                         whiteSpace: "nowrap",
                         width: "100%",
-                        maxWidth: "100%", // Видимая область для 5 мину
+                        maxWidth: "100%",
                         padding: "10px 0",
                         borderRadius: "10px",
                         border: '1px solid lightgrey'
@@ -870,7 +726,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
                         type="range"
                         min="0"
                         max={duration}
-                        step="0.01" // Позволяет выбирать с точностью до 0.01 сек
+                        step="0.01"
                         value={currentTime}
                         onChange={handleTimeChangeNEW}
                         onDoubleClick={setTimeCode}

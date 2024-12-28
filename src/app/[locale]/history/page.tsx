@@ -55,64 +55,8 @@ const HistoryP: React.FC<Props> = async ({params: {locale}}: Props) => {
                 </div>) : (<div className={'flex w-full'}>
                     <div><WatchHistoryPage userId={user.id}/></div>
 
-                    {/*<div className=" p-4 pr-20 pt-20 flex flex-col space-y-4 text-sm text-gray-800">
-                        <label htmlFor="search"
-                               className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                                <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                                </svg>
-                            </div>
-                            <input type="search" id="search"
-                                   className="block w-full py-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                   placeholder="Искать в истории просмотра" required/>
-                            <button type="submit"
-                                    className="text-white absolute end-1.5 bottom-1.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search
-                            </button>
-                        </div>
-                        <div className="flex flex-row items-center space-x-2">
-                            <IoTrashOutline size={24}/>
-                            <p>Очистить историю просмотра</p>
-                        </div>
-                        <div className="flex flex-row items-center space-x-2">
-                            <IoIosPause size={24}/>
-                            <p>Не сохранять историю просмотра</p>
-                        </div>
-                        <div className="flex flex-row items-center space-x-2">
-                            <IoTrashOutline size={24}/>
-                            <p>Очистить историю поиска</p>
-                        </div>
-                        <div className="flex flex-row items-center space-x-2">
-                            <IoIosPause size={24}/>
-                            <p>Не сохранять историю поиска</p>
-                        </div>
-
-                    </div>*/}
                 </div>)}
 
-                {/* <div className="w-1/4 p-4">
-                    <ul className="space-y-4 text-sm text-gray-800">
-                        <li className="flex items-center space-x-2">
-                            <IoTrashOutline size={24}/>
-                            <span>Очистить историю просмотра</span>
-                        </li>
-                        <li className="flex items-center space-x-2">
-                            <IoIosPause size={24}/>
-                            <span>Не сохранять историю просмотра</span>
-                        </li>
-                        <li className="flex items-center space-x-2">
-                            <IoTrashOutline size={24}/>
-                            <span>Очистить историю поиска</span>
-                        </li>
-                        <li className="flex items-center space-x-2">
-                            <IoIosPause size={24}/>
-                            <span>Не сохранять историю поиска</span>
-                        </li>
-                    </ul>
-                </div>*/}
 
             </main>
         </>

@@ -8,9 +8,12 @@ import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import Hls from 'hls.js';
 import api from '@/services/axiosApi';
 import { HistoryOfBrowsing } from "@/types/history-of-browsing";
-//import {useUser} from "@clerk/nextjs";
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from "next/navigation";
+import { ISubtitle } from "@/types/subtitle.interface";
+import { useRouter } from "next/navigation";
+import { BiGridHorizontal } from "react-icons/bi";
+import { Switch } from "@/components/ui/switchsubtitle";
 
 
 class WatchHistory {
@@ -56,6 +59,13 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [lastUpdateTime, setLastUpdateTime] = useState(0);
     const pathname = usePathname();
     const [previousPath, setPreviousPath] = useState("");
+    const [filesSubtitles, setFilesSubtitles] = useState<File[]>([]);
+    const [subtitles, setSubtitles] = useState<ISubtitle[]>([]);
+    const router = useRouter();
+    const [selectedLang, setSelectedLang] = useState(0);
+    const [display, setDisplay] = useState("none");
+    const [checked, setChecked] = useState(false);
+    const [fileSub, setFileSub] = useState<File>();
 
     const addVideoToViewHistory = async () => {
         try {
@@ -73,6 +83,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 videoId: id,
                 date: new Date(),
                 timeCode: Math.floor(currentTime),
+                channelSettingsId: 0, // задаётся сервером
             };
 
             const response = await api.post(`/HistoryOfBrowsing/add`, request, {
@@ -93,6 +104,30 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setIsHistoryUpdateInProgress(false); // Сбрасываем флаг после завершения запроса
         }
     };
+
+    const fetchSubtitleFiles = async (subtitles: ISubtitle[]): Promise<File[]> => {
+        console.log("Загрузка файлов:");
+
+        const filePromises = subtitles.map(async (subtitle) => {
+            const encodedUrl = subtitle.puthToFile ? encodeURIComponent(subtitle.puthToFile) : "";
+            const response = await api.get('/Subtitle/getsubtitlefile/' + encodedUrl, {
+                responseType: "blob",
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`Ошибка загрузки файла: ${response.statusText}`);
+            }
+            console.log("Ответ на загрузку файла:", response);
+            const blob = response.data;
+            console.log("blob", blob);
+            return new File([blob], `${subtitle.videoId}_${subtitle.languageCode}_subtitle.vtt`, { type: blob.type });
+
+        });
+
+        return await Promise.all(filePromises);
+
+    };
+
     useEffect(() => {
         const fetchVideo = async () => {
             try {
@@ -102,6 +137,9 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 }
                 const videoData = await response.data;
                 console.log("vide0000**", videoData);
+                videoData.subtitles = await api.get<ISubtitle[]>(`/Subtitle/getpublishsubtitles/${id}`);
+                setSubtitles(videoData.subtitles.data);
+                console.log("*/*/!!", videoData.subtitles.data);
                 if (videoData && videoData.VideoStream) {
                     const videoUrl = videoData.VideoStream.endsWith('720.m3u8')
                         ? videoData.VideoStream
@@ -117,6 +155,29 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
         fetchVideo();
     }, [id]);
+    
+
+    useEffect(() => {
+        const loadSubtitleFiles = async () => {
+            try {
+                if (subtitles.length > 0) {
+                    const files = await fetchSubtitleFiles(subtitles);
+                    setFilesSubtitles(files);
+                    console.log("*/*/!!files", files);
+                }
+            } catch (error) {
+                console.error("Ошибка загрузки файлов субтитров:", error);
+            }
+        };
+
+        loadSubtitleFiles();
+    }, [subtitles]);
+
+    useEffect(() => {
+        
+        console.log("*/*/!!filesAfterSet", filesSubtitles);
+              
+    }, [filesSubtitles]);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -153,9 +214,29 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     }, [videoSrc]);
 
+
+    useEffect(() => {
+        if (videoRef.current) {
+            setDuration(videoRef.current.duration);
+        }
+    }, []);
+
+    // const handleTimeUpdate = () => {
+    //     if (videoRef.current) {
+    //         setCurrentTime(videoRef.current.currentTime);
+
+    //     }
+    // };
     const handleTimeUpdate = () => {
         if (videoRef.current) {
             setCurrentTime(videoRef.current.currentTime);
+            const percentagePlayed = ((videoRef.current.currentTime / videoRef.current.duration) * 100);
+
+            if (percentagePlayed >= 5 && isSignedIn && !hasAddedToHistory.current) {
+                hasAddedToHistory.current = true; // Устанавливаем флаг (useRef)
+                console.log(`Видео добавляется в историю: ${id}`);
+                addVideoToViewHistory(); // Добавляем в историю просмотра
+            }
 
             const delta = currentTime - lastUpdateTime;
             if (isPlaying && delta > 0 && delta < 5) { // Исключаем большие скачки ( перемотку)
@@ -169,12 +250,23 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             setLastUpdateTime(videoRef.current.currentTime);
         }
     };
+
+    useEffect(() => {
+
+        if (duration > 0 && currentTime / duration > 0.75 && !viewed) {
+
+            setViewed(true);
+            increaseViewCount();
+        }
+
+    }, [currentTime]);
+
+
     const handlePauseOrSeek = () => {
         if (videoRef.current) {
             const currentTime = videoRef.current.currentTime;
             const delta = currentTime - lastUpdateTime;
 
-            // Учитываем реальное время только для небольших изменений
             if (delta > 0 && delta < 5) {
                 setRealWatchTime((prevTime) => prevTime + delta);
             }
@@ -213,7 +305,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     };
 
     const SaveViewDuration = async () => {
-        if (realWatchTime > 0) {
+        if (videoRef.current && videoRef.current.currentTime > 1) {
             const formData = new FormData();
             const language = navigator.language;
             language.split('-')[0];
@@ -224,31 +316,22 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 formData.append('clerkId', "***");
             formData.append('videoId', id + '');
             formData.append('location', language);
-            formData.append('duration', realWatchTime + "");
-            formData.append('date', new Date().toString());
+            formData.append('duration', videoRef.current.currentTime + "");
+            formData.append('date', new Date().toISOString());
+
+            console.log("saveDurationVew", formData);
 
             await api.post("/Video/viewingduration", formData);
         }
     }
 
-    useEffect(() => {
-        if (previousPath) {
-            console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
-
-            SaveViewDuration();
-            saveWatchHistory();
-        }
-
-        setPreviousPath(pathname);
-    }, [pathname]);
 
     // Обработка закрытия вкладки или перезагрузки страницы
     useEffect(() => {
-        const handleBeforeUnload = async (event: BeforeUnloadEvent) => {
-
-            await SaveViewDuration();
-            saveWatchHistory(); 
-            event.preventDefault();         
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            SaveViewDuration();
+            addVideoToViewHistory();
         };
 
         if (videoRef.current) {
@@ -277,11 +360,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [id, user, realWatchTime]);
+    }, []);
 
 
     const increaseViewCount = () => {
-        // alert("Просмотр засчитан!");
+
         Viewed(id);
     };
 
@@ -300,27 +383,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
-    useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
-
-            // Убираем обработчик при размонтировании компонента
-            return () => {
-                videoRef.current?.removeEventListener('timeupdate', handleTimeUpdate);
-            };
-        }
-    }, [viewed, id]);
-
-    useEffect(() => {
-
-        return () => {
-            if (duration > 0)
-                SaveViewDuration();
-            saveWatchHistory();
-            console.log("Компонент размонтирован");
-        };
-    }, []);
-
     // Effects
     useEffect(() => {
         const video = videoRef.current;
@@ -330,9 +392,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             const handleLoadedMetadata = () => {
                 setDuration(video.duration);
             };
-            const handleTimeUpdate = () => {
-                setCurrentTime(video.currentTime);
-            };
             const handleVolumeChange = () => {
                 setVolume(video.volume);
                 setIsMuted(video.muted);
@@ -340,13 +399,11 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
             video.addEventListener("loadedmetadata", handleLoadedMetadata);
             handleLoadedMetadata();
-            video.addEventListener("timeupdate", handleTimeUpdate);
             video.addEventListener("volumechange", handleVolumeChange);
 
             return () => {
                 if (video) {
                     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-                    video.removeEventListener("timeupdate", handleTimeUpdate);
                     video.removeEventListener("volumechange", handleVolumeChange);
                 }
             };
@@ -391,6 +448,33 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
             document.removeEventListener("keydown", handleKeyDown as EventListener);
         };
     }, []);
+
+    // useEffect(() => {
+    //     setPreviousPath(pathname);
+    // }, []);
+
+    // useEffect(() => {
+
+    //     if (previousPath && previousPath !== pathname) {
+    //         console.log(`Смена маршрута с ${previousPath} на ${pathname}`);
+    //         SaveViewDuration();
+    //         addVideoToViewHistory();
+    //     }
+
+    //     setPreviousPath(pathname);
+
+    // }, [pathname]);
+
+    useEffect(() => {
+        console.log("Компонент смонтирован");
+
+        return () => {
+            console.log(`Смена маршрута `);
+            SaveViewDuration();
+            addVideoToViewHistory();
+        };
+    }, []);
+
 
     // Event Handlers
     const handleKeyDown: any = (e: KeyboardEvent) => {
@@ -539,6 +623,69 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
+    // const handleSubtitleChange = (key: number) => {
+    //     const video = videoRef.current;
+
+    //     if (video) {
+    //         setSelectedLang(key);
+    //         handleSubtitleOpen();
+    //     }
+    // };
+
+    const handleSubtitleChange = (selectedKey: number) => {
+        const video = videoRef.current;
+        setSelectedLang(selectedKey);
+        if (video) {
+            // for (let i = 0; i < video.textTracks.length; i++) {
+            //     video.textTracks[i].mode = "disabled";
+            // }
+
+            // if (selectedKey >= 0 && selectedKey < video.textTracks.length) {
+            //     video.textTracks[selectedKey].mode = "showing";
+            // }
+           
+            handleSubtitleOpen();
+        }
+    };
+
+    const selectSubtitle =() => {
+        const video = videoRef.current;
+        if (video) {
+            for (let i = 0; i < video.textTracks.length; i++) {
+                video.textTracks[i].mode = "disabled";
+            }
+            if (selectedLang >= 0 && selectedLang < video.textTracks.length) {
+                video.textTracks[selectedLang].mode = "showing";
+                console.log("key", selectedLang);
+            }
+        }
+    }
+
+     useEffect(() => {
+        selectSubtitle();
+    }, [selectedLang, checked , display]);
+    
+    useEffect(() => {
+        
+        setFileSub(filesSubtitles[selectedLang]);
+    }, [checked]);
+
+    const handleSubtitleOpen = () => {
+        if (display == "none"){ 
+            setDisplay("block");
+        }
+        else
+            setDisplay('none');
+    };
+   
+    const CheckedSubtitles = () => {
+        setChecked(!checked);
+        setTimeout(() => {
+            handleSubtitleOpen();
+        }, 500);
+    };
+
+
     // Render
     return (
         <div
@@ -643,7 +790,32 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                             <RxEnterFullScreen size={23} />
                         )}
                     </div>
+
+                    {filesSubtitles.length > 0 ?(
+                    <div>
+                        <BiGridHorizontal onClick={handleSubtitleOpen} />
+                    </div>
+                    ):<></>}
+                    <div style={{
+                        padding: '20px', border: '1px solid white', borderRadius: "8px",
+                        marginTop: "-100px", marginLeft: '85%', display: display, paddingTop: '10px', paddingBottom: '5px',
+                        backgroundColor: 'black', zIndex: '2000', position: 'absolute',
+                    }}>
+                        <div className="flex " style={{ height: '10px', justifyContent: 'end' }}>
+                            <Switch defaultChecked={checked} onCheckedChange={CheckedSubtitles} />
+
+                        </div>
+                        <div><small>Subtitles:&nbsp;</small>{!checked && (<small>off</small>)}</div>
+                        {filesSubtitles.length > 0 && checked && (subtitles?.map((subtitle, key) => (
+                            <div>
+                            <button  key={key} onClick={() => handleSubtitleChange(key)}
+                                style={{ color: selectedLang === key ? "lightgreen" : "white" }}>{subtitle.languageName}</button>
+                                </div>
+                        )))}
+                    </div>
+                   
                 </div>
+
             </div>
             <video
                 ref={videoRef}
@@ -653,8 +825,15 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 controls={false}
                 preload="metadata"
             >
-                <track kind="subtitles" srcLang="en" src="subtitles.vtt" label="Russian" default />
+                {filesSubtitles.length > 0 && checked &&  (subtitles?.map((subtitle, key) => (
+                  
+                    <track  key={key} kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])}
+                        label={subtitle.languageName}  default={selectedLang==key}   />
+                  
+                )))}
+               
             </video>
+
         </div>
     );
 };

@@ -36,8 +36,8 @@ const channelPage = async ({params: {locale}}: IContentProps) => {
                               className="text-gray-500 hover:text-gray-800 pb-2">Recording</Link>
                         <Link target={'_self'} href={"/channel/editing/content/playlists"}
                               className="text-gray-500 hover:text-gray-800 pb-2">Playlists</Link>
-                        <Link target={'_self'} href={"/channel/editing/content/podcasts"}
-                              className="text-gray-500 hover:text-gray-800 pb-2">Podcasts</Link>
+                         <Link target={'_self'} href={"/channel/editing/content/postsonchannel"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Posts</Link>
                         <p className="text-gray-500 border-b-2 border-gray-800 hover:text-gray-800 pb-2">Advertising
                             campaigns</p>
                     </div>

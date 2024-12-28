@@ -1,64 +1,62 @@
-"use client";
-import React, { useEffect, useState, useRef } from 'react';
-import HeaderHome from "@/components/pages/home/header/header";
-import AsideHome from "@/components/pages/home/aside/aside";
-import initTranslations from "@/app/i18n";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+'use client'
+
+import React, { useEffect, useState, useRef } from 'react'
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Upload, X, Info, Plus, Badge } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useUser } from '@clerk/nextjs';
-import { IUser } from '@/types/user.interface';
-import api from '@/services/axiosApi';
-import { IChannel } from '@/types/channelinfo.interface';
-
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Upload, X, Plus, Info } from 'lucide-react'
+import { useUser } from '@clerk/nextjs'
+import api from '@/services/axiosApi'
+import { IChannel } from '@/types/channelinfo.interface'
 
 interface Category {
-    id: number;
-    name: string;
+    id: number
+    name: string
     videosId: []
 }
+
 interface Tag {
-    id: number;
-    name: string;
+    id: number
+    name: string
     videosId: []
 }
 
 const VideoUploadInterface: React.FC = () => {
-
-    const [visibility, setVisibility] = useState('private');
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-    const [isAgeRestricted, setAgeRestricted] = useState(false);
-    const [videoName, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [category, setCategory] = useState('');
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [thumbnail, setThumbnail] =useState<File | null>(null);
-    const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
-    const [thumbnailBase64, setThumbnailBase64] = useState<string>("");
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [visibility, setVisibility] = useState('private')
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false)
+    const [isAgeRestricted, setAgeRestricted] = useState(false)
+    const [videoName, setTitle] = useState('')
+    const [description, setDescription] = useState('')
+    const [category, setCategory] = useState('')
+    const [categories, setCategories] = useState<Category[]>([])
+    const [thumbnail, setThumbnail] = useState<File | null>(null)
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>("")
+    const [thumbnailBase64, setThumbnailBase64] = useState<string>("")
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const [video, setFile] = useState<File | null>(null)
     const [preview, setPreview] = useState<string | null>(null)
     const [newCategory, setNewCategory] = useState('')
-   
     const [currentTag, setCurrentTag] = useState('')
-    const [isCopyright, setIsCopyright] = useState<boolean>(false); // true = є авторські права, false = немає
-    const [audience, setAudience] = useState<string>('all'); // 'children', 'adults', 'all'
-    const [userChannel, setUserChannel] = useState<IChannel | null>();
-    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null); 
-    const [tagIds, setTagIds] = useState<number[]>([]); 
-    const [tags, setTags] = useState<Tag[]>([]);
-    const { user } = useUser();
+    const [isCopyright, setIsCopyright] = useState<boolean>(false)
+    const [audience, setAudience] = useState<string>('all')
+    const [userChannel, setUserChannel] = useState<IChannel | null>()
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
+    const [tagIds, setTagIds] = useState<number[]>([])
+    const [tags, setTags] = useState<Tag[]>([])
+    const { user } = useUser()
+
+    const [isUploading, setIsUploading] = useState(false)
+    const [uploadProgress, setUploadProgress] = useState(0)
+    const [uploadComplete, setUploadComplete] = useState(false)
 
     const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const input = e.target.value;
-        setCurrentTag(input);
-    };
+        const input = e.target.value
+        setCurrentTag(input)
+    }
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = event.target.files?.[0]
@@ -66,24 +64,25 @@ const VideoUploadInterface: React.FC = () => {
             setFile(selectedFile)
             const fileUrl = URL.createObjectURL(selectedFile)
             setPreview(fileUrl)
-            const videoElement = document.createElement('video');
-            videoElement.src = fileUrl;
+            const videoElement = document.createElement('video')
+            videoElement.src = fileUrl
 
             videoElement.onloadedmetadata = () => {
-                const durationInSeconds = Math.floor(videoElement.duration);
-                sessionStorage.setItem('videoDuration', durationInSeconds.toString());
-                URL.revokeObjectURL(fileUrl);
-            };
+                const durationInSeconds = Math.floor(videoElement.duration)
+                sessionStorage.setItem('videoDuration', durationInSeconds.toString())
+                URL.revokeObjectURL(fileUrl)
+            }
         } else {
             alert('Please select a valid video file.')
         }
     }
+
     useEffect(() => {
         api.get('/Category')
             .then((response) => response.data)
             .then((data: Category[]) => setCategories(data))
-            .catch((error) => console.error('Error fetching categories:', error));
-    }, []);
+            .catch((error) => console.error('Error fetching categories:', error))
+    }, [])
 
     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
         event.preventDefault()
@@ -108,90 +107,83 @@ const VideoUploadInterface: React.FC = () => {
             fileInputRef.current.value = ''
         }
     }
+
     const addCategory = () => {
         if (newCategory && !categories.some((category) => category.name === newCategory)) {
             const newCategoryObj: Category = {
                 id: 0,
                 name: newCategory,
                 videosId: []
-            };
-            setCategories([...categories, newCategoryObj]);
-            DownloadCategory(newCategoryObj);
-            setNewCategory('');
+            }
+            setCategories([...categories, newCategoryObj])
+            DownloadCategory(newCategoryObj)
+            setNewCategory('')
         }
-    };
+    }
 
     const addTag = async (tagName: string) => {
         if (tagName && !tags.some(tag => tag.name === tagName)) {
             const newTagObj: Tag = {
-                id: 0, // Тимчасове ID
+                id: 0,
                 name: tagName,
                 videosId: [],
-            };
+            }
     
-            // Додаємо тег у список з тимчасовим ID
-            setTags(prevTags => [...prevTags, newTagObj]);
+            setTags(prevTags => [...prevTags, newTagObj])
     
             try {
-                // Завантажуємо тег на сервер
-                await DownloadTag(newTagObj);
-    
-                // Викликаємо fetchTagIdByName для обробки ID та оновлення станів
-                await fetchTagIdByName(tagName);
+                await DownloadTag(newTagObj)
+                await fetchTagIdByName(tagName)
             } catch (error) {
-                console.error('Error adding tag:', error);
+                console.error('Error adding tag:', error)
             } finally {
-                // Очищуємо поле вводу незалежно від результату
-                setCurrentTag("");
+                setCurrentTag("")
             }
         }
-    };
+    }
     
     const DownloadTag = async (tag: Tag): Promise<void> => {
         try {
             const response = await api.post('/Tag/add', tag, {
                 headers: { 'Content-Type': 'application/json' },
-            });
+            })
     
             if (response.status !== 200) {
-                throw new Error('Failed to add tag');
+                throw new Error('Failed to add tag')
             }
         } catch (error) {
-            console.error('Error adding tag to server:', error);
-            throw error;
+            console.error('Error adding tag to server:', error)
+            throw error
         }
-    };
+    }
     
     const fetchTagIdByName = async (tagName: string): Promise<void> => {
         try {
-            const response = await api.get(`/Tag/getbytagname/${tagName}`);
+            const response = await api.get(`/Tag/getbytagname/${tagName}`)
     
             if (response.status !== 200 || !response.data.id) {
-                throw new Error('Failed to fetch tag ID');
+                throw new Error('Failed to fetch tag ID')
             }
     
-            const tagId = response.data.id;
+            const tagId = response.data.id
     
-            // Оновлюємо масив ID тегів
             setTagIds((prevIds) => {
                 if (!prevIds.includes(tagId)) {
-                    return [...prevIds, tagId];
+                    return [...prevIds, tagId]
                 }
-                return prevIds;
-            });
+                return prevIds
+            })
     
-            // Оновлюємо список тегів з отриманим ID
             setTags((prevTags) =>
                 prevTags.map(tag =>
                     tag.name === tagName ? { ...tag, id: tagId } : tag
                 )
-            );
+            )
         } catch (error) {
-            console.error('Error fetching tag ID:', error);
-            throw error;
+            console.error('Error fetching tag ID:', error)
+            throw error
         }
-    };
-    
+    }
     
     const DownloadCategory = async (category: Category) => {
         try {
@@ -199,190 +191,188 @@ const VideoUploadInterface: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 }
-            });
+            })
 
             if (response.status != 200) {
-                throw new Error('Failed to add category');
+                throw new Error('Failed to add category')
             }
-            console.log('Category added successfully');
-            await fetchCategories();
-            return response.data.id;
+            console.log('Category added successfully')
+            await fetchCategories()
+            return response.data.id
         } catch (error) {
-            console.error('Error adding category:', error);
+            console.error('Error adding category:', error)
         }
-    };
+    }
+
     const fetchCategories = async () => {
         try {
-            const response = await api.get('/Category');
+            const response = await api.get('/Category')
             if (response.status != 200) {
-                throw new Error('Error fetching categories');
+                throw new Error('Error fetching categories')
             }
-            const data: Category[] = await response.data;
-            setCategories(data);
+            const data: Category[] = await response.data
+            setCategories(data)
         } catch (error) {
-            console.error('Error fetching categories:', error);
+            console.error('Error fetching categories:', error)
         }
-    };
+    }
+
     const removeTag = (id: number) => {
-        setTags((prevTags) => prevTags.filter((tag) => tag.id !== id));
-    };
+        setTags((prevTags) => prevTags.filter((tag) => tag.id !== id))
+    }
+
     const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const file = event.target.files?.[0]
         
         if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
-            setThumbnail(file);
+            setThumbnail(file)
             
-            const reader = new FileReader();
+            const reader = new FileReader()
             reader.onload = () => {
-                const base64String = reader.result?.toString().split(',')[1] || ""; 
-                setThumbnailBase64(base64String); 
-                setThumbnailPreview(`data:${file.type};base64,${base64String}`);
-            };
+                const base64String = reader.result?.toString().split(',')[1] || ""
+                setThumbnailBase64(base64String)
+                setThumbnailPreview(`data:${file.type};base64,${base64String}`)
+            }
     
-            reader.readAsDataURL(file); 
+            reader.readAsDataURL(file)
         } else {
-            console.error("Unsupported file format. Please select a PNG or JPEG image.");
+            console.error("Unsupported file format. Please select a PNG or JPEG image.")
         }
-    };
+    }
     
     const openFilePicker = () => {
-        fileInputRef.current?.click();
-    };
+        fileInputRef.current?.click()
+    }
+
     const handleButtonClick = () => {
-        document.getElementById('thumbnailInput')?.click();
-    };
+        document.getElementById('thumbnailInput')?.click()
+    }
 
     const fileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
+            const reader = new FileReader()
+            reader.readAsDataURL(file)
 
             reader.onload = () => {
                 if (typeof reader.result === "string") {
-                    const base64String = reader.result.split(",")[1];
-                    resolve(base64String);
+                    const base64String = reader.result.split(",")[1]
+                    resolve(base64String)
                 } else {
-                    reject(new Error("Error: FileReader result is not a string."));
+                    reject(new Error("Error: FileReader result is not a string."))
                 }
-            };
+            }
 
-            reader.onerror = (error) => reject(error);
-        });
-    };
+            reader.onerror = (error) => reject(error)
+        })
+    }
 
     const getUserChannel = async () => {
         if (user) {
-            const response = await api.get('/ChannelSettings/getbyownerid/' + user?.id);
-            console.log("chch", response);
+            const response = await api.get('/ChannelSettings/getbyownerid/' + user?.id)
+            console.log("chch", response)
             if (response.status === 200) {
-                const data: IChannel = await response.data;
-                setUserChannel(data);
+                const data: IChannel = await response.data
+                setUserChannel(data)
             } else {
-                console.error('Ошибка при получении пользователя:', response.statusText);
+                console.error('Ошибка при получении пользователя:', response.statusText)
             }
         }
     }
-    type BadgeProps = {
-        children: React.ReactNode;
-        className?: string;
-        onClick?: () => void; // Додаємо опціональну функцію onClick
-    };
-    const Badge: React.FC<BadgeProps> = ({ children, className, onClick }) => (
-        <div
-            className={`badge ${className}`}
-            onClick={onClick} // Прив'язка onClick
-            role="button" // Додаємо роль для доступності
-            tabIndex={0} // Робимо його фокусованим
-        >
-            {children}
-        </div>
-    );
-    useEffect(() => {
 
-        getUserChannel();
-    }, [user]);
+    useEffect(() => {
+        getUserChannel()
+    }, [user])
 
     const handleSubmit = async () => {
-        const formData = new FormData();
+        setIsUploading(true)
+        setUploadProgress(0)
+        setUploadComplete(false)
 
-    if (!video) {
-        console.error('No video file selected!');
-        return;
-    }
+        const formData = new FormData()
 
-    const duration = Number(sessionStorage.getItem('videoDuration')) || 0;
-    formData.append('videoFile', video);
-    const emptyFile = new Blob([], { type: 'application/octet-stream' });
-    formData.append('file', emptyFile, 'empty-file.bin');
+        if (!video) {
+            console.error('No video file selected!')
+            setIsUploading(false)
+            return
+        }
 
-    const videoUrls = await fileToBase64(video);
+        const duration = Number(sessionStorage.getItem('videoDuration')) || 0
+        formData.append('videoFile', video)
+        const emptyFile = new Blob([], { type: 'application/octet-stream' })
+        formData.append('file', emptyFile, 'empty-file.bin')
 
-    // Додаємо коректне формування tagIds
-    if (Array.isArray(tagIds) && tagIds.length > 0) {
-        tagIds.forEach((id, index) => {
-            formData.append(`tagIds[${index}]`, id.toString());
-        });
-    } else {
-        console.warn('tagIds is empty or not an array.');
-    }
+        const videoUrls = await fileToBase64(video)
 
-    const videoData = {
-        id: 0,
-        objectID: 'some-generated-id',
-        channelSettingsId: userChannel?.id,
-        tittle: videoName,
-        description: description,
-        uploadDate: new Date().toISOString(),
-        duration,
-        videoUrl: videoUrls,
-        viewCount: 0,
-        likeCount: 0,
-        dislikeCount: 0,
-        isShort: false,
-        cover: thumbnailBase64,
-        visibility: visibility === 'public',
-        isAgeRestriction: isAgeRestricted,
-        isCopyright: isCopyright,
-        audience: audience,
-        lastViewedPosition: '00:00:00',
-        categoryIds: selectedCategoryId,
-        tagIds, // Залишаємо в об'єкті
-        file: emptyFile,
-    };
-        console.log("Payload to be sent:", videoData);
+        if (Array.isArray(tagIds) && tagIds.length > 0) {
+            tagIds.forEach((id, index) => {
+                formData.append(`tagIds[${index}]`, id.toString())
+            })
+        } else {
+            console.warn('tagIds is empty or not an array.')
+        }
+
+        const videoData = {
+            id: 0,
+            objectID: 'some-generated-id',
+            channelSettingsId: userChannel?.id,
+            tittle: videoName,
+            description: description,
+            uploadDate: new Date().toISOString(),
+            duration,
+            videoUrl: videoUrls,
+            viewCount: 0,
+            likeCount: 0,
+            dislikeCount: 0,
+            isShort: false,
+            cover: thumbnailBase64,
+            visibility: visibility === 'public',
+            isAgeRestriction: isAgeRestricted,
+            isCopyright: isCopyright,
+            audience: audience,
+            lastViewedPosition: '00:00:00',
+            categoryIds: selectedCategoryId,
+            tagIds,
+            file: emptyFile,
+        }
+
+        console.log("Payload to be sent:", videoData)
 
         Object.entries(videoData).forEach(([key, value]) => {
             if (typeof value === 'string' || typeof value === 'number') {
-                formData.append(key, value.toString());
+                formData.append(key, value.toString())
             } else if (typeof value === 'boolean' || typeof value === 'number') {
-                formData.append(key, value.toString());
+                formData.append(key, value.toString())
             } else if (value instanceof Blob) {
-                formData.append(key, value);
+                formData.append(key, value)
             } 
-        });
+        })
 
         try {
-            const response = await api.post('/Video/add', formData);
+            const response = await api.post('/Video/add', formData, {
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!)
+                    setUploadProgress(percentCompleted)
+                }
+            })
 
-            if (response.status != 201) throw new Error('Failed to upload video data');
-            const result = await response.data;
-            console.log('Video uploaded successfully:', result);
+            if (response.status != 201) throw new Error('Failed to upload video data')
+            const result = await response.data
+            console.log('Video uploaded successfully:', result)
+            setUploadComplete(true)
         } catch (error) {
-            console.error('Error uploading video data:', error);
+            console.error('Error uploading video data:', error)
+        } finally {
+            setIsUploading(false)
         }
-    };
+    }
 
     return (
         <>
-
             {user ? (
-
-                <div className="container  p-4">
+                <div className="container p-4">
                     <Tabs defaultValue="details" className="right">
                         <TabsList className="grid w-full grid-cols-4 mb-4">
                             <TabsTrigger value="details">Details</TabsTrigger>
-                            {/* <TabsTrigger value="monetisation">Monetisation</TabsTrigger>
-                      <TabsTrigger value="ad-suitability">Ad suitability</TabsTrigger> */}
                             <TabsTrigger value="video-elements">Video elements</TabsTrigger>
                             <TabsTrigger value="checks">Checks</TabsTrigger>
                             <TabsTrigger value="visibility">Visibility</TabsTrigger>
@@ -537,43 +527,38 @@ const VideoUploadInterface: React.FC = () => {
                                     </Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-          
-                <div>
-    <Label htmlFor="tags">Tags</Label>
-    <div className="flex flex-wrap gap-2 mb-2">
-    {tags.map((tag) => (
-        <Badge key={tag.id} className="text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
-            <span className="mr-2">{tag.name}</span> {/* Назва тега */}
-            <Button
-                variant="ghost"
-                size="sm"
-                className="ml-1 h-4 w-4 p-0"
-                onClick={() => removeTag(tag.id)} // Видалення за ID
-            >
-                <X className="h-3 w-3" />
-                <span className="sr-only">Remove tag</span>
-            </Button>
-        </Badge>
-    ))}
-</div>
-    
-    <div className="flex items-center gap-2">
-    <input
-        type="text"
-        placeholder="Enter a tag"
-        value={currentTag}
-        onChange={handleTagInputChange}
-        className="border border-gray-300 rounded-md px-2 py-1"
-    />
-    <Button onClick={() => addTag(currentTag)}>+ Add Tag</Button>
-</div>
-
-            </div>
-        </div>
-
+                                    <div>
+                                        <Label htmlFor="tags">Tags</Label>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            {tags.map((tag) => (
+                                                <div key={tag.id} className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
+                                                    <span className="mr-2">{tag.name}</span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="ml-1 h-4 w-4 p-0"
+                                                        onClick={() => removeTag(tag.id)}
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                        <span className="sr-only">Remove tag</span>
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Enter a tag"
+                                                value={currentTag}
+                                                onChange={handleTagInputChange}
+                                                className="border border-gray-300 rounded-md px-2 py-1"
+                                            />
+                                            <Button onClick={() => addTag(currentTag)}>+ Add Tag</Button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div className="space-y-4">
-                                {/* Налаштування "Age Restriction" */}
                                 <h3 className="text-lg font-semibold mb-2">Age Restriction</h3>
                                 <p className="text-sm text-gray-600 mb-2">Would you like to restrict this video to viewers over 18 years old?</p>
                                 <p className="text-xs text-gray-500 mb-4">
@@ -602,7 +587,6 @@ const VideoUploadInterface: React.FC = () => {
                                     </label>
                                 </div>
 
-                                {/* 'Age restriction' налаштування */}
                                 <h3 className="text-lg font-semibold mb-2">Copyright Status</h3>
                                 <p className="text-sm text-gray-600 mb-2">Does this video contain copyrighted material?</p>
                                 <p className="text-xs text-gray-500 mb-4">
@@ -654,21 +638,34 @@ const VideoUploadInterface: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <Button onClick={handleSubmit}>Upload </Button>
+                            {isUploading && (
+                                <div className="mt-4">
+                                    <p>Uploading video... {uploadProgress}%</p>
+                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                        <div 
+                                            className="bg-blue-600 h-2.5 rounded-full" 
+                                            style={{width: `${uploadProgress}%`}}
+                                        ></div>
+                                    </div>
+                                </div>
+                            )}
+                            {uploadComplete && (
+                                <div className="mt-4 text-green-600">
+                                    Upload complete!
+                                </div>
+                            )}
+                            <Button onClick={handleSubmit} disabled={isUploading}>
+                                {isUploading ? 'Uploading...' : 'Upload'}
+                            </Button>
                         </TabsContent>
-                        <TabsContent value="monetisation">Monetisation content</TabsContent>
-                        <TabsContent value="ad-suitability">Ad suitability content</TabsContent>
                         <TabsContent value="video-elements">Video elements content</TabsContent>
                         <TabsContent value="checks">Checks content</TabsContent>
                         <TabsContent value="visibility">Visibility content</TabsContent>
-
                     </Tabs>
                 </div>
-
             ) : <></>}
-
         </>
-    );
-};
+    )
+}
 
-export default VideoUploadInterface;
+export default VideoUploadInterface

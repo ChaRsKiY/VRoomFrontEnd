@@ -656,7 +656,7 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                               })}
                             </ul>
 
-                            {!checksPosts[post.id].isVoted ? (
+                            {!checksPosts[post.id].isVoted  ? (
                               <button
                                 onClick={() => handleVoteSubmit(index)}
                                 className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md disabled:opacity-50"
