@@ -8,8 +8,8 @@ interface ICommentsProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:ICommentsProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+const channelPage = async ({params: {locale}}: ICommentsProps) => {
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
         <>
             <div className="flex items-center justify-between px-4 py-2 mb-8 border-b">

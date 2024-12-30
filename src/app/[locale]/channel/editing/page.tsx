@@ -1,4 +1,4 @@
-'use client'
+// 'use client'
 import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
@@ -10,8 +10,8 @@ interface IChannelEditProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}: IChannelEditProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories']);
+const channelPage: React.FC<IChannelEditProps> = async ({params: {locale}}: IChannelEditProps) => {
+    const {t} = await initTranslations(locale, ['common', 'channel']);
 
 
     return (
@@ -21,7 +21,7 @@ const channelPage = async ({params: {locale}}: IChannelEditProps) => {
                 <HeaderHome t={t}/>
             </div>
             <div className="flex">
-                <AsideHome t={t}/>
+                {t && <AsideHome t={t}/>}
             </div>
             <div className="pl-[22.5%] max-lg:pl-[12%] max-sm:pl-0 pt-20">
 
