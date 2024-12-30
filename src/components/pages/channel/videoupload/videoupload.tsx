@@ -371,15 +371,13 @@ const VideoUploadInterface: React.FC = () => {
             {user ? (
                 <div className="container p-4">
                     <Tabs defaultValue="details" className="right">
-                        <TabsList className="grid w-full grid-cols-4 mb-4">
+                        <h1 className="text-2xl font-bold mb-6">Upload Video</h1>
+                        <TabsList className="grid w-full grid-cols-1 mb-1">
                             <TabsTrigger value="details">Details</TabsTrigger>
-                            <TabsTrigger value="video-elements">Video elements</TabsTrigger>
-                            <TabsTrigger value="checks">Checks</TabsTrigger>
-                            <TabsTrigger value="visibility">Visibility</TabsTrigger>
                         </TabsList>
                         <TabsContent value="details" className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                <h1 className="text-2xl font-bold mb-6">Upload Video</h1>
+                                
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-gray-400 transition-colors duration-400"
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
