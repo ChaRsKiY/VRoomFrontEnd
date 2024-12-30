@@ -43,5 +43,16 @@
     "7.01":"Bitte beachten Sie: Gelöschte Videos können nicht wiederhergestellt werden.",
     "8":"8. Wie kann ich den Support kontaktieren?",
     "telephone":"Telefon:",
-    "hour":"Öffnungszeiten: Mo-Fr"
+    "hour":"Öffnungszeiten: Mo-Fr",
+    "contact":"Kontakte:",
+    "connect":"Kontaktieren Sie uns direkt. Wir werden in Kürze antworten.",
+     "fill":"Füllen Sie das folgende Formular aus:",
+    "name":"Ihr Name:",
+    "email":"Ihre E-Mail:",
+    "enter":"Eingeben",
+    "enterE":"Eingeben ihre E-Mail",
+    "enterN":"Eingeben ihr Name",
+    "send":"Nachricht senden",
+     "mess":"Nachricht:",
+    "about":"Beschreiben Sie Ihr Problem"
 }

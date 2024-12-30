@@ -43,5 +43,15 @@
     "7.01":"Tenga en cuenta: los videos eliminados no se pueden restaurar.",
     "8":"8. Cómo contactar al soporte?",
     "telephone":"Teléfono:",
-    "hour":"Horario de apertura: lunes a viernes"
+    "hour":"Horario de apertura: lunes a viernes",
+    "contact":"Contactos:",
+    "connect":"Contáctenos directamente. Responderemos en breve.",
+     "fill":"Complete el siguiente formulario:",
+    "name":"Su nombre:",
+    "email":"Su correo electrónico:",
+    "enterE":"Ingresar su correo electrónico",
+    "enterN":"Ingresar su nombre",
+    "send":"Enviar mensaje",
+    "mess":"Mensaje:",
+    "about":"Describe tu problema"
 }

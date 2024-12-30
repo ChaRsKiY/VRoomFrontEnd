@@ -388,7 +388,7 @@ const PublishedSubtitleslist = () => {
                                                                         <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
                                                                             style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
                                                                             onClick={() => deleteSubtitle(subtitle.id)}>
-                                                                            <span >Delete #{index + 1}</span></div>
+                                                                            <span >Delete #{key + 1}</span></div>
 
 
                                                                         <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"

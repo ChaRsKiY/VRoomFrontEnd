@@ -43,5 +43,15 @@
     "7.01":"Please note: deleted videos cannot be restored.",
     "8":"8. How to contact support?",
     "telephone":"Telephone:",
-    "hour":"Opening hours: Mon-Fri"
+    "hour":"Opening hours: Mon-Fri",
+    "contact":"Contacts:",
+    "connect":"Contact us directly. We will respond shortly.",
+     "fill":"Fill out the form below:",
+    "name":"Your name:",
+    "email":"Your Email:",
+    "enterE":"Enter your email",
+    "enterN":"Enter your name",
+    "send":"Send message",
+     "mess":"Message:",
+    "about":"Describe your problem"
 }
