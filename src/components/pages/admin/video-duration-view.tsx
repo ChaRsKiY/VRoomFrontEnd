@@ -1,16 +1,12 @@
 "use client"
 
-import React, {useEffect, useState} from 'react'
+import {useEffect, useState} from "react";
 import ChartAnalytics, {AnalyticData, dateToMonth, dateToWeek} from "@/components/pages/admin/chart";
+import {RangeDate} from "@/components/pages/admin/registration-summary-chart";
 import api from "@/services/axiosApi";
 import {useTranslation} from "next-i18next";
 
-export interface RangeDate {
-    start: Date | null;
-    end: Date | null;
-}
-
-const RegistrationSummaryChart: React.FC = () => {
+const VideoViewDuration = ({ channelId }: { channelId: number }) => {
     const [data, setData] = useState<AnalyticData[]>([]);
     const [rangeDate, setRangeDate] = useState<RangeDate>({
         start: null,
@@ -18,11 +14,11 @@ const RegistrationSummaryChart: React.FC = () => {
     });
     const [range, setRange] = useState("year");
 
-    const { t } = useTranslation();
+    const { t } = useTranslation()
 
     const fetchData = async () => {
         try {
-            const response = await api.get("/AnalyticVRoom/getusersregistrations/" + range);
+            const response = await api.get("/AnalyticVRoom/getdurationviewallvideobychannelbydiapason/" + range + "/" + channelId);
             setData(response.data.map((item: any) => ({
                 month: range === "year" ? dateToMonth(item.date) : dateToWeek(item.date),
                 count: item.count
@@ -34,7 +30,7 @@ const RegistrationSummaryChart: React.FC = () => {
 
     const fetchDataByRange = async () => {
         try {
-            const response = await api.get("/AnalyticVRoom/getusersregistrationsbydays/" + rangeDate?.start?.toISOString() + "/" + rangeDate?.end?.toISOString());
+            const response = await api.get("/AnalyticVRoom/getdurationviewallvideobychannelbydates/" + rangeDate?.start?.toISOString() + "/" + rangeDate?.end?.toISOString()  + "/" + channelId);
             setData(response.data.map((item: any) => ({
                 month: range === "year" ? dateToMonth(item.date) : dateToWeek(item.date),
                 count: item.count
@@ -57,8 +53,8 @@ const RegistrationSummaryChart: React.FC = () => {
     }, [rangeDate]);
 
     return (
-        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:registrations")} chartDescription={t("admin-main:summary-registrations")} data={data} dataKey="count" range={range} setRange={setRange} />
+        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:view-duration-by-channel")} chartDescription={t("admin-main:view-duration-summary-channel")} data={data} dataKey="count" range={range} setRange={setRange} />
     )
 }
 
-export default RegistrationSummaryChart
+export default VideoViewDuration;

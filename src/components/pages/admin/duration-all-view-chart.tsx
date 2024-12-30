@@ -4,6 +4,7 @@ import React, {useEffect, useState} from 'react'
 import ChartAnalytics, {AnalyticData, dateToMonth, dateToWeek} from "@/components/pages/admin/chart";
 import api from "@/services/axiosApi";
 import {RangeDate} from "@/components/pages/admin/registration-summary-chart";
+import {useTranslation} from "next-i18next";
 
 const DurationAllViewVideoChart: React.FC = () => {
     const [data, setData] = useState<AnalyticData[]>([]);
@@ -12,6 +13,8 @@ const DurationAllViewVideoChart: React.FC = () => {
         end: null
     });
     const [range, setRange] = useState("year");
+
+    const { t } = useTranslation()
 
     const fetchData = async () => {
         try {
@@ -58,7 +61,7 @@ const DurationAllViewVideoChart: React.FC = () => {
     }, [rangeDate]);
 
     return (
-        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle="Video Duration" chartDescription="A summary of the video duration" data={data} dataKey="count" range={range} setRange={setRange} />
+        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:video-watch-duration")} chartDescription={t("admin-main:summary-video-watch-duration")} data={data} dataKey="count" range={range} setRange={setRange} />
     )
 }
 

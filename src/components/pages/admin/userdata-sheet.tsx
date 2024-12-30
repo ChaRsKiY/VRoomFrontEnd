@@ -12,6 +12,7 @@ import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {toggleBanUser} from "@/lib/admin-user";
+import {useTranslation} from "next-i18next";
 
 interface Props {
     userId: string;
@@ -27,11 +28,13 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
     const [highlightedEmail, setHighlightedEmail] = useState<string | null>(null);
     const [banStatePending, setBanStatePending] = useState<boolean>(false);
 
+    const { t } = useTranslation();
+
     const parseAdminLevelToBadge = useMemo(() => (level: number) => {
         const badgeStyles = "py-0.5 px-2 text-[0.9rem] ml-3 text-white rounded-[0.5rem]";
-        if (level === 1) return <div className={`${badgeStyles} bg-green-400`}>Moderator</div>;
-        if (level === 2) return <div className={`${badgeStyles} bg-yellow-400`}>Content Manager</div>;
-        if (level === 3) return <div className={`${badgeStyles} bg-red-400`}>Admin</div>;
+        if (level === 1) return <div className={`${badgeStyles} bg-green-400`}>{t("admin-main:moderator")}</div>;
+        if (level === 2) return <div className={`${badgeStyles} bg-yellow-400`}>{t("admin-main:content-manager")}</div>;
+        if (level === 3) return <div className={`${badgeStyles} bg-red-400`}>{t("admin-main:admin")}</div>;
         return null;
     }, []);
 
@@ -61,7 +64,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
     if (!user || !currentUser || (loading && !user)) {
         return (
             <div className="w-full h-full flex justify-center items-center font-bold">
-                <Label className="text-[1.5rem]">Loading</Label>
+                <Label className="text-[1.5rem]">{t("admin-main:loading")}</Label>
             </div>
         );
     }
@@ -78,8 +81,8 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                 <SheetTitle className="flex items-center">
                     {user.username}
                     <div className="flex space-x-2 ml-3">
-                        {isCurrentUser && <div className="py-0.5 px-2 text-[0.9rem] text-white bg-blue rounded-[0.5rem]">You</div>}
-                        {user.banned && <div className="py-0.5 px-2 text-[0.9rem] ml-3 text-white bg-red-700 rounded-[0.5rem]">Banned</div>}
+                        {isCurrentUser && <div className="py-0.5 px-2 text-[0.9rem] text-white bg-blue rounded-[0.5rem]">{t("admin-main:you")}</div>}
+                        {user.banned && <div className="py-0.5 px-2 text-[0.9rem] ml-3 text-white bg-red-700 rounded-[0.5rem]">{t("admin-main:banned")}</div>}
                         {user.privateMetadata.isAdmin && parseAdminLevelToBadge(user.privateMetadata.adminLevel)}
                     </div>
                 </SheetTitle>
@@ -93,11 +96,11 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                     </Avatar>
                     <div className="flex space-x-2 items-center">
                         <div>
-                            <Label>Firstname</Label>
+                            <Label>{t("admin-main:first-name")}</Label>
                             <Input value={user.firstName} disabled/>
                         </div>
                         <div>
-                            <Label>Lastname</Label>
+                            <Label>{t("admin-main:last-name")}</Label>
                             <Input value={user.lastName} disabled/>
                         </div>
                     </div>
@@ -105,41 +108,41 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
 
                 <article className="flex mt-5 max-sm:text-[0.75rem]">
                     <div className="flex-1">
-                        <Label>Last active:</Label>
+                        <Label>{t("admin-main:last-active")}</Label>
                         <p className="text-neutral-500">{user.lastActiveAt ? new Date(user.lastActiveAt).toLocaleString() : "-"}</p>
                     </div>
                     <div className="flex-1">
-                        <Label>Created at:</Label>
+                        <Label>{t("admin-main:created")}</Label>
                         <p className="text-neutral-500">{new Date(user.createdAt).toLocaleString()}</p>
                     </div>
                 </article>
 
                 <article className="flex mt-3 max-sm:text-[0.75rem]">
                     <div className="flex-1">
-                        <Label>Last sign in:</Label>
+                        <Label>{t("admin-main:last-sign-in")}</Label>
                         <p className="text-neutral-500">{new Date(user.lastSignInAt).toLocaleString()}</p>
                     </div>
                     <div className="flex-1">
-                        <Label>Updated at:</Label>
+                        <Label>{t("admin-main:updated-at")}</Label>
                         <p className="text-neutral-500">{new Date(user.updatedAt).toLocaleString()}</p>
                     </div>
                 </article>
 
                 <article className="flex mt-3 max-sm:text-[0.75rem]">
                     <div className="flex-1">
-                        <Label>Two Factor Enabled:</Label>
-                        <p className="text-neutral-500">{user.twoFactorEnabled ? "Yes" : "No"}</p>
+                        <Label>{t("admin-main:two-factor-enabled")}</Label>
+                        <p className="text-neutral-500">{user.twoFactorEnabled ? t("admin-main:yes") : t("admin-main:no")}</p>
                     </div>
                     <div className="flex-1">
-                        <Label>Backup Code Enabled:</Label>
-                        <p className="text-neutral-500">{user.backupCodeEnabled ? "Yes" : "No"}</p>
+                        <Label>{t("admin-main:backup-code-enabled")}</Label>
+                        <p className="text-neutral-500">{user.backupCodeEnabled ? t("admin-main:yes") : t("admin-main:no")}</p>
                     </div>
                 </article>
 
                 <div className="h-[1px] bg-neutral-200 rounded-[0.5rem] mt-4 mb-3"/>
 
                 <article className="space-y-2">
-                    <Label>Emails</Label>
+                    <Label>{t("admin-main:emails")}</Label>
                     <div className="space-y-2.5">{user.emailAddresses.map((email, key) => (
                         <div
                             key={key}
@@ -149,7 +152,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                             }`}>
                             <div id="target-element" className="font-bold">{email.emailAddress}</div>
                             {user.primaryEmailAddressId === email.id &&
-                                <div className="italic text-[0.9rem]">Primary</div>}
+                                <div className="italic text-[0.9rem]">{t("admin-main:primary")}</div>}
 
                             <div className="flex mt-2 space-x-2 flex-wrap">
                                 {user.externalAccounts.map((provider, key) => {
@@ -168,23 +171,23 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                 </article>
 
                 <article className="mt-4 space-y-2">
-                    <Label>Phone numbers</Label>
+                    <Label>{t("admin-main:phone-numbers")}</Label>
                     <div
                         className="space-y-2.5">{user.phoneNumbers.length ? user.phoneNumbers.map((phoneNumber, key) => (
                         <div key={key}>
                             <div className="border-b-[1px] pb-1">{phoneNumber.phoneNumber}</div>
 
                             {user.primaryPhoneNumberId === phoneNumber.id &&
-                                <div className="italic text-[0.9rem]">Primary</div>}
+                                <div className="italic text-[0.9rem]">{t("admin-main:primary")}</div>}
                         </div>
                     )) : (
-                        <div className="italic text-[0.8rem]">No phone numbers</div>
+                        <div className="italic text-[0.8rem]">{t("admin-main:no-phone-numbers")}</div>
                     )}
                     </div>
                 </article>
 
                 <article className="mt-4 space-y-2">
-                    <Label>External accounts</Label>
+                    <Label>{t("admin-main:external-accounts")}</Label>
                     <div
                         className="space-y-2.5">{user.externalAccounts.length ? user.externalAccounts.map((provider, key) => (
                         <div key={key} className="border-[1px] px-3 py-2 rounded-[0.5rem]">
@@ -198,7 +201,7 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                             </Button>
                         </div>
                     )) : (
-                        <div className="italic text-[0.8rem]">No external accounts</div>
+                        <div className="italic text-[0.8rem]">{t("admin-main:no-external-accounts")}</div>
                     )}
                     </div>
                 </article>
@@ -206,12 +209,12 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                 <div className="h-[1px] bg-neutral-200 rounded-[0.5rem] mt-4 mb-3"/>
 
                 <article className="space-y-2">
-                    <Label>Actions</Label>
+                    <Label>{t("admin-main:actions")}</Label>
                     <div className="flex flex-wrap">
                         {canBan && (
                             <Button className="mr-2 mb-2" disabled={banStatePending} variant="outline"
                                     onClick={() => toggleBanUser(user.id, user.banned ? "unban" : "ban", setBanStatePending, fetchUser)}>
-                                {user.banned ? "Unban" : "Ban"}
+                                {user.banned ? t("admin-main:unban") : t("admin-main:ban")}
                             </Button>
                         )}
                         {canEdit && <AdminUserEditModal user={user} fetchUser={fetchUser} />}
@@ -220,13 +223,6 @@ export default function UserDataSheet({ currentUserAdminLevel, userId, onOpenShe
                         {canDelete && <DeleteUserModal userId={user.id} username={user.username}
                                                      onOpenSheetChange={onOpenSheetChange}
                                                      fetchTableUsers={fetchTableUsers}/>}
-
-                        <div className="space-x-2">
-                            <Button variant="outline">Account settings</Button>
-                            <Button variant="outline">To comments</Button>
-                            <Button variant="outline">To activity</Button>
-                        </div>
-
                     </div>
                 </article>
             </div>

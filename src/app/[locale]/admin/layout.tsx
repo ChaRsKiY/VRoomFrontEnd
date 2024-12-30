@@ -4,9 +4,19 @@ import {currentUser} from "@clerk/nextjs/server";
 import NotFound from "@/app/[locale]/not-found";
 import {SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {AppSidebar} from "@/components/pages/admin/sidebar";
+import initTranslations from "@/app/i18n";
 
-const AdminLayout: React.FC<PropsWithChildren> = async ({ children }) => {
+interface Props {
+    params: {
+        locale: string;
+    }
+    children: React.ReactNode;
+}
+
+const AdminLayout: React.FC<Props> = async ({ children, params: { locale }  }: Props) => {
     const user = await currentUser();
+
+    const { t } = await initTranslations(locale, ['admin-main']);
 
     if (!user?.privateMetadata?.isAdmin) {
         return <NotFound />
@@ -14,7 +24,7 @@ const AdminLayout: React.FC<PropsWithChildren> = async ({ children }) => {
 
     return (
         <SidebarProvider className="py-4">
-            <AppSidebar />
+            <AppSidebar t={t} />
             <main className="flex-1">
                 {children}
             </main>

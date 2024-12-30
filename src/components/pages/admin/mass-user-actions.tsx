@@ -10,9 +10,10 @@ interface Props {
     selection: Record<string, boolean>,
     fetchUsers: () => Promise<void>,
     setSelection: (selection: Record<string, boolean>) => void
+    currentUserAdminLevel: number
 }
 
-const MassUserActions: React.FC<Props> = ({ selection, fetchUsers, setSelection }: Props) => {
+const MassUserActions: React.FC<Props> = ({ selection, fetchUsers, setSelection, currentUserAdminLevel }: Props) => {
     const [isPending, setIsPending] = useState<boolean>(false)
     const { user } = useUser()
 
@@ -165,18 +166,19 @@ const MassUserActions: React.FC<Props> = ({ selection, fetchUsers, setSelection 
     return (
         <div className="rounded-[0.5rem] border border-neutral-200 p-4">
                 <Label>Mass Actions</Label>
-                <div className="space-x-5 mt-1 flex">
+                <div className="space-x-5 mt-1 flex items-center">
                     <div>
                         <Button onClick={() => setSelection({})} variant="outline">Unselect all</Button>
                     </div>
-                    <div>
-                        <Button>Send message</Button>
-                    </div>
-                    <div className="space-x-1.5">
-                        <Button disabled={isPending} onClick={() => banUnbanManyUsers(true)}>Ban All</Button>
-                        <Button disabled={isPending} onClick={() => banUnbanManyUsers(false)}>Unban All</Button>
-                        <Button disabled={isPending} onClick={deleteManyUsers}>Delete All</Button>
-                    </div>
+                    {currentUserAdminLevel == 3 ? (
+                        <div className="space-x-1.5">
+                            <Button disabled={isPending} onClick={() => banUnbanManyUsers(true)}>Ban All</Button>
+                            <Button disabled={isPending} onClick={() => banUnbanManyUsers(false)}>Unban All</Button>
+                            <Button disabled={isPending} onClick={deleteManyUsers}>Delete All</Button>
+                        </div>
+                    ) : (
+                        <span>No mass actions available</span>
+                    )}
                 </div>
         </div>
     )

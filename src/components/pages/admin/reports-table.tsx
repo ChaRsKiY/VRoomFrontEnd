@@ -40,6 +40,7 @@ import ReportAnswerForm from "@/components/pages/admin/report-answer-modal";
 import api from "@/services/axiosApi";
 import {IoIosSearch} from "react-icons/io";
 import {useUser} from "@clerk/nextjs";
+import {useTranslation} from "next-i18next";
 
 export type Report = {
     id: string
@@ -78,43 +79,45 @@ export default function ReportsTable() {
     const [searchQuery, setSearchQuery] = useState("")
     const { user } = useUser()
 
+    const { t } = useTranslation()
+
     const perPage = 5;
 
     const columns: ColumnDef<Report>[] = [
         {
             accessorKey: "id",
-            header: "ID",
+            header: t("admin-main:id"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("id")}</div>
             ),
         },
         {
             accessorKey: "senderUserId",
-            header: "Sender ID",
+            header: t("admin-main:sender-id"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("senderUserId")}</div>
             ),
         },
         {
             accessorKey: "status",
-            header: "Status",
+            header: t("admin-main:status"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("status")}</div>
             ),
         },
         {
             accessorKey: "title",
-            header: "Title",
+            header: t("admin-main:title"),
             cell: ({ row }) => <div className="capitalize">{row.getValue("title") ? row.getValue("title") : "-"}</div>,
         },
         {
             accessorKey: "type",
-            header: "Type",
+            header: t("admin-main:type"),
             cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
         },
         {
             accessorKey: "createdAt",
-            header: "Created At",
+            header: t("admin-main:created-at"),
             cell: ({ row }) => <div className="lowercase">{new Date(row.getValue("createdAt")).toLocaleString()}</div>,
         },
         {
@@ -146,26 +149,26 @@ export default function ReportsTable() {
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">{t("admin-main:open-menu")}</span>
                                 <MoreHorizontal />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t("admin-main:actions")}</DropdownMenuLabel>
                             <DropdownMenuItem
                                 onClick={() => navigator.clipboard.writeText(report.id)}
                             >
-                                Copy report ID
+                                {t("admin-main:copy-report-id")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 onClick={() => navigator.clipboard.writeText(report.senderUserId.toString())}
                             >
-                                Copy sender ID
+                                {t("admin-main:copy-sender-id")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            {report.status === "Open" && <DropdownMenuItem onClick={handleProcess}>Process</DropdownMenuItem>}
+                            {report.status === "Open" && <DropdownMenuItem onClick={handleProcess}>{t("admin-main:process")}</DropdownMenuItem>}
                             {report.status === "Processing" && report.adminId === user?.id && <DropdownMenuItem asChild><ReportAnswerForm report={report} /></DropdownMenuItem>}
-                            {report.status === "Closed" && <DropdownMenuItem onClick={handleReOpen}>Reopen</DropdownMenuItem>}
+                            {report.status === "Closed" && <DropdownMenuItem onClick={handleReOpen}>{t("admin-main:reopen")}</DropdownMenuItem>}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -214,13 +217,13 @@ export default function ReportsTable() {
         <div className="w-full">
             <div className="flex items-center">
                 <form className="flex my-5 space-x-2" onSubmit={handleSearch}>
-                    <Input placeholder="Search..." className="w-[200px]"/>
+                    <Input placeholder={t("admin-main:search")} className="w-[200px]"/>
                     <Button variant="outline" type="submit"><IoIosSearch size={23}/></Button>
                 </form>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button disabled={isPending} variant="outline" className="ml-auto">
-                            Columns <ChevronDown/>
+                            {t("admin-main:columns")} <ChevronDown/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -237,7 +240,7 @@ export default function ReportsTable() {
                                             column.toggleVisibility(!!value)
                                         }
                                     >
-                                        {column.id}
+                                        {column.columnDef?.header?.toString()}
                                     </DropdownMenuCheckboxItem>
                                 )
                             })}
@@ -287,7 +290,7 @@ export default function ReportsTable() {
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t("admin-main:no-results")}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -302,7 +305,7 @@ export default function ReportsTable() {
                         onClick={() => setPage(page - 1)}
                         disabled={page === 1 || isPending}
                     >
-                        Previous
+                        {t("admin-main:previous")}
                     </Button>
                     <Button
                         variant="outline"
@@ -310,7 +313,7 @@ export default function ReportsTable() {
                         onClick={() => setPage(page + 1)}
                         disabled={page >= Math.ceil(total / perPage) || isPending}
                     >
-                        Next
+                        {t("admin-main:next")}
                     </Button>
                 </div>
             </div>

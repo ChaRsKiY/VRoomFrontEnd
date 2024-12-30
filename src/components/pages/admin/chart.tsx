@@ -37,12 +37,13 @@ import RangeSelectDropdown from "@/components/pages/admin/range-select-dropdown"
 import ColorSelectDropdown from "@/components/pages/admin/color-select-dropdown";
 import DifferenceDateSelectDropdown from "@/components/pages/admin/difference-date-select-dropdown";
 import {RangeDate} from "@/components/pages/admin/registration-summary-chart";
+ import {useTranslation} from "next-i18next";
 
 const chartConfig = {
     desktop: {
         label: "Desktop",
         color: "hsl(var(--chart-1))",
-    },
+    }
 } satisfies ChartConfig
 
 export interface AnalyticData {
@@ -80,10 +81,12 @@ export default function ChartAnalytics({ chartTitle, chartDescription, data, ran
     const [color, setColor] = useState("auto");
     const [chartType, setChartType] = useState<ChartType>({ type: "area", value: "bump" });
 
+    const { t } = useTranslation();
+
     const analyzeData = (data: AnalyticData[]) => {
         if (!data || data.length === 0) {
             return {
-                trendText: "No data available",
+                trendText: t("admin-main:no-data"),
                 rangeText: "",
             };
         }
@@ -102,14 +105,14 @@ export default function ChartAnalytics({ chartTitle, chartDescription, data, ran
 
         let trendText;
         if (trend > 0) {
-            trendText = `Trending up by ${trendPercentage}%`;
+            trendText = `${t("admin-main:trending-up-by")} ${trendPercentage}%`;
         } else if (trend < 0) {
-            trendText = `Trending down by ${Math.abs(parseFloat(trendPercentage))}%`;
+            trendText = `${t("admin-main:trending-down-by")} ${Math.abs(parseFloat(trendPercentage))}%`;
         } else {
-            trendText = "No significant trend";
+            trendText = t("admin-main:no-trend");
         }
 
-        const rangeText = `Total: ${total}, Avg: ${average}, Max: ${maxCount}, Min: ${minCount}`;
+        const rangeText = `${t("admin-main:total")} ${total}, ${t("admin-main:avg")} ${average}, ${t("admin-main:max")} ${maxCount}, ${t("admin-main:min")} ${minCount}`;
 
         return {
             trendText,
@@ -150,8 +153,8 @@ export default function ChartAnalytics({ chartTitle, chartDescription, data, ran
                                         </div>
                                         <div className="flex items-center gap-2 leading-none text-muted-foreground">
                                             {range === "year"
-                                                ? "January - December 2024" :
-                                                (range === "month") ? "Last 30 Days" : "Last 7 Days"}
+                                                ? t("admin-main:jan-dec") :
+                                                (range === "month") ? t("admin-main:last-30-days") : t("admin-main:last-7-days")}
                                         </div>
                                         <div className="text-muted-foreground">
                                             {rangeText}
@@ -160,7 +163,7 @@ export default function ChartAnalytics({ chartTitle, chartDescription, data, ran
                                 );
                             })()
                         ) : (
-                            <div className="text-muted-foreground">No data available</div>
+                            <div className="text-muted-foreground">{t("admin-main:no-data")}</div>
                         )}
                     </div>
                     <div>
@@ -174,7 +177,7 @@ export default function ChartAnalytics({ chartTitle, chartDescription, data, ran
 
 const renderChart = (data: AnalyticData[], chartType: ChartType, color: string) => {
     if (data.length === 0) {
-        return <div>No data</div>;
+        return <div>-</div>;
     }
 
     if (chartType.type === "area") {

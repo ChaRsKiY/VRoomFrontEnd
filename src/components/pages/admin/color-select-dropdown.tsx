@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {IoIosColorPalette} from "react-icons/io";
 import {Label} from "@/components/ui/label";
+import {useTranslation} from "next-i18next";
 
 interface Props {
     color: string;
@@ -14,13 +15,15 @@ interface Props {
 }
 
 const ColorSelectDropdown = ({ color, setColor }: Props) => {
+    const { t } = useTranslation();
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button variant="outline"><IoIosColorPalette size={18} /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="p-2.5">
-                <Label className="pl-2">Choose Chart Color</Label>
+                <Label className="pl-2">{t("admin-main:choose-chart-color")}</Label>
                 <div className="grid grid-cols-5 gap-4 pt-3">
                     <button
                         className="h-[40px] w-[40px] rounded-full bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500"

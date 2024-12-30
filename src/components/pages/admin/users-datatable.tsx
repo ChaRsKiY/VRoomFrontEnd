@@ -31,6 +31,7 @@ import {getUsersWithPaginationAndQuery} from "@/actions/admin";
 import {IoIosSearch} from "react-icons/io";
 import UserDropdownMenu from "@/components/pages/admin/user-dropdown-menu";
 import MassUserActions from "@/components/pages/admin/mass-user-actions";
+import {useTranslation} from "next-i18next";
 
 export interface ITableUser {
     id: string,
@@ -56,6 +57,8 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
     const [page, setPage] = React.useState<number>(1)
     const [query, setQuery] = useState<string>("")
     const perPage = 5
+
+    const { t } = useTranslation()
 
     const fetchUsers = React.useCallback(async (sQuery = query) => {
         try {
@@ -117,7 +120,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
         },
         {
             accessorKey: "id",
-            header: "ID",
+            header: t("admin-main:id"),
             cell: ({row}) => <div>{row.getValue("id")}</div>,
         },
         {
@@ -128,7 +131,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     disabled={isPending}
                 >
-                    Username
+                    {t("admin-main:username")}
                     <CaretSortIcon className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -142,7 +145,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     disabled={isPending}
                 >
-                    Email
+                    {t("admin-main:email")}
                     <CaretSortIcon className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -150,12 +153,12 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
         },
         {
             accessorKey: "firstName",
-            header: "First Name",
+            header: t("admin-main:first-name"),
             cell: ({ row }) => <div>{row.getValue("firstName")}</div>,
         },
         {
             accessorKey: "lastName",
-            header: "Last Name",
+            header: t("admin-main:last-name"),
             cell: ({ row }) => <div>{row.getValue("lastName")}</div>,
         },
         {
@@ -166,7 +169,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                     disabled={isPending}
                 >
-                    Created At
+                    {t("admin-main:created-at")}
                     <CaretSortIcon className="ml-2 h-4 w-4" />
                 </Button>
             ),
@@ -232,7 +235,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
             <div className="flex items-center py-4">
                 <form onSubmit={handleSubmitSearch} className="space-x-2 flex">
                     <Input
-                        placeholder="Search by data"
+                        placeholder={t("admin-main:search-by-data")}
                         name="query"
                         className="max-w-sm"
                     />
@@ -241,7 +244,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                            {t("admin-main:columns")} <ChevronDownIcon className="ml-2 h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -309,7 +312,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t("admin-main:no-results")}
                                 </TableCell>
                             </TableRow>
                         ) : (
@@ -318,7 +321,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    Loading.
+                                    {t("admin-main:loading")}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -327,8 +330,8 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
-                    {Object.keys(rowSelection).length} of{" "}
-                    {total} row(s) selected.
+                    {Object.keys(rowSelection).length} {t("admin-main:of")}{" "}
+                    {total} {t("admin-main:rows-selected")}
                 </div>
                 <div className="space-x-2">
                     <Button
@@ -337,7 +340,7 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                         onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                         disabled={page === 1 || isPending}
                     >
-                        Previous
+                        {t("admin-main:previous")}
                     </Button>
                     <Button
                         variant="outline"
@@ -345,13 +348,13 @@ export default function UsersDataTable({ currentUserAdminLevel }: { currentUserA
                         onClick={() => setPage((prev) => prev + 1)}
                         disabled={page >= Math.ceil(total / perPage) || isPending}
                     >
-                        Next
+                        {t("admin-main:next")}
                     </Button>
                 </div>
             </div>
 
             {Object.keys(rowSelection).length > 0 && (
-                <MassUserActions setSelection={setRowSelection} selection={rowSelection} fetchUsers={fetchUsers}  />
+                <MassUserActions setSelection={setRowSelection} selection={rowSelection} fetchUsers={fetchUsers} currentUserAdminLevel={currentUserAdminLevel}  />
             )}
         </div>
     )

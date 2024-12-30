@@ -8,6 +8,7 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import {IoIosClose} from "react-icons/io";
 import {updateUserBaseData} from "@/actions/admin";
+import {useTranslation} from "next-i18next";
 
 interface Props {
     setData: (prev: EditData) => void,
@@ -17,6 +18,8 @@ interface Props {
 }
 
 const EditUserDataForm = ({ setData, data, userHasImage, baseAvatarUrl }: Props) => {
+    const { t } = useTranslation();
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setData({
             ...data,
@@ -30,21 +33,21 @@ const EditUserDataForm = ({ setData, data, userHasImage, baseAvatarUrl }: Props)
     return (
         <article className="px-1 space-y-2">
             <div>
-                <Label>Username</Label>
+                <Label>{t("admin-main:username")}</Label>
                 <Input
                     value={data.userData.username}
                     name="username"
                     onChange={handleChange}/>
             </div>
             <div>
-                <Label>Firstname</Label>
+                <Label>{t("admin-main:first-name")}</Label>
                 <Input
                     value={data.userData.firstName}
                     name="firstName"
                     onChange={handleChange}/>
             </div>
             <div>
-                <Label>Lastname</Label>
+                <Label>{t("admin-main:last-name")}</Label>
                 <Input
                     value={data.userData.lastName}
                     name="lastName"
