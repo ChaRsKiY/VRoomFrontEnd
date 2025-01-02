@@ -17,6 +17,7 @@ import { IChannel } from "@/types/channelinfo.interface"
 import api from '@/services/axiosApi'
 import { Upload, X, Plus } from 'lucide-react'
 import { ScrollArea } from "@/components/ui/scroll-area"
+import imageCompression from 'browser-image-compression';
 
 interface IChannelEditProps {
     params: { locale: string }
@@ -57,262 +58,262 @@ const VideoUpdateInterface: React.FC = () => {
     const [tags, setTags] = useState<Tag[]>([])
     const { user } = useUser()
 
-    const [isUpdating, setIsUpdating] = useState(false)
-    const [updateProgress, setUpdateProgress] = useState(0)
-    const [updateComplete, setUpdateComplete] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
+  const [updateComplete, setUpdateComplete] = useState(false);
 
-    useEffect(() => {
-        if (user) {
-            fetchAvailableVideos()
-            fetchCategories()
-            getUserChannel()
+  useEffect(() => {
+    if (user) {
+      fetchAvailableVideos();
+      fetchCategories();
+      getUserChannel();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (userChannel) {
+      fetchAvailableVideos();
+    }
+  }, [userChannel]);
+
+  const fetchAvailableVideos = async () => {
+    if (!userChannel?.id) {
+      console.error('User channel ID is missing');
+      return;
+    }
+    try {
+      const response = await api.get(`/Video/getchannelvideos/${userChannel.id}`);
+      setAvailableVideos(response.data);
+    } catch (error) {
+      console.error('Error fetching available videos:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/Category');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const getUserChannel = async () => {
+    if (user) {
+      try {
+        const response = await api.get(`/ChannelSettings/getbyownerid/${user.id}`);
+        if (response.status === 200) {
+          setUserChannel(response.data);
         }
-    }, [user])
-    
-    useEffect(() => {
-        if (userChannel) {
-            fetchAvailableVideos()
+      } catch (error) {
+        console.error('Error fetching user channel:', error);
+      }
+    }
+  };
+
+  const addCategory = () => {
+    if (newCategory && !categories.some((category) => category.name === newCategory)) {
+      const newCategoryObj: Category = {
+        id: 0,
+        name: newCategory,
+        videosId: [],
+      };
+      setCategories([...categories, newCategoryObj]);
+      DownloadCategory(newCategoryObj);
+      setNewCategory('');
+    }
+  };
+
+  const DownloadCategory = async (category: Category) => {
+    try {
+      const response = await api.post('/Category/add', category, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error('Failed to add category');
+      }
+      console.log('Category added successfully');
+      await fetchCategories();
+      return response.data.id;
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  const handleVideoSelect = (video: IVideo) => {
+    try {
+      setVideo(video); // Update video
+      setTitle(video.tittle);
+      setDescription(video.description);
+      setVisibility(video.visibility ? 'public' : 'private');
+      setAgeRestricted(video.isAgeRestriction);
+      setIsCopyright(video.isCopyright);
+      setAudience(video.audience);
+      setThumbnailPreview(`data:image/jpeg;base64,${video.cover}`);
+      console.log('Video data:', video); // Check video data
+    } catch (error) {
+      console.error('Error selecting video:', error);
+    }
+  };
+
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentTag(e.target.value);
+  };
+
+  const addTag = async (tagName: string) => {
+    if (tagName && !tags.some(tag => tag.name === tagName)) {
+      const newTagObj: Tag = {
+        id: 0,
+        name: tagName,
+        videosId: [],
+      };
+
+      setTags(prevTags => [...prevTags, newTagObj]);
+
+      try {
+        await api.post('/Tag/add', newTagObj);
+        await fetchTagIdByName(tagName);
+      } catch (error) {
+        console.error('Error adding tag:', error);
+      } finally {
+        setCurrentTag('');
+      }
+    }
+  };
+
+  const fetchTagIdByName = async (tagName: string): Promise<void> => {
+    try {
+      const response = await api.get(`/Tag/getbytagname/${tagName}`);
+      if (response.status !== 200 || !response.data.id) {
+        throw new Error('Failed to fetch tag ID');
+      }
+
+      const tagId = response.data.id;
+
+      setTagIds(prevIds => {
+        if (!prevIds.includes(tagId)) {
+          return [...prevIds, tagId];
         }
-    }, [userChannel])
-    
-    const fetchAvailableVideos = async () => {
-        if (!userChannel?.id) {
-            console.error('User channel ID is missing');
-            return;
-        }
-        try {
-            const response = await api.get(`/Video/getchannelvideos/${userChannel.id}`);
-            setAvailableVideos(response.data);
-        } catch (error) {
-            console.error('Error fetching available videos:', error);
-        }
+        return prevIds;
+      });
+
+      setTags(prevTags =>
+        prevTags.map(tag =>
+          tag.name === tagName ? { ...tag, id: tagId } : tag
+        )
+      );
+    } catch (error) {
+      console.error('Error fetching tag ID:', error);
+      throw error;
+    }
+  };
+
+  const removeTag = (id: number) => {
+    setTags((prevTags) => prevTags.filter((tag) => tag.id !== id));
+    setTagIds((prevIds) => prevIds.filter((tagId) => tagId !== id));
+  };
+
+  const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
+      setThumbnail(file);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result?.toString() || "";
+        console.log("Generated Base64:", base64String);
+        setThumbnailBase64(base64String);
+        setThumbnailPreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      console.error("Unsupported file format. Please select a PNG or JPEG image.");
+    }
+  };
+
+  const handleVideoDelete = async (id: number): Promise<void> => {
+    try {
+      console.log('Deleting video with id:', id);
+      const response = await api.delete(`/Video/${id}`);
+      console.log('Server response status:', response.status);
+
+      if (response.status === 204) {
+        const updatedVideos = availableVideos.filter((video) => video.id !== id);
+        setAvailableVideos(updatedVideos);
+        alert('Video successfully deleted');
+      } else {
+        throw new Error('Failed to delete video');
+      }
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      alert('Failed to delete the video. Please try again.');
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!video) return;
+
+    setIsUpdating(true);
+    setUpdateProgress(0);
+    setUpdateComplete(false);
+
+    try {
+      let compressedCover = video.cover;
+
+      const updatedVideoData = {
+        id: video.id, // Очікується ціле число
+        objectID: 'some-generated-id', // Має бути рядок
+        channelSettingsId: userChannel?.id, // Очікується ціле число
+        tittle: video.tittle, // Має бути рядок
+        description: description, // Має бути рядок
+        uploadDate: new Date().toISOString(), // Дата у форматі ISO
+        duration: video.duration, // Ціле число (тривалість у секундах)
+        videoUrl: video.videoUrl, // Має бути рядок
+        vRoomVideoUrl: '', // Якщо це не використовується, передайте пустий рядок або видаліть поле
+        viewCount: 0, // Ціле число
+        likeCount: 0, // Ціле число
+        dislikeCount: 0, // Ціле число
+        isShort: false, // Булеве значення
+        cover: thumbnailBase64, // Має бути рядок (Base64-стрічка або шлях до зображення)
+        visibility: visibility === 'public', // Булеве значення (true/false)
+        isAgeRestriction: false, // Булеве значення (true/false)
+        isCopyright: false, // Булеве значення (true/false)
+        audience: 'all', // Має бути рядок
+        categoryIds: [], // Масив цілих чисел
+        tagIds: [], // Масив цілих чисел
+        historyOfBrowsingIds: [], // Масив цілих чисел
+        commentVideoIds: [], // Масив цілих чисел
+        playLists: [], // Масив цілих чисел
+        lastViewedPosition: '00:00:00', // Рядок (формат часу)
     };
 
-    const fetchCategories = async () => {
-        try {
-            const response = await api.get('/Category')
-            setCategories(response.data)
-        } catch (error) {
-            console.error('Error fetching categories:', error)
-        }
+      console.log("Updated Video Data:", updatedVideoData);
+
+      const response = await api.put(`/Video/update`, updatedVideoData, {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total!
+          );
+          setUpdateProgress(percentCompleted);
+        },
+      });
+
+      if (response.status !== 200) throw new Error('Failed to update video data');
+
+      console.log('Video updated successfully:', response.data);
+
+      setVideo(response.data);
+      setUpdateComplete(true);
+    } catch (error) {
+      console.error('Error updating video data:', error);
+    } finally {
+      setIsUpdating(false);
     }
-
-    const getUserChannel = async () => {
-        if (user) {
-            try {
-                const response = await api.get('/ChannelSettings/getbyownerid/' + user.id)
-                if (response.status === 200) {
-                    setUserChannel(response.data)
-                }
-            } catch (error) {
-                console.error('Error fetching user channel:', error)
-            }
-        }
-    }
-
-    const addCategory = () => {
-        if (newCategory && !categories.some((category) => category.name === newCategory)) {
-            const newCategoryObj: Category = {
-                id: 0,
-                name: newCategory,
-                videosId: []
-            }
-            setCategories([...categories, newCategoryObj])
-            DownloadCategory(newCategoryObj)
-            setNewCategory('')
-        }
-    }
-
-    const DownloadCategory = async (category: Category) => {
-        try {
-            const response = await api.post('/Category/add', category, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-
-            if (response.status != 200) {
-                throw new Error('Failed to add category')
-            }
-            console.log('Category added successfully')
-            await fetchCategories()
-            return response.data.id
-        } catch (error) {
-            console.error('Error adding category:', error)
-        }
-    }
-
-    const handleVideoSelect = (video: IVideo) => {
-        try {
-            setVideo(video); // Оновлення відео
-            setTitle(video.tittle);
-            setDescription(video.description);
-           // setCategory(video.category);
-            //setTags(video.tags || []);
-            setVisibility(video.visibility ? 'public' : 'private');
-            setAgeRestricted(video.isAgeRestriction);
-            setIsCopyright(video.isCopyright);
-            setAudience(video.audience);
-            //setSelectedCategoryId(video.categoryIds);
-            //setTagIds(video.tagIds || []);
-            setThumbnailPreview(`data:image/jpeg;base64,${video.cover}`);
-
-            console.log('Video data:', video);  // Перевірте дані, які приходять
-        } catch (error) {
-            console.error('Error selecting video:', error);
-        }
-    };
-
-    const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCurrentTag(e.target.value)
-    }
-
-    const addTag = async (tagName: string) => {
-        if (tagName && !tags.some(tag => tag.name === tagName)) {
-            const newTagObj: Tag = {
-                id: 0,
-                name: tagName,
-                videosId: [],
-            }
-    
-            setTags(prevTags => [...prevTags, newTagObj])
-    
-            try {
-                await api.post('/Tag/add', newTagObj)
-                await fetchTagIdByName(tagName)
-            } catch (error) {
-                console.error('Error adding tag:', error)
-            } finally {
-                setCurrentTag("")
-            }
-        }
-    }
-
-    const fetchTagIdByName = async (tagName: string): Promise<void> => {
-        try {
-            const response = await api.get(`/Tag/getbytagname/${tagName}`)
-    
-            if (response.status !== 200 || !response.data.id) {
-                throw new Error('Failed to fetch tag ID')
-            }
-    
-            const tagId = response.data.id
-    
-            setTagIds(prevIds => {
-                if (!prevIds.includes(tagId)) {
-                    return [...prevIds, tagId]
-                }
-                return prevIds
-            })
-    
-            setTags(prevTags =>
-                prevTags.map(tag =>
-                    tag.name === tagName ? { ...tag, id: tagId } : tag
-                )
-            )
-        } catch (error) {
-            console.error('Error fetching tag ID:', error)
-            throw error
-        }
-    }
-
-    const removeTag = (id: number) => {
-        setTags((prevTags) => prevTags.filter((tag) => tag.id !== id))
-        setTagIds((prevIds) => prevIds.filter((tagId) => tagId !== id))
-    }
-
-    const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
-        
-        if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
-            setThumbnail(file)
-            
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = reader.result?.toString().split(',')[1] || ""
-                setThumbnailBase64(base64String)
-                setThumbnailPreview(`data:${file.type};base64,${base64String}`)
-            }
-    
-            reader.readAsDataURL(file)
-        } else {
-            console.error("Unsupported file format. Please select a PNG or JPEG image.")
-        }
-    }
-
-    const handleVideoDelete = async (id: number): Promise<void> => {
-        try {
-            console.log('Deleting video with id:', id);
-            const response = await api.delete(`/Video/${id}`);
-            console.log('Server response status:', response.status);
-    
-            if (response.status === 204) {
-                const updatedVideos = availableVideos.filter((video) => video.id !== id);
-                setAvailableVideos(updatedVideos);
-                alert('Video successfully deleted');
-            } else {
-                throw new Error('Failed to delete video');
-            }
-        } catch (error) {
-            console.error('Error deleting video:', error);
-            alert('Failed to delete the video. Please try again.');
-        }
-    };
-    
-    const handleSubmit = async () => {
-        if (!video) return;
-    
-        setIsUpdating(true);
-        setUpdateProgress(0);
-        setUpdateComplete(false);
-        const emptyFile = new Blob([], { type: 'application/octet-stream' })
-        try {
-            // Оновлюємо лише ті поля, які сервер очікує
-            const updatedVideoData = {
-                id: video.id,
-            objectID: 'some-generated-id',
-            channelSettingsId: userChannel?.id,
-            tittle: video.tittle,
-            description: video.description,
-            uploadDate: new Date().toISOString(),
-            duration: 222,
-            videoUrl: video.videoUrl,
-            viewCount: 0,
-            likeCount: 0,
-            dislikeCount: 0,
-            isShort: false,
-            cover: video.cover,
-            visibility: visibility === 'public',
-            isAgeRestriction: 'False',
-            isCopyright: 'False',
-            audience: 'all',
-            lastViewedPosition: '00:00:00',
-            categoryIds: [],
-            tagIds: [],
-            file: emptyFile,
-            };
-    
-            const response = await api.put(`/Video/update`, updatedVideoData, {
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
-                    setUpdateProgress(percentCompleted);
-                },
-            });
-    
-            if (response.status !== 200) throw new Error('Failed to update video data');
-    
-            console.log('Video updated successfully:', response.data);
-    
-            // Оновлення локального стану після успішного оновлення
-            setVideo(response.data);
-            setUpdateComplete(true);
-        } catch (error) {
-            console.error('Error updating video data:', error);
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-    
+  };
     return (
         <div className="container p-4">
             <h1 className="text-2xl font-bold mb-6">Update Video</h1>
@@ -401,37 +402,41 @@ const VideoUpdateInterface: React.FC = () => {
           className="min-h-[200px]"
         />
 
-        {/* Thumbnail Selection */}
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold">Choose a thumbnail</h3>
-            <p>Set a thumbnail that stands out and draws viewers' attention.</p>
-            <p className="text-sm text-gray-500">Recommended size is 1280x720</p>
+<div className="space-y-4">
+  <div>
+    <h3 className="text-lg font-semibold">Choose a thumbnail</h3>
+    <p>Set a thumbnail that stands out and draws viewers' attention.</p>
+    <p className="text-sm text-gray-500">Recommended size is 1280x720</p>
 
-            <Button variant="outline" onClick={() => handleThumbnailChange}>
-              Choose file
-            </Button>
+    {/* Вибір файлу через прихований input */}
+    <Button
+      variant="outline"
+      onClick={() => document.getElementById("thumbnailInput")?.click()}
+    >
+      Choose file
+    </Button>
 
-            <input
-              id="thumbnailInput"
-              type="file"
-              accept="image/png, image/jpeg, image/jpg"
-              className="hidden"
-              onChange={handleThumbnailChange}
-            />
+    <input
+      id="thumbnailInput"
+      type="file"
+      accept="image/png, image/jpeg, image/jpg"
+      className="hidden"
+      onChange={handleThumbnailChange}
+    />
 
-            {thumbnailPreview && (
-              <div className="mt-4">
-                <p>Thumbnail preview:</p>
-                <img
-                  src={thumbnailPreview as string}
-                  alt="Thumbnail Preview"
-                  className="thumbnail-preview"
-                  style={{ width: "300px", height: "auto" }}
-                />
-              </div>
-            )}
-          </div>
+    {/* Прев'ю мініатюри */}
+    {thumbnailPreview && (
+      <div className="mt-4">
+        <p>Thumbnail preview:</p>
+        <img
+          src={thumbnailPreview as string}
+          alt="Thumbnail Preview"
+          className="thumbnail-preview"
+          style={{ width: "300px", height: "auto" }}
+        />
+      </div>
+    )}
+</div>
 
           {/* Thumbnail Grid */}
           <div className="grid grid-cols-4 gap-4 mt-4">

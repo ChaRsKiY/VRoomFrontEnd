@@ -13,7 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 const connection = new HubConnectionBuilder()
-    .withUrl("https://your-server.com/webrtc")
+    .withUrl("https://localhost:5024/webrtc")
+    .withAutomaticReconnect() 
     .build();
 
 const ICE_SERVERS = [
@@ -35,177 +36,210 @@ export default function WebRTCBroadcast() {
   const [chatMessages, setChatMessages] = useState<string[]>([])
   const [newChatMessage, setNewChatMessage] = useState('')
   
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const ws = useRef<WebSocket | null>(null)
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const ws = useRef<WebSocket | null>(null);
+
+  const connection = useRef(
+    new HubConnectionBuilder()
+      .withUrl("https://9dda-176-98-71-120.ngrok-free.app/webrtc")
+      .withAutomaticReconnect()
+      .build()
+  ).current;
+
   useEffect(() => {
+    // Підписка на повідомлення SignalR
     connection.on("ReceiveOffer", handleOffer);
     connection.on("ReceiveAnswer", handleAnswer);
     connection.on("ReceiveIceCandidate", handleNewICECandidate);
-  
+
     return () => {
       connection.off("ReceiveOffer", handleOffer);
       connection.off("ReceiveAnswer", handleAnswer);
       connection.off("ReceiveIceCandidate", handleNewICECandidate);
     };
   }, []);
+
   useEffect(() => {
+    // Таймер активного стріму
     if (isActive) {
       const interval = setInterval(() => {
-        setSeconds(seconds => seconds + 1)
-      }, 1000)
-      return () => clearInterval(interval)
+        setSeconds((prev) => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
     }
-  }, [isActive])
+  }, [isActive]);
 
   useEffect(() => {
     if (isActive) {
-      setupWebSocket()
+      setupWebSocket();
     }
     return () => {
-      ws.current?.close()
-    }
-  }, [isActive])
+      ws.current?.close();
+    };
+  }, [isActive]);
 
   const setupWebSocket = () => {
-    ws.current = new WebSocket('wss://localhost:5024')
-    
-    ws.current.onopen = () => console.log('WebSocket Open')
-    
+    ws.current = new WebSocket("wss://9dda-176-98-71-120.ngrok-free.app");
+
+    ws.current.onopen = () => console.log("WebSocket Open");
+
     ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      switch(data.type) {
-        case 'viewer-connected':
-          handleNewViewer(data.viewerId)
-          break
-        case 'viewer-disconnected':
-          handleViewerDisconnect(data.viewerId)
-          break
-        case 'offer':
-          handleOffer(data.offer, data.viewerId)
-          break
-        case 'answer':
-          handleAnswer(data.answer, data.viewerId)
-          break
-        case 'ice-candidate':
-          handleNewICECandidate(data.candidate, data.viewerId)
-          break
-        case 'chat-message':
-          setChatMessages(prev => [...prev, data.message])
-          break
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case "viewer-connected":
+          handleNewViewer(data.viewerId);
+          break;
+        case "viewer-disconnected":
+          handleViewerDisconnect(data.viewerId);
+          break;
+        case "offer":
+          handleOffer(data.offer, data.viewerId);
+          break;
+        case "answer":
+          handleAnswer(data.answer, data.viewerId);
+          break;
+        case "ice-candidate":
+          handleNewICECandidate(data.candidate, data.viewerId);
+          break;
+        case "chat-message":
+          setChatMessages((prev) => [...prev, data.message]);
+          break;
+        default:
+          console.warn("Unknown WebSocket message type:", data.type);
       }
-    }
-  }
+    };
+  };
 
   const handleNewViewer = (viewerId: string) => {
-    const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS })
-    
+    const peerConnection = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
     peerConnection.onicecandidate = (event) => {
       if (event.candidate) {
-        ws.current?.send(JSON.stringify({
-          type: 'ice-candidate',
-          candidate: event.candidate,
-          viewerId: viewerId
-        }))
+        ws.current?.send(
+          JSON.stringify({
+            type: "ice-candidate",
+            candidate: event.candidate,
+            viewerId: viewerId,
+          })
+        );
       }
-    }
+    };
 
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, mediaStream)
-      })
+      mediaStream.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, mediaStream);
+      });
     }
 
-    setPeerConnections(prev => ({ ...prev, [viewerId]: peerConnection }))
-    setViewerCount(count => count + 1)
+    setPeerConnections((prev) => ({ ...prev, [viewerId]: peerConnection }));
+    setViewerCount((count) => count + 1);
 
     peerConnection.createOffer()
-      .then(offer => peerConnection.setLocalDescription(offer))
+      .then((offer) => peerConnection.setLocalDescription(offer))
       .then(() => {
-        ws.current?.send(JSON.stringify({
-          type: 'offer',
-          offer: peerConnection.localDescription,
-          viewerId: viewerId
-        }))
-      })
-  }
+        ws.current?.send(
+          JSON.stringify({
+            type: "offer",
+            offer: peerConnection.localDescription,
+            viewerId: viewerId,
+          })
+        );
+      });
+  };
 
   const handleViewerDisconnect = (viewerId: string) => {
-    const peerConnection = peerConnections[viewerId]
+    const peerConnection = peerConnections[viewerId];
     if (peerConnection) {
-      peerConnection.close()
-      setPeerConnections(prev => {
-        const newConnections = { ...prev }
-        delete newConnections[viewerId]
-        return newConnections
-      })
-      setViewerCount(count => count - 1)
+      peerConnection.close();
+      setPeerConnections((prev) => {
+        const newConnections = { ...prev };
+        delete newConnections[viewerId];
+        return newConnections;
+      });
+      setViewerCount((count) => count - 1);
     }
-  }
+  };
 
   const handleOffer = (offer: RTCSessionDescriptionInit, viewerId: string) => {
-    const peerConnection = peerConnections[viewerId]
+    const peerConnection = peerConnections[viewerId];
     if (peerConnection) {
-      peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+      peerConnection
+        .setRemoteDescription(new RTCSessionDescription(offer))
         .then(() => peerConnection.createAnswer())
-        .then(answer => peerConnection.setLocalDescription(answer))
+        .then((answer) => peerConnection.setLocalDescription(answer))
         .then(() => {
-          ws.current?.send(JSON.stringify({
-            type: 'answer',
-            answer: peerConnection.localDescription,
-            viewerId: viewerId
-          }))
-        })
+          ws.current?.send(
+            JSON.stringify({
+              type: "answer",
+              answer: peerConnection.localDescription,
+              viewerId: viewerId,
+            })
+          );
+        });
     }
-  }
+  };
 
   const handleAnswer = (answer: RTCSessionDescriptionInit, viewerId: string) => {
-    const peerConnection = peerConnections[viewerId]
+    const peerConnection = peerConnections[viewerId];
     if (peerConnection) {
-      peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+      peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     }
-  }
+  };
 
   const handleNewICECandidate = (candidate: RTCIceCandidateInit, viewerId: string) => {
-    const peerConnection = peerConnections[viewerId]
+    const peerConnection = peerConnections[viewerId];
     if (peerConnection) {
-      peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+      peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     }
-  }
+  };
 
   const startStream = async () => {
-    setIsActive(true)
+    setIsActive(true);
     try {
-      await enableStream()
+      await enableStream();
     } catch (error) {
-      console.error('Error starting stream:', error)
-      setIsActive(false)
+      console.error("Error starting stream:", error);
+      setIsActive(false);
     }
-  }
+  };
 
   const stopStream = () => {
-    setIsActive(false)
-    mediaStream?.getTracks().forEach(track => track.stop())
-    setMediaStream(null)
-    Object.values(peerConnections).forEach(pc => pc.close())
-    setPeerConnections({})
-    setViewerCount(0)
-    ws.current?.close()
-  }
+    setIsActive(false);
+    mediaStream?.getTracks().forEach((track) => track.stop());
+    setMediaStream(null);
+    Object.values(peerConnections).forEach((pc) => pc.close());
+    setPeerConnections({});
+    setViewerCount(0);
+    ws.current?.close();
+  };
 
   const enableStream = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: isVideoOn,
         audio: !isMuted,
-      })
-      setMediaStream(stream)
+      });
+
+      setMediaStream(stream);
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
+        videoRef.current.srcObject = stream;
       }
+
+      Object.values(peerConnections).forEach((pc) => {
+        const senders = pc.getSenders();
+        senders.forEach((sender) => {
+          if (sender.track?.kind === "video") {
+            sender.replaceTrack(stream.getVideoTracks()[0]);
+          }
+          if (sender.track?.kind === "audio") {
+            sender.replaceTrack(stream.getAudioTracks()[0]);
+          }
+        });
+      });
     } catch (err) {
-      console.log(err)
+      console.error("Error accessing media devices:", err);
     }
-  }
+  };
 
   const toggleMute = () => {
     setIsMuted(!isMuted)
@@ -235,34 +269,38 @@ export default function WebRTCBroadcast() {
 
   const toggleScreenShare = async () => {
     try {
-      let stream
+      let stream;
       if (!userFacing) {
-        stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+        // Отримуємо потік екрану
+        stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       } else {
-        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        // Отримуємо камеру
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       }
-      setMediaStream(stream)
+  
+      setMediaStream(stream);
       if (videoRef.current) {
-        videoRef.current.srcObject = stream
+        videoRef.current.srcObject = stream;
       }
-      setUserFacing(!userFacing)
-
-      // Update all peer connections with the new stream
+  
+      setUserFacing(!userFacing);
+  
+      // Оновлення всіх peer connections з новим потоком
       Object.values(peerConnections).forEach(pc => {
-        const senders = pc.getSenders()
+        const senders = pc.getSenders();
         senders.forEach(sender => {
           if (sender.track?.kind === 'video') {
-            sender.replaceTrack(stream.getVideoTracks()[0])
+            sender.replaceTrack(stream.getVideoTracks()[0]);
           }
           if (sender.track?.kind === 'audio') {
-            sender.replaceTrack(stream.getAudioTracks()[0])
+            sender.replaceTrack(stream.getAudioTracks()[0]);
           }
-        })
-      })
+        });
+      });
     } catch (err) {
-      console.log(err)
+      console.error("Error in screen sharing: ", err);
     }
-  }
+  };
 
   const handleCanPlay = () => {
     videoRef.current?.play()
