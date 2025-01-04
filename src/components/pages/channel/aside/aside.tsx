@@ -26,15 +26,15 @@ interface IAsideHomeProps {
 const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
 
     const mainPageAccountCategories = [
-        {icon: <LuLayoutDashboard/>, name: t("channel:Home"), path: "/channel/editing"},
-        {icon: <PiMonitorPlayLight/>, name: t("channel:Content"), path: "/channel/editing/content"},
-        {icon: <MdOutlineAnalytics/>, name: t("channel:Analytics"), path: "/channel/editing/analytics"},
-        {icon: <LiaCommentSolid/>, name: t("channel:Comments"), path: "/channel/editing/comments"},
-        {icon: <MdOutlineSubtitles/>, name: t("channel:Subtitles"), path: "/channel/editing/subtitles"},
-        {icon: <TbCircleLetterC/>, name: t("channel:Copyright"), path: "/channel/editing/copyright"},
-        {icon: <MdOutlineMonetizationOn/>, name: t("channel:Monetization"), path: "/channel/editing/monetization"},
-        {icon: <FaMagic/>, name: t("channel:Channel_setup"), path: "/channel/editing/channel_setup/profile"},
-        {icon: <MdOutlineLibraryMusic/>, name: t("channel:Music_library"), path: "/channel/editing/music_library"},
+        {icon: <LuLayoutDashboard/>, name: t("channel.json:Home"), path: "/channel.json/editing"},
+        {icon: <PiMonitorPlayLight/>, name: t("channel.json:Content"), path: "/channel.json/editing/content"},
+        {icon: <MdOutlineAnalytics/>, name: t("channel.json:Analytics"), path: "/channel.json/editing/analytics"},
+        {icon: <LiaCommentSolid/>, name: t("channel.json:Comments"), path: "/channel.json/editing/comments"},
+        {icon: <MdOutlineSubtitles/>, name: t("channel.json:Subtitles"), path: "/channel.json/editing/subtitles"},
+        {icon: <TbCircleLetterC/>, name: t("channel.json:Copyright"), path: "/channel.json/editing/copyright"},
+        {icon: <MdOutlineMonetizationOn/>, name: t("channel.json:Monetization"), path: "/channel.json/editing/monetization"},
+        {icon: <FaMagic/>, name: t("channel.json:Channel_setup"), path: "/channel.json/editing/channel_setup/profile"},
+        {icon: <MdOutlineLibraryMusic/>, name: t("channel.json:Music_library"), path: "/channel.json/editing/music_library"},
     ]
 
 

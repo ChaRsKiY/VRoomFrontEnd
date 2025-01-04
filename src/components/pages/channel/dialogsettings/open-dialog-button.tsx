@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function OpenDialogButton() {
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-    const [selectedPage, setSelectedPage] = useState('page-channel-basic-info');  // Какая страница выбрана
+    const [selectedPage, setSelectedPage] = useState('page-channel.json-basic-info');  // Какая страница выбрана
 
     // Динамическая загрузка страниц
     const PageComponent = dynamic(() => import(`@/components/pages/channel/dialogsettings/${selectedPage}`), {
@@ -25,7 +25,7 @@ export default function OpenDialogButton() {
 
     const closeDialog = () => {
         setIsDialogOpen(false);
-        setSelectedPage('page-channel-basic-info');
+        setSelectedPage('page-channel.json-basic-info');
     };
 
     return (

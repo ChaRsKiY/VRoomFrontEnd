@@ -79,7 +79,7 @@ export default function VideoCard({el}: IVideoCardProps) {
         }
     }, [isUserLoaded, clerkUser]);
 
-    // Fetching user data (channel settings)
+    // Fetching user data (channel.json settings)
     //цей метод не потрібний бо в getUserChannel ми отримуємо даннi каналу за допомогою clerkUser?.id і
     //тоді не потрібно отримувати id каналу щоб потім отримати дані каналу по id
     /*const fetchUserData = async () => {
@@ -87,22 +87,22 @@ export default function VideoCard({el}: IVideoCardProps) {
             const response = await api.get(`/ChannelSettings/getinfobychannelid/${clerkUser?.id}`);
             if (response.status === 200) {
                 const channelSettingsId = response.data.id;
-                getUserChannel(channelSettingsId); // Fetch channel info
+                getUserChannel(channelSettingsId); // Fetch channel.json info
             }
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
     };*/
 
-    // Fetching user channel data by channel ID
+    // Fetching user channel.json data by channel.json ID
     const getUserChannel = async (/*channelId: number*/) => {
         try {
             const response = await api.get(`/ChannelSettings/getbyownerid/${clerkUser?.id}`);
             if (response.status === 200) {
-                setUserChannel(response.data); // Set channel data
+                setUserChannel(response.data); // Set channel.json data
             }
         } catch (error) {
-            console.error('Error fetching user channel:', error);
+            console.error('Error fetching user channel.json:', error);
         }
     };
   const fetchUserData = async () => {
@@ -111,10 +111,10 @@ export default function VideoCard({el}: IVideoCardProps) {
       if (response.status === 200) {
         const channelData: IChannel = response.data;
         setUserChannel(channelData);
-        console.log('Fetched channel data:', channelData);
+        console.log('Fetched channel.json data:', channelData);
       }
     } catch (error) {
-      console.error('Error fetching channel data:', error);
+      console.error('Error fetching channel.json data:', error);
     }
   };
 
@@ -173,7 +173,7 @@ export default function VideoCard({el}: IVideoCardProps) {
       await fetchUserData();
       await fetchPlaylists();
       if (!userChannel?.id) {
-        console.error('User channel ID is missing');
+        console.error('User channel.json ID is missing');
         return;
       }
   

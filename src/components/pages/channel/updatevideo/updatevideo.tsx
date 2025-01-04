@@ -97,7 +97,7 @@ const VideoUpdateInterface: React.FC = () => {
                     setUserChannel(response.data)
                 }
             } catch (error) {
-                console.error('Error fetching user channel:', error)
+                console.error('Error fetching user channel.json:', error)
             }
         }
     }

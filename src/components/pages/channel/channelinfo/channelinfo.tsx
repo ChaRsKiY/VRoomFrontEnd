@@ -115,7 +115,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
                 setChannel(data);
                 getMentions();
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -143,7 +143,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
                 });
                 setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
             //}
         } catch (error) {
@@ -169,7 +169,7 @@ const ChannelInfoComponent: React.FC<IProps> = ({channelid}) => {
                     }
                 });
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);

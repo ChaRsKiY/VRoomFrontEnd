@@ -20,7 +20,7 @@ const HeaderHome: React.FC<IHeaderHomeProps> = ({ t }: IHeaderHomeProps) => {
                 <Search />
             </div>
 
-            <HeaderBlock />
+            <HeaderBlock /> 
         </div>
     )
 };

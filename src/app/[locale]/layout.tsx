@@ -13,6 +13,8 @@ import { ReactNode } from "react";
 import { clerkLocalization } from "@/utils/clerk-localization-tool";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/providers/theme.provider";
+import api from "@/services/axiosApi";
+import {auth} from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "VRoom",
@@ -32,6 +34,9 @@ interface IRootLayoutProps {
 
 async function RootLayout({ children, params: { locale } }: Readonly<IRootLayoutProps>) {
   const { resources } = await initTranslations(locale, i18nNamespaces);
+  const { getToken } = auth();
+
+  api.defaults.headers.put.Authorization = `Bearer ${await getToken()}`;
 
   return (
     <VideoProvider>

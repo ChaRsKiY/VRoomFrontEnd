@@ -46,7 +46,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                     });
                     setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
                 } else {
-                    console.error('Ошибка при получении channel:', response.statusText);
+                    console.error('Ошибка при получении channel.json:', response.statusText);
                 }
             }
         } catch (error) {
@@ -120,7 +120,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                 const data: IChannel = await response.data;
                 setChannel(data);
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
