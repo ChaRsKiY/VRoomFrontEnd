@@ -12,13 +12,26 @@ import fetchVideos from '../content/fetch-filtered-videos-by-type';
 import Hls from 'hls.js';
 import MDialog from "@/components/pages/channel/subtitle/menuwindow";
 import { toast } from "@/hooks/use-toast";
+import initTranslations from "@/app/i18n";
+
+interface Props {
+    params: {
+        locale: string;
+    }
+}
+
 
 interface IProps {
     videoId: number;
     onClose: () => void;
+    params: {
+        locale: string;
+    };
 }
 
-const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
+const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose ,params: { locale } }) => {
+
+    const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
 
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
@@ -49,6 +62,20 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const [publishDialog, setPublishDiaolg] = useState<boolean>(false);
     const [validMessage, setValidMessage] = useState<string>("");
     const [isValid2, setIsValid2] = useState<boolean>(true);
+     const [manualText, setManualText] = useState('');
+        const [lfileText, setFileText] = useState('');
+        const [delText, setDelText] = useState('');
+
+     useEffect(() => {
+            const loadTranslations = async () => {
+                const { t } = await initTranslations(locale, ['subtitles']);
+                setT(() => t);
+                setManualText(t('manual'));
+                setFileText(t('file'));
+                setDelText(t('del'));
+            };
+            loadTranslations();
+        }, [locale]);
 
 
     const SaveDrafts = () => {

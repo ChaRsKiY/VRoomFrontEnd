@@ -10,7 +10,7 @@ interface ISubtitlesProps {
 }
 
 const channelPage = async ({params: {locale}}: ISubtitlesProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories', 'channel']);
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel','subtitles']);
 
 
     return (
@@ -44,7 +44,7 @@ const channelPage = async ({params: {locale}}: ISubtitlesProps) => {
 
 
                 </div>
-                <AllVideolist/>
+                <AllVideolist params={{ locale }} />
 
             </div>
         </>
