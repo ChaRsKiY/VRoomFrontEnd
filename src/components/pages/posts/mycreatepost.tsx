@@ -2,26 +2,25 @@
 
 import React from 'react'
 import Image from "next/image";
-import { FaImage, FaVideo, FaVoteYea } from 'react-icons/fa';
-import { useEffect, useState, useRef } from 'react';
-import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ITranslationFunction } from "@/types/translation.interface";
-import { useTranslation } from "next-i18next";
-import { IPost } from "@/types/post.interface";
+import {FaImage, FaVideo, FaVoteYea} from 'react-icons/fa';
+import {useEffect, useState, useRef} from 'react';
+import {buttonCancelStyles} from '@/styles/buttonstyles/buttonCancelStyles';
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
+import {IPost} from "@/types/post.interface";
 import PostList from "@/components/pages/posts/posts";
-import { IChannel } from "@/types/channelinfo.interface"
-import { useUser } from '@clerk/nextjs';
-import { IVideo } from '@/types/videoinfo.interface';
-import { FaEye } from 'react-icons/fa';
+import {IChannel} from "@/types/channelinfo.interface"
+import {useUser} from '@clerk/nextjs';
+import {IVideo} from '@/types/videoinfo.interface';
+import {FaEye} from 'react-icons/fa';
 import api from '@/services/axiosApi';
 import '@/styles/modalsubtitles.css';
 
 
-
 const CreatePost: React.FC = () => {
     // const idTest=1;
-    const { t }: { t: ITranslationFunction } = useTranslation()
+    const {t}: { t: ITranslationFunction } = useTranslation()
 
     const [lineColor, setLineColor] = useState('lightgray');
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -47,7 +46,7 @@ const CreatePost: React.FC = () => {
     const [displayVideoMenu, setDisplayVideoMenu] = useState('none');
     const [postOwner, setPostOwner] = useState<IChannel | null>(null);
     const [videoPost, setVideoPost] = useState<IVideo | null>(null);
-    const { user } = useUser();
+    const {user} = useUser();
     const [pollOptions, setPollOptions] = useState<string[]>(['', '']); // Изначально два пустых варианта для опроса
     const [postType, setPostType] = useState<'text' | 'poll' | 'vote'>('text'); // Тип поста
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -149,18 +148,15 @@ const CreatePost: React.FC = () => {
         if (displayVideoMenu === 'none' && display4 === 'block') {
             setDisplayVideoMenu('block');
             setDisplay4('none');
-        }
-        else if (displayVideoMenu === 'block') {
+        } else if (displayVideoMenu === 'block') {
             setDisplayVideoMenu('none');
             if (display4 === 'none')
                 setDisplay2('block');
-        }
-        else if (displayVideoMenu === 'none' && display1 === 'block') {
+        } else if (displayVideoMenu === 'none' && display1 === 'block') {
             setDisplay1('none');
             setDisplay2('block');
             setDisplay3('block');
-        }
-        else {
+        } else {
             setDisplayVideoMenu('block');
             setDisplay2('none');
         }
@@ -202,8 +198,7 @@ const CreatePost: React.FC = () => {
         if (videoPost != null) {
             setVideoPost(null);
             setLink('');
-        }
-        else {
+        } else {
             setDisplay4('none');
         }
         if (fileVideoRef.current) {
@@ -249,8 +244,7 @@ const CreatePost: React.FC = () => {
                 if (videoPost != null) {
                     formData.append('type', 'videolink');
                     formData.append('videolink', link);
-                }
-                else
+                } else
                     formData.append('type', 'text');
                 if (image) formData.append('img', image);
                 if (video) formData.append('video', video);
@@ -266,8 +260,9 @@ const CreatePost: React.FC = () => {
                     alert(res.statusText);
                 }
             }
+        } else {
+            alert('Add a post description! Text field cannot be empty !')
         }
-        else { alert('Add a post description! Text field cannot be empty !') }
     };
 
     const autoResize = () => {
@@ -279,193 +274,237 @@ const CreatePost: React.FC = () => {
 
     return (
         <div>
-        <div  >
+            <div className={'mt-3'}>
 
-            <div className="w-full  ">
-                <div className="w-3/4 px-8" style={{ border: '2px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px' }}>
+                <div className="w-full  ">
+                    <div className="w-3/4 px-8"
+                         style={{border: '2px solid rgba(0, 128, 0, 0.5)', padding: '10px', borderRadius: '5px'}}>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <small style={{ textAlign: 'center', color: 'grey', fontWeight: 'bold' }}>Select post type:</small>
-                        <select value={postType} onChange={(e) => setPostType(e.target.value as 'text' | 'poll' | 'vote')}
-                            style={{
-                                padding: '10px'
-                            }}>
-                            <option value="text">Regular post</option>
-                            <option value="vote">Post-voting</option>
+                        <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                            <small style={{textAlign: 'center', color: 'grey', fontWeight: 'bold'}}>Select post
+                                type:</small>
+                            <select value={postType}
+                                    onChange={(e) => setPostType(e.target.value as 'text' | 'poll' | 'vote')}
+                                    style={{
+                                        padding: '10px'
+                                    }}>
+                                <option value="text">Regular post</option>
+                                <option value="vote">Post-voting</option>
 
-                        </select>
-                    </div>
-
-                    <textarea
-                        ref={textareaRef}
-                        value={text}
-                        onChange={handleChange}
-                        placeholder="Enter the text"
-                        style={{
-                            border: "none",
-                            borderBottom: "2px solid gray",
-                            outline: "none",
-                            width: "100%",
-                            resize: "none",
-                            overflow: "hidden", 
-                            padding: "5px",
-                            minHeight: "30px", 
-                            boxSizing: "border-box", 
-                        }}
-                    />
-
-
-                    {postType === 'vote' && (
-                        <div>
-                            <small style={{ color: 'grey', fontWeight: 'bold' }}>Add vote options:</small>
-                            {pollOptions.map((option, index) => (
-                                <div key={index} style={{ display: 'flex', marginBottom: '5px' }}>
-                                    <input
-                                        type="text"
-                                        value={option}
-                                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                                        placeholder={`Option ${index + 1}`}
-                                        style={{ flex: 1, padding: '5px', border: '1px solid lightgray', borderRadius: '5px' }}
-                                    />
-                                </div>
-                            ))}
-                            <button onClick={handleAddOption} style={{ marginTop: '5px' }}>
-                                Add an option
-                            </button>
+                            </select>
                         </div>
-                    )}
 
-                    {postType === 'text' && (
-                        <div className=" w-full " >
+                        <textarea
+                            ref={textareaRef}
+                            value={text}
+                            onChange={handleChange}
+                            placeholder="Enter the text"
+                            style={{
+                                border: "none",
+                                borderBottom: "2px solid gray",
+                                outline: "none",
+                                width: "100%",
+                                resize: "none",
+                                overflow: "hidden",
+                                padding: "5px",
+                                minHeight: "30px",
+                                boxSizing: "border-box",
+                            }}
+                        />
 
-                            <div className='flex' style={{ justifyContent: 'space-around' }}>
-                                <div onClick={addImage} style={{ display: display2 }} >
-                                    <TooltipProvider>
-                                        <Tooltip >
-                                            <TooltipTrigger className="max-sm:hidden">
-                                                <FaImage size={40} color="grey" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>add image</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                                <div style={{ border: '2px solid gray', padding: '10px', borderRadius: '10px', margin: '10px', display }}>
-                                    <label>Add image:</label>
-                                    {imagePreview != '' && (
-                                        <Image src={imagePreview} alt="Banner Image" width={200} height={150}
-                                            className="w-35 h-25 bg-gray-200 mr-6 mt-2" />)}
-                                    <div>
-                                        <input type="file" ref={fileImageRef}
-                                            className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-        file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
-        dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
-                                            onChange={handleImageChange}
+
+                        {postType === 'vote' && (
+                            <div>
+                                <small style={{color: 'grey', fontWeight: 'bold'}}>Add vote options:</small>
+                                {pollOptions.map((option, index) => (
+                                    <div key={index} style={{display: 'flex', marginBottom: '5px'}}>
+                                        <input
+                                            type="text"
+                                            value={option}
+                                            onChange={(e) => handleOptionChange(index, e.target.value)}
+                                            placeholder={`Option ${index + 1}`}
+                                            style={{
+                                                flex: 1,
+                                                padding: '5px',
+                                                border: '1px solid lightgray',
+                                                borderRadius: '5px'
+                                            }}
                                         />
-                                        <button onClick={handleCancelImg} className='modal-button'
-                                            style={{ borderRadius: '6px', paddingLeft: '25px', paddingRight: '30px', paddingBottom: '6px', marginLeft: "2px" }}>Cancel</button>
                                     </div>
-                                </div>
-                                <div onClick={openVideoMenu} style={{ display: display3 }} >
-                                    <TooltipProvider>
-                                        <Tooltip >
-                                            <TooltipTrigger className="max-sm:hidden">
+                                ))}
+                                <button onClick={handleAddOption} style={{marginTop: '5px'}}>
+                                    Add an option
+                                </button>
+                            </div>
+                        )}
 
-                                                <FaVideo size={40} color="grey" />
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>add video or video-link</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
-                                <div style={{ display: display4 }}>
-                                    <input type='text' name='videolink'
-                                        value={link}
-                                        onChange={(e) => handleVideoLinkChange(e.target.value)}
-                                        placeholder={`video-link`}
-                                        style={{
-                                            flex: 1, padding: '5px', border: '1px solid lightgray', borderRadius: '5px',
-                                            minWidth: '300px'
-                                        }}></input>
-                                    <button onClick={previewVideoLink} style={{ padding: '10px' }}>
-                                        <FaEye style={{ display: 'inline' }} /><small>&nbsp;Preview</small></button>
-                                    <button onClick={handleCancelVideo} title='Cancel'
-                                        style={{ padding: '10px' }}>X</button>
-                                    {videoPost ? (
-                                        <div className="mt-4" >
-                                            <video controls width="400" autoPlay muted loop >
-                                                <source src={videoPost?.videoUrl} type="video/mp4" />
-                                                Ваш браузер не поддерживает просмотр видео.
-                                            </video>
+                        {postType === 'text' && (
+                            <div className=" w-full ">
 
-
-
-                                        </div>
-                                    ) : <></>}
-                                </div>
-                                <div style={{ display: displayVideoMenu }}>
-                                    <div style={{ display: 'flex' }}> <div>
-                                        <div onClick={addVideoLink} className='modal-button' >
-                                            <p>Add the video-link</p></div>
-                                        <div onClick={addVideo} className='modal-button'>
-                                            <p>Upload new video</p></div>
+                                <div className='flex' style={{justifyContent: 'space-around'}}>
+                                    <div onClick={addImage} style={{display: display2}}>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger className="max-sm:hidden">
+                                                    <FaImage size={40} color="grey"/>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>add image</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </div>
-                                        <div> <button style={{ paddingRight: '10px', color: 'gray', fontWeight: "bold" }} onClick={closeMenuVideo}
-                                            title='Close'>
-                                            X</button></div>
-                                    </div></div>
-
-                                <div style={{ border: '2px solid gray', padding: '10px', borderRadius: '10px', display: display1 }}>
-                                    <label>Add video:</label>
-
-                                    {videoPreview && (
-                                        <div className="mt-4">
-                                            <video controls width="400" autoPlay muted loop >
-                                                <source src={videoPreview} type="video/mp4" />
-                                                Ваш браузер не поддерживает просмотр видео.
-                                            </video>
-
+                                    <div style={{
+                                        border: '2px solid gray',
+                                        padding: '10px',
+                                        borderRadius: '10px',
+                                        margin: '10px',
+                                        display
+                                    }}>
+                                        <label>Add image:</label>
+                                        {imagePreview != '' && (
+                                            <Image src={imagePreview} alt="Banner Image" width={200} height={150}
+                                                   className="w-35 h-25 bg-gray-200 mr-6 mt-2"/>)}
+                                        <div>
+                                            <input type="file" ref={fileImageRef}
+                                                   className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+        file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
+        dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
+                                                   onChange={handleImageChange}
+                                            />
+                                            <button onClick={handleCancelImg} className='modal-button'
+                                                    style={{
+                                                        borderRadius: '6px',
+                                                        paddingLeft: '25px',
+                                                        paddingRight: '30px',
+                                                        paddingBottom: '6px',
+                                                        marginLeft: "2px"
+                                                    }}>Cancel
+                                            </button>
                                         </div>
-                                    )}
+                                    </div>
+                                    <div onClick={openVideoMenu} style={{display: display3}}>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger className="max-sm:hidden">
 
-                                    <input type="file" ref={fileVideoRef}
-                                        className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                                                    <FaVideo size={40} color="grey"/>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>add video or video-link</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </div>
+                                    <div style={{display: display4}}>
+                                        <input type='text' name='videolink'
+                                               value={link}
+                                               onChange={(e) => handleVideoLinkChange(e.target.value)}
+                                               placeholder={`video-link`}
+                                               style={{
+                                                   flex: 1,
+                                                   padding: '5px',
+                                                   border: '1px solid lightgray',
+                                                   borderRadius: '5px',
+                                                   minWidth: '300px'
+                                               }}></input>
+                                        <button onClick={previewVideoLink} style={{padding: '10px'}}>
+                                            <FaEye style={{display: 'inline'}}/><small>&nbsp;Preview</small></button>
+                                        <button onClick={handleCancelVideo} title='Cancel'
+                                                style={{padding: '10px'}}>X
+                                        </button>
+                                        {videoPost ? (
+                                            <div className="mt-4">
+                                                <video controls width="400" autoPlay muted loop>
+                                                    <source src={videoPost?.videoUrl} type="video/mp4"/>
+                                                    Ваш браузер не поддерживает просмотр видео.
+                                                </video>
+
+
+                                            </div>
+                                        ) : <></>}
+                                    </div>
+                                    <div style={{display: displayVideoMenu}}>
+                                        <div style={{display: 'flex'}}>
+                                            <div>
+                                                <div onClick={addVideoLink} className='modal-button'>
+                                                    <p>Add the video-link</p></div>
+                                                <div onClick={addVideo} className='modal-button'>
+                                                    <p>Upload new video</p></div>
+                                            </div>
+                                            <div>
+                                                <button
+                                                    style={{paddingRight: '10px', color: 'gray', fontWeight: "bold"}}
+                                                    onClick={closeMenuVideo}
+                                                    title='Close'>
+                                                    X
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style={{
+                                        border: '2px solid gray',
+                                        padding: '10px',
+                                        borderRadius: '10px',
+                                        display: display1
+                                    }}>
+                                        <label>Add video:</label>
+
+                                        {videoPreview && (
+                                            <div className="mt-4">
+                                                <video controls width="400" autoPlay muted loop>
+                                                    <source src={videoPreview} type="video/mp4"/>
+                                                    Ваш браузер не поддерживает просмотр видео.
+                                                </video>
+
+                                            </div>
+                                        )}
+
+                                        <input type="file" ref={fileVideoRef}
+                                               className="mt-3 block w-full text-sm text-gray-500 file:me-4 file:py-2 file:px-4 file:rounded-lg file:border-0
         file:text-sm file:font-semibold file:bg-[#087ba6] file:text-white hover:file:bg-[#0ea2de] file:disabled:opacity-50 file:disabled:pointer-events-none
         dark:text-neutral-500 dark:file:bg-blue-500 dark:hover:file:bg-blue-400"
 
-                                        onChange={handleVideoChange}
-                                    />
+                                               onChange={handleVideoChange}
+                                        />
 
-                                    <button onClick={handleCancelVideo} className='modal-button'
-                                        style={{ borderRadius: '6px', paddingLeft: '25px', paddingRight: '30px', paddingBottom: '6px', marginLeft: "2px" }}>
-                                        Cancel</button>
+                                        <button onClick={handleCancelVideo} className='modal-button'
+                                                style={{
+                                                    borderRadius: '6px',
+                                                    paddingLeft: '25px',
+                                                    paddingRight: '30px',
+                                                    paddingBottom: '6px',
+                                                    marginLeft: "2px"
+                                                }}>
+                                            Cancel
+                                        </button>
+                                    </div>
+
                                 </div>
 
                             </div>
 
+                        )}
+
+                        <div style={{display: 'flex', justifyContent: 'end'}}>
+                            <button onClick={handleSubmit2} className='modal-button'>
+                                Publish
+                            </button>
                         </div>
-
-                    )}
-
-                    <div style={{ display: 'flex', justifyContent: 'end' }}>
-                        <button onClick={handleSubmit2} className='modal-button'>
-                            Publish </button>
                     </div>
-                </div>
 
+
+                </div>
 
             </div>
 
+            {postOwner && (
+                <div>
+                    <PostList channelId={postOwner.id}/>
+                </div>
+            )}
         </div>
-        
-        {postOwner && (
-            <div >
-                           <PostList channelId={postOwner.id} />
-           </div>
-                       )}
-                       </div>
     );
 };
 

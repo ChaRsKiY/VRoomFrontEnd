@@ -11,7 +11,7 @@ interface IHomeTabProps {
 }
 
 const channelPage = async ({params: {locale}}: IHomeTabProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories']);
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel']);
     return (
 
         <>

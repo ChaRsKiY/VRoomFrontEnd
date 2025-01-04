@@ -1,89 +1,96 @@
-
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import initTranslations from "@/app/i18n";
 
-const termsPage = () => {
+interface Props {
+    params: {
+        locale: string;
+    }
+}
+
+const termsPage: React.FC<Props> = async({ params: { locale } }: Props) => {
+
+     const { t } = await initTranslations(locale, ['terms'])
 
     return (
 
         <div style={{
-            width: '100%', backgroundImage: `url(/logo.svg)`,
+            width: '100%', backgroundImage: `url(/terms_light.jpg)`,
             height: "100%", 
         }}>
             <div style={{paddingLeft:'20px'}}> <Link href="/">
-                <Image src="/logo.svg" alt="logo" width={125} height={125} />
+                <Image src="/logo.svg" alt="logo" width={125} height={125}  style={{paddingLeft:'20px', backgroundColor: "rgba(254,254,254,1)"}}></Image>
             </Link></div>
             <div style={{
                 display: 'flex', width: '100%', justifyContent: 'space-around',
-                background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.1),  rgba(0, 128, 255, 0.2) )',
+              //  background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.1),  rgba(0, 128, 255, 0.2) )',
                 height: "100%"
             }}>
                 <div style={{
-                    width: "1000px", marginTop: '80px', padding: '50px', borderRadius: "50px", marginBottom: "100px",
-                    backgroundColor: "rgba(254,254,254,0.7)", boxShadow: 'rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset'
+                    width: "1000px", marginTop: '10px', padding: '50px', borderRadius: "50px", marginBottom: "100px",
+                    backgroundColor: "rgba(254,254,254,1)", boxShadow: 'rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset'
                 }}>
-                    <h1 style={{ fontSize: '24px', textAlign: 'center' }}>Добро пожаловать на VRoom!</h1>
+                    <h1 style={{ fontSize: '24px', textAlign: 'center' }}>{t("terms:welcome")}</h1>
                     <br />
                     <p>
-                         Надеемся, что статья пригодится вам, обязательно ознакомьтесь с условиями пользования сайта.
+                    {t("terms:hope")}
                     </p>
                   
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>1.Общие положения</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:one")}</h2>
                     <br />
-                    <p>1.1Настоящие правила регулируют использование всех функций и сервисов, доступных на сайте.</p>
+                    <p>{t("terms:1.1")}</p>
                     <br />
-                    <p>1.2Пользуясь сайтом, вы подтверждаете, что вам исполнилось 13 лет или вы получили согласие родителей/опекунов.</p>
+                    <p>{t("terms:1.2")}</p>
                     <br />
-                    <p>1.3Мы оставляем за собой право изменять условия использования в любое время. Изменения вступают в силу с момента их публикации.</p>
+                    <p>{t("terms:1.3")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>2. Ваш аккаунт</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:2")}</h2>
                     <br />
-                    <p>2.1. Для доступа к некоторым функциям вам может потребоваться регистрация. Вы обязуетесь предоставить точные данные при создании аккаунта.</p>
+                    <p>{t("terms:2.1")}</p>
                     <br />
-                    <p>2.2. Вы несёте ответственность за безопасность вашего аккаунта. Мы не отвечаем за несанкционированный доступ, произошедший по вашей вине.</p>
+                    <p>{t("terms:2.2")}</p>
                     <br />
-                    <p>2.3. В случае нарушения правил ваш аккаунт может быть заблокирован или удалён.</p>
+                    <p>{t("terms:2.3")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>3. Публикация контента</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:3")}</h2>
                     <br />
-                    <p>3.1. Вы сохраняете права на контент, который загружаете, но предоставляете сайту право использовать его для предоставления услуг.</p>
+                    <p>{t("terms:3.1")}</p>
                     <br />
-                    <p>3.2. Запрещено размещать материалы, которые нарушают законодательство, авторские права или содержат ненависть, насилие, дискриминацию.</p>
+                    <p>{t("terms:3.2")}</p>
                     <br />
-                    <p>3.3. Мы оставляем за собой право удалить контент, нарушающий правила, без предварительного уведомления.</p>
+                    <p>{t("terms:3.3")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>4. Конфиденциальность</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:4")}</h2>
                     <br />
-                    <p>4.1. Мы собираем и обрабатываем ваши данные в соответствии с нашей Политикой конфиденциальности.</p>
+                    <p>{t("terms:4.1")}</p>
                     <br />
-                    <p>4.2. Вы обязуетесь соблюдать права других пользователей на конфиденциальность и не раскрывать их личные данные.</p>
+                    <p>{t("terms:4.2")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>5. Ограничение ответственности</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:5")}</h2>
                     <br />
-                    <p>5.1. Мы предоставляем сервисы "как есть" и не гарантируем их бесперебойную работу.</p>
+                    <p>{t("terms:5.1")}</p>
                     <br />
-                    <p>5.2. Мы не несем ответственности за возможные убытки, связанные с использованием сайта.</p>
+                    <p>{t("terms:5.2")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>6. Прекращение доступа</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:6")}</h2>
                     <br />
-                    <p>6.1. Мы оставляем за собой право ограничить или прекратить ваш доступ к сайту в случае нарушения правил.</p>
+                    <p>{t("terms:6.1")}</p>
                     <br />
-                    <p>6.2. Вы можете прекратить использование сайта в любое время, удалив ваш аккаунт.</p>
+                    <p>{t("terms:6.2")}</p>
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>7. Связь с администрацией</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:7")}</h2>
                     <br />
-                    <p>Если у вас возникли вопросы, свяжитесь с нами:</p>
+                    <p>{t("terms:ques")}</p>
                     <br />
                     <p> &nbsp;&nbsp;&nbsp;&nbsp;Email: vroomteamit@gmail.com</p>
 
                     <p> &nbsp;&nbsp;&nbsp;&nbsp;+38 (097) 123-45-67</p><br />
                     <br /><br />
-                    <h2 style={{ fontSize: '20px', }}>8. Применимое право</h2>
+                    <h2 style={{ fontSize: '20px', }}>{t("terms:8")}</h2>
                     <br />
-                    <p>Настоящие условия регулируются законодательством вашей страны проживания.</p>
+                    <p>{t("terms:end")}</p>
                     <br />
                 </div>
             </div>

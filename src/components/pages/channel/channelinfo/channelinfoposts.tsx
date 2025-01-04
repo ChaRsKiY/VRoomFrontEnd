@@ -1,5 +1,6 @@
 "use client"
 import {useState, useEffect} from 'react';
+import {useRouter} from 'next/navigation'
 import {useUser} from '@clerk/nextjs';
 import {IChannel} from '@/types/channelinfo.interface';
 import Image from 'next/image';
@@ -11,6 +12,9 @@ import api from '@/services/axiosApi';
 import CreatePost from '../../posts/createpost';
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
+import {redirect} from "next/navigation";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
 
 
 interface IProps {
@@ -20,36 +24,37 @@ interface IProps {
 
 
 const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
-
+    const router = useRouter()
     const [channel, setChannel] = useState<IChannel | null>(null);
     const [isFolowed, setIsFolowed] = useState(false);
     const {user} = useUser();
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
-
+    const {t}: { t: ITranslationFunction } = useTranslation();
 
     const getChannelSections = async () => {
         try {
-            if (user) {
-                const response = await api.get<ChannelSection[]>(`/ChannelSections/channelid/${channelid}`);
-                const data: ChannelSection[] = response.data;
+            // if (user) {
+            const response = await api.get<ChannelSection[]>(`/ChannelSections/channelid/${channelid}`);
+            const data: ChannelSection[] = response.data;
 
 
-                if (response.status == 200) {
-                    const sectionsWithUrls = data.map(section => {
-                        // Найти URL для текущего title
-                        const matchingLink = linksArray.find(link => link.title === section.title);
+            if (response.status == 200) {
+                const sectionsWithUrls = data.map(section => {
+                    // Найти URL для текущего title
+                    const matchingLink = linksArray.find(link => link.title === section.title);
 
-                        return {
-                            ...section,
-                            urlType: section.title,// Формируем URL, только если совпадает title
-                            url: matchingLink ? `${matchingLink.url}${section.channel_SettingsId}` : "",
-                        };
-                    });
-                    setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
-                } else {
-                    console.error('Ошибка при получении channel.json:', response.statusText);
-                }
+                    return {
+                        ...section,
+                        urlType: section.title,// Формируем URL, только если совпадает title
+                        url: matchingLink ? `${matchingLink.url}${section.channel_SettingsId}` : "",
+                    };
+                });
+                // console.log(sectionsWithUrls.sort((a, b) => a.order - b.order));
+                setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
+            } else {
+                console.error('Ошибка при получении channel:', response.statusText);
             }
+            // }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
         }
@@ -121,7 +126,7 @@ const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
                 const data: IChannel = await response.data;
                 setChannel(data);
             } else {
-                console.error('Ошибка при получении channel.json:', response.statusText);
+                console.error('Ошибка при получении channel:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -133,6 +138,9 @@ const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
         getChannel();
         getChannelSections();
         checkIsFolowed();
+        /*if (isFolowed) {
+            router.push(`/gotochannel/${channelid}`);
+        }*/
     }, [channelid]);
 
     return (
@@ -185,7 +193,7 @@ const ChannelPostComponent: React.FC<IProps> = ({channelid}) => {
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
                                         <Link
                                             className={el.title === 'posts' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
-                                            href={el.url} key={key}>{el.title}</Link>
+                                            href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>
                                 {/*<Link href={"/gotochannel/" + channelid} style={{

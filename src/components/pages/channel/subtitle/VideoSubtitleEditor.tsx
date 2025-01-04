@@ -20,9 +20,9 @@ interface IProps {
 
 const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
-    const [duration, setDuration] = useState(0); 
-    const [currentTime, setCurrentTime] = useState(0); 
-    const [videoUrl, setVideoUrl] = useState<string | null>(null); 
+    const [duration, setDuration] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -57,9 +57,9 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }
 
     const PublishSubtitle = () => {
-    
-            savePublishSubtitles(true);
-            // onClose();
+
+        savePublishSubtitles(true);
+        // onClose();
 
     }
 
@@ -283,7 +283,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                     str = "saved to drafts";
                 toast({
                     title: "Subtitles added",
-                    description: "Your subtitles have been "+ str,
+                    description: "Your subtitles have been " + str,
                     className: "text-green-600 bg-green-100",
                     duration: 3000,
                 });
@@ -528,8 +528,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         if (videoSrc && videoRef.current) {
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                hls.loadSource(videoSrc); 
-                hls.attachMedia(videoRef.current); 
+                hls.loadSource(videoSrc);
+                hls.attachMedia(videoRef.current);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log("HLS: Манифест загружен, воспроизведение готово");
                 });
@@ -665,27 +665,32 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     <button className='modal-button'
                                         onClick={SaveDrafts}>Save to draft</button>
                                     <button className='publish-button'
-                                        onClick={validateSubtitles }>Publish</button>
+                                        onClick={validateSubtitles}>Publish</button>
                                     <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                     >
                                         <BiArrowFromTop title='Download' />
                                     </button>
+                                    <button className='modal-button ' onClick={() => { setDraftsDiaolg(true) }}
+                                        title='Exit' >
+                                        <BiPlus style={{ transform: 'rotate(45deg)' }} />
+                                    </button>
+                                    <MDialog isOpen={draftsDialog} onClose={onClose} onAcsept={SaveDrafts} toDo="Save to draft" />
                                 </>)}
-                               
-                                 <button className='modal-button ' onClick={() => { setDraftsDiaolg(true) }}
-                                  title='Exit' >
-                                    <BiPlus style={{ transform: 'rotate(45deg)' }}  />
-                                </button>
-                                <MDialog isOpen={draftsDialog} onClose={onClose} onAcsept={SaveDrafts} toDo="Save to draft" />
+                                {!isChoosen && (
+                                    <button className='modal-button ' onClick={onClose}
+                                        title='Exit' >
+                                        <BiPlus style={{ transform: 'rotate(45deg)' }} />
+                                    </button>
+                                )}
                                 {!isValid2 && (
                                     <div style={{
-                                        border: '1px solid darkgray', padding: '10px', position: 'fixed', marginTop:"-40px",
-                                        backgroundColor: "lightgray", color: 'red', borderRadius: "8px", marginRight:'100px'
+                                        border: '1px solid darkgray', padding: '10px', position: 'fixed', marginTop: "-40px",
+                                        backgroundColor: "lightgray", color: 'red', borderRadius: "8px", marginRight: '100px'
                                     }}>
                                         <div>
-                                            <div style={{paddingLeft:'10px', fontWeight:'bold'}}>Warning! </div>
-                                            <div>{validMessage}</div><br/>
-                                            <div className='flex' style={{justifyContent:'space-around'}}>
+                                            <div style={{ paddingLeft: '10px', fontWeight: 'bold' }}>Warning! </div>
+                                            <div>{validMessage}</div><br />
+                                            <div className='flex' style={{ justifyContent: 'space-around' }}>
                                                 <button className='modal-button ' onClick={() => { setIsValid2(true) }}>Cancel</button>
                                                 <button className='modal-button ' onClick={PublishSubtitle}>Publish subtitles</button>
                                             </div>
@@ -696,13 +701,12 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        {/* *********************************************** */}
-                      
-                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
+
+                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px', justifyContent: 'center', display: 'flex' }}>
 
 
-                            <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey"}}>
-                                <video ref={videoRef} controls style={{maxHeight:'450px' }} >
+                            <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey" }}>
+                                <video ref={videoRef} controls style={{ maxHeight: '450px' }} >
                                     {fileSubtitle && (
                                         <track
                                             src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
@@ -717,9 +721,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                             </div>
 
                         </div>
-
-                        {/* *********************************************** */}
-
                         {!isChoosen ? (<>
                             <div style={{ padding: "20px", display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
                                 <p style={{
