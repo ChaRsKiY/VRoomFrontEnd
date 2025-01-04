@@ -6,20 +6,20 @@ export const testNotifications = [
         title: "New Notification",
         description: "You have a new notification",
         isRead: false,
-        path: "/channel/3"
+        path: "/channel.json/3"
     },
     {
         id: 2,
         title: "New Notification",
         isRead: true,
         description: "You have a new notification",
-        path: "/channel/3"
+        path: "/channel.json/3"
     },
     {
         id: 3,
         title: "New Notification",
         description: "You have a new notification",
         isRead: false,
-        path: "/channel/3"
+        path: "/channel.json/3"
     },
 ] as Notification[]

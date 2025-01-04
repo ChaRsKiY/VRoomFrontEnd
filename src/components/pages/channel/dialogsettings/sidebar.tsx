@@ -8,12 +8,12 @@ interface ISidebarProps {
 const Sidebar: React.FC<ISidebarProps> = ({ t, onSelect }: ISidebarProps) => {
 
     const menuItems = [
-        // { name: t("channel:General"), path: "Page1"},
-        { name: t("channel:Channel"), path: "page-channel-basic-info" },
-        /* { name: t("channel:Uploading_videos"), path: "page3"},
-         { name: t("channel:Permissions"), path: "page4"},
-         { name: t("channel:Community"), path: "page5"},
-         { name: t("channel:Agreements"), path: "page6"},*/
+        // { name: t("channel.json:General"), path: "Page1"},
+        { name: t("channel.json:Channel"), path: "page-channel.json-basic-info" },
+        /* { name: t("channel.json:Uploading_videos"), path: "page3"},
+         { name: t("channel.json:Permissions"), path: "page4"},
+         { name: t("channel.json:Community"), path: "page5"},
+         { name: t("channel.json:Agreements"), path: "page6"},*/
     ]
     return (
         <div className="w-[1/3.5]  text-black h-full">

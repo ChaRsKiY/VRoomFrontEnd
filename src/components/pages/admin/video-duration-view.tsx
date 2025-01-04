@@ -53,7 +53,7 @@ const VideoViewDuration = ({ channelId }: { channelId: number }) => {
     }, [rangeDate]);
 
     return (
-        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:view-duration-by-channel")} chartDescription={t("admin-main:view-duration-summary-channel")} data={data} dataKey="count" range={range} setRange={setRange} />
+        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:view-duration-by-channel.json")} chartDescription={t("admin-main:view-duration-summary-channel.json")} data={data} dataKey="count" range={range} setRange={setRange} />
     )
 }
 

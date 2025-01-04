@@ -23,7 +23,7 @@ import Watch from "@/components/pages/watch/watch"
 //         title: "Cyberpunk 2077 - Official Trailer 2022",
 //         views: 223000,
 //         description: "Hello this is my new video about cars",
-//         channel: {
+//         channel.json: {
 //             avatar: "https://yt3.ggpht.com/fxGKYucJAVme-Yz4fsdCroCFCrANWqw0ql4GYuvx8Uq4l_euNJHgE-w9MTkLQA805vWCi-kE0g=s176-c-k-c0x00ffffff-no-rj-mo",
 //             name: "Mr Beast"
 //         }
