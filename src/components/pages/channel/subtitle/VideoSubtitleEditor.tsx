@@ -1,29 +1,39 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import {useState, useRef, useEffect} from 'react';
 import api from '@/services/axiosApi';
 import VideoPlayer from './player';
-import { BiArrowFromTop, BiCircle, BiPen, BiPencil, BiPlus, BiPlusCircle, BiSolidKeyboard, BiTrash, BiX } from 'react-icons/bi';
+import {
+    BiArrowFromTop,
+    BiCircle,
+    BiPen,
+    BiPencil,
+    BiPlus,
+    BiPlusCircle,
+    BiSolidKeyboard,
+    BiTrash,
+    BiX
+} from 'react-icons/bi';
 import '@/styles/modalsubtitles.css';
 import handler from '@/services/upload';
 import * as Accordion from '@radix-ui/react-accordion';
-import { ISubtitle } from '@/types/subtitle.interface';
-import fetchVideos from '../content/fetch-filtered-videos-by-type';
+import {ISubtitle} from '@/types/subtitle.interface';
+
 import Hls from 'hls.js';
 import MDialog from "@/components/pages/channel/subtitle/menuwindow";
-import { toast } from "@/hooks/use-toast";
+import {toast} from "@/hooks/use-toast";
 
 interface IProps {
     videoId: number;
     onClose: () => void;
 }
 
-const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
+const VideoSubtitleEditor: React.FC<IProps> = ({videoId, onClose}) => {
 
-    const [duration, setDuration] = useState(0); 
-    const [currentTime, setCurrentTime] = useState(0); 
-    const [videoUrl, setVideoUrl] = useState<string | null>(null); 
-    const [forms, setForms] = useState([{ text: '', start: 0, end: 0 },]);
+    const [duration, setDuration] = useState(0);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [forms, setForms] = useState([{text: '', start: 0, end: 0},]);
     const videoRef = useRef<HTMLVideoElement>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [timePoints, setTimePoints] = useState<number[]>([]);
@@ -35,8 +45,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const startPercentage = (start / duration) * 100;
     const endPercentage = (end / duration) * 100;
     const percentage = (currentTime / duration) * 100;
-    const [selectedLanguage, setSelectedLanguage] = useState({ name: "English", code: "en" });
-    const [languages, setLanguages] = useState([{ name: "Русский", code: "ru" }, { name: "English", code: "en" }]);
+    const [selectedLanguage, setSelectedLanguage] = useState({name: "English", code: "en"});
+    const [languages, setLanguages] = useState([{name: "Русский", code: "ru"}, {name: "English", code: "en"}]);
     const [languageIndex, setLanguageIndex] = useState<number>(0);
     const [urlSubtitles, setUrlSubtitles] = useState<string | null>(null);
     const [fileSubtitle, setFileSubtitle] = useState<File | undefined>();
@@ -57,9 +67,9 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }
 
     const PublishSubtitle = () => {
-    
-            savePublishSubtitles(true);
-            // onClose();
+
+        savePublishSubtitles(true);
+        // onClose();
 
     }
 
@@ -138,8 +148,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             ),
         ].join('');
 
-        const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+        const blob = new Blob([vttContent], {type: 'text/vtt'});
+        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', {type: 'text/vtt'});
         setFileSubtitle(file);
     }
 
@@ -186,7 +196,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     const handleFormChangeNEW = (index: number, name: string, value: string) => {
         const updatedForms = [...forms];
         const timeInSeconds = parseTime2(value);
-        updatedForms[index] = { ...updatedForms[index], [name]: timeInSeconds };
+        updatedForms[index] = {...updatedForms[index], [name]: timeInSeconds};
         setForms(updatedForms);
     };
 
@@ -222,7 +232,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         setIsValid2(isV);
         setValidMessage(errorMessages);
         if (isV)
-            PublishSubtitle();;
+            PublishSubtitle();
+        ;
 
     };
 
@@ -239,7 +250,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                 ),
             ].join('');
 
-            const blob = new Blob([vttContent], { type: 'text/vtt' });
+            const blob = new Blob([vttContent], {type: 'text/vtt'});
 
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -283,7 +294,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                     str = "saved to drafts";
                 toast({
                     title: "Subtitles added",
-                    description: "Your subtitles have been "+ str,
+                    description: "Your subtitles have been " + str,
                     className: "text-green-600 bg-green-100",
                     duration: 3000,
                 });
@@ -312,15 +323,15 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             ),
         ].join('');
 
-        const blob = new Blob([vttContent], { type: 'text/vtt' });
-        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', { type: 'text/vtt' });
+        const blob = new Blob([vttContent], {type: 'text/vtt'});
+        const file = new File([blob], videoId + selectedLanguage.code + 'subtitle.vtt', {type: 'text/vtt'});
 
         await uploadVTTToBackend(file, publish);
 
     };
 
     const addForm = () => {
-        setForms([...forms, { text: '', start: 0, end: 0 }]);
+        setForms([...forms, {text: '', start: 0, end: 0}]);
     };
 
     const removeForm = (index: number) => {
@@ -330,7 +341,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
     const handleFormChange = (index: number, name: string, value: string | number) => {
         const updatedForms = forms.map((form, i) =>
-            i === index ? { ...form, [name]: value } : form
+            i === index ? {...form, [name]: value} : form
         );
         setForms(updatedForms);
     };
@@ -407,13 +418,13 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     ) => {
         setForms((prevForms) =>
             prevForms.map((form, i) =>
-                i === index ? { ...form, [name]: value } : form
+                i === index ? {...form, [name]: value} : form
             )
         );
     };
 
     const insertForm = (index: number) => {
-        const newForm = { text: '', start: 0, end: 0 };
+        const newForm = {text: '', start: 0, end: 0};
         setForms((prevForms) => {
             const updatedForms = [...prevForms];
             updatedForms.splice(index, 0, newForm);
@@ -428,7 +439,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
                 setForms((prevForms) =>
                     prevForms.map((form, i) =>
-                        i === selectedIndex ? { ...form, start: sortedPoints[1], end: sortedPoints[2] } : form
+                        i === selectedIndex ? {...form, start: sortedPoints[1], end: sortedPoints[2]} : form
                     )
                 );
                 return [];
@@ -440,7 +451,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                 setForms((prevForms) =>
                     prevForms.map((form, i) =>
                         i === selectedIndex
-                            ? { ...form, start: sortedPoints2[0] }
+                            ? {...form, start: sortedPoints2[0]}
                             : form
                     )
                 );
@@ -449,7 +460,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                 setForms((prevForms) =>
                     prevForms.map((form, i) =>
                         i === selectedIndex
-                            ? { ...form, start: sortedPoints2[0], end: sortedPoints2[1] }
+                            ? {...form, start: sortedPoints2[0], end: sortedPoints2[1]}
                             : form
                     )
                 );
@@ -488,7 +499,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
             console.log("name:" + name);
             console.log("code:" + code)
             if (!isLanguageSelected(code)) {
-                addLanguage({ name, code });
+                addLanguage({name, code});
                 triggerRef.current?.click();
             } else {
                 removeLanguage(code);
@@ -528,8 +539,8 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
         if (videoSrc && videoRef.current) {
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                hls.loadSource(videoSrc); 
-                hls.attachMedia(videoRef.current); 
+                hls.loadSource(videoSrc);
+                hls.attachMedia(videoRef.current);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     console.log("HLS: Манифест загружен, воспроизведение готово");
                 });
@@ -542,21 +553,21 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
     }, [videoSrc]);
 
     return (
-        <div className="subtitle-editor" onClick={closeDelete}  >
+        <div className="subtitle-editor" onClick={closeDelete}>
 
-            <div style={{ display: 'flex', justifyContent: "space-around" }}>
-                <div style={{ width: "100%", backgroundColor: '#eeeeee ', }}>
-                    <div style={{ padding: "10px", borderBottom: "0.5px solid #bdbdbd" }}>
-                        <div style={{ display: 'flex', justifyContent: "space-between" }}>
+            <div style={{display: 'flex', justifyContent: "space-around"}}>
+                <div style={{width: "100%", backgroundColor: '#eeeeee ',}}>
+                    <div style={{padding: "10px", borderBottom: "0.5px solid #bdbdbd"}}>
+                        <div style={{display: 'flex', justifyContent: "space-between"}}>
                             <div className='flex'>
-                                <button style={{ padding: "5px", borderRadius: "8px" }}
-                                    onClick={handleLanguageChange}
-                                    title='Select language'>
+                                <button style={{padding: "5px", borderRadius: "8px"}}
+                                        onClick={handleLanguageChange}
+                                        title='Select language'>
 
                                     <BiSolidKeyboard size={25} style={{
                                         display: 'inline', marginRight: '5px',
-                                    }} />
-                                    <label style={{ fontWeight: 'bold' }}>{selectedLanguage.name}</label></button>
+                                    }}/>
+                                    <label style={{fontWeight: 'bold'}}>{selectedLanguage.name}</label></button>
 
                                 <Accordion.Root
                                     type="single"
@@ -572,7 +583,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     <Accordion.Item
                                         value="ru"
                                         className="border-b"
-                                        style={{ borderBottom: 'none' }}
+                                        style={{borderBottom: 'none'}}
                                     >
                                         <Accordion.Trigger
                                             className="w-full text-left py-2 font-bold"
@@ -588,43 +599,44 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                             <BiPlus
                                                 size={25}
                                                 title="Add language"
-                                                style={{ marginTop: '8px', color: 'black' }}
+                                                style={{marginTop: '8px', color: 'black'}}
                                             />
                                         </Accordion.Trigger>
                                         <Accordion.Content
                                             className="p-4"
 
-                                            style={{ marginTop: '-40px', marginLeft: '25px' }}
+                                            style={{marginTop: '-40px', marginLeft: '25px'}}
                                         >
-                                            <div  >
+                                            <div>
                                                 <select
                                                     value={selectedLanguage.code}
                                                     onChange={changeSelectedLanguage}
                                                     className="w-full border px-2 py-1"
-                                                    style={{ color: 'black', padding: '5px', borderRadius: '0' }}
+                                                    style={{color: 'black', padding: '5px', borderRadius: '0'}}
                                                 >
-                                                    <option data-label="Русский" data-code="ru" value="ru" style={{ padding: '10px' }}>
+                                                    <option data-label="Русский" data-code="ru" value="ru"
+                                                            style={{padding: '10px'}}>
                                                         Русский{' '}
                                                         {isLanguageSelected('ru') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
+                                                            <span style={{color: 'green', marginLeft: '10px'}}>●</span>
                                                         )}
                                                     </option>
                                                     <option data-label="English" data-code="en" value="en">
                                                         English{' '}
                                                         {isLanguageSelected('en') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
+                                                            <span style={{color: 'green', marginLeft: '10px'}}>●</span>
                                                         )}
                                                     </option>
                                                     <option data-label="Deutsch" data-code="de" value="de">
                                                         Deutsch{' '}
                                                         {isLanguageSelected('de') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
+                                                            <span style={{color: 'green', marginLeft: '10px'}}>●</span>
                                                         )}
                                                     </option>
                                                     <option data-label="Espaniola" data-code="es" value="es">
                                                         Espaniola{' '}
                                                         {isLanguageSelected('es') && (
-                                                            <span style={{ color: 'green', marginLeft: '10px' }}>●</span>
+                                                            <span style={{color: 'green', marginLeft: '10px'}}>●</span>
                                                         )}
                                                     </option>
                                                 </select>
@@ -632,8 +644,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                         </Accordion.Content>
                                     </Accordion.Item>
                                 </Accordion.Root>
-
-
 
 
                                 {/* <Accordion.Item value={selectedLanguage.code} className="border-b">
@@ -663,31 +673,48 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                             <div>
                                 {isChoosen && (<>
                                     <button className='modal-button'
-                                        onClick={SaveDrafts}>Save to draft</button>
+                                            onClick={SaveDrafts}>Save to draft
+                                    </button>
                                     <button className='publish-button'
-                                        onClick={validateSubtitles }>Publish</button>
+                                            onClick={validateSubtitles}>Publish
+                                    </button>
                                     <button className='modal-button ' onClick={downloadSubtitlesAsVTT}
                                     >
-                                        <BiArrowFromTop title='Download' />
+                                        <BiArrowFromTop title='Download'/>
                                     </button>
                                 </>)}
-                               
-                                 <button className='modal-button ' onClick={() => { setDraftsDiaolg(true) }}
-                                  title='Exit' >
-                                    <BiPlus style={{ transform: 'rotate(45deg)' }}  />
+
+                                <button className='modal-button ' onClick={() => {
+                                    setDraftsDiaolg(true)
+                                }}
+                                        title='Exit'>
+                                    <BiPlus style={{transform: 'rotate(45deg)'}}/>
                                 </button>
-                                <MDialog isOpen={draftsDialog} onClose={onClose} onAcsept={SaveDrafts} toDo="Save to draft" />
+                                <MDialog isOpen={draftsDialog} onClose={onClose} onAcsept={SaveDrafts}
+                                         toDo="Save to draft"/>
                                 {!isValid2 && (
                                     <div style={{
-                                        border: '1px solid darkgray', padding: '10px', position: 'fixed', marginTop:"-40px",
-                                        backgroundColor: "lightgray", color: 'red', borderRadius: "8px", marginRight:'100px'
+                                        border: '1px solid darkgray',
+                                        padding: '10px',
+                                        position: 'fixed',
+                                        marginTop: "-40px",
+                                        backgroundColor: "lightgray",
+                                        color: 'red',
+                                        borderRadius: "8px",
+                                        marginRight: '100px'
                                     }}>
                                         <div>
-                                            <div style={{paddingLeft:'10px', fontWeight:'bold'}}>Warning! </div>
-                                            <div>{validMessage}</div><br/>
-                                            <div className='flex' style={{justifyContent:'space-around'}}>
-                                                <button className='modal-button ' onClick={() => { setIsValid2(true) }}>Cancel</button>
-                                                <button className='modal-button ' onClick={PublishSubtitle}>Publish subtitles</button>
+                                            <div style={{paddingLeft: '10px', fontWeight: 'bold'}}>Warning!</div>
+                                            <div>{validMessage}</div>
+                                            <br/>
+                                            <div className='flex' style={{justifyContent: 'space-around'}}>
+                                                <button className='modal-button ' onClick={() => {
+                                                    setIsValid2(true)
+                                                }}>Cancel
+                                                </button>
+                                                <button className='modal-button ' onClick={PublishSubtitle}>Publish
+                                                    subtitles
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -695,14 +722,20 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                             </div>
                         </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div style={{display: 'flex', justifyContent: 'space-between'}}>
                         {/* *********************************************** */}
-                      
-                        <div style={{ padding: '20px', paddingLeft: '0', minWidth: '500px', justifyContent:'center',display:'flex' }}>
+
+                        <div style={{
+                            padding: '20px',
+                            paddingLeft: '0',
+                            minWidth: '500px',
+                            justifyContent: 'center',
+                            display: 'flex'
+                        }}>
 
 
-                            <div style={{ padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey"}}>
-                                <video ref={videoRef} controls style={{maxHeight:'450px' }} >
+                            <div style={{padding: "5px", borderRadius: "3px", backgroundColor: "lightgrey"}}>
+                                <video ref={videoRef} controls style={{maxHeight: '450px'}}>
                                     {fileSubtitle && (
                                         <track
                                             src={URL.createObjectURL(fileSubtitle)} // Создаём временный URL для файла
@@ -721,13 +754,18 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                         {/* *********************************************** */}
 
                         {!isChoosen ? (<>
-                            <div style={{ padding: "20px", display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
+                            <div style={{
+                                padding: "20px",
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'space-around'
+                            }}>
                                 <p style={{
                                     borderBottom: "1px solid #bdbdbd", padding: '10px',
                                     borderRadius: '0px', color: 'black', fontWeight: 'bold',
 
                                 }}>
-                                    <label htmlFor="subtitle-upload" style={{ cursor: "pointer", padding: "10px" }}>
+                                    <label htmlFor="subtitle-upload" style={{cursor: "pointer", padding: "10px"}}>
                                         Upload subtitle file (.vtt)
                                     </label>
                                     <input
@@ -746,15 +784,17 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     borderRadius: '0px', color: 'black', fontWeight: 'bold',
 
                                 }}>
-                                    <button onClick={() => { setIsChoosen(true) }}> Enter subtitles manually
-                                        <BiPencil style={{ display: 'inline', marginLeft: '10px' }} />
+                                    <button onClick={() => {
+                                        setIsChoosen(true)
+                                    }}> Enter subtitles manually
+                                        <BiPencil style={{display: 'inline', marginLeft: '10px'}}/>
                                     </button>
                                 </p>
                                 <div></div>
                             </div>
                         </>) : <>
                             {/* Форма добавления субтитров */}
-                            <div >
+                            <div>
 
                                 <div style={{
                                     padding: '5px', width: '100%',
@@ -762,22 +802,30 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     marginTop: '35px'
 
                                 }}
-                                    className="custom-scroll" >
+                                     className="custom-scroll">
                                     {forms.map((form, index) => (
                                         <div className="subtitle-form " style={{
                                             padding: '5px',
-                                            backgroundColor: index == selectedIndex ? "lightgrey" : "", border: '1px solid #bdbdbd',
+                                            backgroundColor: index == selectedIndex ? "lightgrey" : "",
+                                            border: '1px solid #bdbdbd',
                                             marginBottom: '2px'
                                         }}
-                                            onClick={() => { changeIndex(index) }} >
-                                            <div style={{ display: 'flex', }}>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }}>
+                                             onClick={() => {
+                                                 changeIndex(index)
+                                             }}>
+                                            <div style={{display: 'flex',}}>
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexDirection: "column",
+                                                    justifyContent: "space-between"
+                                                }}>
                                                     <small>{index + 1}</small>
-                                                    <button  >
-                                                        <BiPlusCircle onClick={() => insertForm(index + 1)} title='Insert' />
+                                                    <button>
+                                                        <BiPlusCircle onClick={() => insertForm(index + 1)}
+                                                                      title='Insert'/>
                                                     </button>
                                                 </div>
-                                                <div style={{ marginRight: '3px' }}  >
+                                                <div style={{marginRight: '3px'}}>
 
                                                     <textarea
                                                         className="custom-scroll"
@@ -786,20 +834,28 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                         onChange={(e) => handleFormChangeValue(index, 'text', e.target.value)}
                                                         placeholder="Text"
                                                         style={{
-                                                            border: '1px solid #bdbdbd', padding: '3px', minHeight: "100%", resize: "none",
+                                                            border: '1px solid #bdbdbd',
+                                                            padding: '3px',
+                                                            minHeight: "100%",
+                                                            resize: "none",
                                                             // background: 'transparent', color: "white",
-                                                            borderRadius: "6px", minWidth: '300px'
+                                                            borderRadius: "6px",
+                                                            minWidth: '300px'
                                                         }}
                                                     />
                                                 </div>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "space-between" }} >
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexDirection: "column",
+                                                    justifyContent: "space-between"
+                                                }}>
                                                     <div>
-                                                        <BiX onClick={() => clearText(index)} title='Clear text' />
+                                                        <BiX onClick={() => clearText(index)} title='Clear text'/>
                                                     </div>
 
                                                 </div>
-                                                <div style={{ marginRight: "10px", }}>
-                                                    <div style={{ margin: '3px' }}>
+                                                <div style={{marginRight: "10px",}}>
+                                                    <div style={{margin: '3px'}}>
                                                         <input
                                                             type="text"
                                                             name="start"
@@ -809,12 +865,15 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                             }
                                                             min={0}
                                                             style={{
-                                                                border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                                borderRadius: "10px", paddingLeft: "10px"
+                                                                border: '1px solid #bdbdbd',
+                                                                padding: '3px',
+                                                                width: '80px',
+                                                                borderRadius: "10px",
+                                                                paddingLeft: "10px"
                                                             }}
                                                         />
                                                     </div>
-                                                    <div style={{ margin: '3px' }}>
+                                                    <div style={{margin: '3px'}}>
                                                         <input
                                                             type="text"
                                                             name="end"
@@ -824,18 +883,26 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                                             }
                                                             min={0}
                                                             style={{
-                                                                border: '1px solid #bdbdbd', padding: '3px', width: '80px',
-                                                                borderRadius: "10px", paddingLeft: "10px"
+                                                                border: '1px solid #bdbdbd',
+                                                                padding: '3px',
+                                                                width: '80px',
+                                                                borderRadius: "10px",
+                                                                paddingLeft: "10px"
                                                             }}
                                                         />
                                                     </div>
                                                 </div>
-                                                <div style={{ display: 'flex', flexDirection: "column", justifyContent: "end" }}  >
+                                                <div style={{
+                                                    display: 'flex',
+                                                    flexDirection: "column",
+                                                    justifyContent: "end"
+                                                }}>
 
                                                     <div>
-                                                        <BiTrash className='remove-button' onClick={(event) => toggleDeleteMenu(index, event)}
-                                                            style={{ margin: '5px', }}
-                                                            title='Delete' />
+                                                        <BiTrash className='remove-button'
+                                                                 onClick={(event) => toggleDeleteMenu(index, event)}
+                                                                 style={{margin: '5px',}}
+                                                                 title='Delete'/>
                                                     </div>
                                                     {deleteMenuOpenIndex === index ? (
                                                         <div
@@ -851,21 +918,27 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
 
                                                             }}
                                                         >
-                                                            <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
-                                                                style={{ display: 'flex', justifyContent: 'center', color: 'red', fontWeight: 'bold' }}
+                                                            <div
+                                                                className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-red-300"
+                                                                style={{
+                                                                    display: 'flex',
+                                                                    justifyContent: 'center',
+                                                                    color: 'red',
+                                                                    fontWeight: 'bold'
+                                                                }}
                                                                 onClick={() => removeForm(index)}>
-                                                                <span >Delete #{index + 1}</span></div>
+                                                                <span>Delete #{index + 1}</span></div>
 
 
-                                                            <div className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
-                                                                style={{ display: 'flex', justifyContent: 'center' }}
+                                                            <div
+                                                                className="flex items-center space-x-2 cursor-pointer p-1 modal-button hover:bg-gray-300"
+                                                                style={{display: 'flex', justifyContent: 'center'}}
                                                                 onClick={closeDelete}>
-                                                                <span >Cancel</span></div>
+                                                                <span>Cancel</span></div>
                                                         </div>
                                                     ) : (<></>)}
 
                                                 </div>
-
 
 
                                             </div>
@@ -878,38 +951,35 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                                     margin: '20px', marginTop: '12px',
                                     fontSize: '10px'
                                 }}
-                                    className='modal-button'>
-                                    + Add form</button>
+                                        className='modal-button'>
+                                    + Add form
+                                </button>
 
                             </div>
 
                         </>}
 
 
-
-
-
-
                     </div>
                 </div>
             </div>
             {isChoosen && (<>
-                <div style={{ display: 'flex', justifyContent: 'space-between', }}>
+                <div style={{display: 'flex', justifyContent: 'space-between',}}>
                     <span>{formatTime(currentTime)}</span>
-                    <span >{formatTime(duration)}</span>
+                    <span>{formatTime(duration)}</span>
                 </div>
-                <div style={{ backgroundColor: 'lightgrey ', }}   >
+                <div style={{backgroundColor: 'lightgrey ',}}>
                     <div className="custom-scroll2"
-                        ref={scrollContainerRef}
-                        style={{
-                            overflowX: "scroll",
-                            whiteSpace: "nowrap",
-                            width: "100%",
-                            maxWidth: "100%", // Видимая область для 5 мину
-                            padding: "10px 0",
-                            borderRadius: "10px",
-                            border: '1px solid lightgrey'
-                        }}
+                         ref={scrollContainerRef}
+                         style={{
+                             overflowX: "scroll",
+                             whiteSpace: "nowrap",
+                             width: "100%",
+                             maxWidth: "100%", // Видимая область для 5 мину
+                             padding: "10px 0",
+                             borderRadius: "10px",
+                             border: '1px solid lightgrey'
+                         }}
                     >
                         <input
                             type="range"
@@ -946,7 +1016,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose }) => {
                     </div>
                 </div>
             </>)}
-
 
 
         </div>

@@ -19,6 +19,11 @@ import {IUser} from "@/types/user.interface";
 import {PiPencilSimple, PiPencilSimpleLight} from "react-icons/pi";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
+import {IPinnedVideo} from "@/types/pinned-video.interface";
+import {
+    fetchPinnedVideoByChannelId,
+    fetchPinnedVideoOrNullByChannelId
+} from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
 
 
 interface IChannelProps {
@@ -53,6 +58,8 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
     const {user} = useUser();
     const [owner, setOwner] = useState<IUser | null>(null);
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
+
+    const [pinnedVideo, setPinnedVideo] = useState<IVideo | null>(null);
 
     const checkIsFolowed = async () => {
         if (user) {
@@ -171,6 +178,16 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
         }
     };
 
+    const getPinnedVideo = async () => {
+        try {
+            //if (user) {
+            const response = await fetchPinnedVideoOrNullByChannelId(channelid);
+            setPinnedVideo(response);
+            //}
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getMentions = async () => {
         try {
@@ -266,7 +283,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
 
     useEffect(() => {
         chooseShorts();
-        chooseNewOnce();
+        getPinnedVideo();//chooseNewOnce() ==> старое
         chooseMoreViwed();
         chooseMoreLiked();
         chooseAll();
@@ -326,7 +343,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                     </div>
                                 </div>
 
-                                <div className={'w-[30.3125rem] h-[1.625rem]'}>
+                                <div className={'w-max h-[1.625rem]'}>
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
 
                                         <Link
@@ -337,12 +354,12 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                 <hr/>
                                 <div>
                                     <div>
-                                        {sectionsWithUrl.find(cs => cs.title === 'PinnedVideoSection' && cs.isVisible) &&
+                                        {(sectionsWithUrl.find(cs => cs.title === 'PinnedVideoSection' && cs.isVisible)) &&
                                             <div
                                                 className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                                {videosNew ? (
+                                                {pinnedVideo ? (
                                                     <div style={{display: display1}}>
-                                                        <VideoCardLast el={videosNew}/>
+                                                        <VideoCardLast el={pinnedVideo}/>
                                                     </div>) : <></>}
                                             </div>}
                                         <hr/>

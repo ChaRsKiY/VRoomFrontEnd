@@ -31,6 +31,7 @@ import {
     Check
 } from 'lucide-react';
 import {IChannel} from '@/types/channelinfo.interface';
+import {formatDuration} from "@/utils/dateformat";
 
 interface IVideoCardProps {
     el: IVideo;
@@ -105,18 +106,18 @@ export default function VideoCard({el}: IVideoCardProps) {
             console.error('Error fetching user channel:', error);
         }
     };
-  const fetchUserData = async () => {
-    try {
-      const response = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
-      if (response.status === 200) {
-        const channelData: IChannel = response.data;
-        setUserChannel(channelData);
-        console.log('Fetched channel data:', channelData);
-      }
-    } catch (error) {
-      console.error('Error fetching channel data:', error);
-    }
-  };
+    const fetchUserData = async () => {
+        try {
+            const response = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
+            if (response.status === 200) {
+                const channelData: IChannel = response.data;
+                setUserChannel(channelData);
+                console.log('Fetched channel data:', channelData);
+            }
+        } catch (error) {
+            console.error('Error fetching channel data:', error);
+        }
+    };
 
     // Fetch playlists for the user
     const fetchPlaylists = async () => {
@@ -131,93 +132,98 @@ export default function VideoCard({el}: IVideoCardProps) {
         }
     };
 
-  const handleAddToPlaylist = async (playlistId: number) => {
-    try {
-      fetchUserData();
-      fetchPlaylists();
-      const selectedPlaylist = existingPlaylists.find(
-        (playlist) => playlist.id === playlistId
-      );
-  
-      if (!selectedPlaylist) {
-        console.error('Playlist not found');
-        return;
-      }
+    const handleAddToPlaylist = async (playlistId: number) => {
+        try {
+            fetchUserData();
+            fetchPlaylists();
+            const selectedPlaylist = existingPlaylists.find(
+                (playlist) => playlist.id === playlistId
+            );
 
-      const updatedVideosId = [...selectedPlaylist.videosId, el.id];
-  
-      // Оновлена структура плейлиста
-      const updatedPlaylist = {
-        ...selectedPlaylist,
-        videosId: updatedVideosId,
-        date: new Date().toISOString(), // Оновлюємо дату
-      };
+            if (!selectedPlaylist) {
+                console.error('Playlist not found');
+                return;
+            }
 
-      await api.put(`/PlayList/update`, updatedPlaylist);
-      setExistingPlaylists((prev) =>
-        prev.map((playlist) =>
-          playlist.id === playlistId
-            ? { ...playlist, videosId: updatedVideosId }
-            : playlist
-        )
-      );
-  
-      console.log('Video successfully added to playlist:', playlistId);
-    } catch (error) {
-      console.error('Error adding video to playlist:', error);
-    }
-  };
+            const updatedVideosId = [...selectedPlaylist.videosId, el.id];
 
-  const handleCreateNewPlaylist = async (name: string, privacy: string) => {
-    try {
-      await fetchUserData();
-      await fetchPlaylists();
-      if (!userChannel?.id) {
-        console.error('User channel ID is missing');
-        return;
-      }
-  
-      const newPlaylist = {
-        id: 0,
-        userId: userChannel.id,
-        title: name,
-        access: privacy === 'public', // Булеве значення
-        date: new Date().toISOString(),
-        videosId: [], // Порожній масив
-      };
-  
-      console.log('Data being sent to the server:', newPlaylist);
-  
-      const response = await api.post('/PlayList/add', newPlaylist);
-  
-      if (response.status === 200 || response.status === 201) {
-        console.log('Created new playlist:', response.data);
-        setExistingPlaylists((prev) => [...prev, response.data]);
-      } else {
-        console.error('Unexpected response status:', response.status, response.data);
-      }
-    } catch (error) {
-       if (error instanceof Error) {
-        console.error('General error:', error.message);
-      } else {
-        console.error('Unknown error:', error);
-      }
-    }
-  };
-  
-  return (
-    <div className="space-y-2.5">
-      <Link href={`/watch/${el.id}`} className="block">
-        {coverBase64 && (
-          <Image
-            src={`data:image/jpeg;base64,${coverBase64}`}
-            alt={el.tittle}
-            width={1000}
-            height={1000}
-            className="rounded-xl aspect-[16/9]"
-          />
-        )}
-      </Link>
+            // Оновлена структура плейлиста
+            const updatedPlaylist = {
+                ...selectedPlaylist,
+                videosId: updatedVideosId,
+                date: new Date().toISOString(), // Оновлюємо дату
+            };
+
+            await api.put(`/PlayList/update`, updatedPlaylist);
+            setExistingPlaylists((prev) =>
+                prev.map((playlist) =>
+                    playlist.id === playlistId
+                        ? {...playlist, videosId: updatedVideosId}
+                        : playlist
+                )
+            );
+
+            console.log('Video successfully added to playlist:', playlistId);
+        } catch (error) {
+            console.error('Error adding video to playlist:', error);
+        }
+    };
+
+    const handleCreateNewPlaylist = async (name: string, privacy: string) => {
+        try {
+            await fetchUserData();
+            await fetchPlaylists();
+            if (!userChannel?.id) {
+                console.error('User channel ID is missing');
+                return;
+            }
+
+            const newPlaylist = {
+                id: 0,
+                userId: userChannel.id,
+                title: name,
+                access: privacy === 'public', // Булеве значення
+                date: new Date().toISOString(),
+                videosId: [], // Порожній масив
+            };
+
+            console.log('Data being sent to the server:', newPlaylist);
+
+            const response = await api.post('/PlayList/add', newPlaylist);
+
+            if (response.status === 200 || response.status === 201) {
+                console.log('Created new playlist:', response.data);
+                setExistingPlaylists((prev) => [...prev, response.data]);
+            } else {
+                console.error('Unexpected response status:', response.status, response.data);
+            }
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error('General error:', error.message);
+            } else {
+                console.error('Unknown error:', error);
+            }
+        }
+    };
+
+    return (
+        <div className="space-y-2.5">
+            <Link href={`/watch/${el.id}`} className="block relative">
+                {coverBase64 && (
+                    <><Image
+                        src={`data:image/jpeg;base64,${coverBase64}`}
+                        alt={el.tittle}
+                        width={1000}
+                        height={1000}
+                        className="rounded-xl aspect-[16/9]"/>
+                        <div
+                            className="bg-black px-1 text-[0.785rem] text-white rounded w-max absolute bottom-1.5 right-1.5">
+                            {formatDuration(el.duration)}
+                        </div>
+                    </>
+                )
+                }
+            </Link>
 
             <div className="flex space-x-2.5">
                 <Image

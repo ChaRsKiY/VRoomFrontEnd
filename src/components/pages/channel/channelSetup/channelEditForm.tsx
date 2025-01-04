@@ -7,6 +7,9 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import Link from "next/link";
 import api from '@/services/axiosApi';
+import {IChannel} from "@/types/channelinfo.interface";
+import {Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport} from "@/components/ui/toast";
+import {response} from "express";
 
 const ChannelEditBlock = () => {
     const {user} = useUser(); // Получаем текущего пользователя
@@ -15,13 +18,11 @@ const ChannelEditBlock = () => {
     const [channelBanner, setChannelBanner] = useState<File | null>();
     const [channelBannerPreview, setChannelBannerPreview] = useState<string>('https://placehold.co/150x100.svg');
     const [channelBannerValid, setChannelBannerValid] = useState<string | null>(null);
-    const [chBannerPrevOld, setChBannerPrevOld] = useState<string>("");
     const chBInputRef = useRef<HTMLInputElement | null>(null);
 
     const [profilePhoto, setProfilePhoto] = useState<File | null>();
     const [profilePhotoPreview, setProfilePhotoPreview] = useState<string>('https://placehold.co/120x80.svg');
     const [profilePhotoValid, setProfilePhotoValid] = useState<string | null>(null);
-    const [profPhotoPrevOld, setProfPhotoPrevOld] = useState<string>("");
     const profPhInputRef = useRef<HTMLInputElement | null>(null);
 
     const [channelNickName, setChannelNickName] = useState<string>("");
@@ -34,6 +35,32 @@ const ChannelEditBlock = () => {
 
     const [channelDescription, setChannelDescription] = useState<string>("");
     const [channelUrl, setChannelUrl] = useState<string>("");
+    const [openToast, setOpenToast] = useState(false);
+
+    const initialState = useRef({
+        channelBannerPreview: '', profilePhotoPreview: '',
+        channelNickName: '', channelName: '', channelDescription: ''
+    });
+
+    // Проверка, были ли изменения в профиле
+    const hasChanged =
+        JSON.stringify({
+            channelBannerPreview,
+            profilePhotoPreview,
+            channelNickName,
+            channelName,
+            channelDescription,
+        }) !==
+        JSON.stringify(initialState.current);
+
+    // Функция для сброса изменений (возвращает поля к начальным значениям)
+    const handleResetChanges = () => {
+        setChannelBannerPreview(initialState.current.channelBannerPreview);
+        setProfilePhotoPreview(initialState.current.profilePhotoPreview);
+        setChannelName(initialState.current.channelName);
+        setChannelNickName(initialState.current.channelNickName);
+        setChannelDescription(initialState.current.channelDescription);
+    };
 
     useEffect(() => {
         if (user) {
@@ -41,29 +68,32 @@ const ChannelEditBlock = () => {
         }
     }, [user]);
 
+    const setData = (data: IChannel) => {
+        initialState.current = {
+            channelBannerPreview: data.channelBanner === null ? 'https://placehold.co/150x100.svg' : data.channelBanner,
+            profilePhotoPreview: data.channelProfilePhoto,
+            channelNickName: '@' + data.channelNikName,
+            channelName: data.channelName,
+            channelDescription: data.description
+        };
+
+        setId(data.id);
+        setChannelBannerPreview(data.channelBanner === null ? 'https://placehold.co/150x100.svg' : data.channelBanner);
+        setProfilePhotoPreview(data.channelProfilePhoto);
+
+        setChannelName(data.channelName);
+        setChannelNameValid(true);
+
+        setChannelNickName('@' + data.channelNikName);
+        setChannelNickNameValid(true);
+
+        setChannelDescription(data.description);
+        setChannelUrl(data.channel_URL);
+    }
+
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await api.get(`/ChannelSettings/getbyownerid/` + userId);
-
-            const data: any = await response.data;
-            console.log(data.channelName);
-
-            if (data.channelBanner == null) {
-                setChannelBannerPreview('https://placehold.co/150x100.svg');
-            }
-
-            setId(data.id);
-            setChannelBannerPreview(data.channelBanner);
-            setChBannerPrevOld(data.channelBanner);
-            setProfilePhotoPreview(data.channelProfilePhoto);
-            setProfPhotoPrevOld(data.channelProfilePhoto);
-            setChannelName(data.channelName);
-            setChannelNameValid(true);
-            setChannelDescription(data.description);
-            setChannelNickName('@' + data.channelNikName);
-
-            setChannelNickNameValid(true);
-            setChannelUrl(data.channel_URL);
+            await api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => setData(response.data));
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
@@ -91,19 +121,15 @@ const ChannelEditBlock = () => {
             api.put("/ChannelSettings/updateShort", formData, {
                 headers: {"Content-Type": false},
             })
-                .then(() => {
-                    location.reload();
+                .then((response) => {
+                    setData(response.data);
+                    setOpenToast(true);
+                    setTimeout(() => setOpenToast(false), 4000); // Закрыть автоматически через 3 секунды
                 })
                 .catch((error) => {
                     alert(error.message);
                 });
 
-        }
-    };
-
-    const handleButtonClick = () => {
-        if (user) {
-            fetchChannel(user.id);
         }
     };
 
@@ -138,9 +164,9 @@ const ChannelEditBlock = () => {
             }
             setChannelBanner(file);
             setChannelBannerPreview(URL.createObjectURL(file));
-        } else setChannelBannerPreview(chBannerPrevOld);
-
+        } else setChannelBannerPreview(initialState.current.channelBannerPreview);
     };
+
     const handleProfilePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -160,10 +186,9 @@ const ChannelEditBlock = () => {
             setProfilePhoto(file);
             setProfilePhotoPreview(URL.createObjectURL(file));
 
-        } else setProfilePhotoPreview(profPhotoPrevOld);
-
-
+        } else setProfilePhotoPreview(initialState.current.profilePhotoPreview);
     };
+
     // Функция для проверки разрешения изображения
     const validateImageResolution = (file: File, minWidth: number, minHeight: number): Promise<boolean> => {
         return new Promise((resolve) => {
@@ -226,12 +251,12 @@ const ChannelEditBlock = () => {
                     <div className="flex space-x-4">
                         <Link target={'_self'} href={channelUrl}
                               className="text-gray-700 pt-1 hover:text-gray-800 ">Перейти на канал</Link>
-                        <button type="button" onClick={handleButtonClick}
-                                className="bg-gray-200 px-4 py-1 rounded">Отмена
+                        <button type="button" disabled={!hasChanged} onClick={handleResetChanges}
+                                className="bg-gray-200 px-4 py-1 font-semibold rounded disabled:text-gray-500">Отмена
                         </button>
-                        <input type="submit"
-                               className="bg-blue-500 hover:bg-blue-800 text-white hover:cursor-pointer px-4 py-1 rounded"
-                               value="Опубликовать"/>
+                        <button type={'submit'} disabled={!hasChanged}
+                                className="bg-gray-200 px-4 py-1 font-semibold rounded disabled:text-gray-500">Опубликовать
+                        </button>
                     </div>
                 </div>
                 <div className="w-[62.5rem] h-[12.25rem] shrink-0">
@@ -349,6 +374,16 @@ const ChannelEditBlock = () => {
 
                 </div>
             </form>
+            <ToastProvider>
+                <ToastViewport/>
+                <Toast open={openToast} onOpenChange={setOpenToast} className={'bg-gray-500 text-white'}>
+                    <div>
+                        <ToastTitle>Успех!</ToastTitle>
+                        <ToastDescription>Данные канала успешно сохранены!</ToastDescription>
+                    </div>
+                    <ToastClose/>
+                </Toast>
+            </ToastProvider>
         </>
     )
 }

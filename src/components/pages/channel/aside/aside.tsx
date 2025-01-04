@@ -26,7 +26,7 @@ interface IAsideHomeProps {
 const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
 
     const mainPageAccountCategories = [
-        {icon: <LuLayoutDashboard/>, name: t("home"), path: "/channel/editing"},
+        {icon: <LuLayoutDashboard/>, name: t("channel:home"), path: "/channel/editing"},
         {icon: <PiMonitorPlayLight/>, name: t("channel:Content"), path: "/channel/editing/content"},
         {icon: <MdOutlineAnalytics/>, name: t("channel:Analytics"), path: "/channel/editing/analytics"},
         {icon: <LiaCommentSolid/>, name: t("channel:Comments"), path: "/channel/editing/comments"},
@@ -42,7 +42,7 @@ const AsideHome: React.FC<IAsideHomeProps> = async ({t}: IAsideHomeProps) => {
         <div>
             <div className="fixed bottom-0 top-20  overflow-y-scroll pb-10 max-lg:hidden no-scrollbar">
                 <div className=" ml-[-3%]">
-                    
+
                     <UserCategoryBlock/>
                     <CategoryBlock data={mainPageAccountCategories} title=" "/>
                     <div className="px-3 my-3">

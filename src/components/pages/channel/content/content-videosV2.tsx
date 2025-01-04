@@ -7,14 +7,14 @@ import {IContentVideo} from "@/types/videoDTO.interface";
 import {Filters} from "@/types/filters.interface";
 import {useUser} from "@clerk/nextjs";
 import {FaFilter} from "react-icons/fa";
-import fetchVideos from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
+import {fetchVideos} from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
 import Image from "next/image";
 import {base64ToUint8Array, byteArrayToBase64} from "@/utils/base64Functions";
 import {MdOutlineAnalytics, MdOutlineInsertComment, MdOutlineModeEditOutline} from "react-icons/md";
 import {RiYoutubeLine} from "react-icons/ri";
 import {BsThreeDotsVertical} from "react-icons/bs";
 import {IoMdArrowDropdown} from "react-icons/io";
-import {formatDate} from "@/utils/dateformat";
+import {formatDate, formatDuration} from "@/utils/dateformat";
 import api from "@/services/axiosApi";
 
 interface IContentVideoProps {
@@ -33,7 +33,10 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
     const [isLoading, setIsLoading] = useState(true);
 
     const [activeId, setActiveId] = useState<number | null>(null);
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
+    const allSelected = selectedIds.size === videos.length && videos.length > 0;
+    const [headerCheckboxChecked, setHeaderCheckboxChecked] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
@@ -59,10 +62,6 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
         setActiveId(activeId === id ? null : id);
     };
 
-
-    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-    const allSelected = selectedIds.size === videos.length && videos.length > 0;
-    const [headerCheckboxChecked, setHeaderCheckboxChecked] = useState(false);
 
     // Обновляем состояние чекбокса в заголовке
     useEffect(() => {
@@ -183,11 +182,16 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
 
                         </td>
                         <td className="py-3 px-3  flex ">
-                            <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
-                                   width={115} height={100}
-                                   alt="Video Thumbnail"
-                                   className={`mr-1.5 rounded-lg ${isShort ? "aspect-[16/9]" : "aspect-video"}`}/>
-
+                            <div className={'relative'}>
+                                <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
+                                       width={120} height={105}
+                                       alt="Video Thumbnail"
+                                       className={`mr-1.5 rounded-lg aspect-video`}/>
+                                <div
+                                    className="bg-black px-1 py-[-0.5px] text-[0.625rem] text-white rounded w-max absolute bottom-1 right-0.5">
+                                    {formatDuration(el.duration)}
+                                </div>
+                            </div>
                             <div key={el.id} className="relative w-full">
                                 <div className="w-full h-full p-1 flex flex-col">
                                     <span>{el.tittle}</span>
@@ -198,10 +202,12 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                                     <div className="absolute top-0 left-0 bg-white w-full h-full p-1">
                                         <span>{el.tittle}</span>
                                         <div className="flex flex-row items-center justify-center mt-2">
-                                            <MdOutlineModeEditOutline onClick={() => alert(el.tittle + " / " + el.id)}
-                                                                      title="Edit"
-                                                                      className="w-1/4 h-7 cursor-pointer"/>
-                                            <MdOutlineAnalytics title="Analitics" className="w-1/4 h-7 cursor-pointer"/>
+                                            <MdOutlineModeEditOutline
+                                                onClick={() => alert(el.tittle + " / " + el.id)}
+                                                title="Edit"
+                                                className="w-1/4 h-7 cursor-pointer"/>
+                                            <MdOutlineAnalytics title="Analitics"
+                                                                className="w-1/4 h-7 cursor-pointer"/>
                                             <MdOutlineInsertComment title="Comments"
                                                                     className="w-1/4 h-7 cursor-pointer"/>
                                             <RiYoutubeLine title="Video" className="w-1/4 h-7 cursor-pointer"/>
