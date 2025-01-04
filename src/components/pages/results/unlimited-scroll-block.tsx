@@ -1,7 +1,6 @@
 'use client';
 
 import React, {useState, useEffect} from 'react';
-import {IPresentedVideo} from "@/types/historyofbrowsing-groupdate.interface";
 import VideoCard from "@/components/pages/results/video-card";
 import ClientScrollBlock from "@/components/pages/results/client-scroll-block";
 import {IVideo} from "@/types/videoinfo.interface";
