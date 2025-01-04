@@ -344,7 +344,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                 </div>
 
                                 <div className={'w-max h-[1.625rem]'}>
-                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
+                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection" || cs.title == "ForYou" || cs.title == "HighRaitingVideos"))).map((el, key) => (
 
                                         <Link
                                             className={el.title === 'home' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
@@ -363,45 +363,51 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                                     </div>) : <></>}
                                             </div>}
                                         <hr/>
-                                        <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
-                                                onClick={showAllViwed}>For you &nbsp;&nbsp;
-                                            <FaPlay size={12} className="text-black-600 cursor-pointer"
-                                                    title='All popular' style={{display: 'inline'}}/></button>
-                                        <div
-                                            className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                            {videosPopular.slice(0, 4).map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display2}}>
-                                                    <VideoCard el={el}/>
+                                        {sectionsWithUrl.find(cs => cs.title === 'ForYou' && cs.isVisible) &&
+                                            <>
+                                                <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
+                                                        onClick={showAllViwed}>For you &nbsp;&nbsp;
+                                                    <FaPlay size={12} className="text-black-600 cursor-pointer"
+                                                            title='All popular' style={{display: 'inline'}}/></button>
+                                                <div
+                                                    className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+                                                    {videosPopular.slice(0, 4).map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display2}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
+                                                    {videosPopular.map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display2a}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                            {videosPopular.map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display2a}}>
-                                                    <VideoCard el={el}/>
-                                                </div>
-                                            ))}
-                                        </div>
+                                            </>}
                                         <hr/>
-                                        <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
-                                                onClick={showAllLiked}>High raiting videos&nbsp;&nbsp;
-                                            <FaPlay size={12} className="text-black-600 cursor-pointer"
-                                                    title='All popular' style={{display: 'inline'}}/></button>
-                                        <div
-                                            className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                            {videosLiked.slice(0, 4).map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display3}}>
-                                                    <VideoCard el={el}/>
+                                        {sectionsWithUrl.find(cs => cs.title === 'HighRaitingVideos' && cs.isVisible) &&
+                                            <>
+                                                <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
+                                                        onClick={showAllLiked}>High raiting videos&nbsp;&nbsp;
+                                                    <FaPlay size={12} className="text-black-600 cursor-pointer"
+                                                            title='All popular' style={{display: 'inline'}}/></button>
+                                                <div
+                                                    className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+                                                    {videosLiked.slice(0, 4).map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display3}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
+                                                    {videosLiked.map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display3a}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                            {videosLiked.map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display3a}}>
-                                                    <VideoCard el={el}/>
-                                                </div>
-                                            ))}
-                                        </div>
+                                            </>}
                                         <hr/>
                                         <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
                                                 onClick={showAllShorts}>Shorts&nbsp;&nbsp;

@@ -30,7 +30,7 @@ interface ISectionsSettingsProps {
     t: ITranslationFunction
 }
 
-const MAX_SECTIONS = 8;
+const MAX_SECTIONS = 10;
 
 const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettingsProps) => {
     const {user} = useUser();
@@ -138,7 +138,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
         setChannelSections((prevSections) => {
             const updatedSections = prevSections
                 .map((section) =>
-                    section.id === id ? {...section, isVisible: false, order: 0} : section
+                    section.id === id && section.title !== "home" ? {...section, isVisible: false, order: 0} : section
                 )
                 .filter((section) => section.isVisible)
                 .map((section, index) => ({...section, order: index + 1}));
@@ -252,7 +252,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                 <div className={'flex-col'}>
                     <h2 className="text-[#000] font-Inter text-[1.3rem] font-bold font-not-italic font-500 leading-normal">Layout</h2>
                     <p className="text-[#000] font-Inter text-[0.885rem] font-not-italic font-400 leading-normal">
-                        Customize the layout of your channel homepage with up to 8 sections
+                        Customize the layout of your channel homepage with up to {MAX_SECTIONS} sections
                     </p>
                 </div>
                 <div className={'flex w-[21%]'}></div>
@@ -327,13 +327,32 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                                                                                 onVideoSelect={handleVideoSelect}/>
                                                         </div>
                                                     )}
-                                                    {(section.title === "home") && (
+
+                                                    {(section.title === "ForYou") && (
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
                                                                 VRoom recommends fresh content based on your
                                                                 viewers' interests. This is only visible to your
                                                                 viewers when you have enough content. More Settings
+                                                            </p>
+                                                        </div>)}
+
+                                                    {(section.title === "home") && (
+                                                        <div className="flex-1 px-4">
+                                                            <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
+                                                            <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
+                                                                В этом разделе отображается закрепленное видео, контент
+                                                                для вас и тд.
+                                                            </p>
+                                                        </div>)}
+
+                                                    {(section.title === "HighRaitingVideos") && (
+                                                        <div className="flex-1 px-4">
+                                                            <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
+                                                            <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
+                                                                В этом разделе отображаются самые популярные видео
+                                                                канала
                                                             </p>
                                                         </div>)}
                                                     {section.title === "playlists" && (

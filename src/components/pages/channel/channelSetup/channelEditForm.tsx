@@ -10,6 +10,10 @@ import api from '@/services/axiosApi';
 import {IChannel} from "@/types/channelinfo.interface";
 import {Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport} from "@/components/ui/toast";
 import {response} from "express";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {IUser} from "@/types/user.interface";
+import {ChannelSection, ChSection} from "@/types/channelsections.interfaces";
+import {ICountry} from "@/types/country.interface";
 
 const ChannelEditBlock = () => {
     const {user} = useUser(); // Получаем текущего пользователя
@@ -37,9 +41,12 @@ const ChannelEditBlock = () => {
     const [channelUrl, setChannelUrl] = useState<string>("");
     const [openToast, setOpenToast] = useState(false);
 
+    const [countries, setCountries] = useState<ICountry[]>([]);
+    const [selectedCountryId, setSelectedCountryId] = useState<number>(0);
+
     const initialState = useRef({
         channelBannerPreview: '', profilePhotoPreview: '',
-        channelNickName: '', channelName: '', channelDescription: ''
+        channelNickName: '', channelName: '', channelDescription: '', selectedCountryId: 0
     });
 
     // Проверка, были ли изменения в профиле
@@ -50,6 +57,7 @@ const ChannelEditBlock = () => {
             channelNickName,
             channelName,
             channelDescription,
+            selectedCountryId,
         }) !==
         JSON.stringify(initialState.current);
 
@@ -60,6 +68,7 @@ const ChannelEditBlock = () => {
         setChannelName(initialState.current.channelName);
         setChannelNickName(initialState.current.channelNickName);
         setChannelDescription(initialState.current.channelDescription);
+        setSelectedCountryId(initialState.current.selectedCountryId);
     };
 
     useEffect(() => {
@@ -74,7 +83,8 @@ const ChannelEditBlock = () => {
             profilePhotoPreview: data.channelProfilePhoto,
             channelNickName: '@' + data.channelNikName,
             channelName: data.channelName,
-            channelDescription: data.description
+            channelDescription: data.description,
+            selectedCountryId: data.country_Id
         };
 
         setId(data.id);
@@ -89,11 +99,20 @@ const ChannelEditBlock = () => {
 
         setChannelDescription(data.description);
         setChannelUrl(data.channel_URL);
+        setSelectedCountryId(data.country_Id);
     }
 
     const fetchChannel = async (userId: string) => {
         try {
-            await api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => setData(response.data));
+            await Promise.all([
+                api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => {
+                    setData(response.data);
+                }),
+                api.get<ICountry[]>(`/Country`).then(response => {
+                    setCountries(response.data);
+                })
+            ]);
+            // await api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => setData(response.data));
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
@@ -114,12 +133,15 @@ const ChannelEditBlock = () => {
             }
 
             formData.append('id', id + '');
+            formData.append('Country_Id', selectedCountryId + '');
             formData.append('ChannelName', channelName);
             formData.append('Description', channelDescription);
             formData.append('channelNikName', channelNickName.replaceAll("@", ""));
 
+            console.log(selectedCountryId);
+
             api.put("/ChannelSettings/updateShort", formData, {
-                headers: {"Content-Type": false},
+                headers: {"Content-Type": 'multipart/form-data'},
             })
                 .then((response) => {
                     setData(response.data);
@@ -237,8 +259,13 @@ const ChannelEditBlock = () => {
     };
 
 
-    const {t}: { t: ITranslationFunction } = useTranslation();
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.target.value);
+        setSelectedCountryId(Number(e.target.value));
+    };
 
+
+    const {t}: { t: ITranslationFunction } = useTranslation();
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -371,6 +398,41 @@ const ChannelEditBlock = () => {
                         cooperation. Viewers can see the email address in the 'About' tab.</p>
                     <input type="email" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
                            placeholder="Email address"/>
+
+                </div>
+                <div className="w-[62.5rem] h-[7rem] shrink-0">
+                    <h2 className="block font-semibold">Contact information</h2>
+                    <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
+                        cooperation. Viewers can see the email address in the 'About' tab.</p>
+                    <div className="w-72">
+                        <select id="countries" name="country"
+                                value={selectedCountryId}
+                                onChange={handleChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            {countries.length > 0 ? (
+                                countries.map((country, index) => (
+                                    <>
+                                        {country.countryCode === "NotSelected" && (
+                                            <option key={country.countryCode} value={country.id} selected>
+                                                {country.name}
+                                            </option>
+                                        )}
+                                        {country.countryCode !== "NotSelected" && (
+                                            <option key={country.countryCode} value={country.id}>
+                                                {country.name}
+                                            </option>
+                                        )}
+                                    </>
+                                ))
+                            ) : (
+                                <option>Loading...</option>
+                            )}
+                            {/*{countries.map((country) => {
+
+                            }))};*/}
+                            <option value="US">United States</option>
+                        </select>
+                    </div>
 
                 </div>
             </form>
