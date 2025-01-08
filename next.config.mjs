@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-
+    async rewrites() {
+        return [
+            {
+                source: '/api',
+                destination: 'http://95.217.212.221:5024/api',
+            },
+        ]
+    },
     images: {
         remotePatterns: [
             {
