@@ -1,5 +1,12 @@
 {
     "video":"Video",
     "lang":"Idiomas",
-    "date":"Fecha"
+    "date":"Fecha",
+    "manual":"",
+    "del":"",
+    "file":"",
+    "sub":"Subtitles",
+    "all":"All",
+    "foul":"Foul copy",
+    "pub":"Published"
 }
