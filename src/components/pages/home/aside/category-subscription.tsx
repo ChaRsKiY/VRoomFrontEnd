@@ -20,11 +20,11 @@ const CategorySubscription: React.FC = () => {
     const [mainPageFollowed, setMainPageFollowed] = useState<IBlock[]>([]);
     const [allFollowed, setAllFollowed] = useState<IBlock[]>([]);
     const { user } = useUser();
-    const [visibleCount, setVisibleCount] = useState(2);
+    const [visibleCount, setVisibleCount] = useState(3);
 
 
     const handleClick = () => {
-        const nextVisibleCount = visibleCount + 5;
+        const nextVisibleCount = visibleCount + 3;
         setVisibleCount(nextVisibleCount);
 
         const nextItems = allFollowed.slice(visibleCount, nextVisibleCount);
@@ -43,7 +43,7 @@ const CategorySubscription: React.FC = () => {
             const subscriptions = await response.data;
             console.log(subscriptions);
 
-            setMainPageFollowed(subscriptions.slice(0, 5).map((subscription: any) => ({
+            setMainPageFollowed(subscriptions.slice(0, 3).map((subscription: any) => ({
                 iconPath: subscription.channelProfilePhoto ,  
                 name: subscription.channelNikName, 
                 path: "/gotochannel/" + subscription.id,  

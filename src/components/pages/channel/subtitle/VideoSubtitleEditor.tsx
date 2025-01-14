@@ -27,8 +27,8 @@ interface IProps {
 
 const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { locale } }) => {
 
-    // const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
-    const { t } = useTranslation();
+     const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
+   // const { t } = useTranslation();
 
     const [duration, setDuration] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
@@ -59,20 +59,20 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { loc
     const [publishDialog, setPublishDiaolg] = useState<boolean>(false);
     const [validMessage, setValidMessage] = useState<string>("");
     const [isValid2, setIsValid2] = useState<boolean>(true);
-    const [manualText, setManualText] = useState('');
-    const [lfileText, setFileText] = useState('');
-    const [delText, setDelText] = useState('');
+    // const [manualText, setManualText] = useState('');
+    // const [lfileText, setFileText] = useState('');
+    // const [delText, setDelText] = useState('');
 
-    //  useEffect(() => {
-    //         const loadTranslations = async () => {
-    //             const { t } = await initTranslations(locale, ['subtitles']);
-    //             setT(() => t);
-    //             setManualText(t('manual'));
-    //             setFileText(t('file'));
-    //             setDelText(t('del'));
-    //         };
-    //         loadTranslations();
-    //     }, [locale]);
+     useEffect(() => {
+            const loadTranslations = async () => {
+                const { t } = await initTranslations(locale, ['subtitles']);
+                setT(() => t);
+                // setManualText(t('manual'));
+                // setFileText(t('file'));
+                // setDelText(t('del'));
+            };
+            loadTranslations();
+        }, [locale]);
 
 
     const SaveDrafts = () => {
@@ -251,10 +251,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { loc
     };
 
     const downloadSubtitlesAsVTT = () => {
-
-        const userResponse = window.confirm("Cкачать?");
-
-        if (userResponse) {
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -272,9 +268,6 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { loc
 
             URL.revokeObjectURL(link.href);
             console.log("Скачено");
-        } else {
-            console.log("не скачено");
-        }
     };
 
     const uploadVTTToBackend = async (file: File, topublish: boolean) => {
@@ -753,8 +746,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { loc
 
                                 }}>
                                     <label htmlFor="subtitle-upload" style={{ cursor: "pointer", padding: "10px" }}>
-                                        {/* Upload subtitle file (.vtt) */}
-                                        {t("subtitles:video")}
+                                        {t("subtitles:upload" )}
                                     </label>
                                     <input
                                         id="subtitle-upload"
@@ -772,7 +764,7 @@ const VideoSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, params: { loc
                                     borderRadius: '0px', color: 'black', fontWeight: 'bold',
 
                                 }}>
-                                    <button onClick={() => { setIsChoosen(true) }}> Enter subtitles manually
+                                    <button onClick={() => { setIsChoosen(true) }}>   {t("subtitles:manual" )}
                                         <BiPencil style={{ display: 'inline', marginLeft: '10px' }} />
                                     </button>
                                 </p>

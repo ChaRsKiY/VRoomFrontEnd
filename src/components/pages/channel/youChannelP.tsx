@@ -55,14 +55,15 @@ const YouChannelP = () => {
                 <div className="flex justify-between items-center mt-4 ">
                     {shortHistory?.map((item) => (
                         <div className={'pr-1.5'} key={item.id}>
-                            <div className={'flex flex-col mb-4 cursor-pointer w-max'}>
+                            <div className={'flex flex-col mb-4 cursor-pointer w-max'} >
                                 <Image onClick={() => router.push(item.vRoomVideoUrl)}
                                        src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(item.cover))}`}
                                        alt={item.videoTitle} className={'rounded-[8px] aspect-video p-0.5'}
                                        width={210} height={120}/>
 
-                                <div className={'flex flex-col relative  '} style={{marginLeft: '10px'}}>
-                                    <h1 className={'text-[20px] font-semibold'}>{item.videoTitle}</h1>
+                                <div className={'flex flex-col relative  '} style={{marginLeft: '10px', minWidth:'200px'}}>
+                                    <h1 className={'text-[20px] font-semibold'}
+                                    style={{maxHeight:'30px', maxWidth:'190px',overflow:'hidden'}}>{item.videoTitle}</h1>
                                     <p className={'text-[14px] text-gray-600'}>{item.channelName}</p>
                                     <p className={'text-[14px] text-gray-600'}>{formatNumber(item.viewCount)} views</p>
                                     <div className={'absolute flex flex-row items-center top-0 right-0'}>

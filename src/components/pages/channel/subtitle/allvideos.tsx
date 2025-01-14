@@ -27,8 +27,8 @@ interface Props {
 const AllVideolist: React.FC<Props> = ({ params: { locale } }: Props) => {
 
     // const { t } = await initTranslations(locale, ['subtitles']);
-    //const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
-    const {t}= useTranslation();
+    const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
+    //const {t}= useTranslation();
 
     const [open, setOpen] = useState(false);
     const [channel, setChannel] = useState<IChannel>();
@@ -38,16 +38,16 @@ const AllVideolist: React.FC<Props> = ({ params: { locale } }: Props) => {
     const [dateText, setDateText] = useState('');
     const { user } = useUser();
 
-    // useEffect(() => {
-    //     const loadTranslations = async () => {
-    //         const { t } = await initTranslations(locale, ['subtitles']);
-    //         setT(() => t);
-    //         setVideoText(t('video'));
-    //         setLangText(t('lang'));
-    //         setDateText(t('date'));
-    //     };
-    //     loadTranslations();
-    // }, [locale]);
+    useEffect(() => {
+        const loadTranslations = async () => {
+            const { t } = await initTranslations(locale, ['subtitles']);
+            setT(() => t);
+            setVideoText(t('video'));
+            setLangText(t('lang'));
+            setDateText(t('date'));
+        };
+        loadTranslations();
+    }, [locale]);
 
     const openSubtitlesEditor = (id: number) => {
         setVideoId(id);
@@ -81,7 +81,7 @@ const AllVideolist: React.FC<Props> = ({ params: { locale } }: Props) => {
     const getVideos = async () => {
         try {
             if (channel) {
-                const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+                const response = await api.get('/Video/getchannelvideos/' + channel.id);
 
                 if (response.status === 200) {
                     const mydata: IContentVideo[] = await response.data;

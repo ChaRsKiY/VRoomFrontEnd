@@ -21,9 +21,11 @@ const EmailForm: React.FC<IProps> = ({ fill, name, email, enterE, enterN, send, 
         subject: "",
         text: "",
     });
+    const[display,setDisplay]=useState("none");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setEmailData({ ...emailData, [e.target.name]: e.target.value });
+        setDisplay("none")
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -32,8 +34,14 @@ const EmailForm: React.FC<IProps> = ({ fill, name, email, enterE, enterN, send, 
             const response = await api.get("/SendEmail/sendemail/" + emailData.subject + "/" + emailData.from + "/" + emailData.text);
 
             if (response.status === 200) {
-                alert("Ваш вопрс отправлен!");
-                window.location.href = "/";
+                setEmailData({
+                    from: "",
+                    subject: "",
+                    text: "",
+                });
+                setDisplay("block");
+                // alert("Ваш вопрс отправлен!");
+                // window.location.href = "/";
             } else {
                 console.log("Ошибка при отправке письма");
             }
@@ -131,7 +139,7 @@ const EmailForm: React.FC<IProps> = ({ fill, name, email, enterE, enterN, send, 
                 </button>
             </form>
 
-
+            <div style={{color:'green', display}}>Your email has been sent</div>
         </section>
 
     );

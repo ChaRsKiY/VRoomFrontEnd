@@ -88,7 +88,7 @@ const ChannelEditBlock = () => {
             formData.append('Description', channelDescription);
             formData.append('channelNikName', channelNickName.replaceAll("@", ""));
 
-            api.put("/ChannelSettings/updateShort", formData, {
+            await api.put("/ChannelSettings/updateShort", formData, {
                 headers: {"Content-Type": false},
             })
                 .then(() => {
