@@ -232,7 +232,7 @@ const ChannelInfoAboutComponent: React.FC<IProps> = ({channelid}) => {
                                 <div className={'w-[30.3125rem] h-[1.625rem]'}>
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
                                         <Link
-                                            className={el.title === 'About' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
+                                            className={el.title === 'about' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
                                             href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>

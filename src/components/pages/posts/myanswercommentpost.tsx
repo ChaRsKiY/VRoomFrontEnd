@@ -43,7 +43,7 @@ const MyAnswerCommentPost: React.FC<AnsCommentProps> = ({ commentId, onCancel })
           const data: IUser = await response.data;
           setUser(data);
           setUserId(data.clerk_Id);
-          setAvatarUrl(data.channelBanner);
+          setAvatarUrl(data.channelProfilePhoto);
           setName(data.channelName);
 
         } else {

@@ -276,7 +276,7 @@ const PublishedSubtitleslist = () => {
     const getVideos = async () => {
         try {
             if (channel) {
-                const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+                const response = await api.get('/Video/getchannelvideos/' + channel.id);
 
                 if (response.status === 200) {
                     const mydata: IContentVideo[] = await response.data;

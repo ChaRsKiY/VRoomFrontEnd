@@ -20,6 +20,7 @@ import { MdPushPin } from 'react-icons/md';
 import { ISimpleUser } from '@/types/simpleuser.interface';
 import { FaPen } from 'react-icons/fa';
 import { formatTimeAgo } from "@/utils/format";
+import { BiTrash } from 'react-icons/bi';
 import api from '@/services/axiosApi';
 
 interface CommentsProps {
@@ -370,6 +371,13 @@ const CommentsPost: React.FC<CommentsProps> = ({ comments, answers, id }) => {
                             <FaPen size={15} color="blue" /></div>
                           <div>
                             <span style={{ fontSize: '18px' }}>Edit comment</span></div>
+                        </div>
+                        <div  className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300"
+                          style={{ display: 'flex', justifyContent: 'center' }}>
+                          <div>
+                            <BiTrash size={15} color="red" /></div>
+                          <div>
+                            <span style={{ fontSize: '18px' }}>Delete comment</span></div>
                         </div>
                       </>)}
 

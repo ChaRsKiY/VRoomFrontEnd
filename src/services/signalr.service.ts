@@ -6,6 +6,7 @@ export class SignalRService {
 
     constructor() {
         this.connection = new signalR.HubConnectionBuilder()
+            // .withUrl("http://95.217.212.221:5024/hub")
             .withUrl("https://localhost:7154/hub")
             .withAutomaticReconnect()
             .build();

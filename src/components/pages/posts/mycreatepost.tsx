@@ -251,7 +251,7 @@ const CreatePost: React.FC = () => {
                 const res = await api.post('/Post/add', formData);
 
                 if (res.status === 200) {
-                    alert('Данные успешно сохранены');
+                   // alert('Данные успешно сохранены');
                     handleCancelImg();
                     handleCancelVideo();
                     setText('');
