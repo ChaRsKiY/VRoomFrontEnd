@@ -9,8 +9,8 @@ interface IContentProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:IContentProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+const channelPage = async ({params: {locale}}: IContentProps) => {
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>
@@ -36,8 +36,8 @@ const channelPage = async ({params: {locale}}:IContentProps) => {
                               className="text-gray-500 hover:text-gray-800 pb-2">Playlists</Link>
                         <Link target={'_self'} href={"/channel/editing/content/postsonchannel"}
                               className="text-gray-500 hover:text-gray-800 pb-2">Posts</Link>
-                        <Link target={'_self'} href={"/channel/editing/content/advertising_campaigns"}
-                              className="text-gray-500 hover:text-gray-800 pb-2">Advertising campaigns</Link>
+                        {/*<Link target={'_self'} href={"/channel/editing/content/advertising_campaigns"}
+                              className="text-gray-500 hover:text-gray-800 pb-2">Advertising campaigns</Link>*/}
                     </div>
 
                     <div className="flex items-center space-x-4 mb-6 mt-3">

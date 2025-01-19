@@ -10,15 +10,24 @@ import {
 import UploadVideoCountChart from "@/components/pages/admin/upload-video-count-chart";
 import DurationAllViewChart from "@/components/pages/admin/duration-all-view-chart";
 import ChannelRequiredBlocks from "@/components/pages/admin/channel-required-blocks";
+import initTranslations from "@/app/i18n";
 
 export const revalidate = 1200;
 
-const AnalyticsAndStatisticPage: React.FC = async () => {
+interface Props {
+    params: {
+        locale: string;
+    }
+}
+
+const AnalyticsAndStatisticPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
     const user = await currentUser();
+
+    const { t } = await initTranslations(locale, ['admin-main']);
 
     return (
         <div className="px-[3.5%] flex-1">
-            <Header user={user} data={{title: 'Analytics and Statistics', description: 'View analytics and statistics'}} />
+            <Header user={user} data={{title: t("admin-main:analytics-and-statistic"), description: t("view-analytics-statistics")}} />
 
             <main className="mt-5">
                 <div className="max-[1220px]:hidden">

@@ -9,7 +9,7 @@ interface IProfileTabProps {
 }
 
 const channelPage = async ({params: {locale}}: IProfileTabProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>

@@ -12,6 +12,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { deleteUser } from "@/actions/admin"
+import {useTranslation} from "next-i18next";
 
 interface Props {
     userId: string,
@@ -25,6 +26,8 @@ interface Props {
 const DeleteUserModal: React.FC<Props> = ({ userId, username, onOpenSheetChange = null, openD, setOpenD, fetchTableUsers }) => {
     const [isPending, setIsPending] = useState(false)
     const [open, setOpen] = useState(openD || false)
+
+    const { t } = useTranslation()
 
     const deleteUserById = async () => {
         setIsPending(true)
@@ -49,14 +52,14 @@ const DeleteUserModal: React.FC<Props> = ({ userId, username, onOpenSheetChange 
         <Dialog open={open} onOpenChange={onOpenSheetChange ? setOpen :setOpenD}>
             {onOpenSheetChange && (
                 <DialogTrigger asChild>
-                    <Button className="mr-2 mb-2" variant="outline">Delete</Button>
+                    <Button className="mr-2 mb-2" variant="outline">{t("admin-main:delete")}</Button>
                 </DialogTrigger>
             )}
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Delete user {username}?</DialogTitle>
+                    <DialogTitle>{t("admin-main:delete-user")} {username}?</DialogTitle>
                     <DialogDescription>
-                        Are you sure you want to delete this user? This action cannot be undone.
+                        {t("admin-main:delete-user-description")}
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="mt-3">
@@ -66,7 +69,7 @@ const DeleteUserModal: React.FC<Props> = ({ userId, username, onOpenSheetChange 
                         variant="destructive"
                         className="w-full"
                     >
-                        {isPending ? "Deleting..." : "Yes, delete"}
+                        {isPending ? t("admin-main:deleting") : t("admin-main:yes-delete")}
                     </Button>
                 </DialogFooter>
             </DialogContent>

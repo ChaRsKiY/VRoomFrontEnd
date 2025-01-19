@@ -12,7 +12,7 @@ import { useUser } from '@clerk/nextjs';
 import { usePathname } from "next/navigation";
 import { ISubtitle } from "@/types/subtitle.interface";
 import { useRouter } from "next/navigation";
-import { BiMove, BiSupport } from "react-icons/bi";
+import { BiGridHorizontal } from "react-icons/bi";
 import { Switch } from "@/components/ui/switchsubtitle";
 
 
@@ -61,7 +61,6 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     const [previousPath, setPreviousPath] = useState("");
     const [filesSubtitles, setFilesSubtitles] = useState<File[]>([]);
     const [subtitles, setSubtitles] = useState<ISubtitle[]>([]);
-    const [encodedUrl, setEncodedUrl] = useState("");
     const router = useRouter();
     const [selectedLang, setSelectedLang] = useState(0);
     const [display, setDisplay] = useState("none");
@@ -108,11 +107,9 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
 
     const fetchSubtitleFiles = async (subtitles: ISubtitle[]): Promise<File[]> => {
         console.log("Загрузка файлов:");
+
         const filePromises = subtitles.map(async (subtitle) => {
-            if (subtitle.puthToFile != undefined) {
-                setEncodedUrl(encodeURIComponent(subtitle.puthToFile));
-            }
-            else setEncodedUrl("");
+            const encodedUrl = subtitle.puthToFile ? encodeURIComponent(subtitle.puthToFile) : "";
             const response = await api.get('/Subtitle/getsubtitlefile/' + encodedUrl, {
                 responseType: "blob",
             });
@@ -651,7 +648,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         }
     };
 
-     useEffect(() => {
+    const selectSubtitle =() => {
         const video = videoRef.current;
         if (video) {
             for (let i = 0; i < video.textTracks.length; i++) {
@@ -661,9 +658,12 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 video.textTracks[selectedLang].mode = "showing";
                 console.log("key", selectedLang);
             }
-          // setFileSub(filesSubtitles[selectedLang]);
         }
-    }, [selectedLang, checked]);
+    }
+
+     useEffect(() => {
+        selectSubtitle();
+    }, [selectedLang, checked , display]);
     
     useEffect(() => {
         
@@ -671,18 +671,20 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
     }, [checked]);
 
     const handleSubtitleOpen = () => {
-        if (display == "none")
+        if (display == "none"){ 
             setDisplay("block");
+        }
         else
             setDisplay('none');
     };
-
+   
     const CheckedSubtitles = () => {
         setChecked(!checked);
         setTimeout(() => {
             handleSubtitleOpen();
         }, 500);
     };
+
 
     // Render
     return (
@@ -788,9 +790,12 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                             <RxEnterFullScreen size={23} />
                         )}
                     </div>
+
+                    {filesSubtitles.length > 0 ?(
                     <div>
-                        <BiMove onClick={handleSubtitleOpen} />
+                        <BiGridHorizontal onClick={handleSubtitleOpen} />
                     </div>
+                    ):<></>}
                     <div style={{
                         padding: '20px', border: '1px solid white', borderRadius: "8px",
                         marginTop: "-100px", marginLeft: '85%', display: display, paddingTop: '10px', paddingBottom: '5px',
@@ -808,6 +813,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                                 </div>
                         )))}
                     </div>
+                   
                 </div>
 
             </div>
@@ -822,15 +828,10 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
                 {filesSubtitles.length > 0 && checked &&  (subtitles?.map((subtitle, key) => (
                   
                     <track  key={key} kind="subtitles" srcLang={subtitle.languageCode} src={URL.createObjectURL(filesSubtitles[key])}
-                        label={subtitle.languageName}  default={selectedLang==key}/>
+                        label={subtitle.languageName}  default={selectedLang==key}   />
                   
                 )))}
-                
-                  {/* {fileSub&&  (
-                    <track   kind="subtitles" srcLang={subtitles[selectedLang].languageCode} src={URL.createObjectURL(fileSub)}
-                        label={subtitles[selectedLang].languageName} default />
-                )} */}
-
+               
             </video>
 
         </div>

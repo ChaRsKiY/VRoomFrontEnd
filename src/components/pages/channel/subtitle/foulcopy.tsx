@@ -107,7 +107,7 @@ const FoulCopySubtitlelist = () => {
     const getVideos = async () => {
         try {
             if (channel) {
-                const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+                const response = await api.get('/Video/getchannelvideos/' + channel.id);
 
                 if (response.status === 200) {
                     const mydata: IContentVideo[] = await response.data;
@@ -244,9 +244,7 @@ const FoulCopySubtitlelist = () => {
                     ))) : (
                         <tr>
                             <td colSpan={2} className="text-center py-4" style={{ cursor: 'pointer' }}>
-                                <div onClick={() => openSubtitlesEditor(1, "","","")}>
-                                    {/* TestFoulCopySubtitlesEditor */}
-                                </div>
+                                
                             </td>
                         </tr>
                     )}

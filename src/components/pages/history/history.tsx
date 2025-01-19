@@ -14,7 +14,7 @@ import {GoReport} from "react-icons/go";
 import {PiQueue} from "react-icons/pi";
 import {IoIosPause} from "react-icons/io";
 
-const WatchHistoryPage = ({userId}: { userId: string }) => {
+const WatchHistoryPage = ({userId,locale}: { userId: string ,locale:string}) => {
     const [history, setHistory] = useState<HistoryOfBrowsingGroupDate[]>([]);
     const router = useRouter();
 
@@ -91,7 +91,7 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
                 {history?.map((group) => (
                     <div key={group.date}>
                         <h2 className={'font-bold text-[22px]'} style={{margin: '20px 0 10px'}}>
-                            {new Date(group.date).toLocaleDateString('ru-RU', {
+                            {new Date(group.date).toLocaleDateString(locale, {
                                 weekday: 'long',
                                 year: 'numeric',
                                 month: 'long',
@@ -101,19 +101,19 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
                         <div>
                             {group.historyOfBrowsingVideos?.map((item) => (
                                 <div className={' px-5'} key={item.id}>
-                                    <div className={'flex mb-4 relative cursor-pointer w-max'}>
+                                    <div className={'flex mb-4 relative cursor-pointer w-max'} >
                                         <Image onClick={() => router.push(item.vRoomVideoUrl)}
                                                src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(item.cover))}`}
                                                alt={item.videoTitle} className={'rounded-[8px] aspect-video'}
                                                width={245} height={230}/>
 
-                                        <div className={'flex flex-col min-w-[270px] '} style={{marginLeft: '10px'}}>
+                                        <div className={'flex flex-col min-w-[270px] '} style={{marginLeft: '10px',marginRight:"20px"}}>
 
                                             <h1 className={'text-[20px]'}>{item.videoTitle}</h1>
                                             <p className={'text-[14px] text-gray-600'}>{item.channelName}
                                                 <span className={'pr-1.5'}></span> {formatNumber(item.viewCount)} views
                                             </p>
-                                            <p>{item.videoDescription}</p>
+                                            <p  style={{width:"500px"}}>{item.videoDescription}</p>
 
                                         </div>
                                         <div className={'absolute flex flex-row items-center top-0 right-0'}>

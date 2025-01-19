@@ -9,6 +9,7 @@ import { IUser } from '@/types/user.interface';
 import { buttonSubmitStyles } from '@/styles/buttonstyles/buttonSubmitStyles';
 import { buttonCancelStyles } from '@/styles/buttonstyles/buttonCancelStyles';
 import api from '@/services/axiosApi';
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 interface MyCommentProps {
     videoId: number;
@@ -30,7 +31,7 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
     const [disabled, setDisabled] = useState(true);
     const [videoid, setVideoId] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
-    const textAreaRef2 = useRef<HTMLTextAreaElement | null>(null);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
 
     const handleFocus = () => {
@@ -41,33 +42,16 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
         setLineColor('lightgray');
     };
 
-    // const handleChange2 = () => {
-    //   const value = textAreaRef2.current?.value || '';  
-    //   setInputValue(value);
-    //   if (value === '') {
-    //     setDisabled(true);
-    //   } else {
-    //     setDisabled(false);
-    //   }
-    // };
-
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setInputValue(event.target.value);
-        if (inputValue == '' || event.target.value == '')
-            setDisabled(true);
-        else
-            setDisabled(false);
+        setDisabled(event.target.value.trim() === "");
     };
 
-    const handleChange2 = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-        event.stopPropagation();
-
-        setInputValue(event.target.value);
-        if (inputValue == '' || event.target.value == '')
-            setDisabled(true);
-        else
-            setDisabled(false);
+    const handleEmojiClick = (emoji: EmojiClickData) => {
+        setInputValue((prev) => prev + emoji.emoji);
+        setDisabled(false); // Активируем кнопку, если добавлен смайлик
     };
+
 
     const handleSubmit = async () => {
 
@@ -117,7 +101,7 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
         setDisplay('block');
         setDisplay2('none');
         setTimeout(() => {
-            inputRef.current?.focus(); // Переводим фокус на input
+            inputRef.current?.focus();
         }, 0);
     };
 
@@ -129,7 +113,7 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
                 setDisplay2('block');
                 setWrite('Write a comment...');
                 setUserId(amuser.clerk_Id);
-                setAvatarUrl(amuser.channelBanner);
+                setAvatarUrl(amuser.channelProfilePhoto);
                 setName(amuser.channelName);
             } else {
                 setDisplayMain('none');
@@ -167,7 +151,7 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
                 </div>
             </div>
             <div style={{ display }}>
-                <div>
+                <div style={{ position: "relative" }}>
                     <input
                         type="text"
                         value={inputValue}
@@ -186,39 +170,32 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
 
                         }}
                     />
-
-                    {/* <textarea
-       value={inputValue}
-        onChange={handleChange2}
-        onFocus={handleFocus}
-        ref={textAreaRef2}
-        rows={1} 
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`,
-          outline: 'none',
-          width: '100%',
-          resize: 'none',   
-          overflow: 'hidden', 
-          padding: '5px' 
-        }}
-      /> */}
-
                 </div>
                 <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <div style={{ display: 'flex' }}>
-                        <div style={{ margin: '5px', marginLeft: '50px' }}>
-                            <FaSmile size={25} color="lightgray" />
+                        <div style={{ margin: '5px', marginLeft: '50px', position: "relative" }}>
+                            <button
+                                onClick={() => setShowEmojiPicker(!showEmojiPicker)}  >
+                                <FaSmile size={25} color="lightgray" />
+                            </button>
+                            {showEmojiPicker && (
+                                <div style={{ position: "absolute", top: "5px", left: "50px", zIndex: 10 }}>
+                                    <EmojiPicker onEmojiClick={handleEmojiClick} />
+                                </div>
+                            )}
                         </div>
                         <div style={{ marginLeft: '20px' }}>
                             <div style={{ fontSize: '11px', paddingTop: '5px', marginBottom: '-5px' }}>By sending a
                                 comment, you agree to
                             </div>
-                            <Link href="http://localhost:3000/ru/termsofservice" passHref target="_blank"
+                            <Link href="/terms" passHref target="_blank"
                                 rel="noopener noreferrer"
                                 style={{ color: 'blue', fontSize: '11px' }}>
                                 VRoom's Terms of Service.</Link>
                         </div>
+                    </div>
+                    <div>
+
                     </div>
                     <div>
                         <button onClick={handleCancel}
@@ -239,24 +216,5 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
 
 
 export default MyComment;
-
-
-{/* <textarea
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        rows={1} 
-        style={{
-          border: 'none',
-          borderBottom: `2px solid ${lineColor}`,
-          outline: 'none',
-          width: '100%',
-          resize: 'none',   
-          overflow: 'hidden', 
-          padding: '5px' 
-        }}
-      />*/
-}
 
 

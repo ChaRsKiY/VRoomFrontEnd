@@ -17,6 +17,7 @@ import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
 import api from "@/services/axiosApi";
 import {toast} from "@/hooks/use-toast";
+import {useTranslation} from "next-i18next";
 
 const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
@@ -24,6 +25,8 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
     const [response, setResponse] = useState(report.adminAnswer);
     const [isPending, setIsPending] = useState(false);
     const [open, setOpen] = useState(false);
+
+    const { t } = useTranslation()
 
     const handleSubmit = async () => {
         if (!response) {
@@ -35,8 +38,8 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
         try {
             await api.post(`/ContentReport/${report.id}/answer`, { answer: response });
             toast({
-                title: "Report answered",
-                description: "The report has been successfully answered.",
+                title: t("admin-main:report-answered"),
+                description: t("admin-main:report-answered-description"),
             });
             setOpen(false);
             setIsPending(false);
@@ -49,25 +52,24 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger className="w-full relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-neutral-100 transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50">
-                Answer to report
+                {t("admin-main:answer-report")}
             </DialogTrigger>
             <DialogContent className="max-h-screen overflow-scroll">
                 <DialogHeader>
-                    <DialogTitle>Respond info</DialogTitle>
+                    <DialogTitle>{t("admin-main:respond-info")}</DialogTitle>
                     <DialogDescription>
-                        Please fill out the form below to address the report. Ensure all information
-                        is accurate before submission.
+                        {t("admin-main:respond-info-description")}
                     </DialogDescription>
                 </DialogHeader>
                 <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
                     <div>
                         <Label className="block mb-3">
-                            Report Type: {report.type}
+                            {t("admin-main:report-type")} {report.type}
                         </Label>
 
-                        <Label>Report Content</Label>
+                        <Label>{t("admin-main:report-content")}</Label>
                         <Textarea
-                            placeholder="Write the report type here..."
+                            placeholder={t("admin-main:report-content-placeholder")}
                             value={report.description}
                             className="w-full h-auto resize-none"
                         />
@@ -75,7 +77,7 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">
-                            Response
+                            {t("admin-main:response")}
                         </label>
                         <ReactQuill
                             value={response}
@@ -92,12 +94,12 @@ const ReportAnswerForm = ({ report }: { report: Report }) => {
                                     ["clean"],
                                 ],
                             }}
-                            placeholder="Write your response here..."
+                            placeholder={t("admin-main:response-placeholder")}
                         />
                     </div>
 
                     <Button disabled={isPending} type="button" className="w-full" onClick={handleSubmit}>
-                        Submit Response
+                        {t("admin-main:submit-response")}
                     </Button>
                 </form>
             </DialogContent>

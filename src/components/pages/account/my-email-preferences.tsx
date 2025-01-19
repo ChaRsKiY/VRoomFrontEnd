@@ -20,7 +20,7 @@ const MyEmailPreferences: React.FC = async () => {
             setUser(data);
            
           } else {
-            console.error('Ошибка при получении channel:', response.statusText);
+            console.error('Ошибка при получении channel.json:', response.statusText);
           }
         } catch (error) {
           console.error('Ошибка при подключении к серверу:', error);

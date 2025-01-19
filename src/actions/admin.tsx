@@ -32,7 +32,7 @@ export const getUsersWithPaginationAndQuery = async ({limit, offset, query, sort
         return 'You are not authorized to perform this action'
     }
 
-    if ((currentUser.privateMetadata.adminLevel as number) < 2) return 'unauthorized';
+    if ((currentUser.privateMetadata.adminLevel as number) < 1) return 'unauthorized';
 
     try {
         const {data, totalCount} = await client.users.getUserList({limit, offset, query, orderBy: parseSortFieldOrder(sortField, sortOrder)})
@@ -381,4 +381,14 @@ export const deleteUsers = async (userIds: string[]) => {
         console.error('Error deleting users:', e)
         return JSON.stringify(e.errors[0])
     }
+}
+
+export const adminCanDo = async (requiredAdminLevel: number): Promise<boolean> => {
+    const { userId } = auth();
+    if (!userId) return false;
+
+    const currentUser = await client.users.getUser(userId);
+    if (!currentUser?.privateMetadata?.isAdmin) return false;
+
+    return (currentUser.privateMetadata.adminLevel as number) >= requiredAdminLevel;
 }

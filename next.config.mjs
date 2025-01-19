@@ -41,7 +41,15 @@ const nextConfig = {
                 hostname: 'www.alpbachtal.at',
                 port: '',
                 pathname: '**',
-            }
+            },
+            {
+                protocol: "https",
+                hostname: "**",
+            },
+            {
+                protocol: "http",
+                hostname: "**",
+            },
         ],
     },
    

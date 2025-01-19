@@ -11,7 +11,7 @@ interface Props {
 }
 
 const FeedbackPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
-    const { t } = await initTranslations(locale, ['common', 'categories','tagname']);
+    const { t } = await initTranslations(locale, ['help','common', 'categories']);
 
 
     return (
@@ -22,8 +22,11 @@ const FeedbackPage: React.FC<Props> = async ({ params: { locale } }: Props) => {
             </div>
             <main className="pl-[20%] w-full  flex justify-center max-lg:pl-[12%] max-sm:pl-0"
             >
-                <div className='flex' >
-                    <FeedbackComponent  />
+                <div className='flex' style={{
+                    backgroundImage: `url(/terms_light.jpg)`,
+                    padding: "50px", paddingLeft: "200px", paddingRight: "200px", 
+                }}  >
+                    <FeedbackComponent  t={t} />
 
                 </div>
 

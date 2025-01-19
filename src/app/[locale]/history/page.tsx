@@ -53,7 +53,7 @@ const HistoryP: React.FC<Props> = async ({params: {locale}}: Props) => {
                         Войти
                     </Link>
                 </div>) : (<div className={'flex w-full'}>
-                    <div><WatchHistoryPage userId={user.id}/></div>
+                    <div><WatchHistoryPage userId={user.id} locale={locale}/></div>
 
                 </div>)}
 

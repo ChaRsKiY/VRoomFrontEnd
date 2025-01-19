@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "i18nexus pull && next dev",
-    "build": "i18nexus pull && next build",
-    "start": "i18nexus pull && next start",
-    "lint": "i18nexus pull && next lint"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@clerk/localizations": "^2.7.1",
@@ -43,6 +43,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
     "date-fns": "^4.1.0",
+    "emoji-picker-react": "^4.12.0",
     "framer-motion": "^11.3.30",
     "gapi-script": "^1.2.0",
     "googleapis": "^144.0.0",

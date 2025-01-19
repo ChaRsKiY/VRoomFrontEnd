@@ -7,8 +7,8 @@ interface IMusicLibraryProps {
     params: { locale: string; }
 }
 
-const channelPage = async ({params: {locale}}:IMusicLibraryProps) => {
-    const {t} = await initTranslations(locale, ['common', 'categories'])
+const channelPage = async ({params: {locale}}: IMusicLibraryProps) => {
+    const {t} = await initTranslations(locale, ['common', 'categories', 'channel'])
     return (
 
         <>

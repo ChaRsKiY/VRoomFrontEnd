@@ -12,16 +12,6 @@ export interface ChannelSection {
     isVisible: boolean;
 }
 
-/*export interface ChannelSectionWithUrl {
-    id: number;
-    channel_SettingsId: number;
-    title: string;
-    sectionId: number;
-    order: number;
-    isVisible: boolean;
-    url: string;
-}*/
-
 export interface ChannelSectionWithUrl extends ChannelSection {
     url: string;
     urlType: string; // Поле для проверки соответствия

@@ -15,7 +15,7 @@ interface Props {
 
 const Home: React.FC<Props> = async ({ params: { locale } }: Props) => {
 
-    const { t } = await initTranslations(locale, ['common', 'categories','tagname']);
+    const { t } = await initTranslations(locale, ['common', 'categories','tagname','channel']);
 
     return (
         <>

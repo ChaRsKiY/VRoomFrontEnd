@@ -8,7 +8,14 @@ interface Props {
 }
 
 const RandomAdBlock = async ({ className }: Props) => {
-    const res = await api.get('/Ad/getrandom');
+    let res;
+
+    try {
+        res = await api.get('/Ad/getrandom');
+    } catch (e) {
+        return null;
+    }
+
     const ad = res.data;
 
     return (

@@ -3,6 +3,8 @@
 import React, {useEffect, useState} from 'react'
 import ChartAnalytics, {AnalyticData, dateToMonth, dateToWeek} from "@/components/pages/admin/chart";
 import api from "@/services/axiosApi";
+import {useTranslation} from "next-i18next";
+import {useAuth} from "@clerk/nextjs";
 
 export interface RangeDate {
     start: Date | null;
@@ -17,9 +19,17 @@ const RegistrationSummaryChart: React.FC = () => {
     });
     const [range, setRange] = useState("year");
 
+    const { getToken } = useAuth();
+
+    const { t } = useTranslation();
+
     const fetchData = async () => {
         try {
-            const response = await api.get("/AnalyticVRoom/getusersregistrations/" + range);
+            const response = await api.get("/AnalyticVRoom/getusersregistrations/" + range, {
+                headers: {
+                    "Authorization": `Bearer ${await getToken()}`
+                }
+            });
             setData(response.data.map((item: any) => ({
                 month: range === "year" ? dateToMonth(item.date) : dateToWeek(item.date),
                 count: item.count
@@ -31,7 +41,11 @@ const RegistrationSummaryChart: React.FC = () => {
 
     const fetchDataByRange = async () => {
         try {
-            const response = await api.get("/AnalyticVRoom/getusersregistrationsbydays/" + rangeDate?.start?.toISOString() + "/" + rangeDate?.end?.toISOString());
+            const response = await api.get("/AnalyticVRoom/getusersregistrationsbydays/" + rangeDate?.start?.toISOString() + "/" + rangeDate?.end?.toISOString(), {
+                headers: {
+                    "Authorization": `Bearer ${await getToken()}`
+                }
+            });
             setData(response.data.map((item: any) => ({
                 month: range === "year" ? dateToMonth(item.date) : dateToWeek(item.date),
                 count: item.count
@@ -54,7 +68,7 @@ const RegistrationSummaryChart: React.FC = () => {
     }, [rangeDate]);
 
     return (
-        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle="Registrations" chartDescription="A summary of the registrations" data={data} dataKey="count" range={range} setRange={setRange} />
+        <ChartAnalytics rangeDate={rangeDate} setRangeDate={setRangeDate} chartTitle={t("admin-main:registrations")} chartDescription={t("admin-main:summary-registrations")} data={data} dataKey="count" range={range} setRange={setRange} />
     )
 }
 

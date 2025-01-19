@@ -41,6 +41,9 @@ import api from "@/services/axiosApi";
 import {IoIosSearch} from "react-icons/io";
 import {useSession, useUser} from "@clerk/nextjs";
 import Image from "next/image";
+import AdAddDialog from "@/components/pages/admin/ad-add-dialog";
+import {adminCanDo} from "@/actions/admin";
+import {useTranslation} from "next-i18next";
 
 export type Ad = {
     id: string
@@ -74,49 +77,58 @@ export default function AdsTable() {
     const [total, setTotal] = React.useState(0)
     const [isPending, setIsPending] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
-    const { user } = useUser()
+    const [adminCanAddDelete, setAdminCanAddDelete] = useState(false)
+
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        (async () => {
+            const canAdd = await adminCanDo(3);
+            setAdminCanAddDelete(canAdd);
+        })()
+    }, []);
 
     const perPage = 5;
 
     const columns: ColumnDef<Ad>[] = [
         {
             accessorKey: "id",
-            header: "ID",
+            header: t("admin-main:id"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("id")}</div>
             ),
         },
         {
             accessorKey: "title",
-            header: "Title",
+            header: t("admin-main:title"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("title")}</div>
             ),
         },
         {
             accessorKey: "description",
-            header: "Description",
+            header: t("admin-main:description"),
             cell: ({ row }) => (
                 <div className="capitalize">{row.getValue("description")}</div>
             ),
         },
         {
             accessorKey: "url",
-            header: "URL",
+            header: t("admin-main:url"),
             cell: ({ row }) => (
-                <div>{row.getValue("url")}</div>
+                <div className="max-w-[400px] overflow-scroll no-scrollbar">{row.getValue("url")}</div>
             ),
         },
         {
             accessorKey: "imageUrl",
-            header: "Image URL",
+            header: t("admin-main:image-url"),
             cell: ({ row }) => (
                 <Image src={row.getValue("imageUrl")} alt={row.getValue("title")} width={55} height={55} />
             ),
         },
         {
             accessorKey: "createdAt",
-            header: "Created At",
+            header: t("admin-main:created-at"),
             cell: ({ row }) => (
                 <div className="capitalize">{new Date(row.getValue("createdAt")).toLocaleString()}</div>
             ),
@@ -127,23 +139,36 @@ export default function AdsTable() {
             cell: ({ row }) => {
                 const report = row.original
 
+                const handleDeleteAd = async () => {
+                    try {
+                        await api.delete('/Ad/' + report.id);
+                        await fetchAds(1, 10, '');
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">{t("admin-main:open-menu")}</span>
                                 <MoreHorizontal />
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t("admin-main:actions")}</DropdownMenuLabel>
                             <DropdownMenuItem
                                 onClick={() => navigator.clipboard.writeText(report.id)}
                             >
-                                Copy ad ID
+                                {t("admin-main:copy-ad-id")}
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Delete</DropdownMenuItem>
+                            {adminCanAddDelete && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <Button variant="ghost" className="w-full relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50" onClick={handleDeleteAd}>{t("admin-main:delete")}</Button>
+                                </>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 )
@@ -192,13 +217,13 @@ export default function AdsTable() {
         <div className="w-full">
             <div className="flex items-center">
                 <form className="flex my-5 space-x-2" onSubmit={handleSearch}>
-                    <Input placeholder="Search..." className="w-[200px]"/>
+                    <Input placeholder={t("admin-main:search")} className="w-[200px]"/>
                     <Button variant="outline" type="submit"><IoIosSearch size={23}/></Button>
                 </form>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button disabled={isPending} variant="outline" className="ml-auto">
-                            Columns <ChevronDown/>
+                            {t("admin-main:columns")} <ChevronDown/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -215,7 +240,7 @@ export default function AdsTable() {
                                             column.toggleVisibility(!!value)
                                         }
                                     >
-                                        {column.id}
+                                        {column.columnDef?.header?.toString()}
                                     </DropdownMenuCheckboxItem>
                                 )
                             })}
@@ -265,7 +290,7 @@ export default function AdsTable() {
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {t("admin-main:no-results")}
                                 </TableCell>
                             </TableRow>
                         )}
@@ -280,7 +305,7 @@ export default function AdsTable() {
                         onClick={() => setPage(page - 1)}
                         disabled={page === 1 || isPending}
                     >
-                        Previous
+                        {t("admin-main:previous")}
                     </Button>
                     <Button
                         variant="outline"
@@ -288,10 +313,11 @@ export default function AdsTable() {
                         onClick={() => setPage(page + 1)}
                         disabled={page >= Math.ceil(total / perPage) || isPending}
                     >
-                        Next
+                        {t("admin-main:next")}
                     </Button>
                 </div>
             </div>
+            {adminCanAddDelete && <AdAddDialog fetchAds={fetchAds} />}
         </div>
     )
 }

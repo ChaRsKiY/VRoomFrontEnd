@@ -13,7 +13,7 @@ function ClientHome() {
 
     return (
         <div>
-            {/*<Link target={'_blank'} href={"/channel/editing"} className="space-y-2.5">Customize channel view</Link>*/}
+            {/*<Link target={'_blank'} href={"/channel.json/editing"} className="space-y-2.5">Customize channel.json view</Link>*/}
             <button onClick={openModal}>Customize channel view</button>
             <CreateChannelModal open={isModalOpen} onClose={closeModal} />
         </div>

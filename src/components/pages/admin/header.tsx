@@ -30,13 +30,11 @@ const Header = ({ user, data }: HeaderProps) => {
             <div className="flex items-center">
                 <div className="flex items-center mr-8 space-x-5">
                     <BackToHomeButton />
-                    <FiMessageCircle size={27} className="text-neutral-500"/>
                     <Avatar>
                         <AvatarImage src={user?.imageUrl}/>
                         <AvatarFallback>VR</AvatarFallback>
                     </Avatar>
                 </div>
-                <Input placeholder="Search..." className="max-w-64 h-12"/>
             </div>
         </header>
     );

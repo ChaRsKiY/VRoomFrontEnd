@@ -10,6 +10,10 @@ import Link from 'next/link';
 import api from '@/services/axiosApi';
 import {ChannelSection, ChannelSectionWithUrl} from "@/types/channelsections.interfaces";
 import {linksArray} from "@/components/pages/channel/channelinfo/channel-sections_links_array";
+import {IUser} from "@/types/user.interface";
+import {PiPencilSimpleLight} from "react-icons/pi";
+import {ITranslationFunction} from "@/types/translation.interface";
+import {useTranslation} from "next-i18next";
 
 
 interface IProps {
@@ -19,12 +23,29 @@ interface IProps {
 
 
 const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
-
+    const {t}: { t: ITranslationFunction } = useTranslation();
     const [channel, setChannel] = useState<IChannel | null>(null);
     const [isFolowed, setIsFolowed] = useState(false);
     const {user} = useUser();
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
+    const [owner, setOwner] = useState<IUser | null>(null);
 
+    const findOwner = async (id: number) => {
+        try {
+
+            const response = await api.get('/ChannelSettings/getinfobychannelid/' + id);
+
+            if (response.status === 200) {
+                const data: IUser = await response.data;
+                setOwner(data);
+            } else {
+                console.error('Ошибка при получении пользователя:', response.statusText);
+            }
+
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getChannelSections = async () => {
         try {
@@ -46,7 +67,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                     });
                     setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
                 } else {
-                    console.error('Ошибка при получении channel:', response.statusText);
+                    console.error('Ошибка при получении channel.json:', response.statusText);
                 }
             }
         } catch (error) {
@@ -120,7 +141,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                 const data: IChannel = await response.data;
                 setChannel(data);
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -129,6 +150,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
 
 
     useEffect(() => {
+        findOwner(channelid);
         getChannel();
         getChannelSections();
         checkIsFolowed();
@@ -174,8 +196,14 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                                             borderRight: '1px solid lightgray',
                                             paddingRight: '20px'
                                         }}>
-                                            <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription}
-                                                            onAdd={addSubscription}/>
+                                            {user && user?.id === owner?.clerk_Id ? (
+                                                <div className={'flex flex-row gap-1 items-center justify-center'}>
+                                                    <PiPencilSimpleLight size={21}/>
+                                                    <Link target={'_blank'} href={"/channel/editing"}
+                                                          className="block pl-0 pr-0.5 py-2 rounded-full">Edit
+                                                        channel</Link></div>) : (
+                                                <FolowComponent isfolowed={isFolowed} onDelete={deleteSubscription}
+                                                                onAdd={addSubscription}/>)}
                                         </div>
                                         <LinkBlock ch={channel}/>
                                     </div>
@@ -185,7 +213,7 @@ const ChannelLivestComponent: React.FC<IProps> = ({channelid}) => {
                                     {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
                                         <Link
                                             className={el.title === 'Broadcasts' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
-                                            href={el.url} key={key}>{el.title}</Link>
+                                            href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>
                                     ))}
                                 </div>
                                 {/*<Link href={"/gotochannel/" + channelid} style={{

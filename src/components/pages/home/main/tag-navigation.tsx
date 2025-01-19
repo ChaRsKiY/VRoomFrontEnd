@@ -149,7 +149,8 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
                             <input
                                 style={{ padding: '5px', cursor: 'pointer' }}
                                 type='submit'
-                                value={tag.translatedName}
+                                // value={tag.translatedName}
+                                value={tag.name}
                             />
                         </form>
                     </div>

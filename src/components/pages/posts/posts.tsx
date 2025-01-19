@@ -486,11 +486,11 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div  className='w-full'>
+    <div className='w-full'>
       <div style={{ display }}>
-       
-       
-    
+
+
+
         <div className=" w-3/4" >
 
           {posts.length === 0 ? (
@@ -518,7 +518,7 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                       <small style={{ fontWeight: 'bold', color: 'gray' }}>{formatTimeAgo(new Date(post.date))}</small>
 
                     </div>
-                    {(post.type === 'text' || post.type === 'videolink') ? (<>
+                    {(post.type === 'text' ) ? (<>
                       <div key={index} style={{ marginBottom: '20px', paddingLeft: '50px' }}>
                         <textarea
                           ref={(el) => {
@@ -566,7 +566,7 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                         )}
                       </div>
                     </>) : <>
-                      <h2 className="text-xl font-semibold mb-4">{post.text}</h2>
+                    {post.type != 'videolink' &&(  <h2 className="text-xl font-semibold mb-4">{post.text}</h2>)}
                     </>}
                     <br />
                     {post.type === 'text' || post.type === 'videolink' ? (<>
@@ -576,11 +576,13 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                         {post.video && (
                           <>
                             <div className='flex'>
-                              {post.type === 'videolink' ? (<>
-                                <video src={videosLink[post.id]?.videoUrl} controls width="350px" style={{ paddingLeft: '50px' }}
-                                autoPlay muted>
+                              {post.type === 'videolink'? (<>
+                              
+                                <video src={post.video} controls width="350px" style={{ paddingLeft: '50px' }}
+                                  autoPlay loop muted>
                                   Ваш браузер не поддерживает видео.
                                 </video>
+                               
                                 <div>
                                   <div style={{ paddingRight: '10px' }}>
                                     <a href={post.video} target="_blank" rel="noopener noreferrer"
@@ -588,13 +590,18 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                                       {post.video}
                                     </a>
                                   </div>
-                                  <div><small>{formatNumber(videosLink[post.id]?.viewCount)} views
+                                  <div><small>
+                                    {/* {formatNumber(videosLink[post.id]?.viewCount)} views */}
                                     <FaCircle style={{ fontSize: '5px', color: 'gray', margin: '0 8px', display: 'inline' }} />
-                                    {formatTimeAgo(new Date(videosLink[post.id]?.uploadDate))}</small></div>
+                                    {/* {formatTimeAgo(new Date(videosLink[post.id]?.uploadDate))} */}
+                                    {formatTimeAgo(new Date(post.date))}
+                                    </small></div>
                                   <div>{videosLink[post.id]?.description}</div>
+                                  <br/>
+                                  <h2 className="text-xl font-semibold mb-4">{post.text}</h2>
                                 </div>
                               </>) : <>
-                                <video src={post.video} controls width="100%" style={{ paddingLeft: '50px' }} autoPlay muted>
+                                <video src={post.video} controls width="100%" style={{ paddingLeft: '50px' }} autoPlay loop muted >
                                   Ваш браузер не поддерживает видео.
                                 </video>
                               </>}
@@ -719,18 +726,18 @@ const PostList: React.FC<IPropsPost> = ({ channelId }) => {
                                 paddingTop: '4px',
                                 paddingBottom: '4px',
                                 position: 'absolute',
-                               // border: '1px solid grey'
+                                // border: '1px solid grey'
                               }}
                             >
                               <div className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-red-300"
-                            
+
                                 style={{ display: 'flex', justifyContent: 'center' }}
                                 onClick={() => deletePost(post.id)}>
                                 <span style={{ fontSize: '18px' }}>Delete</span></div>
 
 
                               {/* <div className="flex items-center space-x-2 cursor-pointer p-1 hover:bg-gray-300" */}
-                                <div className="modal-button"
+                              <div className="modal-button"
                                 style={{ display: 'flex', justifyContent: 'center' }}
                                 onClick={closeReport}>
                                 <span style={{ fontSize: '18px' }}>Cancel</span></div>
