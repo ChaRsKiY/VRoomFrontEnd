@@ -8,7 +8,6 @@ import DescriptionBlock from "@/components/pages/watch/description-block";
 import CommentsBlock from "@/components/pages/watch/comments-block";
 import HeaderHome from "@/components/pages/home/header/header";
 import initTranslations from "@/app/i18n";
-import {data} from '@/testdata/videos';
 import {IVideo} from "@/types/videoinfo.interface"
 import AsideHome from "@/components/pages/home/aside/aside";
 import Watch from "@/components/pages/watch/watch"

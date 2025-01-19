@@ -15,7 +15,8 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  return (
+  // @ts-ignore
+    return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
@@ -61,10 +62,10 @@ function Calendar({
       }}
       components={{
         IconLeft: ({ className, ...props }) => (
-          <ChevronLeftIcon className={cn("h-4 w-4", className)} {...props} />
+          <ChevronLeftIcon className={cn("h-4 w-4", className)} {...props as any} />
         ),
         IconRight: ({ className, ...props }) => (
-          <ChevronRightIcon className={cn("h-4 w-4", className)} {...props} />
+          <ChevronRightIcon className={cn("h-4 w-4", className)} {...props as any} />
         ),
       }}
       {...props}
