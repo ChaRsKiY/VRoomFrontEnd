@@ -109,7 +109,7 @@ export default function VideoCard({el}: IVideoCardProps) {
     try {
       const response = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
       if (response.status === 200) {
-        const channelData: IChannel = response.data;
+        const channelData = response.data.id;
         setUserChannel(channelData);
         console.log('Fetched channel data:', channelData);
       }
@@ -170,40 +170,36 @@ export default function VideoCard({el}: IVideoCardProps) {
 
   const handleCreateNewPlaylist = async (name: string, privacy: string) => {
     try {
-      await fetchUserData();
-      await fetchPlaylists();
-      if (!userChannel?.id) {
-        console.error('User channel ID is missing');
-        return;
-      }
-  
-      const newPlaylist = {
-        id: 0,
-        userId: userChannel.id,
-        title: name,
-        access: privacy === 'public', // Булеве значення
-        date: new Date().toISOString(),
-        videosId: [], // Порожній масив
-      };
-  
-      console.log('Data being sent to the server:', newPlaylist);
-  
-      const response = await api.post('/PlayList/add', newPlaylist);
-  
-      if (response.status === 200 || response.status === 201) {
-        console.log('Created new playlist:', response.data);
-        setExistingPlaylists((prev) => [...prev, response.data]);
-      } else {
-        console.error('Unexpected response status:', response.status, response.data);
-      }
+        const userResponse = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
+        if (userResponse.status === 200) {
+            // Використовуємо id користувача з першого запиту
+            const userId = userResponse.data.id;
+            
+            const newPlaylist = {
+                id: 0,
+                userId: userId, // Використовуємо правильний id користувача
+                title: name,
+                access: privacy === 'public',
+                date: new Date().toISOString(),
+                videosId: [],
+            };
+
+            console.log('Data being sent to the server:', newPlaylist);
+            const response = await api.post('/PlayList/add', newPlaylist);
+
+            if (response.status === 200 || response.status === 201) {
+                console.log('Created new playlist:', response.data);
+                setExistingPlaylists((prev) => [...prev, response.data]);
+            }
+        }
     } catch (error) {
-       if (error instanceof Error) {
-        console.error('General error:', error.message);
-      } else {
-        console.error('Unknown error:', error);
-      }
+        if (error instanceof Error) {
+            console.error('General error:', error.message);
+        } else {
+            console.error('Unknown error:', error);
+        }
     }
-  };
+};
   
   return (
     <div className="space-y-2.5">

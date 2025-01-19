@@ -57,10 +57,11 @@ const VideoUpdateInterface: React.FC = () => {
     const [tagIds, setTagIds] = useState<number[]>([])
     const [tags, setTags] = useState<Tag[]>([])
     const { user } = useUser()
-
     const [isUpdating, setIsUpdating] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
   const [updateComplete, setUpdateComplete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -236,62 +237,117 @@ const VideoUpdateInterface: React.FC = () => {
   };
 
   const handleVideoDelete = async (id: number): Promise<void> => {
-    try {
-      console.log('Deleting video with id:', id);
-      const response = await api.delete(`/Video/${id}`);
-      console.log('Server response status:', response.status);
+    if (!id) {
+      console.error('Invalid video ID');
+      return;
+    }
 
+    if (!window.confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      console.log('Attempting to delete video:', id);
+      const response = await api.delete(`/Video/${id}`);
+      console.log('Delete response:', response);
+      
       if (response.status === 204) {
-        const updatedVideos = availableVideos.filter((video) => video.id !== id);
-        setAvailableVideos(updatedVideos);
+        // Update the UI only after successful deletion
+        setAvailableVideos(prevVideos => prevVideos.filter(v => v.id !== id));
+        
+        // Reset selected video if it was deleted
+        if (video?.id === id) {
+          setVideo(null);
+          setTitle('');
+          setDescription('');
+          setThumbnailPreview('');
+          setThumbnailBase64('');
+        }
+        
         alert('Video successfully deleted');
-      } else {
-        throw new Error('Failed to delete video');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting video:', error);
-      alert('Failed to delete the video. Please try again.');
+      let errorMessage = 'Failed to delete video';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (error.response.status === 404) {
+          errorMessage = 'Video not found';
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.status === 500) {
+          errorMessage = 'Server error occurred while deleting video';
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response received from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage = error.message || 'An unexpected error occurred';
+      }
+      
+      setDeleteError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   const handleSubmit = async () => {
-    if (!video) return;
+    if (!video) {
+      console.error('No video data available');
+      return;
+    }
 
     setIsUpdating(true);
     setUpdateProgress(0);
     setUpdateComplete(false);
 
     try {
-      let compressedCover = video.cover;
+      // Перевіряємо наявність обов'язкових полів
+      if (!videoName && !video.tittle) {
+        throw new Error('Video title is required');
+      }
 
       const updatedVideoData = {
-        id: video.id, // Очікується ціле число
-        objectID: 'some-generated-id', // Має бути рядок
-        channelSettingsId: userChannel?.id, // Очікується ціле число
-        tittle: video.tittle, // Має бути рядок
-        description: description, // Має бути рядок
-        uploadDate: new Date().toISOString(), // Дата у форматі ISO
-        duration: video.duration, // Ціле число (тривалість у секундах)
-        videoUrl: video.videoUrl, // Має бути рядок
-        vRoomVideoUrl: '', // Якщо це не використовується, передайте пустий рядок або видаліть поле
-        viewCount: 0, // Ціле число
-        likeCount: 0, // Ціле число
-        dislikeCount: 0, // Ціле число
-        isShort: false, // Булеве значення
-        cover: thumbnailBase64, // Має бути рядок (Base64-стрічка або шлях до зображення)
-        visibility: visibility === 'public', // Булеве значення (true/false)
-        isAgeRestriction: false, // Булеве значення (true/false)
-        isCopyright: false, // Булеве значення (true/false)
-        audience: 'all', // Має бути рядок
-        categoryIds: [], // Масив цілих чисел
-        tagIds: [], // Масив цілих чисел
-        historyOfBrowsingIds: [], // Масив цілих чисел
-        commentVideoIds: [], // Масив цілих чисел
-        playLists: [], // Масив цілих чисел
-        lastViewedPosition: '00:00:00', // Рядок (формат часу)
-    };
+        id: video.id,
+        objectID: "",
+        channelSettingsId: video.channelSettingsId,
+        tittle: videoName || video.tittle,
+        description: description || video.description,
+        uploadDate: video.uploadDate,
+        duration: video.duration,
+        videoUrl: video.videoUrl,
+        vRoomVideoUrl: video.vRoomVideoUrl,
+        viewCount: video.viewCount,
+        likeCount: video.likeCount,
+        dislikeCount: video.dislikeCount,
+        isShort: video.isShort,
+        cover: thumbnailBase64 
+          ? thumbnailBase64.replace(/^data:image\/[a-z]+;base64,/, '')
+          : video.cover,
+        visibility: visibility === 'public',
+        isAgeRestriction: isAgeRestricted,
+        isCopyright: isCopyright,
+        audience: audience || 'all',
+        categoryIds: selectedCategoryId ? [selectedCategoryId] : [],
+        tagIds: tagIds || [],
+        historyOfBrowsingIds: [],
+        commentVideoIds: [],
+        playLists:  [],
+        lastViewedPosition: '00:00:00'
+      };
 
-      console.log("Updated Video Data:", updatedVideoData);
+      // Логуємо дані перед відправкою
+      console.log('Sending update request with data:', {
+        ...updatedVideoData,
+        cover: updatedVideoData.cover ? 'base64_data' : 'no_cover' // Не логуємо повний base64
+      });
 
       const response = await api.put(`/Video/update`, updatedVideoData, {
         onUploadProgress: (progressEvent) => {
@@ -302,14 +358,20 @@ const VideoUpdateInterface: React.FC = () => {
         },
       });
 
-      if (response.status !== 200) throw new Error('Failed to update video data');
+      if (response.status !== 200) {
+        throw new Error(`Failed to update video: ${response.statusText}`);
+      }
 
       console.log('Video updated successfully:', response.data);
-
       setVideo(response.data);
       setUpdateComplete(true);
-    } catch (error) {
-      console.error('Error updating video data:', error);
+    } catch (error: any) {
+      console.error('Error updating video data:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      // Можна додати відображення помилки для користувача
     } finally {
       setIsUpdating(false);
     }
@@ -345,19 +407,31 @@ const VideoUpdateInterface: React.FC = () => {
                                             <span className="truncate flex-1 text-left">{v.tittle}</span>
                                         </div>
                                     </Button>
-                                    <button
+                                    <Button
                                         onClick={() => handleVideoDelete(v.id)}
-                                        className="p-2 rounded hover:bg-red-100 focus:outline-none"
-                                        aria-label="Delete video"
+                                        className="ml-2"
+                                        disabled={isDeleting}
+                                        variant="destructive"
+                                        size="sm"
                                     >
-                                        🗑️
-                                    </button>
+                                        {isDeleting ? (
+                                            <span className="animate-spin">🔄</span>
+                                        ) : (
+                                            <span>🗑️</span>
+                                        )}
+                                    </Button>
                                 </div>
                             ))}
                         </div>
                     </ScrollArea>
                 </DialogContent>
             </Dialog>
+
+            {deleteError && (
+                <div className="mt-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                    Error: {deleteError}
+                </div>
+            )}
 
             {video ? (
   <Tabs defaultValue="details">
@@ -367,6 +441,16 @@ const VideoUpdateInterface: React.FC = () => {
     <TabsContent value="details">
       <div className="space-y-4">
         {/* Privacy Settings */}
+                  <div>
+                    <Label  className="text-lg font-semibold">Title</Label>
+                    <Input
+                      id="title"
+                      value={videoName}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="text-lg"
+                      placeholder="Введіть назву відео"
+                    />
+                  </div>
         <div>
           <Label>Privacy Settings</Label>
           <RadioGroup value={visibility} onValueChange={setVisibility}>
@@ -486,39 +570,6 @@ const VideoUpdateInterface: React.FC = () => {
               Add
             </Button>
           </div>
-
-          {/* Tags */}
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag) => (
-                  <div key={tag.id} className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
-                    <span className="mr-2">{tag.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-1 h-4 w-4 p-0"
-                      onClick={() => removeTag(tag.id)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove tag</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter a tag"
-                  value={currentTag}
-                  onChange={handleTagInputChange}
-                  className="border border-gray-300 rounded-md px-2 py-1"
-                />
-                <Button onClick={() => addTag(currentTag)}>+ Add Tag</Button>
-              </div>
-            </div>
-          </div> */}
         </div>
 
         {/* Age Restriction Section */}
