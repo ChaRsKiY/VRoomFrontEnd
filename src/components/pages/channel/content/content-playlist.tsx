@@ -9,7 +9,7 @@ import {CgPlayList} from "react-icons/cg";
 import {IPlayList} from "@/types/playlist.interface";
 import {formatDate} from "@/utils/dateformat";
 import FilterDialog from "@/components/pages/channel/filter/filter-dialog";
-import fetchVideos from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
+import {fetchVideos} from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
 import {Filters} from "@/types/filters.interface";
 import {FaFilter} from "react-icons/fa";
 

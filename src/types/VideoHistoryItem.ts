@@ -11,5 +11,6 @@ export interface VideoHistoryItem {
     channelSettingsId: number,
     channelName: string,
     channel_URL: string,
-    TimeCode: number;
+    TimeCode: number,
+    duration: number,
 }

@@ -31,6 +31,7 @@ import {
     Check
 } from 'lucide-react';
 import {IChannel} from '@/types/channelinfo.interface';
+import {formatDuration} from "@/utils/dateformat";
 
 interface IVideoCardProps {
     el: IVideo;
@@ -131,18 +132,18 @@ export default function VideoCard({el}: IVideoCardProps) {
         }
     };
 
-  const handleAddToPlaylist = async (playlistId: number) => {
-    try {
-      fetchUserData();
-      fetchPlaylists();
-      const selectedPlaylist = existingPlaylists.find(
-        (playlist) => playlist.id === playlistId
-      );
-  
-      if (!selectedPlaylist) {
-        console.error('Playlist not found');
-        return;
-      }
+    const handleAddToPlaylist = async (playlistId: number) => {
+        try {
+            fetchUserData();
+            fetchPlaylists();
+            const selectedPlaylist = existingPlaylists.find(
+                (playlist) => playlist.id === playlistId
+            );
+
+            if (!selectedPlaylist) {
+                console.error('Playlist not found');
+                return;
+            }
 
       const updatedVideosId = [...selectedPlaylist.videosId, el.id];
   
@@ -269,7 +270,7 @@ export default function VideoCard({el}: IVideoCardProps) {
             )}
         </div>
     )
-}
+
 
 interface PlaylistModalProps {
     videoId: number;
@@ -382,5 +383,7 @@ function PlaylistModal({
                 </form>
             </div>
         </div>
-    )
-}
+                         )
+                        }}
+    
+                       
