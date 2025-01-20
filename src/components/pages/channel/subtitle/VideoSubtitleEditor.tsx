@@ -22,7 +22,6 @@ import {ISubtitle} from '@/types/subtitle.interface';
 import Hls from 'hls.js';
 import MDialog from "@/components/pages/channel/subtitle/menuwindow";
 import {toast} from "@/hooks/use-toast";
-import { toast } from "@/hooks/use-toast";
 import initTranslations from "@/app/i18n";
 import { useTranslation } from 'react-i18next';
 
