@@ -19,17 +19,16 @@ const termsPage: React.FC<Props> = async({ params: { locale } }: Props) => {
             width: '100%', backgroundImage: `url(/terms_light.jpg)`,
             height: "100%", 
         }}>
-            <div style={{paddingLeft:'20px'}}> <Link href="/">
-                <Image src="/logo.svg" alt="logo" width={125} height={125}  style={{paddingLeft:'20px', backgroundColor: "rgba(254,254,254,1)"}}></Image>
+            <div className="pt-4" style={{paddingLeft:'20px'}}> <Link href="/">
+                <Image src="/logo.svg" alt="logo" width={125} height={125} style={{paddingLeft:'20px'}}></Image>
             </Link></div>
             <div style={{
                 display: 'flex', width: '100%', justifyContent: 'space-around',
               //  background: 'linear-gradient( to bottom right, rgba(0, 128, 0, 0.1),  rgba(0, 128, 255, 0.2) )',
                 height: "100%"
             }}>
-                <div style={{
-                    width: "1000px", marginTop: '10px', padding: '50px', borderRadius: "50px", marginBottom: "100px",
-                    backgroundColor: "rgba(254,254,254,1)", boxShadow: 'rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset'
+                <div className="bg-white dark:bg-neutral-900" style={{
+                    width: "1000px", marginTop: '10px', padding: '50px', borderRadius: "50px", marginBottom: "100px",  boxShadow: 'rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset'
                 }}>
                     <h1 style={{ fontSize: '24px', textAlign: 'center' }}>{t("terms:welcome")}</h1>
                     <br />

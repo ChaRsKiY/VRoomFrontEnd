@@ -52,12 +52,10 @@ const EmailForm: React.FC<IProps> = ({ fill, name, email, enterE, enterN, send, 
                     display: "flex",
                     flexDirection: "column",
                     gap: "10px",
-                    backgroundColor: "#f9f9f9",
                     padding: "20px",
                     borderRadius: "8px",
                     margin: '10px',
-                    boxShadow: "rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset",
-                }} >
+                }}>
                 <label>
                     <strong>{name}</strong>
                     <input

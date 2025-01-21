@@ -67,7 +67,7 @@ const AsideHome: React.FC<IAsideHomeProps> = ({t}: IAsideHomeProps) => {
     const mainPageOtherCategories = [
         {icon: <FaHandsHelping/>, name: t("categories:help"), path: "/help"},
         {icon: <MdFeedback/>, name: t("categories:feedback"), path: "/feedback"},
-        {icon: <FaFlag/>, name: t("categories:report_history"), path: "/reporthistory"},
+        {icon: <FaFlag/>, name: t("categories:report_history"), path: "/my-reports"},
     ]
 
 

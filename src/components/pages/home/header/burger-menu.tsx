@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { IoLogOutOutline, IoMenu, IoMoonOutline } from "react-icons/io5";
@@ -17,6 +17,7 @@ import {LanguagePicker} from "@/components/pages/home/header/language-picker";
 import {TbSettings} from "react-icons/tb";
 import {AccountSwitch} from "@/components/pages/home/header/account-switch";
 import {RxQuestionMarkCircled} from "react-icons/rx";
+import {ThemeContext} from "@/components/providers/theme.provider";
 
 const BurgerMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -28,6 +29,8 @@ const BurgerMenu: React.FC = () => {
     const { i18n } = useTranslation();
     const currentLocale = i18n.language;
     const currentPathname = usePathname();
+
+    const { setTheme: setContextTheme } = useContext(ThemeContext);
 
     const handleChange = (value: any) => {
         // set cookie for next-i18n-router
@@ -70,6 +73,7 @@ const BurgerMenu: React.FC = () => {
         document.body.classList.toggle('dark', newTheme === 'dark');
         localStorage.setItem('theme', newTheme);
         localStorage.setItem('appearance', newAppearance);
+        setContextTheme(newTheme);
     };
 
     const handleOpen = () => setIsOpen(!isOpen);

@@ -47,12 +47,6 @@ export async function AppSidebar({ t }: { t: (s: string) => string }) {
             icon: Users,
         },
         {
-            title: t("video"),
-            url: "/video-management",
-            icon: Video,
-            subContent: null
-        },
-        {
             title: t("content-reports"),
             url: "/content-reports",
             icon: Inbox,

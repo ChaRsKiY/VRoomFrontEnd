@@ -19,7 +19,7 @@ const contentReportTypes = [
 
 export default function AddContentReportPopover({ value, setValue, disabled }: { value: string; setValue: (value: string) => void, disabled: boolean }) {
     return (
-        <select disabled={disabled} className="p-2 border rounded-[0.5rem]" defaultValue={value} onChange={(e) => setValue(e.target.value)}>
+        <select disabled={disabled} className="p-2 border rounded-[0.5rem] dark:bg-black" defaultValue={value} onChange={(e) => setValue(e.target.value)}>
             {contentReportTypes.map((crt) => (
                 <option key={crt.value} value={crt.value}>
                     {crt.label}
