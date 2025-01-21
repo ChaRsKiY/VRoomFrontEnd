@@ -71,9 +71,9 @@ export default function ChannelPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto px-4 py-8 max-w-7xl"> {/* Updated opening div */}
       <ShortChannelBlock />
-      
+
       {/* History Section */}
       <section className="mt-8">
         <div className="flex justify-between items-center mb-4">
@@ -86,7 +86,7 @@ export default function ChannelPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {shortHistory?.map((item) => (
             <div key={item.id} className="group relative">
-              <div 
+              <div
                 className="cursor-pointer"
                 onClick={() => router.push(item.vRoomVideoUrl)}
               >
@@ -160,8 +160,8 @@ export default function ChannelPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {playlists.slice(0, expandedView ? playlists.length : 4).map((playlist) => (
-            <Link 
-              key={playlist.id} 
+            <Link
+              key={playlist.id}
               href={`/channel/playlist?playlistId=${playlist.id}`}
               className="block group"
             >
@@ -192,7 +192,7 @@ export default function ChannelPage() {
           ))}
 
           {!expandedView && playlists.length > 4 && (
-            <Card 
+            <Card
               className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
               onClick={() => setExpandedView(true)}
             >

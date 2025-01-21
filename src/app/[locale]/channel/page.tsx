@@ -21,9 +21,11 @@ const channelPage = async ({params: {locale}}: IChannelProps) => {
             <div className="flex pt-20 overflow-hidden">
                 <AsideHome t={t}/>
             </div>
-            <div className="pl-[5%] max-lg:pl-[5%] max-sm:pl-0 pt-20">
-                <YouChannelP/>
+            <div className="flex justify-center w-full pt-20">
+            <div className="w-full max-w-7xl px-4">
+                    <YouChannelP />
             </div>
+        </div>
         </>
     );
 }
