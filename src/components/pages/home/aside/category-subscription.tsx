@@ -20,7 +20,7 @@ const CategorySubscription: React.FC = () => {
     const [mainPageFollowed, setMainPageFollowed] = useState<IBlock[]>([]);
     const [allFollowed, setAllFollowed] = useState<IBlock[]>([]);
     const { user } = useUser();
-    const [visibleCount, setVisibleCount] = useState(2);
+    const [visibleCount, setVisibleCount] = useState(5);
 
 
     const handleClick = () => {
