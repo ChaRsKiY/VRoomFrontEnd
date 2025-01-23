@@ -284,32 +284,43 @@ const VideoUploadInterface: React.FC = () => {
     }, [user])
 
     const handleSubmit = async () => {
-        setIsUploading(true);
-        setUploadProgress(0);
-        setUploadComplete(false);
-    
+        setIsUploading(true)
+        setUploadProgress(0)
+        setUploadComplete(false)
+
+        const formData = new FormData()
+
         if (!video) {
-            console.error('No video file selected!');
-            setIsUploading(false);
-            return;
+            console.error('No video file selected!')
+            setIsUploading(false)
+            return
         }
-    
-        const duration = Number(sessionStorage.getItem('videoDuration')) || 0;
-        const formData = new FormData();
-    
-        const emptyFile = new Blob([], { type: 'application/octet-stream' });
-        const videoUrls = await fileToBase64(video);
-    
-        // Створюємо об'єкт videoData
+
+        const duration = Number(sessionStorage.getItem('videoDuration')) || 0
+        formData.append('videoFile', video)
+        const emptyFile = new Blob([], { type: 'application/octet-stream' })
+        formData.append('file', emptyFile, 'empty-file.bin')
+
+        const videoUrls = await fileToBase64(video)
+
+        if (Array.isArray(tagIds) && tagIds.length > 0) {
+            tagIds.forEach((id, index) => {
+                formData.append(`tagIds[${index}]`, id.toString())
+            })
+        } else {
+            console.warn('tagIds is empty or not an array.')
+        }
+
         const videoData = {
             id: 0,
             objectID: 'some-generated-id',
             channelSettingsId: userChannel?.id,
             tittle: videoName,
-            description,
+            description: description,
             uploadDate: new Date().toISOString(),
             duration,
             videoUrl: videoUrls,
+            vRoomVideoUrl: "", // Додане нове поле
             viewCount: 0,
             likeCount: 0,
             dislikeCount: 0,
@@ -317,48 +328,47 @@ const VideoUploadInterface: React.FC = () => {
             cover: thumbnailBase64,
             visibility: visibility === 'public',
             isAgeRestriction: isAgeRestricted,
-            isCopyright,
-            audience,
-            lastViewedPosition: '00:00:00',
+            isCopyright: isCopyright,
+            audience: audience,
             categoryIds: selectedCategoryId,
-            tagIds: tagIds || [],
+            tagIds,
+            historyOfBrowsingIds: [], // Додане нове поле
+            commentVideoIds: [], // Додане нове поле
+            playLists: [], // Додане нове поле
+            lastViewedPosition: '00:00:00',
             file: emptyFile,
-        };
-    
-        // Додаємо всі ключі та значення videoData до formData
+        }
+        console.log("Payload to be sent:", videoData)
+
         Object.entries(videoData).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-                value.forEach((item, index) => {
-                    formData.append(`${key}[${index}]`, item.toString());
-                });
-            } else if (value !== undefined && value !== null) {
-                formData.append(key, value instanceof Blob ? value : value.toString());
-            }
-        });
-    
-        formData.append('videoFile', video); // Додаємо файл відео окремо
-    
+            if (typeof value === 'string' || typeof value === 'number') {
+                formData.append(key, value.toString())
+            } else if (typeof value === 'boolean' || typeof value === 'number') {
+                formData.append(key, value.toString())
+            } else if (value instanceof Blob) {
+                formData.append(key, value)
+            } 
+        })
+
         try {
             const response = await api.post('/Video/add', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data', // Змінено тут
-                },
                 onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
-                    setUploadProgress(percentCompleted);
-                },
-            });
-    
-            if (response.status !== 201) throw new Error('Failed to upload video data');
-            const result = response.data;
-            console.log('Video uploaded successfully:', result);
-            setUploadComplete(true);
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!)
+                    setUploadProgress(percentCompleted)
+                }
+            })
+
+            if (response.status != 201) throw new Error('Failed to upload video data')
+            const result = await response.data
+            console.log('Video uploaded successfully:', result)
+            setUploadComplete(true)
         } catch (error) {
-            console.error('Error uploading video data:', error);
+            console.error('Error uploading video data:', error)
         } finally {
-            setIsUploading(false);
+            setIsUploading(false)
         }
-    };
+    }
+
     return (
         <>
             {user ? (

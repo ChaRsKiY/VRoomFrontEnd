@@ -34,10 +34,11 @@ interface IRootLayoutProps {
 
 async function RootLayout({ children, params: { locale } }: Readonly<IRootLayoutProps>) {
   const { resources } = await initTranslations(locale, i18nNamespaces);
-  const { getToken } = auth();
-
-  api.defaults.headers.put.Authorization = `Bearer ${await getToken()}`;
-
+  const session = await auth();
+  if (session) {
+    const token = await session.getToken();
+    api.defaults.headers.put.Authorization = `Bearer ${token}`;
+  }
   return (
     <VideoProvider>
       <ThemeProvider>
