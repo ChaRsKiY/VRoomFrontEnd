@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/localizations": "^2.7.1",
-    "@clerk/nextjs": "^5.2.8",
+    "@clerk/localizations": "^3.9.14",
+    "@clerk/nextjs": "^6.10.1",
     "@hello-pangea/dnd": "^17.0.0",
     "@heroicons/react": "^2.1.5",
     "@hookform/resolvers": "^3.9.1",
@@ -37,6 +37,7 @@
     "@videojs/themes": "^1.0.1",
     "algoliasearch": "^4.24.0",
     "axios": "^1.7.7",
+    "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",

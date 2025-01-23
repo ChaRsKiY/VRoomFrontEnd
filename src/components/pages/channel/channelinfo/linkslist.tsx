@@ -37,17 +37,21 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
 
     useEffect(() => {
         if(channel){ 
-        setUrl(channel.channel_URL);
-        setHrefFB("https://www.instagramm.com/sharer/sharer.php?u="+url);
-        setHrefTW("https://twitter.com/intent/tweet?url="+url);
-        setHrefT("https://telegram.me/share/url?url="+url);
-        setHrefW("https://api.whatsapp.com/send?text="+url);}
+            setUrl(channel.channel_URL);
+         }
 
       }, [channel]);
 
       useEffect(() => {
         setChannel(ch);   
       }, [ch]);
+
+      useEffect(() => {
+        setHrefFB("https://www.instagramm.com/sharer/sharer.php?u="+url);
+        setHrefTW("https://twitter.com/intent/tweet?url="+url);
+        setHrefT("https://telegram.me/share/url?url="+url);
+        setHrefW("https://api.whatsapp.com/send?text="+url);   
+      }, [url]);
 
     return (
         <div>
@@ -62,7 +66,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'12px'}}>
                         <div style={{color:'black'}}>tik tok //short tutorials</div>
-                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'12px'}}> tiktok.com/@juxtopposed</a>
+                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'12px'}}> tiktok.com/@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>
@@ -75,7 +79,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>instagram //only for the cats</div>
-                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> instagram.com/@juxtopposed</a>
+                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> instagram.com/@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>
@@ -88,7 +92,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>twitter //tweet me something</div>
-                            <a href={hrefTW} target="_blank" style={{color:'blue',fontSize:'10px'}}> twitter.com/@juxtopposed</a>
+                            <a href={hrefTW} target="_blank" style={{color:'blue',fontSize:'10px'}}> twitter.com/@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>
@@ -101,7 +105,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>discord //join hospitable designers community</div>
-                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> discord.gg/@juxtopposed</a>
+                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> discord.gg/@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>
@@ -114,7 +118,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>telegramm //message me for business</div>
-                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> t.me/@juxtopposed</a>
+                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> t.me/@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>
@@ -127,7 +131,7 @@ const LinkList: React.FC<IProps> = async ({ch,v}) => {
                         </a> </div>
                         <div className="flex " style={{flexDirection:'column',paddingLeft:'20px',fontSize:'10px'}}>
                         <div style={{color:'black'}}>Whatsapp //message me</div>
-                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> watsapp.com@Whatsapp</a>
+                            <a href={hrefFB} target="_blank" style={{color:'blue',fontSize:'10px'}}> watsapp.com@{channel?.channelNikName}</a>
                         </div>
                         </div>
                         </div>

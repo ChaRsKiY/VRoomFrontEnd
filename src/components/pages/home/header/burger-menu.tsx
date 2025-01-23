@@ -18,6 +18,8 @@ import {TbSettings} from "react-icons/tb";
 import {AccountSwitch} from "@/components/pages/home/header/account-switch";
 import {RxQuestionMarkCircled} from "react-icons/rx";
 import {ThemeContext} from "@/components/providers/theme.provider";
+import { IUser } from '@/types/user.interface';
+import api from '@/services/axiosApi';
 
 const BurgerMenu: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -77,6 +79,28 @@ const BurgerMenu: React.FC = () => {
     };
 
     const handleOpen = () => setIsOpen(!isOpen);
+    const [iAmUser, setUser] = useState<IUser | null>(null);
+
+  const getUser = async () => {
+    try {
+
+      const response = await api.get('/ChannelSettings/getbyownerid/' + user?.id);
+
+      if (response.status === 200) {
+        const data: IUser = await response.data;
+        setUser(data);
+      } else {
+        console.error('Ошибка при получении пользователя:', response.statusText);
+      }
+
+    } catch (error) {
+      console.error('Ошибка при подключении к серверу:', error);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+}, [user]);
 
     return (
         <div className="self-center relative">
@@ -85,10 +109,19 @@ const BurgerMenu: React.FC = () => {
                     <IoMenu className="cursor-pointer h-8 w-8 text-neutral-500" />
                 </button>
             ) : (
-                <Avatar className="cursor-pointer h-8 w-8" onClick={handleOpen}>
-                    <AvatarImage src={user?.imageUrl} />
-                    <AvatarFallback>{user?.username?.slice(0, 2) || "VR"}</AvatarFallback>
-                </Avatar>
+                // <Avatar className="cursor-pointer h-8 w-8" onClick={handleOpen}>
+                //     <AvatarImage src={user?.imageUrl} />
+                //     <AvatarFallback>{user?.username?.slice(0, 2) || "VR"}</AvatarFallback>
+                // </Avatar>
+                <div >
+                    {iAmUser &&(
+                      <img    onClick={handleOpen}
+                          src={iAmUser.channelProfilePhoto}
+                          alt="User Avatar"
+                          style={{ width: '44px', height: '44px', borderRadius: '50%', marginRight: '10px' }}
+                        />
+                    )}
+                     </div>
             )}
 
             {isOpen && (

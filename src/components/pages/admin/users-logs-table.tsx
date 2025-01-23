@@ -14,6 +14,7 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {IoIosSearch} from "react-icons/io";
 import {useTranslation} from "next-i18next";
+import {useAuth, useSession} from "@clerk/nextjs";
 
 interface UserLog {
     id: number;
@@ -31,12 +32,18 @@ export default function UsersLogsTable() {
 
     const { t } = useTranslation()
 
+    const { getToken } = useAuth()
+
     const perPage = 6;
 
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
-                const response = await api.get(`/AdminLog?page=${page}&perPage=${perPage}&type=user&searchQuery=${searchQuery}`);
+                const response = await api.get(`/AdminLog?page=${page}&perPage=${perPage}&type=user&searchQuery=${searchQuery}`, {
+                    headers: {
+                        "Authorization": `Bearer ${await getToken()}`
+                    }
+                });
                 setUserLogs(response.data.adminLogs as UserLog[]);
                 setTotalCount(response.data.adminLogsCount as number);
             } catch (e) {

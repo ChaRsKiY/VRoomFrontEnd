@@ -4,7 +4,7 @@ import React from "react";
 import initTranslations from "@/app/i18n";
 import AsideHome from "@/components/pages/channel/aside/aside";
 import HeaderHome from "@/components/pages/home/header/header";
-import SectionsSettings from "@/components/pages/channel/channelSetup/sections-settings";
+import SectionsSettings from "@/components/pages/channel/channelSetup/channelSections/sections-settings";
 
 interface IHomeTabProps {
     params: { locale: string; }

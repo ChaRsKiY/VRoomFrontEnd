@@ -320,6 +320,7 @@ const VideoUploadInterface: React.FC = () => {
             uploadDate: new Date().toISOString(),
             duration,
             videoUrl: videoUrls,
+            vRoomVideoUrl: "", // Додане нове поле
             viewCount: 0,
             likeCount: 0,
             dislikeCount: 0,
@@ -329,12 +330,14 @@ const VideoUploadInterface: React.FC = () => {
             isAgeRestriction: isAgeRestricted,
             isCopyright: isCopyright,
             audience: audience,
-            lastViewedPosition: '00:00:00',
             categoryIds: selectedCategoryId,
             tagIds,
+            historyOfBrowsingIds: [], // Додане нове поле
+            commentVideoIds: [], // Додане нове поле
+            playLists: [], // Додане нове поле
+            lastViewedPosition: '00:00:00',
             file: emptyFile,
         }
-
         console.log("Payload to be sent:", videoData)
 
         Object.entries(videoData).forEach(([key, value]) => {

@@ -31,6 +31,7 @@ import {
     Check
 } from 'lucide-react';
 import {IChannel} from '@/types/channelinfo.interface';
+import {formatDuration} from "@/utils/dateformat";
 
 interface IVideoCardProps {
     el: IVideo;
@@ -79,7 +80,7 @@ export default function VideoCard({el}: IVideoCardProps) {
         }
     }, [isUserLoaded, clerkUser]);
 
-    // Fetching user data (channel settings)
+    // Fetching user data (channel.json settings)
     //цей метод не потрібний бо в getUserChannel ми отримуємо даннi каналу за допомогою clerkUser?.id і
     //тоді не потрібно отримувати id каналу щоб потім отримати дані каналу по id
     /*const fetchUserData = async () => {
@@ -87,34 +88,34 @@ export default function VideoCard({el}: IVideoCardProps) {
             const response = await api.get(`/ChannelSettings/getinfobychannelid/${clerkUser?.id}`);
             if (response.status === 200) {
                 const channelSettingsId = response.data.id;
-                getUserChannel(channelSettingsId); // Fetch channel info
+                getUserChannel(channelSettingsId); // Fetch channel.json info
             }
         } catch (error) {
             console.error('Error fetching user data:', error);
         }
     };*/
 
-    // Fetching user channel data by channel ID
+    // Fetching user channel.json data by channel.json ID
     const getUserChannel = async (/*channelId: number*/) => {
         try {
             const response = await api.get(`/ChannelSettings/getbyownerid/${clerkUser?.id}`);
             if (response.status === 200) {
-                setUserChannel(response.data); // Set channel data
+                setUserChannel(response.data); // Set channel.json data
             }
         } catch (error) {
-            console.error('Error fetching user channel:', error);
+            console.error('Error fetching user channel.json:', error);
         }
     };
   const fetchUserData = async () => {
     try {
       const response = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
       if (response.status === 200) {
-        const channelData: IChannel = response.data;
+        const channelData = response.data.id;
         setUserChannel(channelData);
-        console.log('Fetched channel data:', channelData);
+        console.log('Fetched channel.json data:', channelData);
       }
     } catch (error) {
-      console.error('Error fetching channel data:', error);
+      console.error('Error fetching channel.json data:', error);
     }
   };
 
@@ -131,18 +132,18 @@ export default function VideoCard({el}: IVideoCardProps) {
         }
     };
 
-  const handleAddToPlaylist = async (playlistId: number) => {
-    try {
-      fetchUserData();
-      fetchPlaylists();
-      const selectedPlaylist = existingPlaylists.find(
-        (playlist) => playlist.id === playlistId
-      );
-  
-      if (!selectedPlaylist) {
-        console.error('Playlist not found');
-        return;
-      }
+    const handleAddToPlaylist = async (playlistId: number) => {
+        try {
+            fetchUserData();
+            fetchPlaylists();
+            const selectedPlaylist = existingPlaylists.find(
+                (playlist) => playlist.id === playlistId
+            );
+
+            if (!selectedPlaylist) {
+                console.error('Playlist not found');
+                return;
+            }
 
       const updatedVideosId = [...selectedPlaylist.videosId, el.id];
   
@@ -170,40 +171,36 @@ export default function VideoCard({el}: IVideoCardProps) {
 
   const handleCreateNewPlaylist = async (name: string, privacy: string) => {
     try {
-      await fetchUserData();
-      await fetchPlaylists();
-      if (!userChannel?.id) {
-        console.error('User channel ID is missing');
-        return;
-      }
-  
-      const newPlaylist = {
-        id: 0,
-        userId: userChannel.id,
-        title: name,
-        access: privacy === 'public', // Булеве значення
-        date: new Date().toISOString(),
-        videosId: [], // Порожній масив
-      };
-  
-      console.log('Data being sent to the server:', newPlaylist);
-  
-      const response = await api.post('/PlayList/add', newPlaylist);
-  
-      if (response.status === 200 || response.status === 201) {
-        console.log('Created new playlist:', response.data);
-        setExistingPlaylists((prev) => [...prev, response.data]);
-      } else {
-        console.error('Unexpected response status:', response.status, response.data);
-      }
+        const userResponse = await api.get(`User/getbyclerkid/${clerkUser?.id}`);
+        if (userResponse.status === 200) {
+            // Використовуємо id користувача з першого запиту
+            const userId = userResponse.data.id;
+            
+            const newPlaylist = {
+                id: 0,
+                userId: userId, // Використовуємо правильний id користувача
+                title: name,
+                access: privacy === 'public',
+                date: new Date().toISOString(),
+                videosId: [],
+            };
+
+            console.log('Data being sent to the server:', newPlaylist);
+            const response = await api.post('/PlayList/add', newPlaylist);
+
+            if (response.status === 200 || response.status === 201) {
+                console.log('Created new playlist:', response.data);
+                setExistingPlaylists((prev) => [...prev, response.data]);
+            }
+        }
     } catch (error) {
-       if (error instanceof Error) {
-        console.error('General error:', error.message);
-      } else {
-        console.error('Unknown error:', error);
-      }
+        if (error instanceof Error) {
+            console.error('General error:', error.message);
+        } else {
+            console.error('Unknown error:', error);
+        }
     }
-  };
+};
   
   return (
     <div className="space-y-2.5">
@@ -273,7 +270,7 @@ export default function VideoCard({el}: IVideoCardProps) {
             )}
         </div>
     )
-}
+
 
 interface PlaylistModalProps {
     videoId: number;
@@ -386,5 +383,7 @@ function PlaylistModal({
                 </form>
             </div>
         </div>
-    )
-}
+                         )
+                        }}
+    
+                       

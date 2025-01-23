@@ -16,3 +16,14 @@ export const byteArrayToBase64 = (byteArray: Uint8Array) => {
     });
     return window.btoa(binary);
 };
+
+export const stringToBase64 = (str: string) => {
+    const coverArray = new Uint8Array(atob(str).split('').map(char => char.charCodeAt(0)));
+    const chunkSize = 65536;
+    let result = '';
+    for (let i = 0; i < coverArray.length; i += chunkSize) {
+        const chunk = coverArray.subarray(i, i + chunkSize);
+        result += String.fromCharCode(...Array.from(chunk));
+    }
+    return window.btoa(result);
+};

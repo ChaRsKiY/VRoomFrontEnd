@@ -19,6 +19,11 @@ import {IUser} from "@/types/user.interface";
 import {PiPencilSimple, PiPencilSimpleLight} from "react-icons/pi";
 import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
+import {IPinnedVideo} from "@/types/pinned-video.interface";
+import {
+    fetchPinnedVideoByChannelId,
+    fetchPinnedVideoOrNullByChannelId
+} from "@/components/pages/channel/content/fetch-filtered-videos-by-type";
 
 
 interface IChannelProps {
@@ -53,6 +58,8 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
     const {user} = useUser();
     const [owner, setOwner] = useState<IUser | null>(null);
     const [sectionsWithUrl, setSectionsWithUrl] = useState<ChannelSectionWithUrl[]>([]);
+
+    const [pinnedVideo, setPinnedVideo] = useState<IVideo | null>(null);
 
     const checkIsFolowed = async () => {
         if (user) {
@@ -135,7 +142,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                 setChannel(data);
                 getMentions();
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -163,7 +170,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                 });
                 setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
             //}
         } catch (error) {
@@ -171,6 +178,16 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
         }
     };
 
+    const getPinnedVideo = async () => {
+        try {
+            //if (user) {
+            const response = await fetchPinnedVideoOrNullByChannelId(channelid);
+            setPinnedVideo(response);
+            //}
+        } catch (error) {
+            console.error('Ошибка при подключении к серверу:', error);
+        }
+    };
 
     const getMentions = async () => {
         try {
@@ -189,7 +206,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                     }
                 });
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -266,7 +283,7 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
 
     useEffect(() => {
         chooseShorts();
-        chooseNewOnce();
+        getPinnedVideo();//chooseNewOnce() ==> старое
         chooseMoreViwed();
         chooseMoreLiked();
         chooseAll();
@@ -326,8 +343,8 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                     </div>
                                 </div>
 
-                                <div className={'w-[30.3125rem] h-[1.625rem]'}>
-                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
+                                <div className={'w-max h-[1.625rem]'}>
+                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection" || cs.title == "ForYou" || cs.title == "HighRaitingVideos"))).map((el, key) => (
 
                                         <Link
                                             className={el.title === 'home' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
@@ -337,54 +354,60 @@ const ChannelInfoComponent: React.FC<IChannelProps> = ({channelid}) => {
                                 <hr/>
                                 <div>
                                     <div>
-                                        {sectionsWithUrl.find(cs => cs.title === 'PinnedVideoSection' && cs.isVisible) &&
+                                        {(sectionsWithUrl.find(cs => cs.title === 'PinnedVideoSection' && cs.isVisible)) &&
                                             <div
                                                 className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                                {videosNew ? (
+                                                {pinnedVideo ? (
                                                     <div style={{display: display1}}>
-                                                        <VideoCardLast el={videosNew}/>
+                                                        <VideoCardLast el={pinnedVideo}/>
                                                     </div>) : <></>}
                                             </div>}
                                         <hr/>
-                                        <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
-                                                onClick={showAllViwed}>For you &nbsp;&nbsp;
-                                            <FaPlay size={12} className="text-black-600 cursor-pointer"
-                                                    title='All popular' style={{display: 'inline'}}/></button>
-                                        <div
-                                            className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                            {videosPopular.slice(0, 4).map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display2}}>
-                                                    <VideoCard el={el}/>
+                                        {sectionsWithUrl.find(cs => cs.title === 'ForYou' && cs.isVisible) &&
+                                            <>
+                                                <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
+                                                        onClick={showAllViwed}>For you &nbsp;&nbsp;
+                                                    <FaPlay size={12} className="text-black-600 cursor-pointer"
+                                                            title='All popular' style={{display: 'inline'}}/></button>
+                                                <div
+                                                    className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+                                                    {videosPopular.slice(0, 4).map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display2}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
+                                                    {videosPopular.map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display2a}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                            {videosPopular.map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display2a}}>
-                                                    <VideoCard el={el}/>
-                                                </div>
-                                            ))}
-                                        </div>
+                                            </>}
                                         <hr/>
-                                        <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
-                                                onClick={showAllLiked}>High raiting videos&nbsp;&nbsp;
-                                            <FaPlay size={12} className="text-black-600 cursor-pointer"
-                                                    title='All popular' style={{display: 'inline'}}/></button>
-                                        <div
-                                            className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
-                                            {videosLiked.slice(0, 4).map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display3}}>
-                                                    <VideoCard el={el}/>
+                                        {sectionsWithUrl.find(cs => cs.title === 'HighRaitingVideos' && cs.isVisible) &&
+                                            <>
+                                                <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
+                                                        onClick={showAllLiked}>High raiting videos&nbsp;&nbsp;
+                                                    <FaPlay size={12} className="text-black-600 cursor-pointer"
+                                                            title='All popular' style={{display: 'inline'}}/></button>
+                                                <div
+                                                    className="grid pr-[2%] grid-cols-4 grid-rows-1 flex-1 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:pr-0">
+                                                    {videosLiked.slice(0, 4).map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display3}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
+                                                    {videosLiked.map((el, key) => (
+                                                        <div key={key} className="px-3 mb-8 space-y-2.5"
+                                                             style={{display: display3a}}>
+                                                            <VideoCard el={el}/>
+                                                        </div>
+                                                    ))}
                                                 </div>
-                                            ))}
-                                            {videosLiked.map((el, key) => (
-                                                <div key={key} className="px-3 mb-8 space-y-2.5"
-                                                     style={{display: display3a}}>
-                                                    <VideoCard el={el}/>
-                                                </div>
-                                            ))}
-                                        </div>
+                                            </>}
                                         <hr/>
                                         <button style={{padding: "20px", fontSize: '20px', fontWeight: 'bold'}}
                                                 onClick={showAllShorts}>Shorts&nbsp;&nbsp;

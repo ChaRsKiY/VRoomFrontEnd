@@ -7,6 +7,13 @@ import {ITranslationFunction} from "@/types/translation.interface";
 import {useTranslation} from "next-i18next";
 import Link from "next/link";
 import api from '@/services/axiosApi';
+import {IChannel} from "@/types/channelinfo.interface";
+import {Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport} from "@/components/ui/toast";
+import {response} from "express";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {IUser} from "@/types/user.interface";
+import {ChannelSection, ChSection} from "@/types/channelsections.interfaces";
+import {ICountry} from "@/types/country.interface";
 
 const ChannelEditBlock = () => {
     const {user} = useUser(); // Получаем текущего пользователя
@@ -15,13 +22,11 @@ const ChannelEditBlock = () => {
     const [channelBanner, setChannelBanner] = useState<File | null>();
     const [channelBannerPreview, setChannelBannerPreview] = useState<string>('https://placehold.co/150x100.svg');
     const [channelBannerValid, setChannelBannerValid] = useState<string | null>(null);
-    const [chBannerPrevOld, setChBannerPrevOld] = useState<string>("");
     const chBInputRef = useRef<HTMLInputElement | null>(null);
 
     const [profilePhoto, setProfilePhoto] = useState<File | null>();
     const [profilePhotoPreview, setProfilePhotoPreview] = useState<string>('https://placehold.co/120x80.svg');
     const [profilePhotoValid, setProfilePhotoValid] = useState<string | null>(null);
-    const [profPhotoPrevOld, setProfPhotoPrevOld] = useState<string>("");
     const profPhInputRef = useRef<HTMLInputElement | null>(null);
 
     const [channelNickName, setChannelNickName] = useState<string>("");
@@ -34,6 +39,37 @@ const ChannelEditBlock = () => {
 
     const [channelDescription, setChannelDescription] = useState<string>("");
     const [channelUrl, setChannelUrl] = useState<string>("");
+    const [openToast, setOpenToast] = useState(false);
+
+    const [countries, setCountries] = useState<ICountry[]>([]);
+    const [selectedCountryId, setSelectedCountryId] = useState<number>(0);
+
+    const initialState = useRef({
+        channelBannerPreview: '', profilePhotoPreview: '',
+        channelNickName: '', channelName: '', channelDescription: '', selectedCountryId: 0
+    });
+
+    // Проверка, были ли изменения в профиле
+    const hasChanged =
+        JSON.stringify({
+            channelBannerPreview,
+            profilePhotoPreview,
+            channelNickName,
+            channelName,
+            channelDescription,
+            selectedCountryId,
+        }) !==
+        JSON.stringify(initialState.current);
+
+    // Функция для сброса изменений (возвращает поля к начальным значениям)
+    const handleResetChanges = () => {
+        setChannelBannerPreview(initialState.current.channelBannerPreview);
+        setProfilePhotoPreview(initialState.current.profilePhotoPreview);
+        setChannelName(initialState.current.channelName);
+        setChannelNickName(initialState.current.channelNickName);
+        setChannelDescription(initialState.current.channelDescription);
+        setSelectedCountryId(initialState.current.selectedCountryId);
+    };
 
     useEffect(() => {
         if (user) {
@@ -41,29 +77,42 @@ const ChannelEditBlock = () => {
         }
     }, [user]);
 
+    const setData = (data: IChannel) => {
+        initialState.current = {
+            channelBannerPreview: data.channelBanner === null ? 'https://placehold.co/150x100.svg' : data.channelBanner,
+            profilePhotoPreview: data.channelProfilePhoto,
+            channelNickName: '@' + data.channelNikName,
+            channelName: data.channelName,
+            channelDescription: data.description,
+            selectedCountryId: data.country_Id
+        };
+
+        setId(data.id);
+        setChannelBannerPreview(data.channelBanner === null ? 'https://placehold.co/150x100.svg' : data.channelBanner);
+        setProfilePhotoPreview(data.channelProfilePhoto);
+
+        setChannelName(data.channelName);
+        setChannelNameValid(true);
+
+        setChannelNickName('@' + data.channelNikName);
+        setChannelNickNameValid(true);
+
+        setChannelDescription(data.description);
+        setChannelUrl(data.channel_URL);
+        setSelectedCountryId(data.country_Id);
+    }
+
     const fetchChannel = async (userId: string) => {
         try {
-            const response = await api.get(`/ChannelSettings/getbyownerid/` + userId);
-
-            const data: any = await response.data;
-            console.log(data.channelName);
-
-            if (data.channelBanner == null) {
-                setChannelBannerPreview('https://placehold.co/150x100.svg');
-            }
-
-            setId(data.id);
-            setChannelBannerPreview(data.channelBanner);
-            setChBannerPrevOld(data.channelBanner);
-            setProfilePhotoPreview(data.channelProfilePhoto);
-            setProfPhotoPrevOld(data.channelProfilePhoto);
-            setChannelName(data.channelName);
-            setChannelNameValid(true);
-            setChannelDescription(data.description);
-            setChannelNickName('@' + data.channelNikName);
-
-            setChannelNickNameValid(true);
-            setChannelUrl(data.channel_URL);
+            await Promise.all([
+                api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => {
+                    setData(response.data);
+                }),
+                api.get<ICountry[]>(`/Country`).then(response => {
+                    setCountries(response.data);
+                })
+            ]);
+            // await api.get<IChannel>(`/ChannelSettings/getbyownerid/` + userId).then(response => setData(response.data));
         } catch (error) {
             console.error('Ошибка при загрузке уведомлений:', error);
         }
@@ -84,26 +133,25 @@ const ChannelEditBlock = () => {
             }
 
             formData.append('id', id + '');
+            formData.append('Country_Id', selectedCountryId + '');
             formData.append('ChannelName', channelName);
             formData.append('Description', channelDescription);
             formData.append('channelNikName', channelNickName.replaceAll("@", ""));
 
-            api.put("/ChannelSettings/updateShort", formData, {
+            console.log(selectedCountryId);
+
+            await api.put("/ChannelSettings/updateShort", formData, {
                 headers: {"Content-Type": false},
             })
-                .then(() => {
-                    location.reload();
+                .then((response) => {
+                    setData(response.data);
+                    setOpenToast(true);
+                    setTimeout(() => setOpenToast(false), 4000); // Закрыть автоматически через 3 секунды
                 })
                 .catch((error) => {
                     alert(error.message);
                 });
 
-        }
-    };
-
-    const handleButtonClick = () => {
-        if (user) {
-            fetchChannel(user.id);
         }
     };
 
@@ -138,9 +186,9 @@ const ChannelEditBlock = () => {
             }
             setChannelBanner(file);
             setChannelBannerPreview(URL.createObjectURL(file));
-        } else setChannelBannerPreview(chBannerPrevOld);
-
+        } else setChannelBannerPreview(initialState.current.channelBannerPreview);
     };
+
     const handleProfilePhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
@@ -160,10 +208,9 @@ const ChannelEditBlock = () => {
             setProfilePhoto(file);
             setProfilePhotoPreview(URL.createObjectURL(file));
 
-        } else setProfilePhotoPreview(profPhotoPrevOld);
-
-
+        } else setProfilePhotoPreview(initialState.current.profilePhotoPreview);
     };
+
     // Функция для проверки разрешения изображения
     const validateImageResolution = (file: File, minWidth: number, minHeight: number): Promise<boolean> => {
         return new Promise((resolve) => {
@@ -212,8 +259,13 @@ const ChannelEditBlock = () => {
     };
 
 
-    const {t}: { t: ITranslationFunction } = useTranslation();
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.target.value);
+        setSelectedCountryId(Number(e.target.value));
+    };
 
+
+    const {t}: { t: ITranslationFunction } = useTranslation();
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -226,12 +278,12 @@ const ChannelEditBlock = () => {
                     <div className="flex space-x-4">
                         <Link target={'_self'} href={channelUrl}
                               className="text-gray-700 pt-1 hover:text-gray-800 ">Перейти на канал</Link>
-                        <button type="button" onClick={handleButtonClick}
-                                className="bg-gray-200 px-4 py-1 rounded">Отмена
+                        <button type="button" disabled={!hasChanged} onClick={handleResetChanges}
+                                className="bg-gray-200 px-4 py-1 font-semibold rounded disabled:text-gray-500">Отмена
                         </button>
-                        <input type="submit"
-                               className="bg-blue-500 hover:bg-blue-800 text-white hover:cursor-pointer px-4 py-1 rounded"
-                               value="Опубликовать"/>
+                        <button type={'submit'} disabled={!hasChanged}
+                                className="bg-gray-200 px-4 py-1 font-semibold rounded disabled:text-gray-500">Опубликовать
+                        </button>
                     </div>
                 </div>
                 <div className="w-[62.5rem] h-[12.25rem] shrink-0">
@@ -348,7 +400,52 @@ const ChannelEditBlock = () => {
                            placeholder="Email address"/>
 
                 </div>
+                <div className="w-[62.5rem] h-[7rem] shrink-0">
+                    <h2 className="block font-semibold">Contact information</h2>
+                    <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
+                        cooperation. Viewers can see the email address in the 'About' tab.</p>
+                    <div className="w-72">
+                        <select id="countries" name="country"
+                                value={selectedCountryId}
+                                onChange={handleChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            {countries.length > 0 ? (
+                                countries.map((country, index) => (
+                                    <>
+                                        {country.countryCode === "NotSelected" && (
+                                            <option key={country.countryCode} value={country.id} selected>
+                                                {country.name}
+                                            </option>
+                                        )}
+                                        {country.countryCode !== "NotSelected" && (
+                                            <option key={country.countryCode} value={country.id}>
+                                                {country.name}
+                                            </option>
+                                        )}
+                                    </>
+                                ))
+                            ) : (
+                                <option>Loading...</option>
+                            )}
+                            {/*{countries.map((country) => {
+
+                            }))};*/}
+                            <option value="US">United States</option>
+                        </select>
+                    </div>
+
+                </div>
             </form>
+            <ToastProvider>
+                <ToastViewport/>
+                <Toast open={openToast} onOpenChange={setOpenToast} className={'bg-gray-500 text-white'}>
+                    <div>
+                        <ToastTitle>Успех!</ToastTitle>
+                        <ToastDescription>Данные канала успешно сохранены!</ToastDescription>
+                    </div>
+                    <ToastClose/>
+                </Toast>
+            </ToastProvider>
         </>
     )
 }

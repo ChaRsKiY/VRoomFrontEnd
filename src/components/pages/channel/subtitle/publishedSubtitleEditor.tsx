@@ -238,7 +238,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
 
     };
     const downloadSubtitlesAsVTT = () => {
-        if (isValid2) {
+       
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -255,7 +255,7 @@ const PublishSubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUrl
             link.click();
 
             URL.revokeObjectURL(link.href);
-        }
+        
     };
 
     const uploadVTTToBackend = async (file: File, topublish: boolean) => {

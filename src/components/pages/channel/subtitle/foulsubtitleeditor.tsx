@@ -229,7 +229,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
     };
 
     const downloadSubtitlesAsVTT = () => {
-        if (isValid2) {
+        
             const vttContent = [
                 'WEBVTT\n\n',
                 ...forms.map(
@@ -246,7 +246,7 @@ const FoulCopySubtitleEditor: React.FC<IProps> = ({ videoId, onClose, subtitleUr
             link.click();
 
             URL.revokeObjectURL(link.href);
-        }
+        
     };
 
     const uploadVTTToBackend = async (file: File, topublish: boolean) => {

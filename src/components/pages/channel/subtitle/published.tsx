@@ -2,9 +2,9 @@
 
 // import React, { useEffect, useState } from 'react'
 // import { IContentVideo } from "@/types/videoDTO.interface";
-// import VideoCard from "@/components/pages/channel/subtitle/videocard";
+// import VideoCard from "@/components/pages/channel.json/subtitle/videocard";
 // import api from '@/services/axiosApi';
-// import PublishSubtitleEditor from "@/components/pages/channel/subtitle/publishedSubtitleEditor";
+// import PublishSubtitleEditor from "@/components/pages/channel.json/subtitle/publishedSubtitleEditor";
 // import { useUser } from '@clerk/nextjs';
 // import { IChannel } from '@/types/channelinfo.interface';
 // import '@/styles/modalsubtitles.css';
@@ -19,7 +19,7 @@
 // const PublishedSubtitleslist = () => {
 
 //     const [open, setOpen] = useState(false);
-//     const [channel, setChannel] = useState<IChannel>();
+//     const [channel.json, setChannel] = useState<IChannel>();
 //     const [videoId, setVideoId] = useState(0);
 //     const { user } = useUser();
 //     const [urlSubtitle, setUrlSubtitle] = useState<string>("");
@@ -55,8 +55,8 @@
 
 //     const getVideos = async () => {
 //         try {
-//             if (channel) {
-//                 const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+//             if (channel.json) {
+//                 const response = await api.get('/Video/getvideosbychannelid/' + channel.json.id);
 
 //                 if (response.status === 200) {
 //                     const mydata: IContentVideo[] = await response.data;
@@ -82,7 +82,7 @@
 
 //     useEffect(() => {
 //         getVideos();
-//     }, [channel]);
+//     }, [channel.json]);
 
 //     return (
 //         <div style={{ margin: '20px' }}>
@@ -276,7 +276,7 @@ const PublishedSubtitleslist = () => {
     const getVideos = async () => {
         try {
             if (channel) {
-                const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+                const response = await api.get('/Video/getchannelvideos/' + channel.id);
 
                 if (response.status === 200) {
                     const mydata: IContentVideo[] = await response.data;

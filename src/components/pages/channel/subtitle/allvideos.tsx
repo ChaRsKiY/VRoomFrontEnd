@@ -13,14 +13,41 @@ import { ISubtitle } from "@/types/subtitle.interface";
 import Image from "next/image";
 import { base64ToUint8Array, byteArrayToBase64 } from "@/utils/base64Functions";
 import { formatDate } from "@/utils/dateformat";
+import initTranslations from "@/app/i18n";
+import { useTranslation } from 'react-i18next';
+
+interface Props {
+    params: {
+        locale: string;
+    }
+}
 
 
-const AllVideolist = () => {
+
+const AllVideolist: React.FC<Props> = ({ params: { locale } }: Props) => {
+
+    // const { t } = await initTranslations(locale, ['subtitles']);
+    const [t, setT] = useState<(key: string) => string>(() => (key: string) => key);
+    //const {t}= useTranslation();
 
     const [open, setOpen] = useState(false);
     const [channel, setChannel] = useState<IChannel>();
     const [videoId, setVideoId] = useState(0);
+    const [videoText, setVideoText] = useState('');
+    const [langText, setLangText] = useState('');
+    const [dateText, setDateText] = useState('');
     const { user } = useUser();
+
+    useEffect(() => {
+        const loadTranslations = async () => {
+            const { t } = await initTranslations(locale, ['subtitles']);
+            setT(() => t);
+            setVideoText(t('video'));
+            setLangText(t('lang'));
+            setDateText(t('date'));
+        };
+        loadTranslations();
+    }, [locale]);
 
     const openSubtitlesEditor = (id: number) => {
         setVideoId(id);
@@ -54,7 +81,7 @@ const AllVideolist = () => {
     const getVideos = async () => {
         try {
             if (channel) {
-                const response = await api.get('/Video/getvideosbychannelid/' + channel.id);
+                const response = await api.get('/Video/getchannelvideos/' + channel.id);
 
                 if (response.status === 200) {
                     const mydata: IContentVideo[] = await response.data;
@@ -83,42 +110,13 @@ const AllVideolist = () => {
     }, [channel]);
 
 
-    //     return (
-    //         <div>
-    //             <div onClick={() => openSubtitlesEditor(1)}>
-    //                 TestSubtitlesEditor
-    //             </div>
-    //             {open && (
-    //                 <div className="modal-overlay">
-    //                     <div className="modal-content">
-    //                        <VideoSubtitleEditor videoId={videoId}  onClose ={closeSubtitlesEditor}/>
-    //                     </div>
-    //                 </div>
-    //             )}
-    //             <div style={{ marginTop: '100px', }}>
-    //                 {moreVideos.map((el, key) => (
-    //                     <div key={key} onClick={() => openSubtitlesEditor(el.id)}>
-    //                         <VideoCard el={el} />
-    //                     </div>
-    //                 ))}
-    //                 {moreVideos.length == 0 ? (<div   >
-    //                     You do not have the playlist yet...
-    //                 </div>) : <></>}
-    //             </div>
-
-    //         </div>
-    //     )
-    // }
-
-    // export default AllVideolist
-
     return (
         <div style={{ margin: '20px' }}>
 
-            {open && (
+            {open && { t } && (
                 <div className="modal-overlay">
                     <div className="modal-content">
-                        <VideoSubtitleEditor videoId={videoId} onClose={closeSubtitlesEditor} />
+                        <VideoSubtitleEditor videoId={videoId} onClose={closeSubtitlesEditor} params= {{ locale }}/>
                     </div>
                 </div>
             )}
@@ -126,9 +124,9 @@ const AllVideolist = () => {
                 <thead className="bg-gray-200 text-gray-600  text-sm leading-normal">
                     <tr className="text-left">
 
-                        <th className="py-3 px-3 ">Video</th>
-                        <th className="py-3 px-3 ">Language</th>
-                        <th className="py-3 px-3 ">Date</th>
+                        <th className="py-3 px-3 ">{t('subtitles:video')}</th>
+                        <th className="py-3 px-3 ">{langText}</th>
+                        <th className="py-3 px-3 ">{dateText}</th>
                     </tr>
                 </thead>
                 <tbody className="text-gray-700 text-sm">
@@ -136,7 +134,7 @@ const AllVideolist = () => {
                     {moreVideos.length > 0 ? (moreVideos.map((el, key) => (
                         <tr key={el.id} data-index={key} className={"border-b border-gray-200 hover:bg-gray-100 text-left"}
                             onClick={() => openSubtitlesEditor(el.id)} style={{ cursor: 'pointer' }} title='Add subtitles'
-                            >
+                        >
 
                             <td className="py-3 px-3  flex ">
                                 <Image src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(el.cover))}`}
@@ -153,14 +151,14 @@ const AllVideolist = () => {
 
                             </td>
 
-                            <td className="py-3 px-3 " style={{paddingLeft:'40px'}}>{el.subtitles ? el.subtitles.length : 0}</td>
+                            <td className="py-3 px-3 " style={{ paddingLeft: '40px' }}>{el.subtitles ? el.subtitles.length : 0}</td>
 
                             <td className="py-3 px-3 ">{formatDate(new Date(el.uploadDate))}</td>
                         </tr>
                     ))) : (
-                        <tr onClick={() => openSubtitlesEditor(1)} style={{cursor:'pointer'}}>
+                        <tr onClick={() => openSubtitlesEditor(1)} style={{ cursor: 'pointer' }}>
                             <td colSpan={3} className="text-center py-4">
-                               
+
                             </td>
                         </tr>
                     )}

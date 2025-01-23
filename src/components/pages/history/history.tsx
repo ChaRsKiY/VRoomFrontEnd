@@ -13,17 +13,18 @@ import {IoTrashOutline} from "react-icons/io5";
 import {GoReport} from "react-icons/go";
 import {PiQueue} from "react-icons/pi";
 import {IoIosPause} from "react-icons/io";
+import {formatDuration} from "@/utils/dateformat";
 
-const WatchHistoryPage = ({userId}: { userId: string }) => {
+const WatchHistoryPage = ({userId,locale}: { userId: string ,locale:string}) => {
     const [history, setHistory] = useState<HistoryOfBrowsingGroupDate[]>([]);
     const router = useRouter();
 
     useEffect(() => {
         const fetchHistory = async () => {
             const response = await api.get(`/HistoryOfBrowsing/getallhistorybyclerkidgroupedbydate/` + userId);
-            if(response.status===200){ 
-            const hist = await response.data;
-            setHistory(hist);
+            if (response.status === 200) {
+                const hist = await response.data;
+                setHistory(hist);
             }
         };
 
@@ -83,14 +84,13 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
             console.error('Ошибка при подключении к серверу:', error);
         }
     }
-
     return (
-        <div className={'flex flex-row'}>
+        <div className={'flex justify-between'}>
             <div className={'basis-9/12'} style={{padding: '20px'}}>
-                <h1>История просмотра</h1>
+                <h1 className={'font-bold text-[1.355rem]'}>История просмотра</h1>
                 {history?.map((group) => (
                     <div key={group.date}>
-                        <h2 className={'font-bold text-[22px]'} style={{margin: '20px 0 10px'}}>
+                        <h2 className={'font-semibold text-[20px]'} style={{margin: '20px 0 10px'}}>
                             {new Date(group.date).toLocaleDateString('ru-RU', {
                                 weekday: 'long',
                                 year: 'numeric',
@@ -100,21 +100,30 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
                         </h2>
                         <div>
                             {group.historyOfBrowsingVideos?.map((item) => (
-                                <div className={' px-5'} key={item.id}>
+                                <div className={'px-5'} key={item.id}>
                                     <div className={'flex mb-4 relative cursor-pointer w-max'}>
-                                        <Image onClick={() => router.push(item.vRoomVideoUrl)}
-                                               src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(item.cover))}`}
-                                               alt={item.videoTitle} className={'rounded-[8px] aspect-video'}
-                                               width={245} height={230}/>
-
-                                        <div className={'flex flex-col min-w-[270px] '} style={{marginLeft: '10px'}}>
-
+                                        <div className={'relative'}>
+                                            <Image
+                                                onClick={() => router.push(item.vRoomVideoUrl)}
+                                                src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(item.cover))}`}
+                                                alt={item.videoTitle}
+                                                className={'rounded-[8px] aspect-video'}
+                                                width={245}
+                                                height={230}
+                                            />
+                                            <div
+                                                className="bg-black px-1 text-[0.775rem] text-white rounded w-max absolute bottom-1.5 right-1.5">
+                                                {formatDuration(item.duration)}
+                                            </div>
+                                        </div>
+                                        <div className={'flex flex-col min-w-[300px] w-full'}
+                                             style={{marginLeft: '10px'}}>
                                             <h1 className={'text-[20px]'}>{item.videoTitle}</h1>
-                                            <p className={'text-[14px] text-gray-600'}>{item.channelName}
-                                                <span className={'pr-1.5'}></span> {formatNumber(item.viewCount)} views
+                                            <p className={'text-[14px] text-gray-600'}>
+                                                {item.channelName} <span
+                                                className={'pr-1.5'}></span> {formatNumber(item.viewCount)} views
                                             </p>
                                             <p>{item.videoDescription}</p>
-
                                         </div>
                                         <div className={'absolute flex flex-row items-center top-0 right-0'}>
 
@@ -150,52 +159,32 @@ const WatchHistoryPage = ({userId}: { userId: string }) => {
                                             </DropdownMenu>
                                         </div>
                                     </div>
-
                                 </div>
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
-            <div className={'basis-[32%] p-4 pr-14 pt-20 w-full'}>
-                <div className="fixed flex-col space-y-4 text-sm text-gray-800">
-                    <label htmlFor="search"
-                           className="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
-                    <div className="relative">
-                        <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
-                            <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
-                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                            </svg>
-                        </div>
-                        <input type="search" id="search"
-                               className="block w-full py-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                               placeholder="Искать в истории просмотра" required/>
-                        {/*<button type="submit"
-                            className="text-white absolute end-1.5 bottom-1.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Search
-                    </button>*/}
+            {/* правый блок */}
+            <div className={'basis-[36%] p-4 fixed right-14 top-32'}>
+                <div className="flex flex-col w-full space-y-4 text-sm text-gray-800">
+                    <div className="relative w-full">
+                        <input
+                            type="search"
+                            id="search"
+                            className="block py-2 min-w-[280px] w-full ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Искать в истории просмотра"
+                        />
                     </div>
                     <div onClick={() => clearHistory()} className="flex flex-row items-center space-x-2 cursor-pointer">
                         <IoTrashOutline size={24}/>
                         <p>Очистить историю просмотра</p>
                     </div>
-                    <div className="flex flex-row items-center space-x-2">
-                        <IoIosPause size={24}/>
-                        <p>Не сохранять историю просмотра</p>
-                    </div>
-                    {/* <div className="flex flex-row items-center space-x-2">
-                        <IoTrashOutline size={24}/>
-                        <p>Очистить историю поиска</p>
-                    </div>
-                    <div className="flex flex-row items-center space-x-2">
-                        <IoIosPause size={24}/>
-                        <p>Не сохранять историю поиска</p>
-                    </div> */}
                 </div>
             </div>
         </div>
     );
+
 };
 
 export default WatchHistoryPage;

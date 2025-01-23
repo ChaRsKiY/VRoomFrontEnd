@@ -1,0 +1,14 @@
+{
+    "video":"Video",
+    "lang":"Languages",
+    "date":"Date",
+    "manual":"Enter subtitles manually",
+    "del":"",
+    "file":"",
+    "sub":"Subtitles",
+    "all":"All videos",
+    "foul":"Foul copy ",
+    "pub":"Published",
+    "upload":"Upload subtitle file (.vtt)"
+
+}

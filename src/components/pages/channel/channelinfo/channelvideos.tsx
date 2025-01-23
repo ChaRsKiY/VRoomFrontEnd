@@ -82,7 +82,7 @@ const ChannelVideosComponent: React.FC<IProps> = ({channelid}) => {
                     });
                     setSectionsWithUrl(sectionsWithUrls.sort((a, b) => a.order - b.order)); // Сортируем по порядку
                 } else {
-                    console.error('Ошибка при получении channel:', response.statusText);
+                    console.error('Ошибка при получении channel.json:', response.statusText);
                 }
             }
         } catch (error) {
@@ -156,7 +156,7 @@ const ChannelVideosComponent: React.FC<IProps> = ({channelid}) => {
                 const data: IChannel = await response.data;
                 setChannel(data);
             } else {
-                console.error('Ошибка при получении channel:', response.statusText);
+                console.error('Ошибка при получении channel.json:', response.statusText);
             }
         } catch (error) {
             console.error('Ошибка при подключении к серверу:', error);
@@ -292,7 +292,7 @@ const ChannelVideosComponent: React.FC<IProps> = ({channelid}) => {
                                 </div>
 
                                 <div className={'w-[30.3125rem] h-[1.625rem]'}>
-                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection"))).map((el, key) => (
+                                    {sectionsWithUrl.filter((cs) => cs.isVisible && !((cs.title == "PinnedVideoSection" || cs.title == "subscriptionsSection" || cs.title == "ForYou" || cs.title == "HighRaitingVideos"))).map((el, key) => (
                                         <Link
                                             className={el.title === 'Video' ? 'border-b-black border-2 font-bold text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal' : 'text-[#000] p-1.5 font-Inter text-[1rem] font-not-italic leading-normal'}
                                             href={el.url} key={key}>{t(`сhannel:${el.title}`)}</Link>

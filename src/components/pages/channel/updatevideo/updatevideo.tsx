@@ -17,6 +17,7 @@ import { IChannel } from "@/types/channelinfo.interface"
 import api from '@/services/axiosApi'
 import { Upload, X, Plus } from 'lucide-react'
 import { ScrollArea } from "@/components/ui/scroll-area"
+import imageCompression from 'browser-image-compression';
 
 interface IChannelEditProps {
     params: { locale: string }
@@ -56,263 +57,325 @@ const VideoUpdateInterface: React.FC = () => {
     const [tagIds, setTagIds] = useState<number[]>([])
     const [tags, setTags] = useState<Tag[]>([])
     const { user } = useUser()
+    const [isUpdating, setIsUpdating] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
+  const [updateComplete, setUpdateComplete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-    const [isUpdating, setIsUpdating] = useState(false)
-    const [updateProgress, setUpdateProgress] = useState(0)
-    const [updateComplete, setUpdateComplete] = useState(false)
+  useEffect(() => {
+    if (user) {
+      fetchAvailableVideos();
+      fetchCategories();
+      getUserChannel();
+    }
+  }, [user]);
 
-    useEffect(() => {
-        if (user) {
-            fetchAvailableVideos()
-            fetchCategories()
-            getUserChannel()
-        }
-    }, [user])
-    
-    useEffect(() => {
-        if (userChannel) {
-            fetchAvailableVideos()
-        }
-    }, [userChannel])
-    
-    const fetchAvailableVideos = async () => {
-        if (!userChannel?.id) {
-            console.error('User channel ID is missing');
-            return;
-        }
-        try {
-            const response = await api.get(`/Video/getchannelvideos/${userChannel.id}`);
-            setAvailableVideos(response.data);
-        } catch (error) {
-            console.error('Error fetching available videos:', error);
-        }
-    };
+  useEffect(() => {
+    if (userChannel) {
+      fetchAvailableVideos();
+    }
+  }, [userChannel]);
 
-    const fetchCategories = async () => {
-        try {
-            const response = await api.get('/Category')
-            setCategories(response.data)
-        } catch (error) {
-            console.error('Error fetching categories:', error)
+  const fetchAvailableVideos = async () => {
+    if (!userChannel?.id) {
+      console.error('User channel ID is missing');
+      return;
+    }
+    try {
+      const response = await api.get(`/Video/getchannelvideos/${userChannel.id}`);
+      setAvailableVideos(response.data);
+    } catch (error) {
+      console.error('Error fetching available videos:', error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/Category');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const getUserChannel = async () => {
+    if (user) {
+      try {
+        const response = await api.get(`/ChannelSettings/getbyownerid/${user.id}`);
+        if (response.status === 200) {
+          setUserChannel(response.data);
         }
+      } catch (error) {
+        console.error('Error fetching user channel:', error);
+      }
+    }
+  };
+
+  const addCategory = () => {
+    if (newCategory && !categories.some((category) => category.name === newCategory)) {
+      const newCategoryObj: Category = {
+        id: 0,
+        name: newCategory,
+        videosId: [],
+      };
+      setCategories([...categories, newCategoryObj]);
+      DownloadCategory(newCategoryObj);
+      setNewCategory('');
+    }
+  };
+
+  const DownloadCategory = async (category: Category) => {
+    try {
+      const response = await api.post('/Category/add', category, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error('Failed to add category');
+      }
+      console.log('Category added successfully');
+      await fetchCategories();
+      return response.data.id;
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  const handleVideoSelect = (video: IVideo) => {
+    try {
+      setVideo(video); // Update video
+      setTitle(video.tittle);
+      setDescription(video.description);
+      setVisibility(video.visibility ? 'public' : 'private');
+      setAgeRestricted(video.isAgeRestriction);
+      setIsCopyright(video.isCopyright);
+      setAudience(video.audience);
+      setThumbnailPreview(`data:image/jpeg;base64,${video.cover}`);
+      console.log('Video data:', video); // Check video data
+    } catch (error) {
+      console.error('Error selecting video:', error);
+    }
+  };
+
+  const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentTag(e.target.value);
+  };
+
+  const addTag = async (tagName: string) => {
+    if (tagName && !tags.some(tag => tag.name === tagName)) {
+      const newTagObj: Tag = {
+        id: 0,
+        name: tagName,
+        videosId: [],
+      };
+
+      setTags(prevTags => [...prevTags, newTagObj]);
+
+      try {
+        await api.post('/Tag/add', newTagObj);
+        await fetchTagIdByName(tagName);
+      } catch (error) {
+        console.error('Error adding tag:', error);
+      } finally {
+        setCurrentTag('');
+      }
+    }
+  };
+
+  const fetchTagIdByName = async (tagName: string): Promise<void> => {
+    try {
+      const response = await api.get(`/Tag/getbytagname/${tagName}`);
+      if (response.status !== 200 || !response.data.id) {
+        throw new Error('Failed to fetch tag ID');
+      }
+
+      const tagId = response.data.id;
+
+      setTagIds(prevIds => {
+        if (!prevIds.includes(tagId)) {
+          return [...prevIds, tagId];
+        }
+        return prevIds;
+      });
+
+      setTags(prevTags =>
+        prevTags.map(tag =>
+          tag.name === tagName ? { ...tag, id: tagId } : tag
+        )
+      );
+    } catch (error) {
+      console.error('Error fetching tag ID:', error);
+      throw error;
+    }
+  };
+
+  const removeTag = (id: number) => {
+    setTags((prevTags) => prevTags.filter((tag) => tag.id !== id));
+    setTagIds((prevIds) => prevIds.filter((tagId) => tagId !== id));
+  };
+
+  const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
+      setThumbnail(file);
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result?.toString() || "";
+        console.log("Generated Base64:", base64String);
+        setThumbnailBase64(base64String);
+        setThumbnailPreview(base64String);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      console.error("Unsupported file format. Please select a PNG or JPEG image.");
+    }
+  };
+
+  const handleVideoDelete = async (id: number): Promise<void> => {
+    if (!id) {
+      console.error('Invalid video ID');
+      return;
     }
 
-    const getUserChannel = async () => {
-        if (user) {
-            try {
-                const response = await api.get('/ChannelSettings/getbyownerid/' + user.id)
-                if (response.status === 200) {
-                    setUserChannel(response.data)
-                }
-            } catch (error) {
-                console.error('Error fetching user channel:', error)
-            }
-        }
+    if (!window.confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
+      return;
     }
 
-    const addCategory = () => {
-        if (newCategory && !categories.some((category) => category.name === newCategory)) {
-            const newCategoryObj: Category = {
-                id: 0,
-                name: newCategory,
-                videosId: []
-            }
-            setCategories([...categories, newCategoryObj])
-            DownloadCategory(newCategoryObj)
-            setNewCategory('')
-        }
-    }
+    setIsDeleting(true);
+    setDeleteError(null);
 
-    const DownloadCategory = async (category: Category) => {
-        try {
-            const response = await api.post('/Category/add', category, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-
-            if (response.status != 200) {
-                throw new Error('Failed to add category')
-            }
-            console.log('Category added successfully')
-            await fetchCategories()
-            return response.data.id
-        } catch (error) {
-            console.error('Error adding category:', error)
-        }
-    }
-
-    const handleVideoSelect = (video: IVideo) => {
-        try {
-            setVideo(video); // Оновлення відео
-            setTitle(video.tittle);
-            setDescription(video.description);
-           // setCategory(video.category);
-            //setTags(video.tags || []);
-            setVisibility(video.visibility ? 'public' : 'private');
-            setAgeRestricted(video.isAgeRestriction);
-            setIsCopyright(video.isCopyright);
-            setAudience(video.audience);
-            //setSelectedCategoryId(video.categoryIds);
-            //setTagIds(video.tagIds || []);
-            setThumbnailPreview(`data:image/jpeg;base64,${video.cover}`);
-
-            console.log('Video data:', video);  // Перевірте дані, які приходять
-        } catch (error) {
-            console.error('Error selecting video:', error);
-        }
-    };
-
-    const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCurrentTag(e.target.value)
-    }
-
-    const addTag = async (tagName: string) => {
-        if (tagName && !tags.some(tag => tag.name === tagName)) {
-            const newTagObj: Tag = {
-                id: 0,
-                name: tagName,
-                videosId: [],
-            }
-    
-            setTags(prevTags => [...prevTags, newTagObj])
-    
-            try {
-                await api.post('/Tag/add', newTagObj)
-                await fetchTagIdByName(tagName)
-            } catch (error) {
-                console.error('Error adding tag:', error)
-            } finally {
-                setCurrentTag("")
-            }
-        }
-    }
-
-    const fetchTagIdByName = async (tagName: string): Promise<void> => {
-        try {
-            const response = await api.get(`/Tag/getbytagname/${tagName}`)
-    
-            if (response.status !== 200 || !response.data.id) {
-                throw new Error('Failed to fetch tag ID')
-            }
-    
-            const tagId = response.data.id
-    
-            setTagIds(prevIds => {
-                if (!prevIds.includes(tagId)) {
-                    return [...prevIds, tagId]
-                }
-                return prevIds
-            })
-    
-            setTags(prevTags =>
-                prevTags.map(tag =>
-                    tag.name === tagName ? { ...tag, id: tagId } : tag
-                )
-            )
-        } catch (error) {
-            console.error('Error fetching tag ID:', error)
-            throw error
-        }
-    }
-
-    const removeTag = (id: number) => {
-        setTags((prevTags) => prevTags.filter((tag) => tag.id !== id))
-        setTagIds((prevIds) => prevIds.filter((tagId) => tagId !== id))
-    }
-
-    const handleThumbnailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0]
+    try {
+      console.log('Attempting to delete video:', id);
+      const response = await api.delete(`/Video/${id}`);
+      console.log('Delete response:', response);
+      
+      if (response.status === 204) {
+        // Update the UI only after successful deletion
+        setAvailableVideos(prevVideos => prevVideos.filter(v => v.id !== id));
         
-        if (file && (file.type === "image/png" || file.type === "image/jpeg" || file.type === "image/jpg")) {
-            setThumbnail(file)
-            
-            const reader = new FileReader()
-            reader.onload = () => {
-                const base64String = reader.result?.toString().split(',')[1] || ""
-                setThumbnailBase64(base64String)
-                setThumbnailPreview(`data:${file.type};base64,${base64String}`)
-            }
-    
-            reader.readAsDataURL(file)
-        } else {
-            console.error("Unsupported file format. Please select a PNG or JPEG image.")
+        // Reset selected video if it was deleted
+        if (video?.id === id) {
+          setVideo(null);
+          setTitle('');
+          setDescription('');
+          setThumbnailPreview('');
+          setThumbnailBase64('');
         }
+        
+        alert('Video successfully deleted');
+      }
+    } catch (error: any) {
+      console.error('Error deleting video:', error);
+      let errorMessage = 'Failed to delete video';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (error.response.status === 404) {
+          errorMessage = 'Video not found';
+        } else if (error.response.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.response.status === 500) {
+          errorMessage = 'Server error occurred while deleting video';
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response received from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        errorMessage = error.message || 'An unexpected error occurred';
+      }
+      
+      setDeleteError(errorMessage);
+      alert(`Error: ${errorMessage}`);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!video) {
+      console.error('No video data available');
+      return;
     }
 
-    const handleVideoDelete = async (id: number): Promise<void> => {
-        try {
-            console.log('Deleting video with id:', id);
-            const response = await api.delete(`/Video/${id}`);
-            console.log('Server response status:', response.status);
-    
-            if (response.status === 204) {
-                const updatedVideos = availableVideos.filter((video) => video.id !== id);
-                setAvailableVideos(updatedVideos);
-                alert('Video successfully deleted');
-            } else {
-                throw new Error('Failed to delete video');
-            }
-        } catch (error) {
-            console.error('Error deleting video:', error);
-            alert('Failed to delete the video. Please try again.');
-        }
-    };
-    
-    const handleSubmit = async () => {
-        if (!video) return;
-    
-        setIsUpdating(true);
-        setUpdateProgress(0);
-        setUpdateComplete(false);
-        const emptyFile = new Blob([], { type: 'application/octet-stream' })
-        try {
-            // Оновлюємо лише ті поля, які сервер очікує
-            const updatedVideoData = {
-                id: video.id,
-            objectID: 'some-generated-id',
-            channelSettingsId: userChannel?.id,
-            tittle: video.tittle,
-            description: video.description,
-            uploadDate: new Date().toISOString(),
-            duration: 222,
-            videoUrl: video.videoUrl,
-            viewCount: 0,
-            likeCount: 0,
-            dislikeCount: 0,
-            isShort: false,
-            cover: video.cover,
-            visibility: visibility === 'public',
-            isAgeRestriction: 'False',
-            isCopyright: 'False',
-            audience: 'all',
-            lastViewedPosition: '00:00:00',
-            categoryIds: [],
-            tagIds: [],
-            file: emptyFile,
-            };
-    
-            const response = await api.put(`/Video/update`, updatedVideoData, {
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
-                    setUpdateProgress(percentCompleted);
-                },
-            });
-    
-            if (response.status !== 200) throw new Error('Failed to update video data');
-    
-            console.log('Video updated successfully:', response.data);
-    
-            // Оновлення локального стану після успішного оновлення
-            setVideo(response.data);
-            setUpdateComplete(true);
-        } catch (error) {
-            console.error('Error updating video data:', error);
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-    
+    setIsUpdating(true);
+    setUpdateProgress(0);
+    setUpdateComplete(false);
+
+    try {
+      // Перевіряємо наявність обов'язкових полів
+      if (!videoName && !video.tittle) {
+        throw new Error('Video title is required');
+      }
+
+      const updatedVideoData = {
+        id: video.id,
+        objectID: "",
+        channelSettingsId: video.channelSettingsId,
+        tittle: videoName || video.tittle,
+        description: description || video.description,
+        uploadDate: video.uploadDate,
+        duration: video.duration,
+        videoUrl: video.videoUrl,
+        vRoomVideoUrl: video.vRoomVideoUrl,
+        viewCount: video.viewCount,
+        likeCount: video.likeCount,
+        dislikeCount: video.dislikeCount,
+        isShort: video.isShort,
+        cover: thumbnailBase64 
+          ? thumbnailBase64.replace(/^data:image\/[a-z]+;base64,/, '')
+          : video.cover,
+        visibility: visibility === 'public',
+        isAgeRestriction: isAgeRestricted,
+        isCopyright: isCopyright,
+        audience: audience || 'all',
+        categoryIds: selectedCategoryId ? [selectedCategoryId] : [],
+        tagIds: tagIds || [],
+        historyOfBrowsingIds: [],
+        commentVideoIds: [],
+        playLists:  [],
+        lastViewedPosition: '00:00:00'
+      };
+
+      // Логуємо дані перед відправкою
+      console.log('Sending update request with data:', {
+        ...updatedVideoData,
+        cover: updatedVideoData.cover ? 'base64_data' : 'no_cover' // Не логуємо повний base64
+      });
+
+      const response = await api.put(`/Video/update`, updatedVideoData, {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total!
+          );
+          setUpdateProgress(percentCompleted);
+        },
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Failed to update video: ${response.statusText}`);
+      }
+
+      console.log('Video updated successfully:', response.data);
+      setVideo(response.data);
+      setUpdateComplete(true);
+    } catch (error: any) {
+      console.error('Error updating video data:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      // Можна додати відображення помилки для користувача
+    } finally {
+      setIsUpdating(false);
+    }
+  };
     return (
         <div className="container p-4">
             <h1 className="text-2xl font-bold mb-6">Update Video</h1>
@@ -344,19 +407,31 @@ const VideoUpdateInterface: React.FC = () => {
                                             <span className="truncate flex-1 text-left">{v.tittle}</span>
                                         </div>
                                     </Button>
-                                    <button
+                                    <Button
                                         onClick={() => handleVideoDelete(v.id)}
-                                        className="p-2 rounded hover:bg-red-100 focus:outline-none"
-                                        aria-label="Delete video"
+                                        className="ml-2"
+                                        disabled={isDeleting}
+                                        variant="destructive"
+                                        size="sm"
                                     >
-                                        🗑️
-                                    </button>
+                                        {isDeleting ? (
+                                            <span className="animate-spin">🔄</span>
+                                        ) : (
+                                            <span>🗑️</span>
+                                        )}
+                                    </Button>
                                 </div>
                             ))}
                         </div>
                     </ScrollArea>
                 </DialogContent>
             </Dialog>
+
+            {deleteError && (
+                <div className="mt-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                    Error: {deleteError}
+                </div>
+            )}
 
             {video ? (
   <Tabs defaultValue="details">
@@ -366,6 +441,16 @@ const VideoUpdateInterface: React.FC = () => {
     <TabsContent value="details">
       <div className="space-y-4">
         {/* Privacy Settings */}
+                  <div>
+                    <Label  className="text-lg font-semibold">Title</Label>
+                    <Input
+                      id="title"
+                      value={videoName}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="text-lg"
+                      placeholder="Введіть назву відео"
+                    />
+                  </div>
         <div>
           <Label>Privacy Settings</Label>
           <RadioGroup value={visibility} onValueChange={setVisibility}>
@@ -401,37 +486,41 @@ const VideoUpdateInterface: React.FC = () => {
           className="min-h-[200px]"
         />
 
-        {/* Thumbnail Selection */}
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold">Choose a thumbnail</h3>
-            <p>Set a thumbnail that stands out and draws viewers' attention.</p>
-            <p className="text-sm text-gray-500">Recommended size is 1280x720</p>
+<div className="space-y-4">
+  <div>
+    <h3 className="text-lg font-semibold">Choose a thumbnail</h3>
+    <p>Set a thumbnail that stands out and draws viewers' attention.</p>
+    <p className="text-sm text-gray-500">Recommended size is 1280x720</p>
 
-            <Button variant="outline" onClick={() => handleThumbnailChange}>
-              Choose file
-            </Button>
+    {/* Вибір файлу через прихований input */}
+    <Button
+      variant="outline"
+      onClick={() => document.getElementById("thumbnailInput")?.click()}
+    >
+      Choose file
+    </Button>
 
-            <input
-              id="thumbnailInput"
-              type="file"
-              accept="image/png, image/jpeg, image/jpg"
-              className="hidden"
-              onChange={handleThumbnailChange}
-            />
+    <input
+      id="thumbnailInput"
+      type="file"
+      accept="image/png, image/jpeg, image/jpg"
+      className="hidden"
+      onChange={handleThumbnailChange}
+    />
 
-            {thumbnailPreview && (
-              <div className="mt-4">
-                <p>Thumbnail preview:</p>
-                <img
-                  src={thumbnailPreview as string}
-                  alt="Thumbnail Preview"
-                  className="thumbnail-preview"
-                  style={{ width: "300px", height: "auto" }}
-                />
-              </div>
-            )}
-          </div>
+    {/* Прев'ю мініатюри */}
+    {thumbnailPreview && (
+      <div className="mt-4">
+        <p>Thumbnail preview:</p>
+        <img
+          src={thumbnailPreview as string}
+          alt="Thumbnail Preview"
+          className="thumbnail-preview"
+          style={{ width: "300px", height: "auto" }}
+        />
+      </div>
+    )}
+</div>
 
           {/* Thumbnail Grid */}
           <div className="grid grid-cols-4 gap-4 mt-4">
@@ -481,39 +570,6 @@ const VideoUpdateInterface: React.FC = () => {
               Add
             </Button>
           </div>
-
-          {/* Tags */}
-          {/* <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="tags">Tags</Label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {tags.map((tag) => (
-                  <div key={tag.id} className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
-                    <span className="mr-2">{tag.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="ml-1 h-4 w-4 p-0"
-                      onClick={() => removeTag(tag.id)}
-                    >
-                      <X className="h-3 w-3" />
-                      <span className="sr-only">Remove tag</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Enter a tag"
-                  value={currentTag}
-                  onChange={handleTagInputChange}
-                  className="border border-gray-300 rounded-md px-2 py-1"
-                />
-                <Button onClick={() => addTag(currentTag)}>+ Add Tag</Button>
-              </div>
-            </div>
-          </div> */}
         </div>
 
         {/* Age Restriction Section */}

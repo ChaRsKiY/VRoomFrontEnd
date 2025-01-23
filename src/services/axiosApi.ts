@@ -8,4 +8,13 @@ const api = axios.create({
      },
 });
 
+// Додаємо перехоплювач для обробки помилок
+api.interceptors.response.use(
+response => response,
+error => {
+    console.error('API Error:', error);
+    return Promise.reject(error);
+}
+);
+
 export default api;

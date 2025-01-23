@@ -19,7 +19,7 @@ const ChannelRequiredBlocks: React.FC = () => {
             if (isNaN(parseInt(ref.current.value))) {
                 toast({
                     title: 'Error',
-                    description: 'Invalid channel id.',
+                    description: 'Invalid channel.json id.',
                     className: 'bg-red-200 text-red-800'
                 })
                 return;
@@ -32,10 +32,10 @@ const ChannelRequiredBlocks: React.FC = () => {
     return (
         <div className="">
             <h1 className="text-2xl mb-3"
-            >{t("admin-main:channel-required-blocks")}</h1>
-            <Label>{t("admin-main:enter-channel-id")}</Label>
+            >{t("admin-main:channel.json-required-blocks")}</h1>
+            <Label>{t("admin-main:enter-channel.json-id")}</Label>
             <div className="flex space-x-1.5 mb-6">
-                <Input ref={ref} type="number" placeholder={t("admin-main:channel-id")} className="max-w-64" />
+                <Input ref={ref} type="number" placeholder={t("admin-main:channel.json-id")} className="max-w-64" />
                 <Button onClick={handleSearch}>{t("admin-main:search")}</Button>
             </div>
 

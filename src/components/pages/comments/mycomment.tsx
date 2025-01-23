@@ -113,7 +113,7 @@ const MyComment: React.FC<MyCommentProps> = ({ videoId, amuser }) => {
                 setDisplay2('block');
                 setWrite('Write a comment...');
                 setUserId(amuser.clerk_Id);
-                setAvatarUrl(amuser.channelBanner);
+                setAvatarUrl(amuser.channelProfilePhoto);
                 setName(amuser.channelName);
             } else {
                 setDisplayMain('none');
