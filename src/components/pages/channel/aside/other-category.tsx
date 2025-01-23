@@ -13,7 +13,6 @@ const OtherCategoryBlock = () => {
         <div>
 
             <div className="flex flex-col space-y-1">
-                <OpenDialogButton/>
                 <Link href={"/feedback"} className={"flex space-x-4 items-center px-4 rounded-xl hover:bg-neutral-200 py-1 min-h-10 text-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-700"}>
                     <div className="text-2xl">
                         <MdOutlineFeedback width={26} height={26}/>

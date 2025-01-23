@@ -61,40 +61,44 @@ const YouChannelP = () => {
                                        alt={item.videoTitle} className={'rounded-[8px] aspect-video p-0.5'}
                                        width={210} height={120}/>
 
-                                <div className={'flex flex-col relative  '} style={{marginLeft: '10px'}}>
+                                <div className={'flex flex-col'} style={{marginLeft: '10px'}}>
                                     <h1 className={'text-[20px] font-semibold'}>{item.videoTitle}</h1>
-                                    <p className={'text-[14px] text-gray-600'}>{item.channelName}</p>
-                                    <p className={'text-[14px] text-gray-600'}>{formatNumber(item.viewCount)} views</p>
-                                    <div className={'absolute flex flex-row items-center top-0 right-0'}>
-                                        <DropdownMenu>{/* Меню дій */}
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="mm" className="ml-auto">
-                                                    <MoreVertical className="h-6 w-6"/>
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <PiQueue className="mr-2 h-4 w-4"/> Add to queue
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Clock className="mr-2 h-4 w-4"/> Save to Watch later
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <FaRegBookmark className="mr-2 h-4 w-4"/> Save to playlist
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <Share2 className="mr-2 h-4 w-4"/> Share
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <IoTrashOutline className="mr-2 h-4 w-4"/> Delete from view
-                                                    history
-                                                </DropdownMenuItem>
+                                    <div className="flex justify-between items-center relative">
+                                        <div>
+                                            <p className={'text-[14px] text-gray-600'}>{item.channelName}</p>
+                                            <p className={'text-[14px] text-gray-600'}>{formatNumber(item.viewCount)} views</p>
+                                        </div>
+                                        <div className={'absolute flex flex-row items-center top-0 right-0'}>
+                                            <DropdownMenu>{/* Меню дій */}
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="mm" className="ml-auto">
+                                                        <MoreVertical className="h-6 w-6"/>
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <PiQueue className="mr-2 h-4 w-4"/> Add to queue
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Clock className="mr-2 h-4 w-4"/> Save to Watch later
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <FaRegBookmark className="mr-2 h-4 w-4"/> Save to playlist
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <Share2 className="mr-2 h-4 w-4"/> Share
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem>
+                                                        <IoTrashOutline className="mr-2 h-4 w-4"/> Delete from view
+                                                        history
+                                                    </DropdownMenuItem>
 
-                                                <DropdownMenuItem>
-                                                    <GoReport className="mr-2 h-4 w-4"/> Send feedback
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                                    <DropdownMenuItem>
+                                                        <GoReport className="mr-2 h-4 w-4"/> Send feedback
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </div>
                                 </div>
 
