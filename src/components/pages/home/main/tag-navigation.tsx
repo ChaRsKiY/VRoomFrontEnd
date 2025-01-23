@@ -31,7 +31,7 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
 
             if (response.status === 200) {
                 const mydata: string[] = await response.data;
-                setTagsDB(mydata);
+                setTagsDB(mydata.slice(0, 18));
                 // const translatedTags: ITag[] = mydata.map((nameT) => ({
                 //     name: nameT, 
                 //     translatedName: t("tags:"+nameT), 

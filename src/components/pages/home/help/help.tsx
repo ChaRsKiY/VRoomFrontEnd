@@ -13,10 +13,8 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
 
     return (
 
-        <div style={{
+        <div className="bg-white dark:bg-neutral-900" style={{
             width: '100%', marginTop: '80px', padding: '50px', borderRadius: "30px",
-            backgroundColor: 'white',
-            boxShadow: "rgba(50, 50, 93, 0.25) 0px 50px 100px -20px, rgba(0, 0, 0, 0.3) 0px 30px 60px -30px, rgba(10, 37, 64, 0.35) 0px -2px 6px 0px inset",
             marginBottom: '50px'
         }}>
 
@@ -31,7 +29,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                         <section style={{ marginBottom: "30px" }}>
                             <ul>
                                 <li >
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                            <div >
                                             <strong style={{ fontSize: '20px' }}>{t("help:1.0")}</strong> <br /><br />
                                             <p>
@@ -58,7 +56,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                     <br /><br />
                                 </li>
                                 <li >
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div  >
                                             <strong style={{ fontSize: '20px' }}> {t("help:2.0")}</strong> <br /><br />
                                             <p>
@@ -88,7 +86,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                     <br /><br />
                                 </li>
                                 <li>
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div  >
                                             <strong style={{ fontSize: '20px' }}>{t("help:3.0")}</strong> <br /><br />
                                             <p>
@@ -118,7 +116,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                         </div></div><br /><br />
                                 </li>
                                 <li>
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div >
                                             <strong style={{ fontSize: '20px' }}> {t("help:4.0")}</strong> <br /><br />
                                             <p>
@@ -143,7 +141,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                         </div></div><br /><br />
                                 </li>
                                 <li>
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div >
                                             <strong style={{ fontSize: '20px' }}> {t("help:5.0")}</strong> <br /><br />
                                             <p>
@@ -168,7 +166,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                         </div></div><br /><br />
                                 </li>
                                 <li>
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div  >
                                             <strong style={{ fontSize: '20px' }}> {t("help:6.0")}</strong> <br /><br />
                                             <p>
@@ -191,7 +189,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
                                         </div></div><br /><br />
                                 </li>
                                 <li>
-                                    <div style={{ backgroundColor: 'white' }}>
+                                    <div>
                                         <div  >
                                             <strong style={{ fontSize: '20px' }}> {t("help:7.0")}</strong> <br /><br />
                                             <p>
@@ -210,7 +208,7 @@ const Help: React.FC<IHelpProps> = ({t}: IHelpProps) => {
 
                                         </div></div><br /><br />
                                 </li>
-                                <div style={{ backgroundColor: 'white' }}>
+                                <div>
                                     <div >
                                         <li>
 

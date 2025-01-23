@@ -3,7 +3,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 
 export const ThemeContext = createContext({
-    theme: 'light'
+    theme: 'light',
+    setTheme: (theme: string) => { }
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }: { children: React.ReactNode }) => {
@@ -18,7 +19,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     return (
-        <ThemeContext.Provider value={{ theme }}>
+        <ThemeContext.Provider value={{ theme, setTheme }}>
             {children}
         </ThemeContext.Provider>
     );
