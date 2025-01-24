@@ -7,7 +7,7 @@ export class SignalRService {
     constructor() {
         this.connection = new signalR.HubConnectionBuilder()
             // .withUrl("http://95.217.212.221:5024/hub")
-            .withUrl("https://c7ad-195-230-183-105.ngrok-free.app/hub")
+            .withUrl("https://485a-94-16-44-220.ngrok-free.app/hub")
             .withAutomaticReconnect()
             .build();
 
