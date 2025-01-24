@@ -331,7 +331,6 @@ const VideoUploadInterface: React.FC = () => {
             isAgeRestriction: isAgeRestricted,
             isCopyright: isCopyright,
             audience: audience,
-            lastViewedPosition: '00:00:00',
             categoryIds: selectedCategoryId,
             tagIds,
             historyOfBrowsingIds: [], // Додане нове поле
