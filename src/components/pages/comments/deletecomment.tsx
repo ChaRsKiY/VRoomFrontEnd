@@ -52,7 +52,7 @@ const DeleteComment: React.FC<MyCommentProps> = ({commentId, onClose}) => {
             <div>
                 <div>
                     <p className={'text-lg px-1.5 text-center font-bold'}>
-                        Вы действительно хотите удалить этот комментарий и ответы на него?
+                        Are you sure you want to delete this comment and its replies?
                     </p>
                 </div>
                 <div style={{display: 'flex', width: '100%', justifyContent: 'space-around'}}>

@@ -208,7 +208,7 @@ export default function VideoCard({el}: IVideoCardProps) {
 
     return (
         <div className="space-y-2.5">
-            <Link href={`/watch/${el.id}`} className="block relative">
+            <Link href={el.vRoomVideoUrl} className="block relative">
                 {coverBase64 && (
                     <><Image
                         src={`data:image/jpeg;base64,${coverBase64}`}

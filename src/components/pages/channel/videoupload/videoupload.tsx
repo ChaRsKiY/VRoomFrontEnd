@@ -52,6 +52,7 @@ const VideoUploadInterface: React.FC = () => {
     const [isUploading, setIsUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadComplete, setUploadComplete] = useState(false)
+    const [isShort, setIsShort] = useState(false);
 
     const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target.value
@@ -323,7 +324,7 @@ const VideoUploadInterface: React.FC = () => {
             viewCount: 0,
             likeCount: 0,
             dislikeCount: 0,
-            isShort: false,
+            isShort: isShort,
             cover: thumbnailBase64,
             visibility: visibility === 'public',
             isAgeRestriction: isAgeRestricted,
@@ -366,6 +367,12 @@ const VideoUploadInterface: React.FC = () => {
         }
     }
 
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.target.value);
+        const value = e.target.value === "true";
+        setIsShort(value);
+    };
     return (
         <>
             {user ? (
@@ -380,14 +387,16 @@ const VideoUploadInterface: React.FC = () => {
                         <TabsContent value="details" className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                                 <h1 className="text-2xl font-bold mb-6">Upload Video</h1>
-                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-gray-400 transition-colors duration-400"
+                                <div
+                                    className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-gray-400 transition-colors duration-400"
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
                                     {video ? (
                                         <div className="relative">
-                                            <video className="w-full h-48 object-cover rounded" src={preview || undefined} />
+                                            <video className="w-full h-48 object-cover rounded"
+                                                   src={preview || undefined}/>
                                             <Button
                                                 variant="destructive"
                                                 size="icon"
@@ -397,14 +406,15 @@ const VideoUploadInterface: React.FC = () => {
                                                     removeFile();
                                                 }}
                                             >
-                                                <X className="h-4 w-4" />
+                                                <X className="h-4 w-4"/>
                                                 <span className="sr-only">Remove video</span>
                                             </Button>
                                         </div>
                                     ) : (
                                         <div>
-                                            <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                                            <p className="mt-2 text-sm text-gray-600">Drag and drop a video file here, or click to select a file</p>
+                                            <Upload className="mx-auto h-12 w-12 text-gray-400"/>
+                                            <p className="mt-2 text-sm text-gray-600">Drag and drop a video file here,
+                                                or click to select a file</p>
                                         </div>
                                     )}
                                     <Input
@@ -427,17 +437,20 @@ const VideoUploadInterface: React.FC = () => {
                                 <Label>Privacy Settings</Label>
                                 <RadioGroup value={visibility} onValueChange={setVisibility}>
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="public" id="public" selectedValue={visibility} onValueChange={setVisibility}>
+                                        <RadioGroupItem value="public" id="public" selectedValue={visibility}
+                                                        onValueChange={setVisibility}>
                                             Public
                                         </RadioGroupItem>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="private" id="private" selectedValue={visibility} onValueChange={setVisibility}>
+                                        <RadioGroupItem value="private" id="private" selectedValue={visibility}
+                                                        onValueChange={setVisibility}>
                                             Private
                                         </RadioGroupItem>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility} onValueChange={setVisibility}>
+                                        <RadioGroupItem value="unlisted" id="unlisted" selectedValue={visibility}
+                                                        onValueChange={setVisibility}>
                                             Unlisted
                                         </RadioGroupItem>
                                     </div>
@@ -479,7 +492,7 @@ const VideoUploadInterface: React.FC = () => {
                                                 src={thumbnailPreview as string}
                                                 alt="Thumbnail Preview"
                                                 className="thumbnail-preview"
-                                                style={{ width: "300px", height: "auto" }}
+                                                style={{width: "300px", height: "auto"}}
                                             />
                                         </div>
                                     )}
@@ -498,7 +511,7 @@ const VideoUploadInterface: React.FC = () => {
                                     <Label>Video category</Label>
                                     <Select>
                                         <SelectTrigger onClick={() => setIsCategoryOpen(!isCategoryOpen)}>
-                                            <SelectValue value={category} placeholder="Select a category" />
+                                            <SelectValue value={category} placeholder="Select a category"/>
                                         </SelectTrigger>
                                         <SelectContent isOpen={isCategoryOpen}>
                                             {categories.map((categoryItem) => (
@@ -522,16 +535,18 @@ const VideoUploadInterface: React.FC = () => {
                                         onChange={(e) => setNewCategory(e.target.value)}
                                     />
                                     <Button type="button" onClick={addCategory}>
-                                        <Plus className="h-4 w-4 mr-2" />
+                                        <Plus className="h-4 w-4 mr-2"/>
                                         Add
                                     </Button>
                                 </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="tags">Tags</Label>
                                         <div className="flex flex-wrap gap-2 mb-2">
                                             {tags.map((tag) => (
-                                                <div key={tag.id} className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
+                                                <div key={tag.id}
+                                                     className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
                                                     <span className="mr-2">{tag.name}</span>
                                                     <Button
                                                         variant="ghost"
@@ -539,7 +554,7 @@ const VideoUploadInterface: React.FC = () => {
                                                         className="ml-1 h-4 w-4 p-0"
                                                         onClick={() => removeTag(tag.id)}
                                                     >
-                                                        <X className="h-3 w-3" />
+                                                        <X className="h-3 w-3"/>
                                                         <span className="sr-only">Remove tag</span>
                                                     </Button>
                                                 </div>
@@ -557,113 +572,141 @@ const VideoUploadInterface: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="tags">Video type</Label>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            <select id="countries" name="country"
+                                                    value={isShort.toString()}
+                                                    onChange={handleChange}
+                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                                                <option value={'false'} selected={true}>Video</option>
+                                                <option value={'true'} >Short video</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
                             </div>
+
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold mb-2">Age Restriction</h3>
-                                <p className="text-sm text-gray-600 mb-2">Would you like to restrict this video to viewers over 18 years old?</p>
+                                <p className="text-sm text-gray-600 mb-2">Would you like to restrict this video to
+                                    viewers over 18 years old?</p>
                                 <p className="text-xs text-gray-500 mb-4">
-                                    Age-restricted content may not appear in certain parts of the platform and could have limited advertising options. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
-                                </p>
-                                <div className="space-y-2">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            className="form-radio"
-                                            name="ageRestriction"
-                                            checked={isAgeRestricted}
-                                            onChange={() => setAgeRestricted(true)}
-                                        />
-                                        <span className="ml-2">Yes, restrict to viewers over 18 only</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            className="form-radio"
-                                            name="ageRestriction"
-                                            checked={!isAgeRestricted}
-                                            onChange={() => setAgeRestricted(false)}
-                                        />
-                                        <span className="ml-2">No, allow all viewers</span>
-                                    </label>
-                                </div>
+                                    Age-restricted content may not appear in certain parts of the platform and could
+                                        have limited advertising options. <a href="#"
+                                                                             className="text-blue-500 hover:underline">Learn
+                                        more</a>
+                                    </p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                name="ageRestriction"
+                                                checked={isAgeRestricted}
+                                                onChange={() => setAgeRestricted(true)}
+                                            />
+                                            <span className="ml-2">Yes, restrict to viewers over 18 only</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                name="ageRestriction"
+                                                checked={!isAgeRestricted}
+                                                onChange={() => setAgeRestricted(false)}
+                                            />
+                                            <span className="ml-2">No, allow all viewers</span>
+                                        </label>
+                                    </div>
 
-                                <h3 className="text-lg font-semibold mb-2">Copyright Status</h3>
-                                <p className="text-sm text-gray-600 mb-2">Does this video contain copyrighted material?</p>
-                                <p className="text-xs text-gray-500 mb-4">
-                                    Ensure compliance with copyright regulations by declaring whether this content contains copyrighted materials. <a href="#" className="text-blue-500 hover:underline">Learn more</a>
-                                </p>
-                                <div className="space-y-2">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            className="form-radio"
-                                            name="copyrightStatus"
-                                            checked={isCopyright}
-                                            onChange={() => setIsCopyright(true)}
-                                        />
-                                        <span className="ml-2">Yes, this video contains copyrighted content</span>
-                                    </label>
-                                    <label className="flex items-center">
-                                        <input
-                                            type="radio"
-                                            className="form-radio"
-                                            name="copyrightStatus"
-                                            checked={!isCopyright}
-                                            onChange={() => setIsCopyright(false)}
-                                        />
-                                        <span className="ml-2">No, this video does not contain copyrighted content</span>
-                                    </label>
+                                    <h3 className="text-lg font-semibold mb-2">Copyright Status</h3>
+                                    <p className="text-sm text-gray-600 mb-2">Does this video contain copyrighted
+                                        material?</p>
+                                    <p className="text-xs text-gray-500 mb-4">
+                                        Ensure compliance with copyright regulations by declaring whether this content
+                                        contains copyrighted materials. <a href="#"
+                                                                           className="text-blue-500 hover:underline">Learn
+                                        more</a>
+                                    </p>
+                                    <div className="space-y-2">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                name="copyrightStatus"
+                                                checked={isCopyright}
+                                                onChange={() => setIsCopyright(true)}
+                                            />
+                                            <span className="ml-2">Yes, this video contains copyrighted content</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                className="form-radio"
+                                                name="copyrightStatus"
+                                                checked={!isCopyright}
+                                                onChange={() => setIsCopyright(false)}
+                                            />
+                                            <span
+                                                className="ml-2">No, this video does not contain copyrighted content</span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="space-y-8">
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-4">Video Preview</h2>
-                                    <div className="bg-gray-100 p-4 rounded-lg">
-                                        <div className="aspect-video bg-gray-200 rounded-lg mb-4">
-                                            {preview ? (
-                                                <video className="w-full h-full object-cover rounded-lg" src={preview} controls />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                                    Video preview will appear here
-                                                </div>
-                                            )}
+                                <div className="space-y-8">
+                                    <div>
+                                        <h2 className="text-xl font-semibold mb-4">Video Preview</h2>
+                                        <div className="bg-gray-100 p-4 rounded-lg">
+                                            <div className="aspect-video bg-gray-200 rounded-lg mb-4">
+                                                {preview ? (
+                                                    <video className="w-full h-full object-cover rounded-lg"
+                                                           src={preview} controls/>
+                                                ) : (
+                                                    <div
+                                                        className="w-full h-full flex items-center justify-center text-gray-400">
+                                                        Video preview will appear here
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <h3 className="font-semibold mb-2">Video Title</h3>
+                                            <p className="text-sm text-gray-500">
+                                                0 views • Just now
+                                            </p>
+                                            <p className="text-sm text-gray-500 mt-2">
+                                                Privacy: {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
+                                            </p>
                                         </div>
-                                        <h3 className="font-semibold mb-2">Video Title</h3>
-                                        <p className="text-sm text-gray-500">
-                                            0 views • Just now
-                                        </p>
-                                        <p className="text-sm text-gray-500 mt-2">
-                                            Privacy: {visibility.charAt(0).toUpperCase() + visibility.slice(1)}
-                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                            {isUploading && (
-                                <div className="mt-4">
-                                    <p>Uploading video... {uploadProgress}%</p>
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                        <div 
-                                            className="bg-blue-600 h-2.5 rounded-full" 
-                                            style={{width: `${uploadProgress}%`}}
-                                        ></div>
+                                {isUploading && (
+                                    <div className="mt-4">
+                                        <p>Uploading video... {uploadProgress}%</p>
+                                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                            <div
+                                                className="bg-blue-600 h-2.5 rounded-full"
+                                                style={{width: `${uploadProgress}%`}}
+                                            ></div>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                            {uploadComplete && (
-                                <div className="mt-4 text-green-600">
-                                    Upload complete!
-                                </div>
-                            )}
-                            <Button onClick={handleSubmit} disabled={isUploading}>
-                                {isUploading ? 'Uploading...' : 'Upload'}
-                            </Button>
+                                )}
+                                {uploadComplete && (
+                                    <div className="mt-4 text-green-600">
+                                        Upload complete!
+                                    </div>
+                                )}
+                                <Button onClick={handleSubmit} disabled={isUploading}>
+                                    {isUploading ? 'Uploading...' : 'Upload'}
+                                </Button>
                         </TabsContent>
                         <TabsContent value="video-elements">Video elements content</TabsContent>
                         <TabsContent value="checks">Checks content</TabsContent>
                         <TabsContent value="visibility">Visibility content</TabsContent>
                     </Tabs>
                 </div>
-            ) : <></>}
+                ) : <></>}
         </>
     )
 }

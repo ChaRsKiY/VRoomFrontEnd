@@ -53,7 +53,7 @@ const TagNavigation: React.FC<IProps> = ({ tagName }: IProps) => {
     useEffect(() => {
         const translatedTags: ITag[] = tagsDB.map((nameT) => ({
             name: nameT,
-            translatedName: t("tagname:" + nameT),
+            translatedName: t("tagname:" + nameT.replace(' ', '_')),
         }));
         console.log('успешный list of translatedTags', translatedTags);
         setTags(translatedTags);

@@ -36,45 +36,48 @@ interface Tag {
 
 const VideoUpdateInterface: React.FC = () => {
 
-    const [video, setVideo] = useState<IVideo | null>(null)
-    const [availableVideos, setAvailableVideos] = useState<IVideo[]>([])
-    const [isCategoryOpen, setIsCategoryOpen] = useState(false)
-    const [visibility, setVisibility] = useState('private')
-    const [isAgeRestricted, setAgeRestricted] = useState(false)
-    const [videoName, setTitle] = useState('')
-    const [description, setDescription] = useState('')
-    const [category, setCategory] = useState('')
-    const [categories, setCategories] = useState<Category[]>([])
-    const [thumbnail, setThumbnail] = useState<File | null>(null)
-    const [thumbnailPreview, setThumbnailPreview] = useState<string>("")
-    const [thumbnailBase64, setThumbnailBase64] = useState<string>("")
-    const [newCategory, setNewCategory] = useState('')
-    const [currentTag, setCurrentTag] = useState('')
-    const [isCopyright, setIsCopyright] = useState<boolean>(false)
-    const [audience, setAudience] = useState<string>('all')
-    const [userChannel, setUserChannel] = useState<IChannel | null>(null)
-    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null)
-    const [tagIds, setTagIds] = useState<number[]>([])
-    const [tags, setTags] = useState<Tag[]>([])
-    const { user } = useUser()
+    const [video, setVideo] = useState<IVideo | null>(null);
+    const [availableVideos, setAvailableVideos] = useState<IVideo[]>([]);
+    const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+    const [visibility, setVisibility] = useState('private');
+    const [isAgeRestricted, setAgeRestricted] = useState(false);
+    const [videoName, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [category, setCategory] = useState('');
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [thumbnail, setThumbnail] = useState<File | null>(null);
+    const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
+    const [thumbnailBase64, setThumbnailBase64] = useState<string>("");
+    const [newCategory, setNewCategory] = useState('');
+    const [currentTag, setCurrentTag] = useState('');
+    const [isCopyright, setIsCopyright] = useState<boolean>(false);
+    const [audience, setAudience] = useState<string>('all');
+    const [userChannel, setUserChannel] = useState<IChannel | null>(null);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [tagIds, setTagIds] = useState<number[]>([]);
+    const [tags, setTags] = useState<Tag[]>([]);
+    const { user } = useUser();
 
-    const [isUpdating, setIsUpdating] = useState(false)
-    const [updateProgress, setUpdateProgress] = useState(0)
-    const [updateComplete, setUpdateComplete] = useState(false)
-
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [updateProgress, setUpdateProgress] = useState(0);
+    const [updateComplete, setUpdateComplete] = useState(false);
+    const [isShort, setIsShort] = useState<boolean|null>(null);
 
     useEffect(() => {
         if (user) {
-            fetchAvailableVideos()
-            fetchCategories()
-            getUserChannel()
+            getUserChannel();
+            fetchAvailableVideos();
+            fetchCategories();
+
         }
     }, [user])
 
     const fetchAvailableVideos = async () => {
         try {
-            const response = await api.get(`/Video/getbychannelid/${user?.id}`)
-            setAvailableVideos(response.data)
+            console.log(userChannel?.id);
+            const response = await api.get(`/Video/getbychannelid/${user?.id}`);
+            //const response = await api.get(`/Video/getchannelvideos/${userChannel?.id}`);
+            setAvailableVideos(response.data);
         } catch (error) {
             console.error('Error fetching available videos:', error)
         }
@@ -146,6 +149,7 @@ const VideoUpdateInterface: React.FC = () => {
             setVisibility(videoData.visibility ? 'public' : 'private')
             setAgeRestricted(videoData.isAgeRestriction)
             setIsCopyright(videoData.isCopyright)
+            setIsShort(videoData.isShort);
             setAudience(videoData.audience)
             setSelectedCategoryId(videoData.categoryIds)
             setTagIds(videoData.tagIds || [])
@@ -248,6 +252,7 @@ const VideoUpdateInterface: React.FC = () => {
                 visibility: visibility === 'public',
                 isAgeRestriction: isAgeRestricted,
                 isCopyright: isCopyright,
+                isShort: isShort,
                 audience: audience,
                 categoryIds: selectedCategoryId,
                 tagIds: tagIds,
@@ -269,7 +274,11 @@ const VideoUpdateInterface: React.FC = () => {
             setIsUpdating(false)
         }
     }
-
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.target.value);
+        const value = e.target.value === "true";
+        setIsShort(value);
+    };
     return (
         <>
                 <div className="container p-4">
@@ -355,7 +364,7 @@ const VideoUpdateInterface: React.FC = () => {
                                         <Label>Video category</Label>
                                         <Select>
                                             <SelectTrigger onClick={() => setIsCategoryOpen(!isCategoryOpen)}>
-                                                <SelectValue value={category} placeholder="Select a category" />
+                                                <SelectValue value={category} placeholder="Select a category"/>
                                             </SelectTrigger>
                                             <SelectContent isOpen={isCategoryOpen}>
                                                 {categories.map((categoryItem) => (
@@ -379,7 +388,7 @@ const VideoUpdateInterface: React.FC = () => {
                                             onChange={(e) => setNewCategory(e.target.value)}
                                         />
                                         <Button type="button" onClick={addCategory}>
-                                            <Plus className="h-4 w-4 mr-2" />
+                                            <Plus className="h-4 w-4 mr-2"/>
                                             Add
                                         </Button>
                                     </div>
@@ -388,7 +397,8 @@ const VideoUpdateInterface: React.FC = () => {
                                             <Label htmlFor="tags">Tags</Label>
                                             <div className="flex flex-wrap gap-2 mb-2">
                                                 {tags.map((tag) => (
-                                                    <div key={tag.id} className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
+                                                    <div key={tag.id}
+                                                         className="badge text-sm flex items-center px-2 py-1 rounded-full bg-gray-200 text-gray-800">
                                                         <span className="mr-2">{tag.name}</span>
                                                         <Button
                                                             variant="ghost"
@@ -396,7 +406,7 @@ const VideoUpdateInterface: React.FC = () => {
                                                             className="ml-1 h-4 w-4 p-0"
                                                             onClick={() => removeTag(tag.id)}
                                                         >
-                                                            <X className="h-3 w-3" />
+                                                            <X className="h-3 w-3"/>
                                                             <span className="sr-only">Remove tag</span>
                                                         </Button>
                                                     </div>
@@ -413,6 +423,23 @@ const VideoUpdateInterface: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor="tags">Video type</Label>
+                                            <div className="flex flex-wrap gap-2 mb-2">
+                                                <select id="countries" name="country"
+                                                        value={isShort !== null && isShort !== undefined ? isShort.toString() : "false"}
+                                                        onChange={handleChange}
+                                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                                                    <option value={'false'} selected={true}>Video</option>
+                                                    <option value={'true'}>Short video</option>
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                    </div>
                                 </div>
                             </TabsContent>
 
@@ -420,9 +447,7 @@ const VideoUpdateInterface: React.FC = () => {
                                 {/* Add video elements content here */}
                             </TabsContent>
 
-                        
 
-                           
                         </Tabs>
                     )}
 
@@ -430,8 +455,8 @@ const VideoUpdateInterface: React.FC = () => {
                         <div className="mt-4">
                             <p>Updating video... {updateProgress}%</p>
                             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                <div 
-                                    className="bg-blue-600 h-2.5 rounded-full" 
+                                <div
+                                    className="bg-blue-600 h-2.5 rounded-full"
                                     style={{width: `${updateProgress}%`}}
                                 ></div>
                             </div>

@@ -18,10 +18,12 @@ const VideosSection: React.FC<IVideoCardProps> = ({channelId, isShort, sectionNa
     const [videos, setVideos] = useState<IVideo[]>([]);
 
     useEffect(() => {
+        console.log(isShort);
         const fetchVideos = async () => {
             setVideos(await fetchShortsOrVideosByChannelId(1, 4, channelId, isShort));
         };
         fetchVideos();
+        console.log(videos);
     }, [channelId]);
 
     return (
@@ -43,7 +45,7 @@ const VideosSection: React.FC<IVideoCardProps> = ({channelId, isShort, sectionNa
                     )) :
                     (<div>
                         <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                            В этом разделе отображаются все {isShort ? 'видео' : 'shorts'}</p>
+                            this section displays all{isShort ? 'video' : 'shorts'}</p>
                     </div>)}
 
             </div>

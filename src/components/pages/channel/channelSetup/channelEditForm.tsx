@@ -44,6 +44,9 @@ const ChannelEditBlock = () => {
     const [countries, setCountries] = useState<ICountry[]>([]);
     const [selectedCountryId, setSelectedCountryId] = useState<number>(0);
 
+    const channelUrlRef = useRef<HTMLInputElement | null>(null);
+    const [toastText, setToastText] = useState<string>('');
+
     const initialState = useRef({
         channelBannerPreview: '', profilePhotoPreview: '',
         channelNickName: '', channelName: '', channelDescription: '', selectedCountryId: 0
@@ -138,18 +141,19 @@ const ChannelEditBlock = () => {
             formData.append('Description', channelDescription);
             formData.append('channelNikName', channelNickName.replaceAll("@", ""));
 
-            console.log(selectedCountryId);
+            // console.log(selectedCountryId);
 
             api.put("/ChannelSettings/updateShort", formData, {
                 headers: {"Content-Type": 'multipart/form-data'},
             })
                 .then((response) => {
                     setData(response.data);
+                    setToastText('Channel data saved successfully!');
                     setOpenToast(true);
                     setTimeout(() => setOpenToast(false), 4000); // Закрыть автоматически через 3 секунды
                 })
                 .catch((error) => {
-                    alert(error.message);
+                    console.log(error.message);
                 });
 
         }
@@ -176,12 +180,12 @@ const ChannelEditBlock = () => {
             setChannelBannerValid(null);
             const maxSize = 6 * 1024 * 1024; // Проверка размера файла 6 MB
             if (file.size > maxSize) {
-                setChannelBannerValid('Размер файла не должен превышать 6 MB');
+                setChannelBannerValid('The file size must not exceed 6 MB');
                 return;
             }
             const isValidResolution = await validateImageResolution(file, 2048, 1152);// Проверка разрешения изображения
             if (!isValidResolution) {
-                setChannelBannerValid('Изображение должно быть не менее 2048 x 1152 пикселей');
+                setChannelBannerValid('The image must be at least 2048 x 1152 pixels');
                 return;
             }
             setChannelBanner(file);
@@ -195,14 +199,14 @@ const ChannelEditBlock = () => {
             setProfilePhotoValid(null);
             const maxSize = 4 * 1024 * 1024; // Проверка размера файла 4 MB
             if (file.size > maxSize) {
-                setProfilePhotoValid('Размер файла не должен превышать 4 MB');
+                setProfilePhotoValid('The file size must not exceed 4 MB');
                 return;
             }
 
             const isValidResolution = await validateImageResolution(file, 98, 98);// Проверка разрешения изображения
             if (!isValidResolution) {
                 console.log('Изображение должно быть не менее 98 x 98 пикселей');
-                setProfilePhotoValid('Изображение должно быть не менее 98 x 98 пикселей');
+                setProfilePhotoValid('The image must be at least 98 x 98 pixels');
                 return;
             }
             setProfilePhoto(file);
@@ -252,7 +256,7 @@ const ChannelEditBlock = () => {
         if (allConditionsMet) {
             setErrorChannelNickName("");
         } else {
-            setErrorChannelNickName('Некорректная длина, нет одного символа "@", или псевдоним занят');
+            setErrorChannelNickName('Incorrect length, one "@" character is missing, or the alias is busy');
         }
 
         setChannelNickNameValid(allConditionsMet);
@@ -265,6 +269,19 @@ const ChannelEditBlock = () => {
     };
 
 
+    const handleCopy = () => {
+        if (channelUrlRef.current) {
+            navigator.clipboard.writeText(channelUrlRef.current.value)
+                .then(() => {
+                    setToastText('Link copied to clipboard');
+                    setOpenToast(true);
+                    setTimeout(() => setOpenToast(false), 2800); // Убираем всплывающее окно через 2 секунды
+                })
+                .catch((error) => {
+                    console.error('copy error: ', error);
+                });
+        }
+    };
     const {t}: { t: ITranslationFunction } = useTranslation();
     return (
         <>
@@ -381,30 +398,24 @@ const ChannelEditBlock = () => {
                               value={channelDescription} onChange={(e) => setChannelDescription(e.target.value)}
                               placeholder="Tell your audience about your channel. The description will appear in different sections of YouTube, including the About tab and search results."></textarea>
                 </div>
-                <div className="w-[62.5rem] h-[7rem] shrink-0  mt-8">
+                <div className="w-[62.5rem] h-[7rem] shrink-0  mt-8 mb-4">
                     <h2 className="block font-semibold">Channel URL</h2>
-                    <input type="text" readOnly className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
+                    <input ref={channelUrlRef} type="text" readOnly className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
                            value={channelUrl}/>
                     <br/>
-                    <button className="mt-2 text-blue-600 hover:underline">copy</button>
+                    <button type={'button'} className=" mt-3 inline-flex text-[#FFF] font-Inter text-[0.93rem] font-not-italic font-500 leading-normal px-[0.9375rem] py-[5px] justify-center items-center gap-[0.625rem] rounded-[0.3125rem] bg-[#0EA2DE]"
+                            onClick={handleCopy}>Копировать
+                    </button>
                 </div>
-                <div className="w-[62.5rem] h-[7rem] shrink-0">
+                {/*<div className="w-[62.5rem] h-[7rem] shrink-0">
                     <h2 className="block font-semibold">Link</h2>
                     <button className="text-blue-600 hover:underline">Add link</button>
                 </div>
+*/}
                 <div className="w-[62.5rem] h-[7rem] shrink-0">
-                    <h2 className="block font-semibold">Contact information</h2>
-                    <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
-                        cooperation. Viewers can see the email address in the 'About' tab.</p>
-                    <input type="email" className=" w-[51.5rem] mt-2 p-2 border rounded border-gray-400"
-                           placeholder="Email address"/>
-
-                </div>
-                <div className="w-[62.5rem] h-[7rem] shrink-0">
-                    <h2 className="block font-semibold">Contact information</h2>
-                    <p className="text-sm text-gray-500 mt-1">Indicate how to contact you with questions
-                        cooperation. Viewers can see the email address in the 'About' tab.</p>
-                    <div className="w-72">
+                    <h2 className="block font-semibold">Country</h2>
+                    <p className="text-sm text-gray-500 mt-1">Please indicate your country of residence. Viewers will be able to see the email address under the "About" tab.</p>
+                    <div className="w-72 mt-1">
                         <select id="countries" name="country"
                                 value={selectedCountryId}
                                 onChange={handleChange}
@@ -427,21 +438,18 @@ const ChannelEditBlock = () => {
                             ) : (
                                 <option>Loading...</option>
                             )}
-                            {/*{countries.map((country) => {
-
-                            }))};*/}
-                            <option value="US">United States</option>
                         </select>
                     </div>
 
                 </div>
             </form>
+
             <ToastProvider>
                 <ToastViewport/>
                 <Toast open={openToast} onOpenChange={setOpenToast} className={'bg-gray-500 text-white'}>
                     <div>
-                        <ToastTitle>Успех!</ToastTitle>
-                        <ToastDescription>Данные канала успешно сохранены!</ToastDescription>
+                        <ToastTitle>Success!</ToastTitle>
+                        <ToastDescription>{toastText}</ToastDescription>
                     </div>
                     <ToastClose/>
                 </Toast>
