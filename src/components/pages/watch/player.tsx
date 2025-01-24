@@ -486,6 +486,7 @@ const VideoPlayer: React.FC<IVideoPlayerProps> = ({ src, id }) => {
         switch (e.key.toLowerCase()) {
             case " ":
             case "k":
+                alert("mo ist huso")
                 togglePlayPause();
                 break;
             case "f":
