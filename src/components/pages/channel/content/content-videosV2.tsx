@@ -139,12 +139,12 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                         className={`w-full flex items-center gap-4 text-black px-6 py-1 rounded transition-all duration-300 ease-in-out ${
                             selectedIds.size > 0 ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
                         }`}>
-                        <span className=" text-black">{`Выделено: ${selectedIds.size}`}</span>
+                        <span className=" text-black">{`Selected: ${selectedIds.size}`}</span>
                         <button className="bg-red-500 text-white px-4 py-0.5 rounded hover:bg-red-600"
-                                onClick={handleDelete}>Удалить
+                                onClick={handleDelete}>Delete
                         </button>
                         <button className="bg-gray-300 text-gray-700 px-4 py-0.5 rounded hover:bg-gray-400"
-                                onClick={handleCancel}>Отменить
+                                onClick={handleCancel}>Cancel
                         </button>
                     </div>
                 )}
@@ -160,7 +160,7 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                     <th className="py-3 px-3 "><input type="checkbox" className="w-5 h-5" ref={headerCheckboxRef}
                                                       checked={selectedIds.size === videos.length}
                                                       onChange={(e) => handleSelectAllChange(e.target.checked)}/></th>
-                    <th className="py-3 px-3 ">Video</th>
+                    <th className="py-3 px-3 ">{isShort ? 'Shorts':'Video'}</th>
                     <th className="py-3 px-3 ">Visibility</th>
                     <th className="py-3 px-3 ">Date</th>
                     <th className="py-3 px-3 ">Views</th>
@@ -198,7 +198,7 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                                     <span>{el.description}</span>
                                 </div>
 
-                                {activeId === el.id && (
+                                {/*{activeId === el.id && (
                                     <div className="absolute top-0 left-0 bg-white w-full h-full p-1">
                                         <span>{el.tittle}</span>
                                         <div className="flex flex-row items-center justify-center mt-2">
@@ -214,13 +214,13 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                                             <BsThreeDotsVertical title="All" className="w-1/4 h-7 cursor-pointer"/>
                                         </div>
                                     </div>
-                                )}
+                                )}*/}
 
                             </div>
-                            <div className="flex">
+                           {/* <div className="flex">
                                 <IoMdArrowDropdown className="w-[1.8rem] h-[1.8rem] cursor-pointer" key={el.id}
                                                    onClick={() => handleClick(el.id)}/>
-                            </div>
+                            </div>*/}
                         </td>
                         {el?.visibility === true && (<td className="py-3 px-3 ">Public</td>)}
                         {el?.visibility === false && (<td className="py-3 px-3 ">Private</td>)}
@@ -233,7 +233,7 @@ const ContentVideo: React.FC<IContentVideoProps> = ({isShort}) => {
                 ))) : (
                     <tr>
                         <td colSpan={6} className="text-center py-4">
-                            Нет данных для отображения
+                            No data to display
                         </td>
                     </tr>
                 )}

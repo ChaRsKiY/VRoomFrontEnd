@@ -52,6 +52,7 @@ const VideoUploadInterface: React.FC = () => {
     const [isUploading, setIsUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
     const [uploadComplete, setUploadComplete] = useState(false)
+    const [isShort, setIsShort] = useState(false);
 
     const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target.value
@@ -324,12 +325,13 @@ const VideoUploadInterface: React.FC = () => {
             viewCount: 0,
             likeCount: 0,
             dislikeCount: 0,
-            isShort: false,
+            isShort: isShort,
             cover: thumbnailBase64,
             visibility: visibility === 'public',
             isAgeRestriction: isAgeRestricted,
             isCopyright: isCopyright,
             audience: audience,
+            lastViewedPosition: '00:00:00',
             categoryIds: selectedCategoryId,
             tagIds,
             historyOfBrowsingIds: [], // Додане нове поле
@@ -338,6 +340,7 @@ const VideoUploadInterface: React.FC = () => {
             lastViewedPosition: '00:00:00',
             file: emptyFile,
         }
+
         console.log("Payload to be sent:", videoData)
 
         Object.entries(videoData).forEach(([key, value]) => {
@@ -369,6 +372,12 @@ const VideoUploadInterface: React.FC = () => {
         }
     }
 
+
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        console.log(e.target.value);
+        const value = e.target.value === "true";
+        setIsShort(value);
+    };
     return (
         <>
             {user ? (
@@ -380,7 +389,7 @@ const VideoUploadInterface: React.FC = () => {
                         </TabsList>
                         <TabsContent value="details" className="space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                
+
                                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-gray-400 transition-colors duration-400"
                                     onDragOver={handleDragOver}
                                     onDrop={handleDrop}
@@ -388,7 +397,8 @@ const VideoUploadInterface: React.FC = () => {
                                 >
                                     {video ? (
                                         <div className="relative">
-                                            <video className="w-full h-48 object-cover rounded" src={preview || undefined} />
+                                            <video className="w-full h-48 object-cover rounded"
+                                                   src={preview || undefined}/>
                                             <Button
                                                 variant="destructive"
                                                 size="icon"
@@ -527,6 +537,7 @@ const VideoUploadInterface: React.FC = () => {
                                         Add
                                     </Button>
                                 </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="tags">Tags</Label>
@@ -558,7 +569,24 @@ const VideoUploadInterface: React.FC = () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="tags">Video type</Label>
+                                        <div className="flex flex-wrap gap-2 mb-2">
+                                            <select id="countries" name="country"
+                                                    value={isShort.toString()}
+                                                    onChange={handleChange}
+                                                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+                                                <option value={'false'} selected={true}>Video</option>
+                                                <option value={'true'} >Short video</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
                             </div>
+
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold mb-2">Age Restriction</h3>
                                 <p className="text-sm text-gray-600 mb-2">Would you like to restrict this video to viewers over 18 years old?</p>
@@ -643,8 +671,8 @@ const VideoUploadInterface: React.FC = () => {
                                 <div className="mt-4">
                                     <p>Uploading video... {uploadProgress}%</p>
                                     <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                        <div 
-                                            className="bg-blue-600 h-2.5 rounded-full" 
+                                        <div
+                                            className="bg-blue-600 h-2.5 rounded-full"
                                             style={{width: `${uploadProgress}%`}}
                                         ></div>
                                     </div>

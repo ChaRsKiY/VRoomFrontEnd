@@ -31,7 +31,7 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'myblobcont.blob.core.windows.net',
+                hostname: 'vroom1.blob.core.windows.net',
                 port: '',
                 pathname: '**',
             },

@@ -58,6 +58,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
             setChannelInfo(chInfo.data);
             setChsetid(chInfo.data.channel_Id);
             setSections(sectionsRes.data);
+            console.log(channelSectionsRes.data.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order));
             setChannelSections(channelSectionsRes.data.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order));
             channelSectionsRef.current = channelSectionsRes.data.filter((cs) => cs.isVisible).sort((a, b) => a.order - b.order); // Сохраняем начальное состояние в ref
         } catch (error) {
@@ -138,7 +139,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
         setChannelSections((prevSections) => {
             const updatedSections = prevSections
                 .map((section) =>
-                    section.id === id && section.title !== "home" ? {...section, isVisible: false, order: 0} : section
+                    section.id === id && section.title !== "Home" ? {...section, isVisible: false, order: 0} : section
                 )
                 .filter((section) => section.isVisible)
                 .map((section, index) => ({...section, order: index + 1}));
@@ -215,7 +216,7 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
 
     const handleVideoSelect = (video: IVideo | null) => {
         setSelectedVideo(video);
-        alert(video?.id);
+        //alert(video?.id);
         setIsDialogOpen(false);
     };
 
@@ -342,8 +343,8 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображается закрепленное видео, контент
-                                                                для вас и тд.
+                                                                This section displays pinned videos, content
+                                                                for you, etc.
                                                             </p>
                                                         </div>)}
 
@@ -351,36 +352,36 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображаются самые популярные видео
-                                                                канала
+                                                                This section displays the most popular videos
+                                                                channel
                                                             </p>
                                                         </div>)}
                                                     {section.title === "playlists" && (
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображаются плейлисты канала </p>
+                                                                This section displays the channel's playlists</p>
                                                         </div>)}
                                                     {section.title === "posts" && (
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображаются посты канала. Может быть
-                                                                пустым если нет постов </p>
+                                                                This section displays channel posts. May be
+                                                                empty if there are no posts</p>
                                                         </div>)}
                                                     {section.title === "about" && (
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображается информация канала такая как:
-                                                                дата создания, описание канала и тд. </p>
+                                                                This section displays channel information such as:
+                                                                creation date, channel description, etc.</p>
                                                         </div>)}
                                                     {section.title === "Broadcasts" && (
                                                         <div className="flex-1 px-4">
                                                             <h2 className={'text-[#000] font-Inter text-[0.875rem] font-not-italic font-500 leading-normal font-semibold'}>{t(`сhannel:${section.title}`)}</h2>
                                                             <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                                                                В этом разделе отображаются стримы канала. Может быть
-                                                                пустым если нет стримов </p>
+                                                                This section displays the channel's streams. May be
+                                                                empty if there are no streams</p>
                                                         </div>)}
                                                     <div className="flex-shrink-0.5 p-2 space-x-2">
                                                         <DropdownMenu>
@@ -431,8 +432,8 @@ const SectionsSettings: React.FC<ISectionsSettingsProps> = ({t}: ISectionsSettin
                 <ToastViewport/>
                 <Toast open={openToast} onOpenChange={setOpenToast} className={'bg-gray-500 text-white'}>
                     <div>
-                        <ToastTitle>Успех!</ToastTitle>
-                        <ToastDescription>Разделы успешно сохранены!</ToastDescription>
+                        <ToastTitle>Success</ToastTitle>
+                        <ToastDescription>Sections-saved-successfully!</ToastDescription>
                     </div>
                     <ToastClose/>
                 </Toast>

@@ -30,7 +30,7 @@ const PinnedVideoSection: React.FC<IPinnedVideoSectionProps> = ({
                                                                 }) => {
 
     const [videos, setVideos] = useState<IVideo[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+    /**/const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         console.log(channelId);
@@ -63,29 +63,35 @@ const PinnedVideoSection: React.FC<IPinnedVideoSectionProps> = ({
                             </div>
                         </div>
                     </div>
-                ) : (<span onClick={onOpen} className="text-gray-500 cursor-pointer">Выберите видео</span>)}
+                ) : (<span onClick={onOpen} className="text-gray-500 cursor-pointer">Select video</span>)}
             </div>
             {isDialogOpen &&
                 ReactDOM.createPortal(
                     <div
-                        className="fixed z-50 top-0 left-0 w-full h-full flex justify-center items-center bg-black/50">
+                        className="fixed z-50 top-0 left-0 max-w-full max-h-full w-full h-full flex justify-center items-center bg-black/50">
                         <dialog style={{minWidth: '620px', minHeight: '530px'}}
                                 className={'bg-[#fff] p-5 rounded-xl w-3/5 min-w-[650px] h-3/4 flex'}>
                             <div className="flex flex-col w-full relative">
                                 <div className='flex justify-between absolute top-0 left-0 right-0'>
-                                    <h2 className="text-lg font-semibold">Выберите видео</h2>
-                                    <MdOutlineClose size={34} onClick={onClose} className="cursor-pointer"/>
+                                    <h2 className="text-lg font-semibold">Select video</h2>
+                                    <MdOutlineClose size={34} onClick={()=> {
+                                        onClose();
+                                        setSearchTerm('');
+                                    }} className="cursor-pointer"/>
                                 </div>
 
                                 <hr/>
                                 <div className="flex flex-row mt-10 mb-8 gap-2">
                                     <IoIosSearch size={22}/>
-                                    <input type="text" className={'w-full'} placeholder="Найти свои видео"/>
+                                    <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} type="text" className={'w-full'} placeholder="Find your videos"/>
                                 </div>
 
-                                <div className="grid grid-cols-5 gap-8 gap-y-8 w-full pl-7 pr-7">
+                                <div className="grid grid-cols-5 gap-8 gap-y-8 w-full h-full max-h-full pl-7 pr-7 overflow-y-auto">
                                     {filteredVideos.map((video) => (
-                                        <div key={video.id} onClick={() => onVideoSelect(video)}
+                                        <div key={video.id} onClick={() => {
+                                            onVideoSelect(video);
+                                            setSearchTerm('');
+                                        }}
                                              className={'h-max'}>
                                             <Image
                                                 src={`data:image/jpeg;base64,${stringToBase64(video.cover)}`}

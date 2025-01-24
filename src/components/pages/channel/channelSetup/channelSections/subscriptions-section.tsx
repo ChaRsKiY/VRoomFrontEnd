@@ -67,7 +67,7 @@ const SubscriptionsSection: React.FC<ISubscriptionsProps> = ({channelId, section
                     )) :
                     (<div>
                         <p className={'font-Inter text-[0.875rem] font-not-italic font-400 leading-normal'}>
-                            В этом разделе отображаются все подписки</p>
+                            This section displays all subscriptions</p>
                     </div>)}
 
             </div>
