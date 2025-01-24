@@ -22,18 +22,18 @@ export function AccountSwitch() {
     const currentSession = useSession()
     const { push } = useRouter()
 
-    const availableSessions: SessionResource[] = client.sessions
+    const availableSessions: any[] = client.sessions
 
-    const endSession = async (session: SessionResource) => {
+    const endSession = async (session: any) => {
         await session.end()
 
         if (session.id === currentSession.session?.id) {
-            const newAvailableSessions: SessionResource[] = client.sessions
+            const newAvailableSessions: any[] = client.sessions
             await setActive({ session: newAvailableSessions[0].id })
         }
     }
 
-    const switchAccount = async (session: SessionResource) => {
+    const switchAccount = async (session: any) => {
         if (session.id === currentSession.session?.id) return;
         await setActive({ session: session.id })
         window.location.reload()
