@@ -10,7 +10,7 @@ const Search: React.FC = () => {
     const { t }: { t: ITranslationFunction } = useTranslation()
 
     return (
-        <div className="header-search flex-1 border border-neutral-300 rounded-full relative dark:border-neutral-700">
+        <div className="header-search flex-1 border border-neutral-300 rounded-full relative h-9 dark:border-neutral-700">
             <input
                 placeholder={t("search")}
                 onChange={() => { }}

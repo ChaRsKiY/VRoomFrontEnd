@@ -48,17 +48,17 @@ const YouChannelP = () => {
     }
 
     return (
-        <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0 pt-10">
+        <div className="pl-[20.5%] ml-2 max-lg:pl-[11%] max-sm:pl-0 pt-10 pb-24">
             <ShortChannelBlock/>
             <div className="mt-8">
                 <h2 className="text-xl font-bold">История</h2>
-                <div className="flex justify-between items-center mt-4 ">
+                <div className="grid grid-cols-3 max-md:grid-cols-2 max-sm:grid-cols-1">
                     {shortHistory?.map((item) => (
                         <div className={'pr-1.5'} key={item.id}>
-                            <div className={'flex flex-col mb-4 cursor-pointer w-max'}>
+                            <div className={'flex flex-col mb-4 cursor-pointer'}>
                                 <Image onClick={() => router.push(item.vRoomVideoUrl)}
                                        src={`data:image/jpeg;base64,${byteArrayToBase64(base64ToUint8Array(item.cover))}`}
-                                       alt={item.videoTitle} className={'rounded-[8px] aspect-video p-0.5'}
+                                       alt={item.videoTitle} className={'rounded-[8px] aspect-video p-0.5 w-full'}
                                        width={210} height={120}/>
 
                                 <div className={'flex flex-col'} style={{marginLeft: '10px'}}>
@@ -106,12 +106,11 @@ const YouChannelP = () => {
 
                         </div>
                     ))}
-                    <div className={'flex flex-col mb-4 cursor-pointer'}>
-                        <Link href={'/history'}
-                              className="text-blue-600 w-48 block p-7">Посмотреть все
-                        </Link>
-                    </div>
-
+                </div>
+                <div className={'flex flex-col mb-4 cursor-pointer'}>
+                    <Link href={'/history'}
+                          className="text-blue-600 w-48 block p-4">Посмотреть все
+                    </Link>
                 </div>
             </div>
             <div className="mt-8">
