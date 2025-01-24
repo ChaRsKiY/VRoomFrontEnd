@@ -19,7 +19,7 @@ const AccountsManagement: React.FC = () => {
 
     if (!user) return null
 
-    const removeAccount = async (account: ExternalAccountResource) => {
+    const removeAccount = async (account: any) => {
         try {
             const res = user.externalAccounts.find(acc => acc.id === account.id);
             if (res) {

@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserResource } from "@clerk/types";
 import Link from "next/link";
 
-const UserDataInBurgerMenu: React.FC<{ user: UserResource | undefined | null }> = ({ user }: { user: UserResource | undefined | null }) => {
+const UserDataInBurgerMenu: React.FC<{ user: any | undefined | null }> = ({ user }: { user: any | undefined | null }) => {
 
   const [iAmUser, setUser] = useState<IUser | null>(null);
   const getUser = async () => {

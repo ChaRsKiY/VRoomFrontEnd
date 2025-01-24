@@ -15,7 +15,7 @@ const EmailsManagementForm: React.FC = () => {
 
     if (!user) return null;
 
-    const removeEmail = async (email: EmailAddressResource) => {
+    const removeEmail = async (email: any) => {
         try {
             await email.destroy();
             await user.reload();
@@ -29,7 +29,7 @@ const EmailsManagementForm: React.FC = () => {
         }
     };
 
-    const setPrimaryEmail = async (email: EmailAddressResource) => {
+    const setPrimaryEmail = async (email: any) => {
         try {
             await user.update({
                 primaryEmailAddressId: email.id,
